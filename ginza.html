@@ -126,6 +126,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .form-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)}
 .form-input,.form-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;padding:10px 14px;transition:border-color .3s;outline:none}
 .form-input:focus,.form-textarea:focus{border-color:var(--accent)}
+select.form-input option{background:#111118;color:#fff}
 .form-textarea{min-height:120px;resize:vertical;line-height:1.6}
 .form-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end}
 .btn{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .3s;border:1px solid;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
@@ -191,29 +192,30 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <div class="form-title" id="formTitle">Add New Girl</div>
 <input type="hidden" id="editIndex" value="-1">
 <div class="form-row">
-<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fName" placeholder="Character name"></div>
-<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="fLocation" placeholder="e.g. Empire, Club"></div></div>
+<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fName" placeholder="Name..."></div>
+<div class="form-group"><label class="form-label">Location</label><select class="form-input" id="fLocation"><option value="">Select location</option><option value="Club">Club</option><option value="Empire">Empire</option></select></div></div>
 <div class="form-row">
-<div class="form-group"><label class="form-label">Country</label><input class="form-input" id="fCountry" placeholder="e.g. Japanese"></div>
+<div class="form-group"><label class="form-label">Country</label><select class="form-input" id="fCountry"><option value="">Select country</option><option value="Chinese">Chinese</option><option value="Japanese">Japanese</option><option value="Korean">Korean</option><option value="Other">Other</option></select></div>
 <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="fAge" type="number" min="0" placeholder="e.g. 23"></div></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Body Size</label><input class="form-input" id="fBody" type="number" min="0" placeholder="e.g. 6"></div>
 <div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
-<div class="form-group"></div></div>
-<div class="form-row quad">
+<div class="form-group"><label class="form-label">Experience</label><select class="form-input" id="fExp"><option value="">Select experience</option><option value="Experienced">Experienced</option><option value="Inexperienced">Inexperienced</option></select></div></div>
+<div class="form-row">
 <div class="form-group"><label class="form-label">Value 1</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal1" type="number" min="0" style="padding-left:26px" placeholder="e.g. 100"></div></div>
-<div class="form-group"><label class="form-label">Value 2</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div>
+<div class="form-group"><label class="form-label">Value 2</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div></div>
+<div class="form-row">
 <div class="form-group"><label class="form-label">Value 3</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
-<div class="form-group"><label class="form-label">Experience</label><input class="form-input" id="fExp" placeholder="e.g. 3 years"></div></div>
+<div class="form-group"></div></div>
 <div class="form-row full"><div class="form-group">
 <label class="form-label">Photos <span style="color:var(--text-dim);font-weight:400" id="fPhotoCount">(0 / 10)</span></label>
 <div id="fPhotoGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Language</label><input class="form-input" id="fLang" placeholder="e.g. Japanese, English"></div>
-<div class="form-group"><label class="form-label">Type</label><input class="form-input" id="fType" placeholder="e.g. Full Service"></div></div>
-<div class="form-row full"><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fDesc" placeholder="Character description..."></textarea></div></div>
+<div class="form-group"><label class="form-label">Type</label><input class="form-input" id="fType" placeholder="e.g. Very young, small, cute, innocent..."></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fDesc" placeholder="Description..."></textarea></div></div>
 <div class="form-actions">
 <button class="btn btn-secondary" id="formCancel">Cancel</button>
 <button class="btn btn-primary" id="formSave">Save</button></div>
@@ -231,7 +233,7 @@ const CRED={user:'admin',pass:'UpdAtEr2dAyOstEr'};
 const GITHUB_TOKEN='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';
 const GITHUB_REPO='sydneyginza/sydneyginza.github.io';
 const GITHUB_API=`https://api.github.com/repos/${GITHUB_REPO}/contents`;
-const DATA_PATH='data/girls.json'; 
+const DATA_PATH='data/girls.json';
 let loggedIn=false,dataSha=null;
 const MAX_PHOTOS=10;
 
@@ -402,7 +404,14 @@ formPhotos=[...(g.photos||[])]}else{document.getElementById('formTitle').textCon
 renderFormPhotos();formOverlay.classList.add('open')}
 
 document.getElementById('formSave').onclick=async()=>{
-const name=document.getElementById('fName').value.trim();if(!name){document.getElementById('fName').focus();return}
+const reqFields=[
+{id:'fName',label:'Name'},{id:'fLocation',label:'Location'},{id:'fCountry',label:'Country'},
+{id:'fAge',label:'Age'},{id:'fBody',label:'Body Size'},{id:'fHeight',label:'Height'},
+{id:'fCup',label:'Cup Size'},{id:'fExp',label:'Experience'},{id:'fVal3',label:'Value 3'},
+{id:'fLang',label:'Language'},{id:'fType',label:'Type'},{id:'fDesc',label:'Description'}];
+for(const f of reqFields){const el=document.getElementById(f.id);if(!el.value.trim()){el.focus();showToast(f.label+' is required','error');return}}
+if(formPhotos.length===0){showToast('At least one photo is required','error');return}
+const name=document.getElementById('fName').value.trim();
 const saveBtn=document.getElementById('formSave');saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
 try{
 for(const url of formPhotosToDelete){if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url)}
