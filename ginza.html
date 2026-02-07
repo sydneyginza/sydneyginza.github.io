@@ -279,15 +279,15 @@ function renderRosterFilters(){
   b.textContent=ds===todayStr?'Today':f.day+' '+f.date;
   b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
   const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
-  const locs=[...new Set(girls.map(g=>g.location))];
-  if(!rosterLocFilter&&locs.length)rosterLocFilter=locs[0];
+  const locs=["All",...new Set(girls.map(g=>g.location))];
+  if(!rosterLocFilter)rosterLocFilter='All';
   locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(rosterLocFilter===loc?' active':'');b.textContent=loc;
   b.onclick=()=>{rosterLocFilter=loc;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)})}
 function renderRosterGrid(){
   const rg=document.getElementById('rosterGrid');rg.innerHTML='';
   const todayStr=fmtDate(getAEDTDate());const ds=rosterDateFilter||todayStr;
   let filtered=girls.filter(g=>calData[g.name]&&calData[g.name][ds]);
-  if(rosterLocFilter)filtered=filtered.filter(g=>g.location===rosterLocFilter);
+  if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
   if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
   filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
   const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
@@ -393,3 +393,5 @@ rosterDateFilter=fmtDate(getAEDTDate());
 renderFilters();renderGrid();renderRoster();
 const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)})();
 </script>
+</body>
+</html>
