@@ -292,8 +292,9 @@ function getWeekDates(){const t=getAEDTDate(),a=[];for(let i=0;i<7;i++){const d=
 function dispDate(ds){const d=new Date(ds+'T00:00:00');return{date:d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()],day:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]}}
 
 async function loadAuth(){try{const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-if(r.ok)return JSON.parse(decodeURIComponent(escape(atob((await r.json()).content.replace(/\n/g,'')))));
-if(r.status===404){const d=[{user:'admin',pass:'admin123'}];await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2))))})});return d}}catch(e){}return null}
+if(r.ok){const d=await r.json();const parsed=JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))));console.log('Auth loaded:',parsed.length,'users');return parsed}
+if(r.status===404){console.log('Auth not found, creating default');const d=[{user:'admin',pass:'admin123'}];await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2))))})});return d}
+console.error('Auth fetch status:',r.status)}catch(e){console.error('Auth load error:',e)}return[]}
 
 async function loadData(){try{const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
 if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}if(r.status===404){dataSha=null;return[]}}catch(e){}return null}
@@ -550,7 +551,7 @@ renderFilters();renderGrid();renderRoster();
 if(document.getElementById('profilePage').classList.contains('active'))showPage('rosterPage');showToast('Profile deleted')}};
 
 (async()=>{const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
-if(authData)CRED=authData;else showToast('Could not load auth','error');
+if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 if(data!==null)girls=data;else showToast('Could not load data','error');
 if(cal)calData=cal;
 rosterDateFilter=fmtDate(getAEDTDate());
