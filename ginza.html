@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ginza - Girls</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
 </head>
 <body>
 <div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">Loading Data</div></div>
@@ -153,7 +153,7 @@ async function uploadToGithub(b64,name,fn){const safe=name.replace(/[^a-zA-Z0-9_
 let sha;try{const c=await fetch(`${GITHUB_API_DATA}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
 const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;
 const r=await fetch(`${GITHUB_API_DATA}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-if(!r.ok)throw new Error(r.status);return(await r.json()).content.download_url}
+if(!r.ok)throw new Error(r.status);const rd=await r.json();return`https://raw.githubusercontent.com/${GITHUB_REPO_DATA}/main/${rd.content.path}`}
 
 async function deleteFromGithub(url){try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;const path=decodeURIComponent(m[1]);
 const c=await fetch(`${GITHUB_API_DATA}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
