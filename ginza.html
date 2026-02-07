@@ -49,7 +49,7 @@
 <div class="home-subtitle">Location</div>
 <div class="home-summary">310 Cleveland St Surry Hills NSW 2010
 <div class="home-summary">(back entrance from goodlet lane)</div>
-<button class="home-cta" id="homeCta">View Roster</button>
+
 </section></div>
 
 <div class="page" id="rosterPage"><section class="section">
@@ -180,7 +180,7 @@ document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('home
 document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
 document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
 document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
-document.getElementById('homeCta').onclick=()=>showPage('rosterPage');
+
 
 function fmtTime12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ap=h<12?'AM':'PM';const hr=h===0?12:h>12?h-12:h;return hr+':'+String(m).padStart(2,'0')+' '+ap}
 function getCalEntry(name,date){if(calData[name]&&calData[name][date]){const v=calData[name][date];return typeof v==='object'?v:{start:'',end:''};}return null}
@@ -245,7 +245,8 @@ const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='
 dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
 const g=ngList[ngIdx],ri=girls.indexOf(g);
 const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:'<div class="ng-placeholder"></div>';
-disp.innerHTML=`<div class="ng-card"><div class="ng-photo">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
+disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" style="cursor:pointer">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
+disp.querySelector('.ng-photo').onclick=()=>{profileReturnPage='homePage';showProfile(ri)};
 disp.querySelector('.ng-name').onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
 
 let lbPhotos=[],lbIdx=0;const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
