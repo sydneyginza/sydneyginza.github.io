@@ -118,6 +118,7 @@
 <div class="copy-time-msg" id="copyTimeMsg"></div>
 <div class="copy-time-detail" id="copyTimeDetail"></div>
 <div class="copy-time-actions">
+<button class="btn btn-danger" id="copyTimeCancel">Cancel</button>
 <button class="btn btn-secondary" id="copyTimeNew">Set New Time</button>
 <button class="btn btn-primary" id="copyTimeCopy">Copy Times</button>
 </div>
@@ -210,8 +211,9 @@ modal.classList.add('open')})}
 
 document.getElementById('copyTimeCopy').onclick=()=>closeCopyTimeModal('copy');
 document.getElementById('copyTimeNew').onclick=()=>closeCopyTimeModal('new');
-document.getElementById('copyTimeModal').onclick=e=>{if(e.target===document.getElementById('copyTimeModal'))closeCopyTimeModal('new')};
-window.addEventListener('beforeunload',()=>closeCopyTimeModal('new'));
+document.getElementById('copyTimeCancel').onclick=()=>closeCopyTimeModal('cancel');
+document.getElementById('copyTimeModal').onclick=e=>{if(e.target===document.getElementById('copyTimeModal'))closeCopyTimeModal('cancel')};
+window.addEventListener('beforeunload',()=>closeCopyTimeModal('cancel'));
 
 /* ── Home Page ── */
 function getNewGirls(){
@@ -350,6 +352,9 @@ if(!calData[n])calData[n]={};
 const existing=findExistingTimes(n,d);
 if(existing){
 const choice=await showCopyTimePrompt(n,existing.date,existing.start,existing.end);
+if(choice==='cancel'){
+this.checked=false;if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d];
+if(tw)tw.style.display='none';return}
 if(choice==='copy'){
 calData[n][d]={start:existing.start,end:existing.end};
 if(tw){tw.style.display='flex';
