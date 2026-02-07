@@ -300,7 +300,7 @@ if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURICompone
 
 async function saveData(){try{const enc=btoa(unescape(encodeURIComponent(JSON.stringify(girls,null,2))));const body={message:'Update girls',content:enc};if(dataSha)body.sha=dataSha;
 const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-if(!r.ok)throw new Error((await r.json()).message||r.status);dataSha=(await r.json()).content.sha;return true}catch(e){showToast('Save failed: '+e.message,'error');return false}}
+if(!r.ok){const err=await r.json();throw new Error(err.message||r.status)}const rd=await r.json();dataSha=rd.content.sha;return true}catch(e){showToast('Save failed: '+e.message,'error');return false}}
 
 async function loadCalData(){try{const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
 if(r.ok){const d=await r.json();calSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}if(r.status===404){calSha=null;return{}}}catch(e){}return{}}
