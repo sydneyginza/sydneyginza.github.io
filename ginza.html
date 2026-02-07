@@ -9,7 +9,8 @@
 .cal-time-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px}
 .cal-time-row{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim)}
 .cal-time-row label{font-size:9px;letter-spacing:1px;text-transform:uppercase;min-width:28px;text-align:right}
-.cal-time-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;padding:4px 6px;width:90px;outline:none;transition:border-color .3s;text-align:center}
+.cal-time-input{background:var(--bg-dark);border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;padding:4px 6px;width:90px;outline:none;transition:border-color .3s;text-align:center}
+.cal-time-input option{background:var(--bg-dark);color:#fff}
 .cal-time-input:focus{border-color:var(--accent)}
 .cal-time-input.invalid{border-color:#ff4444;box-shadow:0 0 6px rgba(255,68,68,0.2)}
 .cal-time-warn{font-size:9px;color:#ff4444;letter-spacing:1px;margin-top:2px;min-height:12px}
@@ -454,15 +455,9 @@ table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async funct
   const entry=calData[n][d];
   const warn=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
   
-  if(entry.start&&entry.end){
-    /* Validate end > start */
-    if(entry.end<=entry.start){
-      if(warn)warn.textContent='End must be after start';
-      this.classList.add('invalid');
-      return;
-    }
+      if(entry.start&&entry.end){
     this.classList.remove('invalid');
-    /* Both times set and valid - save and clear pending */
+    /* Both times set - save and clear pending */
     if(calPending[n])delete calPending[n][d];
     if(warn)warn.textContent='';
     const td=this.closest('td');
