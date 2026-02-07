@@ -3,7 +3,7 @@
 :root{--accent:#b44aff;--accent2:#ff6f00;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.04);--text:#e0e0e0;--text-dim:#888}
 body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}
 nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}
-.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4));text-shadow:none;position:relative}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}
 .logo span{-webkit-text-fill-color:transparent}
 @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .nav-right{display:flex;gap:24px;align-items:center}
@@ -192,6 +192,38 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .home-img-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(10,10,15,0.7),transparent);pointer-events:none}
 .home-img-name{position:absolute;bottom:16px;left:0;right:0;text-align:center;z-index:2;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .3s}
 .home-img-card:hover .home-img-name{opacity:1}
+
+/* ── Home Mid Section (Announcement + New Girls) ── */
+.home-mid{display:grid;grid-template-columns:1fr 1fr;gap:60px;margin-bottom:60px;text-align:left}
+.home-mid-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(16px,2.5vw,22px);letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:24px}
+.home-mid-left{padding-top:10px}
+.home-divider-sm{width:50px;height:2px;background:var(--accent);margin-bottom:20px}
+.home-announce{color:var(--text-dim);font-size:15px;line-height:1.8;min-height:100px}
+.home-announce p{margin-bottom:12px}
+.home-mid-right{display:flex;flex-direction:column;align-items:flex-end}
+.home-newgirls{display:flex;align-items:center;gap:24px}
+.ng-nav{display:flex;flex-direction:column;align-items:center;gap:12px}
+.ng-arrow{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.12);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.ng-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,0.06)}
+.ng-arrow svg{width:24px;height:24px;fill:currentColor}
+.ng-dots{display:flex;flex-direction:column;gap:10px}
+.ng-dot{width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);overflow:hidden;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center}
+.ng-dot:hover{border-color:rgba(255,255,255,0.3)}
+.ng-dot.active{border-color:var(--accent);box-shadow:0 0 16px rgba(180,74,255,0.25)}
+.ng-dot img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.ng-dot span{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--text-dim)}
+.ng-dot.active span{color:var(--accent)}
+.ng-counter{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px;color:var(--text-dim);text-align:center}
+.ng-counter span{color:#fff}
+.ng-display{flex-shrink:0}
+.ng-card{text-align:center}
+.ng-photo{width:240px;height:320px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));background:var(--bg-card)}
+.ng-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ng-photo .ng-placeholder{width:100%;height:100%;background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))}
+.ng-name{display:block;margin-top:12px;font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px;color:#e1b97e;text-decoration:none;cursor:pointer;transition:color .3s;text-transform:uppercase}
+.ng-name:hover{color:#f5e6a3}
+.ng-empty{color:var(--text-dim);font-size:14px;letter-spacing:1px;padding:40px 20px}
+
 .home-divider{width:80px;height:1px;background:var(--accent);margin:0 auto 40px}
 .home-subtitle{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(18px,3vw,28px);letter-spacing:4px;text-transform:uppercase;color:#e1b97e;margin-bottom:20px}
 .home-summary{color:var(--text-dim);font-size:17px;line-height:1.9;max-width:720px;margin:0 auto 40px;letter-spacing:.5px}
@@ -212,4 +244,12 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .cal-table{font-size:12px}.cal-table th{padding:10px 6px;font-size:9px}.cal-table td{padding:8px 6px}
 .cal-avatar{width:32px;height:32px}.cal-name{font-size:10px}.cal-check{width:18px;height:18px}
 .home-section{padding:100px 20px 60px}.home-images{gap:12px}.home-img-card{width:160px;height:234px}
+.home-mid{grid-template-columns:1fr;gap:40px}
+.home-mid-right{align-items:center}
+.home-newgirls{flex-direction:column-reverse;gap:16px}
+.ng-nav{flex-direction:row}
+.ng-dots{flex-direction:row}
+.ng-photo{width:200px;height:266px}
+.ng-arrow{width:42px;height:42px}.ng-arrow svg{width:20px;height:20px}
+.ng-dot{width:42px;height:42px}
 }
