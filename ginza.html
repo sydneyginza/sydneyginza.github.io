@@ -47,7 +47,7 @@
 <div class="logo" style="margin-bottom:20px">Welcome</div>
 <div class="home-summary">Discover our exclusive selection of stunning companions. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
 <div class="logo" style="margin-bottom:20px">Location</div>
-<div class="home-summary">310 Cleveland St Surry Hills NSW 2010
+<div class="home-summary">310 Cleveland St Surry Hills NSW 2010</div>
 <div class="home-summary">(back entrance from goodlet lane)</div>
 <div class="logo" style="margin-bottom:20px">Hours</div>
 <div class="home-summary">Monday to Sunday open from 10:30am till 1am.</div>
@@ -92,4 +92,45 @@
 <div class="form-row"><div class="form-group"><label class="form-label">Country</label><select class="form-input" id="fCountry"><option value="">Select country</option><option value="Chinese">Chinese</option><option value="Japanese">Japanese</option><option value="Korean">Korean</option><option value="Other">Other</option></select></div>
 <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="fAge" type="number" min="0" placeholder="e.g. 23"></div></div>
 <div class="form-row"><div class="form-group"><label class="form-label">Body Size</label><input class="form-input" id="fBody" type="number" min="0" placeholder="e.g. 6"></div>
-<div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div 
+<div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
+<div class="form-group"><label class="form-label">Experience</label><select class="form-input" id="fExp"><option value="">Select experience</option><option value="Experienced">Experienced</option><option value="Inexperienced">Inexperienced</option></select></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label">Value 1</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal1" type="number" min="0" style="padding-left:26px" placeholder="e.g. 100"></div></div>
+<div class="form-group"><label class="form-label">Value 2</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label">Value 3</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
+<div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="fStartDate" type="date"></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label">Photos <span style="color:var(--text-dim);font-weight:400" id="fPhotoCount">(0 / 10)</span></label>
+<div id="fPhotoGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label">Language</label><input class="form-input" id="fLang" placeholder="e.g. Japanese, English"></div>
+<div class="form-group"><label class="form-label">Type</label><input class="form-input" id="fType" placeholder="e.g. Very young, small, cute, innocent..."></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fDesc" placeholder="Description..."></textarea></div></div>
+<div class="form-actions"><button class="btn btn-secondary" id="formCancel">Cancel</button><button class="btn btn-primary" id="formSave">Save</button></div>
+</div></div>
+
+<div class="modal-overlay" id="deleteOverlay"><div class="form-modal" style="max-width:420px;text-align:center">
+<div class="form-title" style="margin-bottom:12px">Confirm Delete</div>
+<p style="color:var(--text-dim);margin-bottom:28px;font-size:15px" id="deleteMsg">Are you sure?</p>
+<div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel">Cancel</button><button class="btn btn-danger" id="deleteConfirm">Delete</button></div>
+</div></div>
+
+<div class="copy-time-modal" id="copyTimeModal">
+<div class="copy-time-box">
+<div class="copy-time-title">Copy Times?</div>
+<div class="copy-time-msg" id="copyTimeMsg"></div>
+<div class="copy-time-detail" id="copyTimeDetail"></div>
+<div class="copy-time-actions">
+<button class="btn btn-danger" id="copyTimeCancel">Cancel</button>
+<button class="btn btn-secondary" id="copyTimeNew">Set New Time</button>
+<button class="btn btn-primary" id="copyTimeCopy">Copy Times</button>
+</div>
+</div>
+</div>
+
+<footer><p>Ginza &copy; 2026 &mdash; All Rights Reserved</p></footer>
+
+<script src="https://cdn.jsdelivr.net/gh/sydneyginza/files@main/data/core.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sydneyginza/files@main/data/ui.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sydneyginza/files@main/data/grids.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sydneyginza/files@main/data/forms.js"></script>
+</body>
+</html>
