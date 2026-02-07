@@ -3,7 +3,9 @@
 :root{--accent:#b44aff;--accent2:#ff6f00;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.04);--text:#e0e0e0;--text-dim:#888}
 body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}
 nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}
-.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;letter-spacing:4px;color:#fff;text-transform:uppercase}.logo span{color:var(--accent)}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4));text-shadow:none;position:relative}
+.logo span{-webkit-text-fill-color:transparent}
+@keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .nav-right{display:flex;gap:24px;align-items:center}
 .nav-links{display:flex;gap:32px;align-items:center}
 .nav-links a{color:var(--text-dim);text-decoration:none;font-family:'Rajdhani',sans-serif;font-weight:500;font-size:15px;letter-spacing:2px;text-transform:uppercase;transition:color .3s;position:relative;cursor:pointer}
@@ -178,8 +180,8 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 
 /* ── Home Page ── */
 .home-section{padding:120px 40px 80px;max-width:1200px;margin:0 auto;text-align:center}
-.home-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(36px,5vw,64px);letter-spacing:8px;text-transform:uppercase;color:#fff;margin-bottom:12px}
-.home-title span{color:var(--accent)}
+.home-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(36px,5vw,64px);letter-spacing:8px;text-transform:uppercase;margin-bottom:12px;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 12px rgba(201,149,44,0.35))}
+.home-title span{-webkit-text-fill-color:transparent}
 .home-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:4px;text-transform:uppercase;color:var(--text-dim);margin-bottom:60px}
 .home-images{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:60px}
 .home-img-card{width:256px;height:374px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;position:relative;transition:all .4s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));cursor:pointer}
