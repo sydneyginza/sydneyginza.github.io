@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ginza - Girls</title>
 <link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
+<style>
+.cal-time-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px}
+.cal-time-row{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim)}
+.cal-time-row label{font-size:9px;letter-spacing:1px;text-transform:uppercase;min-width:28px;text-align:right}
+.cal-time-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;padding:4px 6px;width:90px;outline:none;transition:border-color .3s;text-align:center}
+.cal-time-input:focus{border-color:var(--accent)}
+.cal-time-input.invalid{border-color:#ff4444;box-shadow:0 0 6px rgba(255,68,68,0.2)}
+.cal-time-warn{font-size:9px;color:#ff4444;letter-spacing:1px;margin-top:2px;min-height:12px}
+.cal-cell-inner{display:flex;flex-direction:column;align-items:center;min-width:110px}
+</style>
 </head>
 <body>
 <div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">Loading Data</div></div>
@@ -144,7 +154,7 @@ if(!r.ok){const err=await r.json();throw new Error(err.message||r.status)}const 
 async function loadCalData(){try{const r=await fetch(`${GITHUB_API_DATA}/${CAL_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
 if(r.ok){const d=await r.json();calSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}if(r.status===404){calSha=null;return{}}}catch(e){}return{}}
 
-async function saveCalData(){try{const vd=getWeekDates(),cl={};for(const n in calData){cl[n]={};for(const dt of vd){if(calData[n]&&calData[n][dt])cl[n][dt]=true}}calData=cl;
+async function saveCalData(){try{const vd=getWeekDates(),cl={};for(const n in calData){cl[n]={};for(const dt of vd){if(calData[n]&&calData[n][dt])cl[n][dt]=calData[n][dt]}}calData=cl;
 const enc=btoa(unescape(encodeURIComponent(JSON.stringify(calData,null,2))));const body={message:'Update calendar',content:enc};if(calSha)body.sha=calSha;
 const r=await fetch(`${GITHUB_API_DATA}/${CAL_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
 if(!r.ok)throw new Error(r.status);calSha=(await r.json()).content.sha;return true}catch(e){showToast('Calendar save failed','error');return false}}
@@ -165,12 +175,29 @@ let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfile
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null;
 const allPages=['rosterPage','listPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
+/* Track pending (unsaved) calendar entries - checked but missing times */
+let calPending={};
+
 function showPage(id){
+  /* Before leaving calendar, strip any pending entries that lack times */
+  if(document.getElementById('calendarPage').classList.contains('active') && id!=='calendarPage'){
+    let stripped=false;
+    for(const n in calPending){
+      for(const dt in calPending[n]){
+        if(calPending[n][dt]){
+          /* This entry was checked but times not set - remove from calData */
+          if(calData[n]&&calData[n][dt]){delete calData[n][dt];stripped=true}
+        }
+      }
+    }
+    if(stripped){saveCalData();renderRoster();renderGrid()}
+    calPending={};
+  }
   allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
   if(id==='rosterPage')document.getElementById('navRoster').classList.add('active');
   if(id==='listPage')document.getElementById('navGirls').classList.add('active');
-  if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');renderCalendar()}
+  if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderCalendar()}
   if(id==='rosterPage')renderRoster();
   window.scrollTo(0,0)}
 
@@ -197,12 +224,24 @@ rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pn
 const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
 dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
 
+function getCalEntry(name,date){
+  if(calData[name]&&calData[name][date]){
+    const v=calData[name][date];
+    if(typeof v==='object')return v;
+    return{start:'',end:''};
+  }
+  return null;
+}
+
 function showProfile(idx){
   const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
   const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
   const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
-  const todayStr=fmtDate(getAEDTDate());const isAvail=calData[g.name]&&calData[g.name][todayStr];
-  const availHtml=isAvail?'<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today!</span>':'';
+  const todayStr=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,todayStr);
+  let availHtml='';
+  if(entry&&entry.start&&entry.end){
+    availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+entry.start+' - '+entry.end+')</span>';
+  }
   const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Value 1',v:g.val1||'—'},{l:'Value 2',v:g.val2||'—'},{l:'Value 3',v:g.val3||'—'},{l:'Experience',v:g.exp||'—'}];
   document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
   <div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
@@ -264,7 +303,8 @@ const todayStr=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
-const avail=calData[g.name]&&calData[g.name][todayStr]?'<div class="card-avail">Available Today</div>':'';
+const entry=getCalEntry(g.name,todayStr);
+const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${entry.start} - ${entry.end})</div>`:'';
 card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
 card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
@@ -286,17 +326,36 @@ function renderRosterFilters(){
 function renderRosterGrid(){
   const rg=document.getElementById('rosterGrid');rg.innerHTML='';
   const todayStr=fmtDate(getAEDTDate());const ds=rosterDateFilter||todayStr;
-  let filtered=girls.filter(g=>calData[g.name]&&calData[g.name][ds]);
+  let filtered=girls.filter(g=>{
+    const entry=getCalEntry(g.name,ds);
+    return entry&&entry.start&&entry.end;
+  });
   if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
   if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
   filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
   const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
   const isToday=ds===todayStr;
-  const avail=isToday?'<div class="card-avail">Available Today</div>':'';
+  const entry=getCalEntry(g.name,ds);
+  const timeStr=entry&&entry.start&&entry.end?' ('+entry.start+' - '+entry.end+')':'';
+  const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
   card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
   card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};
   rg.appendChild(card)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
+
+function generateTimeOptions(){
+  const opts=['<option value="">--:--</option>'];
+  for(let h=0;h<24;h++){
+    for(let m=0;m<60;m+=30){
+      const val=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      const hr12=h===0?12:h>12?h-12:h;
+      const ampm=h<12?'AM':'PM';
+      const label=hr12+':'+String(m).padStart(2,'0')+' '+ampm;
+      opts.push(`<option value="${val}">${label}</option>`);
+    }
+  }
+  return opts.join('');
+}
 
 function renderCalendar(){
 const fb=document.getElementById('calFilterBar');fb.innerHTML='';
@@ -306,20 +365,120 @@ locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-
 b.onclick=()=>{calLocFilter=loc;renderCalendar()};fb.appendChild(b)});
 const filteredGirls=calLocFilter==='All'?girls:girls.filter(g=>g.location===calLocFilter);
 const table=document.getElementById('calTable');const dates=getWeekDates();const todayStr=dates[0];
+const timeOpts=generateTimeOptions();
 let html='<thead><tr><th>Profile</th>';
 dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});
 html+='</tr></thead><tbody>';
 filteredGirls.forEach(g=>{const gi=girls.indexOf(g);const avatar=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
 html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${avatar}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
-dates.forEach((ds,di)=>{const chk=calData[g.name]&&calData[g.name][ds]?'checked':'';
-html+=`<td class="${di===0?'cal-today':''}"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${chk}></td>`});
+dates.forEach((ds,di)=>{
+  const entry=getCalEntry(g.name,ds);
+  const isChecked=!!entry;
+  const startVal=entry&&entry.start?entry.start:'';
+  const endVal=entry&&entry.end?entry.end:'';
+  const hasValidTimes=startVal&&endVal;
+  const showTimes=isChecked;
+  const chk=isChecked?'checked':'';
+  html+=`<td class="${di===0?'cal-today':''}"><div class="cal-cell-inner">
+    <input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${chk}>
+    <div class="cal-time-wrap" style="display:${showTimes?'flex':'none'}" data-time-name="${g.name}" data-time-date="${ds}">
+      <div class="cal-time-row"><label>Start</label><select class="cal-time-input" data-field="start" data-tname="${g.name}" data-tdate="${ds}">${timeOpts}</select></div>
+      <div class="cal-time-row"><label>End</label><select class="cal-time-input" data-field="end" data-tname="${g.name}" data-tdate="${ds}">${timeOpts}</select></div>
+      <div class="cal-time-warn" data-warn-name="${g.name}" data-warn-date="${ds}"></div>
+    </div>
+  </div></td>`});
 html+='</tr>'});html+='</tbody>';table.innerHTML=html;
+
+/* Set saved time values */
+filteredGirls.forEach(g=>{
+  const dates2=getWeekDates();
+  dates2.forEach(ds=>{
+    const entry=getCalEntry(g.name,ds);
+    if(entry){
+      const startSel=table.querySelector(`select[data-field="start"][data-tname="${g.name}"][data-tdate="${ds}"]`);
+      const endSel=table.querySelector(`select[data-field="end"][data-tname="${g.name}"][data-tdate="${ds}"]`);
+      if(startSel&&entry.start)startSel.value=entry.start;
+      if(endSel&&entry.end)endSel.value=entry.end;
+      /* Mark pending if times missing */
+      if(!entry.start||!entry.end){
+        if(!calPending[g.name])calPending[g.name]={};
+        calPending[g.name][ds]=true;
+        const warn=table.querySelector(`[data-warn-name="${g.name}"][data-warn-date="${ds}"]`);
+        if(warn)warn.textContent='Times required';
+      }
+    }
+  });
+});
+
 table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>{profileReturnPage='calendarPage';showProfile(parseInt(el.dataset.idx))}});
+
 table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){
-const n=this.dataset.name,d=this.dataset.date;if(!calData[n])calData[n]={};
-if(this.checked)calData[n][d]=true;else delete calData[n][d];
-this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');
-renderRoster();renderGrid()}})}
+  const n=this.dataset.name,d=this.dataset.date;
+  const timeWrap=table.querySelector(`[data-time-name="${n}"][data-time-date="${d}"]`);
+  if(this.checked){
+    /* Show time selectors, mark as pending */
+    if(!calData[n])calData[n]={};
+    calData[n][d]={start:'',end:''};
+    if(!calPending[n])calPending[n]={};
+    calPending[n][d]=true;
+    if(timeWrap){
+      timeWrap.style.display='flex';
+      const warn=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
+      if(warn)warn.textContent='Times required';
+    }
+  } else {
+    /* Uncheck - remove and save immediately */
+    if(calData[n])delete calData[n][d];
+    if(calPending[n])delete calPending[n][d];
+    if(timeWrap){
+      timeWrap.style.display='none';
+      const startSel=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`);
+      const endSel=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${d}"]`);
+      if(startSel)startSel.value='';
+      if(endSel)endSel.value='';
+      const warn=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
+      if(warn)warn.textContent='';
+    }
+    this.closest('td').classList.add('cal-saving');
+    await saveCalData();
+    this.closest('td').classList.remove('cal-saving');
+    renderRoster();renderGrid();
+  }
+}});
+
+table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async function(){
+  const n=this.dataset.tname,d=this.dataset.tdate,field=this.dataset.field;
+  if(!calData[n]||!calData[n][d])return;
+  if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};
+  calData[n][d][field]=this.value;
+  const entry=calData[n][d];
+  const warn=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
+  
+  if(entry.start&&entry.end){
+    /* Validate end > start */
+    if(entry.end<=entry.start){
+      if(warn)warn.textContent='End must be after start';
+      this.classList.add('invalid');
+      return;
+    }
+    this.classList.remove('invalid');
+    /* Both times set and valid - save and clear pending */
+    if(calPending[n])delete calPending[n][d];
+    if(warn)warn.textContent='';
+    const td=this.closest('td');
+    td.classList.add('cal-saving');
+    await saveCalData();
+    td.classList.remove('cal-saving');
+    renderRoster();renderGrid();
+    showToast('Schedule saved');
+  } else {
+    this.classList.remove('invalid');
+    if(warn)warn.textContent='Times required';
+    if(!calPending[n])calPending[n]={};
+    calPending[n][d]=true;
+  }
+}});
+}
 
 const formOverlay=document.getElementById('formOverlay');
 const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fVal1','fVal2','fVal3','fExp','fLang','fType','fDesc'];
@@ -388,7 +547,15 @@ if(document.getElementById('profilePage').classList.contains('active'))showPage(
 const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 if(data!==null)girls=data;else showToast('Could not load data','error');
-if(cal)calData=cal;
+if(cal){
+  /* Migrate old boolean format to object format */
+  for(const n in cal){
+    for(const dt in cal[n]){
+      if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};
+    }
+  }
+  calData=cal;
+}
 rosterDateFilter=fmtDate(getAEDTDate());
 renderFilters();renderGrid();renderRoster();
 const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)})();
