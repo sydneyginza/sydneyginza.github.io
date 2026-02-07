@@ -230,6 +230,16 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .home-cta{display:inline-block;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px 40px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .home-cta:hover{background:rgba(180,74,255,0.25)}
 
+/* ── Copy Time Modal ── */
+.copy-time-modal{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+.copy-time-modal.open{opacity:1;pointer-events:all}
+.copy-time-box{width:90%;max-width:420px;background:#111118;border:1px solid rgba(255,255,255,0.08);clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));padding:32px 28px;text-align:center;transform:scale(0.95);transition:transform .4s}
+.copy-time-modal.open .copy-time-box{transform:scale(1)}
+.copy-time-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:16px;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:10px}
+.copy-time-msg{color:var(--text-dim);font-size:14px;line-height:1.7;margin-bottom:8px}
+.copy-time-detail{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:2px;color:var(--accent);margin-bottom:24px}
+.copy-time-actions{display:flex;gap:12px;justify-content:center}
+
 /* ── Responsive ── */
 @media(max-width:768px){
 nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}

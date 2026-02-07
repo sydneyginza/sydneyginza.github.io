@@ -28,29 +28,27 @@
 <div class="home-title">GIN<span>ZA</span></div>
 <div class="home-tagline">Sydney's Premier Experience</div>
 <div class="home-images" id="homeImages"></div>
-
 <div class="home-mid">
 <div class="home-mid-left">
 <div class="home-divider-sm"></div>
-<div class="home-subtitle" id="homeSubtitle">Announcement</div>
-<div class="home-summary" id="homeSummary">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
+<div class="home-subtitle">Announcement</div>
+<div class="home-summary">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
 <div class="home-announce" id="homeAnnounce"></div>
 </div>
 <div class="home-mid-right">
-<div class="home-subtitle" id="homeSubtitle">New Girls</div>
+<div class="home-subtitle">New Girls</div>
 <div class="home-newgirls" id="homeNewGirls">
 <div class="ng-nav" id="ngNav"></div>
 <div class="ng-display" id="ngDisplay"></div>
 </div>
 </div>
 </div>
-
 <div class="home-divider"></div>
-<div class="home-subtitle" id="homeSubtitle">Welcome</div>
-<div class="home-summary" id="homeSummary">Discover our exclusive selection of stunning companions. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
-<div class="home-subtitle" id="homeSubtitle">Location</div>
-<div class="home-summary" id="homeSummary">310 Cleveland StSurry Hills NSW 2010
-<div class="home-summary" id="homeSummary">(back entrance from goodlet lane)</div>
+<div class="home-subtitle">Welcome</div>
+<div class="home-summary">Discover our exclusive selection of stunning companions. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
+<div class="home-subtitle">Location</div>
+<div class="home-summary">310 Cleveland St Surry Hills NSW 2010
+<div class="home-summary">(back entrance from goodlet lane)</div>
 <button class="home-cta" id="homeCta">View Roster</button>
 </section></div>
 
@@ -113,6 +111,19 @@
 <p style="color:var(--text-dim);margin-bottom:28px;font-size:15px" id="deleteMsg">Are you sure?</p>
 <div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel">Cancel</button><button class="btn btn-danger" id="deleteConfirm">Delete</button></div>
 </div></div>
+
+<div class="copy-time-modal" id="copyTimeModal">
+<div class="copy-time-box">
+<div class="copy-time-title">Copy Times?</div>
+<div class="copy-time-msg" id="copyTimeMsg"></div>
+<div class="copy-time-detail" id="copyTimeDetail"></div>
+<div class="copy-time-actions">
+<button class="btn btn-secondary" id="copyTimeNew">Set New Time</button>
+<button class="btn btn-primary" id="copyTimeCopy">Copy Times</button>
+</div>
+</div>
+</div>
+
 <footer><p>Ginza &copy; 2026 &mdash; All Rights Reserved</p></footer>
 
 <script>
@@ -151,6 +162,7 @@ function genFn(){return'img_'+Date.now()+'_'+Math.random().toString(36).substr(2
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
 let ngIdx=0,ngList=[];
+let copyTimeResolve=null;
 const allPages=['homePage','rosterPage','listPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
@@ -172,20 +184,46 @@ document.getElementById('homeCta').onclick=()=>showPage('rosterPage');
 function fmtTime12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ap=h<12?'AM':'PM';const hr=h===0?12:h>12?h-12:h;return hr+':'+String(m).padStart(2,'0')+' '+ap}
 function getCalEntry(name,date){if(calData[name]&&calData[name][date]){const v=calData[name][date];return typeof v==='object'?v:{start:'',end:''};}return null}
 
+/* ── Find existing times for a girl on other dates ── */
+function findExistingTimes(name,excludeDate){
+const dates=getWeekDates();
+for(const dt of dates){
+if(dt===excludeDate)continue;
+const entry=getCalEntry(name,dt);
+if(entry&&entry.start&&entry.end)return{date:dt,start:entry.start,end:entry.end}}
+return null}
+
+/* ── Copy Time Modal ── */
+function showCopyTimePrompt(name,sourceDate,start,end){
+return new Promise(resolve=>{
+const modal=document.getElementById('copyTimeModal');
+const f=dispDate(sourceDate);
+document.getElementById('copyTimeMsg').innerHTML=`<strong style="color:#fff">${name}</strong> has existing times from <strong style="color:#fff">${f.day} ${f.date}</strong>`;
+document.getElementById('copyTimeDetail').textContent=fmtTime12(start)+' — '+fmtTime12(end);
+copyTimeResolve=resolve;
+modal.classList.add('open')})}
+
+document.getElementById('copyTimeCopy').onclick=()=>{
+document.getElementById('copyTimeModal').classList.remove('open');
+if(copyTimeResolve)copyTimeResolve('copy');copyTimeResolve=null};
+document.getElementById('copyTimeNew').onclick=()=>{
+document.getElementById('copyTimeModal').classList.remove('open');
+if(copyTimeResolve)copyTimeResolve('new');copyTimeResolve=null};
+document.getElementById('copyTimeModal').onclick=e=>{
+if(e.target===document.getElementById('copyTimeModal')){
+document.getElementById('copyTimeModal').classList.remove('open');
+if(copyTimeResolve)copyTimeResolve('new');copyTimeResolve=null}};
+
 /* ── Home Page ── */
 function getNewGirls(){
 const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);
 return girls.filter(g=>{if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
 
 function renderHome(){
-/* 4 static images */
 const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg">`;c.appendChild(card)}
-/* Announcement */
-const ann=document.getElementById('homeAnnounce');
-ann.innerHTML='<p></p>';
-/* New Girls slideshow */
+const ann=document.getElementById('homeAnnounce');ann.innerHTML='<p></p>';
 ngList=getNewGirls();ngIdx=0;renderNewGirls()}
 
 function renderNewGirls(){
@@ -193,22 +231,17 @@ const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDispl
 nav.innerHTML='';disp.innerHTML='';
 if(!ngList.length){disp.innerHTML='<div class="ng-empty">No new girls this month</div>';return}
 if(ngIdx>=ngList.length)ngIdx=0;if(ngIdx<0)ngIdx=ngList.length-1;
-/* Up arrow */
 const up=document.createElement('button');up.className='ng-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';
 up.onclick=()=>{ngIdx=(ngIdx-1+ngList.length)%ngList.length;renderNewGirls()};nav.appendChild(up);
-/* Dots */
 const dots=document.createElement('div');dots.className='ng-dots';
 const mx=3;let st=Math.max(0,ngIdx-Math.floor(mx/2)),en=Math.min(ngList.length,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
 for(let i=st;i<en;i++){const dot=document.createElement('button');dot.className='ng-dot'+(i===ngIdx?' active':'');
 const g=ngList[i];dot.innerHTML=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span>${g.name.charAt(0)}</span>`;
 dot.onclick=()=>{ngIdx=i;renderNewGirls()};dots.appendChild(dot)}
 nav.appendChild(dots);
-/* Counter */
 const ctr=document.createElement('div');ctr.className='ng-counter';ctr.innerHTML=`<span>${ngIdx+1}</span> / ${ngList.length}`;nav.appendChild(ctr);
-/* Down arrow */
 const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
 dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
-/* Display card */
 const g=ngList[ngIdx],ri=girls.indexOf(g);
 const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:'<div class="ng-placeholder"></div>';
 disp.innerHTML=`<div class="ng-card"><div class="ng-photo">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
@@ -309,9 +342,30 @@ fg.forEach(g=>{getWeekDates().forEach(ds=>{const entry=getCalEntry(g.name,ds);if
 if(!entry.start||!entry.end){if(!calPending[g.name])calPending[g.name]={};calPending[g.name][ds]=true;const w=table.querySelector(`[data-warn-name="${g.name}"][data-warn-date="${ds}"]`);if(w)w.textContent='Times required'}}})});
 
 table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>{profileReturnPage='calendarPage';showProfile(parseInt(el.dataset.idx))}});
+
+/* ── Calendar checkbox handler with copy-time prompt ── */
 table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){const n=this.dataset.name,d=this.dataset.date;const tw=table.querySelector(`[data-time-name="${n}"][data-time-date="${d}"]`);
-if(this.checked){if(!calData[n])calData[n]={};calData[n][d]={start:'',end:''};if(!calPending[n])calPending[n]={};calPending[n][d]=true;if(tw){tw.style.display='flex';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent='Times required'}}
-else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d];if(tw){tw.style.display='none';const ss=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${d}"]`);if(ss)ss.value='';if(es)es.value='';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent=''}this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');renderRoster();renderGrid();renderHome()}}});
+if(this.checked){
+if(!calData[n])calData[n]={};
+/* Check if this girl has times on another date */
+const existing=findExistingTimes(n,d);
+if(existing){
+const choice=await showCopyTimePrompt(n,existing.date,existing.start,existing.end);
+if(choice==='copy'){
+calData[n][d]={start:existing.start,end:existing.end};
+if(tw){tw.style.display='flex';
+const ss=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${d}"]`);
+if(ss)ss.value=existing.start;if(es)es.value=existing.end;
+const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent=''}
+const td=this.closest('td');td.classList.add('cal-saving');await saveCalData();td.classList.remove('cal-saving');
+renderRoster();renderGrid();renderHome();showToast('Times copied');return}
+else{calData[n][d]={start:'',end:''};if(!calPending[n])calPending[n]={};calPending[n][d]=true;
+if(tw){tw.style.display='flex';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent='Times required'}return}}
+/* No existing times found — default behavior */
+calData[n][d]={start:'',end:''};if(!calPending[n])calPending[n]={};calPending[n][d]=true;
+if(tw){tw.style.display='flex';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent='Times required'}}
+else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d];if(tw){tw.style.display='none';const ss=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${ds}"]`);if(ss)ss.value='';if(es)es.value='';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent=''}this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');renderRoster();renderGrid();renderHome()}}});
+
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';const td=this.closest('td');td.classList.add('cal-saving');await saveCalData();td.classList.remove('cal-saving');renderRoster();renderGrid();renderHome();showToast('Schedule saved')}
 else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});}
