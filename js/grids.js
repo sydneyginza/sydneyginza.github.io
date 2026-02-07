@@ -74,3 +74,4 @@ else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d]
 
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';const td=this.closest('td');td.classList.add('cal-saving');await saveCalData();td.classList.remove('cal-saving');renderRoster();renderGrid();renderHome();showToast('Schedule saved')}
+else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});}
