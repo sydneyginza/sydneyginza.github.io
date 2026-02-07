@@ -150,14 +150,15 @@ const r=await fetch(`${GITHUB_API_DATA}/${CAL_PATH}`,{method:'PUT',headers:{'Aut
 if(!r.ok)throw new Error(r.status);calSha=(await r.json()).content.sha;return true}catch(e){showToast('Calendar save failed','error');return false}}
 
 async function uploadToGithub(b64,name,fn){const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_'),path=`Images/${safe}/${fn}`,pure=b64.split(',')[1];
-let sha;try{const c=await fetch(`${GITHUB_API_DATA}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
+let sha;try{const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
 const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;
-const r=await fetch(`${GITHUB_API_DATA}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-if(!r.ok)throw new Error(r.status);const rd=await r.json();return`https://raw.githubusercontent.com/${GITHUB_REPO_DATA}/main/${rd.content.path}`}
+const r=await fetch(`${GITHUB_API}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+if(!r.ok)throw new Error(r.status);return`https://raw.githubusercontent.com/${GITHUB_REPO}/main/${path}`}
 
-async function deleteFromGithub(url){try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;const path=decodeURIComponent(m[1]);
-const c=await fetch(`${GITHUB_API_DATA}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
-await fetch(`${GITHUB_API_DATA}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:(await c.json()).sha})})}catch(e){}}
+async function deleteFromGithub(url){try{const m=url.match(/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/[^/]+\/(.+?)(\?|$)/);if(!m)return;const repo=m[1];const path=decodeURIComponent(m[2]);
+const api=`https://api.github.com/repos/${repo}/contents/${path}`;
+const c=await fetch(api,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
+await fetch(api,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:(await c.json()).sha})})}catch(e){}}
 
 function genFn(){return'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
