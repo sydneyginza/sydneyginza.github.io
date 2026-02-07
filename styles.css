@@ -143,6 +143,8 @@ select.form-input option{background:#111118;color:#fff}
 .toast.error{border-color:rgba(255,68,68,0.4);color:#ff4444}
 footer{text-align:center;padding:60px 40px;border-top:1px solid rgba(255,255,255,0.04)}
 footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
+
+/* ── Calendar ── */
 .cal-table{width:100%;border-collapse:separate;border-spacing:0}
 .cal-table th{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:16px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);white-space:nowrap}
 .cal-table th:first-child{text-align:left;min-width:200px}
@@ -163,7 +165,38 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .cal-today{background:rgba(180,74,255,0.06)}
 .cal-day-name{display:block;font-size:10px;color:var(--text-dim);margin-top:2px;letter-spacing:1px}
 .cal-saving{opacity:.5;pointer-events:none}
+.cal-time-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px}
+.cal-time-row{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-dim)}
+.cal-time-row label{font-size:9px;letter-spacing:1px;text-transform:uppercase;min-width:28px;text-align:right}
+.cal-time-input{background:var(--bg-dark);border:1px solid rgba(255,255,255,0.12);color:#fff;font-family:'Rajdhani',sans-serif;font-size:12px;padding:4px 6px;width:90px;outline:none;transition:border-color .3s;text-align:center}
+.cal-time-input option{background:var(--bg-dark);color:#fff}
+.cal-time-input:focus{border-color:var(--accent)}
+.cal-time-input.invalid{border-color:#ff4444;box-shadow:0 0 6px rgba(255,68,68,0.2)}
+.cal-time-warn{font-size:9px;color:#ff4444;letter-spacing:1px;margin-top:2px;min-height:12px}
+.cal-cell-inner{display:flex;flex-direction:column;align-items:center;min-width:110px}
 .empty-msg{text-align:center;padding:60px 20px;color:var(--text-dim);font-size:16px;letter-spacing:2px}
+
+/* ── Home Page ── */
+.home-section{padding:120px 40px 80px;max-width:1200px;margin:0 auto;text-align:center}
+.home-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(36px,5vw,64px);letter-spacing:8px;text-transform:uppercase;color:#fff;margin-bottom:12px}
+.home-title span{color:var(--accent)}
+.home-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:4px;text-transform:uppercase;color:var(--text-dim);margin-bottom:60px}
+.home-images{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:60px}
+.home-img-card{width:256px;height:374px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;position:relative;transition:all .4s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));cursor:pointer}
+.home-img-card:hover{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 20px 60px rgba(180,74,255,0.12)}
+.home-img-card img{width:100%;height:100%;object-fit:cover;display:block}
+.home-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))}
+.home-img-placeholder span{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:700;color:rgba(255,255,255,0.08)}
+.home-img-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(10,10,15,0.7),transparent);pointer-events:none}
+.home-img-name{position:absolute;bottom:16px;left:0;right:0;text-align:center;z-index:2;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .3s}
+.home-img-card:hover .home-img-name{opacity:1}
+.home-divider{width:80px;height:1px;background:var(--accent);margin:0 auto 40px}
+.home-subtitle{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(18px,3vw,28px);letter-spacing:4px;text-transform:uppercase;color:#fff;margin-bottom:20px}
+.home-summary{color:var(--text-dim);font-size:17px;line-height:1.9;max-width:720px;margin:0 auto 40px;letter-spacing:.5px}
+.home-cta{display:inline-block;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px 40px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.home-cta:hover{background:rgba(180,74,255,0.25)}
+
+/* ── Responsive ── */
 @media(max-width:768px){
 nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .section{padding:60px 20px;padding-top:100px}
@@ -176,4 +209,5 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .form-row{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr}.form-modal{padding:24px}
 .cal-table{font-size:12px}.cal-table th{padding:10px 6px;font-size:9px}.cal-table td{padding:8px 6px}
 .cal-avatar{width:32px;height:32px}.cal-name{font-size:10px}.cal-check{width:18px;height:18px}
+.home-section{padding:100px 20px 60px}.home-images{gap:12px}.home-img-card{width:160px;height:234px}
 }
