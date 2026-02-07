@@ -229,7 +229,7 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 </div></div>
 <footer><p>Ginza &copy; 2026 — All Rights Reserved</p></footer>
 <script>
-const CRED={user:'admin',pass:'UpdAtEr2dAyOstEr'};
+let CRED=[];
 const GITHUB_TOKEN='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';
 const GITHUB_REPO='sydneyginza/sydneyginza.github.io';
 const GITHUB_API=`https://api.github.com/repos/${GITHUB_REPO}/contents`;
@@ -237,7 +237,22 @@ const DATA_PATH='data/girls.json';
 let loggedIn=false,dataSha=null;
 const MAX_PHOTOS=10;
 
+const AUTH_PATH='data/auth.json';
+
 function showToast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),3000)}
+
+async function loadAuth(){
+  try{
+    const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+    if(r.ok){const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
+    if(r.status===404){
+      const def=[{user:'admin',pass:'admin123'}];
+      const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(def,null,2))));
+      await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:encoded})});
+      return def}
+  }catch(e){console.error('Auth load error:',e)}
+  return null
+}
 
 async function loadData(){
   try{
@@ -338,16 +353,18 @@ document.getElementById('navGirls').onclick=e=>{e.preventDefault();showList()};
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
   if(loggedIn){loginIconBtn.classList.add('logged-in');
-  userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">ADMIN</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-  document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx)}}
+  userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
+  document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx)}}
   else{loginIconBtn.classList.remove('logged-in');
   userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
   document.getElementById('lfBtn').onclick=doLogin;
   document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
   document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}
 }
+let loggedInUser=null;
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;
-if(u===CRED.user&&p===CRED.pass){loggedIn=true;renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as ADMIN')}
+const match=CRED.find(c=>c.user===u&&c.pass===p);
+if(match){loggedIn=true;loggedInUser=match.user;renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
@@ -441,9 +458,9 @@ if(profilePage.classList.contains('active'))showList();showToast('Profile delete
 
 // ========== INIT ==========
 (async()=>{
-  const data=await loadData();
-  if(data!==null)girls=data;
-  else showToast('Could not load data','error');
+  const [authData,data]=await Promise.all([loadAuth(),loadData()]);
+  if(authData)CRED=authData;else showToast('Could not load auth','error');
+  if(data!==null)girls=data;else showToast('Could not load data','error');
   renderFilters();renderGrid();
   const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)
 })();
