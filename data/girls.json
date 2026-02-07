@@ -1,0 +1,25 @@
+[
+  {
+    "name": "Vanilla",
+    "location": "Empire",
+    "country": "Japanese",
+    "age": "19",
+    "body": "6",
+    "height": "153",
+    "cup": "B",
+    "val1": "190",
+    "val2": "250",
+    "val3": "300",
+    "exp": "",
+    "lang": "Japanese, Limited English",
+    "type": "Very young, small, cute, innocent",
+    "desc": "abc",
+    "photos": [
+      "https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Vanilla/J_Vanilla_0.jpeg",
+      "https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Vanilla/J_Vanilla_1.jpeg",
+      "https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Vanilla/J_Vanilla_2.jpeg",
+      "https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Vanilla/J_Vanilla_3.jpeg",
+      "https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Vanilla/J_Vanilla_4.jpeg"
+    ]
+  }
+]
