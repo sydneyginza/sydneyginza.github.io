@@ -121,7 +121,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--text-dim);font-size:28px;cursor:pointer;z-index:5;transition:color .3s}.modal-close:hover{color:#fff}
 .form-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:22px;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:30px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.form-row.full{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr 1fr 1fr}.form-row.quad{grid-template-columns:1fr 1fr 1fr 1fr}
+.form-row.full{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr 1fr 1fr}
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)}
 .form-input,.form-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;padding:10px 14px;transition:border-color .3s;outline:none}
@@ -147,6 +147,28 @@ select.form-input option{background:#111118;color:#fff}
 .toast.error{border-color:rgba(255,68,68,0.4);color:#ff4444}
 footer{text-align:center;padding:60px 40px;border-top:1px solid rgba(255,255,255,0.04)}
 footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
+
+.cal-table{width:100%;border-collapse:separate;border-spacing:0}
+.cal-table th{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:16px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);white-space:nowrap}
+.cal-table th:first-child{text-align:left;min-width:200px}
+.cal-table td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.cal-table td:first-child{text-align:left}
+.cal-table tr:hover td{background:rgba(255,255,255,0.02)}
+.cal-profile{display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .3s}
+.cal-profile:hover{opacity:.8}
+.cal-avatar{width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center}
+.cal-avatar img{width:100%;height:100%;object-fit:cover}
+.cal-avatar .cal-letter{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--text-dim)}
+.cal-name{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:#fff;text-transform:uppercase}
+.cal-loc{font-size:11px;color:var(--text-dim);letter-spacing:1px;margin-top:2px}
+.cal-check{width:22px;height:22px;appearance:none;-webkit-appearance:none;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.15);border-radius:3px;cursor:pointer;transition:all .3s;position:relative;margin:0 auto;display:block}
+.cal-check:hover{border-color:var(--accent)}
+.cal-check:checked{background:rgba(180,74,255,0.2);border-color:var(--accent)}
+.cal-check:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;font-weight:700}
+.cal-today{background:rgba(180,74,255,0.06)}
+.cal-day-name{display:block;font-size:10px;color:var(--text-dim);margin-top:2px;letter-spacing:1px}
+.cal-saving{opacity:.5;pointer-events:none}
+
 @media(max-width:768px){
 nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .section{padding:60px 20px;padding-top:100px}
@@ -156,7 +178,9 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .profile-main-img{max-width:320px}.profile-stats{grid-template-columns:1fr 1fr}
 .profile-nav-rail{left:10px}
 .pnav-dot,.pnav-arrow{width:52px;height:52px}.pnav-dot .dot-inner{width:38px;height:38px}.pnav-dot .dot-letter{font-size:15px}.pnav-arrow svg{width:24px;height:24px}
-.form-row{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr}.form-row.quad{grid-template-columns:1fr 1fr}.form-modal{padding:24px}
+.form-row{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr}.form-modal{padding:24px}
+.cal-table{font-size:12px}.cal-table th{padding:10px 6px;font-size:9px}.cal-table td{padding:8px 6px}
+.cal-avatar{width:32px;height:32px}.cal-name{font-size:10px}.cal-check{width:18px;height:18px}
 }
 </style>
 </head>
@@ -167,7 +191,10 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <nav>
 <div class="logo">GIN<span>ZA</span></div>
 <div class="nav-right">
-<div class="nav-links"><a href="#" class="active" id="navGirls">Girls</a></div>
+<div class="nav-links">
+<a href="#" class="active" id="navGirls">Girls</a>
+<a href="#" id="navCalendar" style="display:none">Calendar</a>
+</div>
 <div style="position:relative">
 <button class="login-icon-btn" id="loginIconBtn"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
 <div class="user-dropdown" id="userDropdown"></div>
@@ -176,6 +203,10 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div></div>
 <div class="filter-bar" id="filterBar"></div>
 <div class="girls-grid" id="girlsGrid"></div>
+</section></div>
+<div class="page" id="calendarPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><div class="section-title">Calendar</div></div></div>
+<div style="overflow-x:auto"><table class="cal-table" id="calTable"></table></div>
 </section></div>
 <div class="page" id="profilePage">
 <div class="profile-nav-rail" id="profileNavRail"></div>
@@ -234,69 +265,85 @@ const GITHUB_TOKEN='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';
 const GITHUB_REPO='sydneyginza/sydneyginza.github.io';
 const GITHUB_API=`https://api.github.com/repos/${GITHUB_REPO}/contents`;
 const DATA_PATH='data/girls.json';
-let loggedIn=false,dataSha=null;
-const MAX_PHOTOS=10;
-
 const AUTH_PATH='data/auth.json';
+const CAL_PATH='data/calendar.json';
+let loggedIn=false,dataSha=null,calSha=null,calData={},loggedInUser=null;
+const MAX_PHOTOS=10;
 
 function showToast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),3000)}
 
+// AEDT date helpers
+function getAEDTDate(){const now=new Date();const aedt=new Date(now.toLocaleString('en-US',{timeZone:'Australia/Sydney'}));return aedt}
+function formatDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
+function getWeekDates(){const today=getAEDTDate();const dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(formatDate(d))}return dates}
+function formatDisplayDate(ds){const d=new Date(ds+'T00:00:00');const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return{date:`${d.getDate()} ${months[d.getMonth()]}`,day:days[d.getDay()]}}
+
+// GitHub data ops
 async function loadAuth(){
-  try{
-    const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-    if(r.ok){const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
-    if(r.status===404){
-      const def=[{user:'admin',pass:'admin123'}];
-      const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(def,null,2))));
-      await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:encoded})});
-      return def}
-  }catch(e){console.error('Auth load error:',e)}
-  return null
-}
+  try{const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+  if(r.ok){const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
+  if(r.status===404){const def=[{user:'admin',pass:'admin123'}];const enc=btoa(unescape(encodeURIComponent(JSON.stringify(def,null,2))));
+  await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:enc})});return def}
+  }catch(e){console.error('Auth error:',e)}return null}
 
 async function loadData(){
-  try{
-    const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-    if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
-    if(r.status===404){dataSha=null;return []}
-  }catch(e){console.error('Load error:',e)}
-  return null
-}
+  try{const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+  if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
+  if(r.status===404){dataSha=null;return[]}}catch(e){console.error('Load error:',e)}return null}
 
 async function saveData(){
+  try{const json=JSON.stringify(girls,null,2);const enc=btoa(unescape(encodeURIComponent(json)));
+  const body={message:'Update girls data',content:enc};if(dataSha)body.sha=dataSha;
+  const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const err=await r.json();throw new Error(err.message||r.status)}dataSha=(await r.json()).content.sha;return true
+  }catch(e){console.error('Save error:',e);showToast('Failed to save: '+e.message,'error');return false}}
+
+async function loadCalData(){
+  try{const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+  if(r.ok){const d=await r.json();calSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
+  if(r.status===404){calSha=null;return{}}}catch(e){console.error('Cal load error:',e)}return{}}
+
+async function saveCalData(){
   try{
-    const json=JSON.stringify(girls,null,2);
-    const encoded=btoa(unescape(encodeURIComponent(json)));
-    const body={message:'Update girls data',content:encoded};
-    if(dataSha)body.sha=dataSha;
-    const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!r.ok){const err=await r.json();throw new Error(err.message||r.status)}
-    const d=await r.json();dataSha=d.content.sha;return true
-  }catch(e){console.error('Save error:',e);showToast('Failed to save: '+e.message,'error');return false}
-}
+  // Clean old dates
+  const validDates=getWeekDates();
+  const cleaned={};
+  for(const name in calData){cleaned[name]={};for(const dt of validDates){if(calData[name]&&calData[name][dt])cleaned[name][dt]=true}}
+  calData=cleaned;
+  const json=JSON.stringify(calData,null,2);const enc=btoa(unescape(encodeURIComponent(json)));
+  const body={message:'Update calendar',content:enc};if(calSha)body.sha=calSha;
+  const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(`Cal save failed: ${r.status}`);calSha=(await r.json()).content.sha;return true
+  }catch(e){console.error('Cal save error:',e);showToast('Failed to save calendar','error');return false}}
 
 async function uploadToGithub(b64,name,fn){
-  const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_');
-  const path=`Images/${safe}/${fn}`;const pure=b64.split(',')[1];
-  let sha;try{const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok){sha=(await c.json()).sha}}catch(e){}
+  const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_');const path=`Images/${safe}/${fn}`;const pure=b64.split(',')[1];
+  let sha;try{const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
   const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;
   const r=await fetch(`${GITHUB_API}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error(`Upload failed: ${r.status}`);
-  return(await r.json()).content.download_url
-}
+  if(!r.ok)throw new Error(`Upload failed: ${r.status}`);return(await r.json()).content.download_url}
 
 async function deleteFromGithub(url){
-  try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;
-  const path=decodeURIComponent(m[1]);
+  try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;const path=decodeURIComponent(m[1]);
   const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
-  const d=await c.json();
-  await fetch(`${GITHUB_API}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:d.sha})})}catch(e){console.error('Delete error:',e)}
-}
+  await fetch(`${GITHUB_API}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:(await c.json()).sha})})}catch(e){console.error('Delete error:',e)}}
 
-function genFn(){return 'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
+function genFn(){return'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
-const listPage=document.getElementById('listPage'),profilePage=document.getElementById('profilePage'),profileContent=document.getElementById('profileContent');
-function showList(){profilePage.classList.remove('active');listPage.classList.add('active');window.scrollTo(0,0)}
+const listPage=document.getElementById('listPage'),profilePage=document.getElementById('profilePage'),profileContent=document.getElementById('profileContent'),calendarPage=document.getElementById('calendarPage');
+
+function showPage(pg){
+  [listPage,profilePage,calendarPage].forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  pg.classList.add('active');window.scrollTo(0,0);
+  if(pg===listPage)document.getElementById('navGirls').classList.add('active');
+  if(pg===calendarPage){document.getElementById('navCalendar').classList.add('active');renderCalendar()}
+}
+function showList(){showPage(listPage)}
+
+// Nav
+document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage(listPage)};
+document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage(calendarPage)};
 
 let lbPhotos=[],lbIdx=0;const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
 document.getElementById('lbClose').onclick=()=>lightbox.classList.remove('open');
@@ -317,8 +364,7 @@ function renderProfileNav(idx){
   rail.appendChild(dots);
   const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
   const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
-  dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)
-}
+  dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
 
 function showProfile(idx){
   const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
@@ -334,8 +380,10 @@ function showProfile(idx){
   <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>${admin}</div></div>`;
   document.getElementById('backBtn').onclick=showList;
   if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
-  renderThumbs(idx);renderProfileNav(idx);listPage.classList.remove('active');profilePage.classList.add('active');window.scrollTo(0,0)
-}
+  renderThumbs(idx);renderProfileNav(idx);
+  [listPage,calendarPage].forEach(p=>p.classList.remove('active'));profilePage.classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  window.scrollTo(0,0)}
 
 function renderThumbs(idx){
   const g=girls[idx],c=document.getElementById('profThumbs');c.innerHTML='';
@@ -346,25 +394,27 @@ function renderThumbs(idx){
   if(loggedIn){const rm=document.createElement('button');rm.className='profile-thumb-remove';rm.innerHTML='✕';
   rm.onclick=async e=>{e.stopPropagation();const url=g.photos[i];if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url);
   g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();showToast('Photo removed')};w.appendChild(rm)}
-  c.appendChild(w)})
-}
+  c.appendChild(w)})}
 
-document.getElementById('navGirls').onclick=e=>{e.preventDefault();showList()};
+// Auth
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
   if(loggedIn){loginIconBtn.classList.add('logged-in');
   userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-  document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx)}}
+  document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');
+  document.getElementById('navCalendar').style.display='none';
+  if(calendarPage.classList.contains('active'))showPage(listPage);
+  renderDropdown();renderFilters();renderGrid()}}
   else{loginIconBtn.classList.remove('logged-in');
   userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
   document.getElementById('lfBtn').onclick=doLogin;
   document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-  document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}
-}
-let loggedInUser=null;
+  document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;
 const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';
+renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx);
+setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
@@ -387,6 +437,32 @@ card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;showProfile(ri)}
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
 grid.appendChild(card)})}
 
+// Calendar
+function renderCalendar(){
+  const table=document.getElementById('calTable');
+  const dates=getWeekDates();const todayStr=dates[0];
+  let html='<thead><tr><th>Profile</th>';
+  dates.forEach((ds,i)=>{const f=formatDisplayDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});
+  html+='</tr></thead><tbody>';
+  girls.forEach((g,gi)=>{
+    const avatar=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
+    html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${avatar}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
+    dates.forEach((ds,di)=>{
+      const chk=calData[g.name]&&calData[g.name][ds]?'checked':'';
+      html+=`<td class="${di===0?'cal-today':''}"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${chk}></td>`;});
+    html+='</tr>'});
+  html+='</tbody>';table.innerHTML=html;
+  table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>showProfile(parseInt(el.dataset.idx))});
+  table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){
+    const n=this.dataset.name,d=this.dataset.date;
+    if(!calData[n])calData[n]={};
+    if(this.checked)calData[n][d]=true;else delete calData[n][d];
+    this.closest('td').classList.add('cal-saving');
+    await saveCalData();
+    this.closest('td').classList.remove('cal-saving')}})
+}
+
+// Form
 const formOverlay=document.getElementById('formOverlay');
 const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fVal1','fVal2','fVal3','fExp','fLang','fType','fDesc'];
 document.getElementById('formClose').onclick=()=>formOverlay.classList.remove('open');
@@ -421,8 +497,7 @@ formPhotos=[...(g.photos||[])]}else{document.getElementById('formTitle').textCon
 renderFormPhotos();formOverlay.classList.add('open')}
 
 document.getElementById('formSave').onclick=async()=>{
-const reqFields=[
-{id:'fName',label:'Name'},{id:'fLocation',label:'Location'},{id:'fCountry',label:'Country'},
+const reqFields=[{id:'fName',label:'Name'},{id:'fLocation',label:'Location'},{id:'fCountry',label:'Country'},
 {id:'fAge',label:'Age'},{id:'fBody',label:'Body Size'},{id:'fHeight',label:'Height'},
 {id:'fCup',label:'Cup Size'},{id:'fExp',label:'Experience'},{id:'fVal3',label:'Value 3'},
 {id:'fLang',label:'Language'},{id:'fType',label:'Type'},{id:'fDesc',label:'Description'}];
@@ -451,19 +526,16 @@ function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').t
 document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){
 const g=girls[deleteTarget];
 if(g.photos&&GITHUB_TOKEN){for(const url of g.photos){if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url)}}
-girls.splice(deleteTarget,1);
-await saveData();
+girls.splice(deleteTarget,1);await saveData();
 deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();
 if(profilePage.classList.contains('active'))showList();showToast('Profile deleted')}};
 
-// ========== INIT ==========
+// Init
 (async()=>{
-  const [authData,data]=await Promise.all([loadAuth(),loadData()]);
-  if(authData)CRED=authData;else showToast('Could not load auth','error');
-  if(data!==null)girls=data;else showToast('Could not load data','error');
-  renderFilters();renderGrid();
-  const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)
-})();
+const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
+if(authData)CRED=authData;else showToast('Could not load auth','error');
+if(data!==null)girls=data;else showToast('Could not load data','error');
+if(cal)calData=cal;
+renderFilters();renderGrid();
+const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)})();
 </script>
-</body>
-</html>
