@@ -182,7 +182,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .home-section{padding:120px 40px 80px;max-width:1200px;margin:0 auto;text-align:center}
 .home-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(36px,5vw,64px);letter-spacing:8px;text-transform:uppercase;margin-bottom:12px;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 12px rgba(201,149,44,0.35))}
 .home-title span{-webkit-text-fill-color:transparent}
-.home-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:4px;text-transform:uppercase;color:var(--text-dim);margin-bottom:60px}
+.home-tagline{font-family:'Rajdhani',sans-serif;font-size:16px;letter-spacing:4px;text-transform:uppercase;color:var(--text-dim);margin-top:12px;margin-bottom:60px}
 .home-images{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:60px}
 .home-img-card{width:256px;height:374px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;position:relative;transition:all .4s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));cursor:pointer}
 .home-img-card:hover{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 20px 60px rgba(180,74,255,0.12)}
