@@ -152,13 +152,10 @@ function fmtTime12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const a
 function getCalEntry(name,date){if(calData[name]&&calData[name][date]){const v=calData[name][date];return typeof v==='object'?v:{start:'',end:''};}return null}
 
 function renderHome(){
-const c=document.getElementById('homeImages');c.innerHTML='';const ts=fmtDate(getAEDTDate());
-let feat=girls.filter(g=>{const e=getCalEntry(g.name,ts);return e&&e.start&&e.end});
-if(feat.length<4){const rem=girls.filter(g=>!feat.includes(g));feat=[...feat,...rem].slice(0,4)}else feat=feat.slice(0,4);
-for(let i=0;i<4;i++){const card=document.createElement('div');card.className='home-img-card';
-if(feat[i]){const g=feat[i],ri=girls.indexOf(g);card.innerHTML=g.photos&&g.photos.length?`<img src="${g.photos[0]}"><div class="home-img-name">${g.name}</div>`:`<div class="home-img-placeholder"><span>${g.name.charAt(0)}</span></div><div class="home-img-name">${g.name}</div>`;card.onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
-else{card.innerHTML='<div class="home-img-placeholder"><span>'+(i+1)+'</span></div>';card.style.cursor='default'}
-c.appendChild(card)}}
+const c=document.getElementById('homeImages');c.innerHTML='';
+const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
+for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';
+card.innerHTML=`<img src="${baseUrl}${i}.jpg">`;c.appendChild(card)}}
 
 let lbPhotos=[],lbIdx=0;const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
 document.getElementById('lbClose').onclick=()=>lightbox.classList.remove('open');
