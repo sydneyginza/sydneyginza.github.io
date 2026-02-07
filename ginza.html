@@ -194,6 +194,11 @@ if(entry&&entry.start&&entry.end)return{date:dt,start:entry.start,end:entry.end}
 return null}
 
 /* ── Copy Time Modal ── */
+function closeCopyTimeModal(result){
+const modal=document.getElementById('copyTimeModal');
+modal.classList.remove('open');
+if(copyTimeResolve){copyTimeResolve(result);copyTimeResolve=null}}
+
 function showCopyTimePrompt(name,sourceDate,start,end){
 return new Promise(resolve=>{
 const modal=document.getElementById('copyTimeModal');
@@ -203,16 +208,10 @@ document.getElementById('copyTimeDetail').textContent=fmtTime12(start)+' — '+f
 copyTimeResolve=resolve;
 modal.classList.add('open')})}
 
-document.getElementById('copyTimeCopy').onclick=()=>{
-document.getElementById('copyTimeModal').classList.remove('open');
-if(copyTimeResolve)copyTimeResolve('copy');copyTimeResolve=null};
-document.getElementById('copyTimeNew').onclick=()=>{
-document.getElementById('copyTimeModal').classList.remove('open');
-if(copyTimeResolve)copyTimeResolve('new');copyTimeResolve=null};
-document.getElementById('copyTimeModal').onclick=e=>{
-if(e.target===document.getElementById('copyTimeModal')){
-document.getElementById('copyTimeModal').classList.remove('open');
-if(copyTimeResolve)copyTimeResolve('new');copyTimeResolve=null}};
+document.getElementById('copyTimeCopy').onclick=()=>closeCopyTimeModal('copy');
+document.getElementById('copyTimeNew').onclick=()=>closeCopyTimeModal('new');
+document.getElementById('copyTimeModal').onclick=e=>{if(e.target===document.getElementById('copyTimeModal'))closeCopyTimeModal('new')};
+window.addEventListener('beforeunload',()=>closeCopyTimeModal('new'));
 
 /* ── Home Page ── */
 function getNewGirls(){
