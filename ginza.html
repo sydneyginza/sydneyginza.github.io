@@ -46,7 +46,9 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .filter-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;align-items:center}
 .filter-btn,.add-btn{background:var(--bg-card);border:1px solid rgba(255,255,255,0.08);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .filter-btn:hover,.filter-btn.active{background:rgba(180,74,255,0.1);border-color:var(--accent);color:var(--accent)}
+.filter-btn.date-active{background:rgba(0,200,100,0.1);border-color:#00c864;color:#00c864}
 .add-btn{background:rgba(180,74,255,0.08);border-color:var(--accent);color:var(--accent);margin-left:auto}.add-btn:hover{background:rgba(180,74,255,0.2)}
+.filter-sep{width:1px;height:28px;background:rgba(255,255,255,0.1);margin:0 4px}
 .girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
 .girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;transition:all .4s;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
 .girl-card:hover{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 20px 60px rgba(180,74,255,0.1)}
@@ -62,6 +64,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-info{padding:16px;position:relative}
 .card-name{font-family:'Orbitron',sans-serif;font-weight:600;font-size:14px;letter-spacing:2px;color:#fff;text-transform:uppercase}
 .card-country{font-size:12px;color:var(--text-dim);letter-spacing:1px;margin-top:4px}
+.card-avail{font-size:11px;color:#00c864;letter-spacing:1px;margin-top:3px;font-weight:600}
 .card-hover-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
 .girl-card:hover .card-hover-line{width:100%}
 .profile-page{padding:100px 40px;padding-top:120px;max-width:1200px;margin:0 auto}
@@ -96,7 +99,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .thumb-wrap{position:relative;display:inline-block}.thumb-wrap:hover .profile-thumb-remove{display:flex}
 .profile-details{padding-top:10px}
 .profile-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(28px,4vw,42px);letter-spacing:5px;text-transform:uppercase;color:#fff;line-height:1.2}
-.profile-meta{display:flex;gap:20px;margin:16px 0 32px;font-size:14px;letter-spacing:2px;text-transform:uppercase;align-items:center}
+.profile-meta{display:flex;gap:20px;margin:16px 0 32px;font-size:14px;letter-spacing:2px;text-transform:uppercase;align-items:center;flex-wrap:wrap}
 .profile-meta span{color:var(--accent)}.profile-meta .dim{color:var(--text-dim)}
 .profile-divider{width:60px;height:1px;background:var(--accent);margin-bottom:32px}
 .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:40px}
@@ -147,7 +150,6 @@ select.form-input option{background:#111118;color:#fff}
 .toast.error{border-color:rgba(255,68,68,0.4);color:#ff4444}
 footer{text-align:center;padding:60px 40px;border-top:1px solid rgba(255,255,255,0.04)}
 footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
-
 .cal-table{width:100%;border-collapse:separate;border-spacing:0}
 .cal-table th{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:16px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.08);white-space:nowrap}
 .cal-table th:first-child{text-align:left;min-width:200px}
@@ -168,7 +170,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .cal-today{background:rgba(180,74,255,0.06)}
 .cal-day-name{display:block;font-size:10px;color:var(--text-dim);margin-top:2px;letter-spacing:1px}
 .cal-saving{opacity:.5;pointer-events:none}
-
+.empty-msg{text-align:center;padding:60px 20px;color:var(--text-dim);font-size:16px;letter-spacing:2px}
 @media(max-width:768px){
 nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .section{padding:60px 20px;padding-top:100px}
@@ -192,32 +194,44 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <div class="logo">GIN<span>ZA</span></div>
 <div class="nav-right">
 <div class="nav-links">
-<a href="#" class="active" id="navGirls">Girls</a>
+<a href="#" id="navRoster" class="active">Roster</a>
+<a href="#" id="navGirls">Girls</a>
 <a href="#" id="navCalendar" style="display:none">Calendar</a>
 </div>
 <div style="position:relative">
 <button class="login-icon-btn" id="loginIconBtn"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
 <div class="user-dropdown" id="userDropdown"></div>
 </div></div></nav>
-<div class="page active" id="listPage"><section class="section">
+
+<div class="page active" id="rosterPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Roster</div></div></div>
+<div class="filter-bar" id="rosterFilterBar"></div>
+<div class="girls-grid" id="rosterGrid"></div>
+</section></div>
+
+<div class="page" id="listPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div></div>
 <div class="filter-bar" id="filterBar"></div>
 <div class="girls-grid" id="girlsGrid"></div>
 </section></div>
+
 <div class="page" id="calendarPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><div class="section-title">Calendar</div></div></div>
 <div style="overflow-x:auto"><table class="cal-table" id="calTable"></table></div>
 </section></div>
+
 <div class="page" id="profilePage">
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-page" id="profileContent"></div>
 </div>
+
 <div class="lightbox-overlay" id="lightbox">
 <button class="lightbox-close" id="lbClose">&times;</button>
 <button class="lightbox-nav lightbox-prev" id="lbPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button>
 <img id="lbImg" src="">
 <button class="lightbox-nav lightbox-next" id="lbNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>
 </div>
+
 <div class="modal-overlay" id="formOverlay"><div class="form-modal">
 <button class="modal-close" id="formClose">&times;</button>
 <div class="form-title" id="formTitle">Add New Girl</div>
@@ -251,6 +265,7 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <button class="btn btn-secondary" id="formCancel">Cancel</button>
 <button class="btn btn-primary" id="formSave">Save</button></div>
 </div></div>
+
 <div class="modal-overlay" id="deleteOverlay"><div class="form-modal" style="max-width:420px;text-align:center">
 <div class="form-title" style="margin-bottom:12px">Confirm Delete</div>
 <p style="color:var(--text-dim);margin-bottom:28px;font-size:15px" id="deleteMsg">Are you sure?</p>
@@ -259,92 +274,71 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 <button class="btn btn-danger" id="deleteConfirm">Delete</button></div>
 </div></div>
 <footer><p>Ginza &copy; 2026 — All Rights Reserved</p></footer>
+
 <script>
 let CRED=[];
 const GITHUB_TOKEN='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';
 const GITHUB_REPO='sydneyginza/sydneyginza.github.io';
 const GITHUB_API=`https://api.github.com/repos/${GITHUB_REPO}/contents`;
-const DATA_PATH='data/girls.json';
-const AUTH_PATH='data/auth.json';
-const CAL_PATH='data/calendar.json';
+const DATA_PATH='data/girls.json',AUTH_PATH='data/auth.json',CAL_PATH='data/calendar.json';
 let loggedIn=false,dataSha=null,calSha=null,calData={},loggedInUser=null;
 const MAX_PHOTOS=10;
+let profileReturnPage='rosterPage';
 
 function showToast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+t+' show';clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),3000)}
+function getAEDTDate(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}))}
+function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function getWeekDates(){const t=getAEDTDate(),a=[];for(let i=0;i<7;i++){const d=new Date(t);d.setDate(t.getDate()+i);a.push(fmtDate(d))}return a}
+function dispDate(ds){const d=new Date(ds+'T00:00:00');return{date:d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()],day:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]}}
 
-// AEDT date helpers
-function getAEDTDate(){const now=new Date();const aedt=new Date(now.toLocaleString('en-US',{timeZone:'Australia/Sydney'}));return aedt}
-function formatDate(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`}
-function getWeekDates(){const today=getAEDTDate();const dates=[];for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()+i);dates.push(formatDate(d))}return dates}
-function formatDisplayDate(ds){const d=new Date(ds+'T00:00:00');const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return{date:`${d.getDate()} ${months[d.getMonth()]}`,day:days[d.getDay()]}}
+async function loadAuth(){try{const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+if(r.ok)return JSON.parse(decodeURIComponent(escape(atob((await r.json()).content.replace(/\n/g,'')))));
+if(r.status===404){const d=[{user:'admin',pass:'admin123'}];await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2))))})});return d}}catch(e){}return null}
 
-// GitHub data ops
-async function loadAuth(){
-  try{const r=await fetch(`${GITHUB_API}/${AUTH_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-  if(r.ok){const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
-  if(r.status===404){const def=[{user:'admin',pass:'admin123'}];const enc=btoa(unescape(encodeURIComponent(JSON.stringify(def,null,2))));
-  await fetch(`${GITHUB_API}/${AUTH_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Create auth.json',content:enc})});return def}
-  }catch(e){console.error('Auth error:',e)}return null}
+async function loadData(){try{const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}if(r.status===404){dataSha=null;return[]}}catch(e){}return null}
 
-async function loadData(){
-  try{const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-  if(r.ok){const d=await r.json();dataSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
-  if(r.status===404){dataSha=null;return[]}}catch(e){console.error('Load error:',e)}return null}
+async function saveData(){try{const enc=btoa(unescape(encodeURIComponent(JSON.stringify(girls,null,2))));const body={message:'Update girls',content:enc};if(dataSha)body.sha=dataSha;
+const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+if(!r.ok)throw new Error((await r.json()).message||r.status);dataSha=(await r.json()).content.sha;return true}catch(e){showToast('Save failed: '+e.message,'error');return false}}
 
-async function saveData(){
-  try{const json=JSON.stringify(girls,null,2);const enc=btoa(unescape(encodeURIComponent(json)));
-  const body={message:'Update girls data',content:enc};if(dataSha)body.sha=dataSha;
-  const r=await fetch(`${GITHUB_API}/${DATA_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok){const err=await r.json();throw new Error(err.message||r.status)}dataSha=(await r.json()).content.sha;return true
-  }catch(e){console.error('Save error:',e);showToast('Failed to save: '+e.message,'error');return false}}
+async function loadCalData(){try{const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
+if(r.ok){const d=await r.json();calSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}if(r.status===404){calSha=null;return{}}}catch(e){}return{}}
 
-async function loadCalData(){
-  try{const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Accept':'application/vnd.github.v3+json'}});
-  if(r.ok){const d=await r.json();calSha=d.sha;return JSON.parse(decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))))}
-  if(r.status===404){calSha=null;return{}}}catch(e){console.error('Cal load error:',e)}return{}}
+async function saveCalData(){try{const vd=getWeekDates(),cl={};for(const n in calData){cl[n]={};for(const dt of vd){if(calData[n]&&calData[n][dt])cl[n][dt]=true}}calData=cl;
+const enc=btoa(unescape(encodeURIComponent(JSON.stringify(calData,null,2))));const body={message:'Update calendar',content:enc};if(calSha)body.sha=calSha;
+const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+if(!r.ok)throw new Error(r.status);calSha=(await r.json()).content.sha;return true}catch(e){showToast('Calendar save failed','error');return false}}
 
-async function saveCalData(){
-  try{
-  // Clean old dates
-  const validDates=getWeekDates();
-  const cleaned={};
-  for(const name in calData){cleaned[name]={};for(const dt of validDates){if(calData[name]&&calData[name][dt])cleaned[name][dt]=true}}
-  calData=cleaned;
-  const json=JSON.stringify(calData,null,2);const enc=btoa(unescape(encodeURIComponent(json)));
-  const body={message:'Update calendar',content:enc};if(calSha)body.sha=calSha;
-  const r=await fetch(`${GITHUB_API}/${CAL_PATH}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error(`Cal save failed: ${r.status}`);calSha=(await r.json()).content.sha;return true
-  }catch(e){console.error('Cal save error:',e);showToast('Failed to save calendar','error');return false}}
+async function uploadToGithub(b64,name,fn){const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_'),path=`Images/${safe}/${fn}`,pure=b64.split(',')[1];
+let sha;try{const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
+const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;
+const r=await fetch(`${GITHUB_API}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
+if(!r.ok)throw new Error(r.status);return(await r.json()).content.download_url}
 
-async function uploadToGithub(b64,name,fn){
-  const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_');const path=`Images/${safe}/${fn}`;const pure=b64.split(',')[1];
-  let sha;try{const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}
-  const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;
-  const r=await fetch(`${GITHUB_API}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error(`Upload failed: ${r.status}`);return(await r.json()).content.download_url}
-
-async function deleteFromGithub(url){
-  try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;const path=decodeURIComponent(m[1]);
-  const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
-  await fetch(`${GITHUB_API}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:(await c.json()).sha})})}catch(e){console.error('Delete error:',e)}}
+async function deleteFromGithub(url){try{const m=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);if(!m)return;const path=decodeURIComponent(m[1]);
+const c=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(!c.ok)return;
+await fetch(`${GITHUB_API}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:(await c.json()).sha})})}catch(e){}}
 
 function genFn(){return'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
-const listPage=document.getElementById('listPage'),profilePage=document.getElementById('profilePage'),profileContent=document.getElementById('profileContent'),calendarPage=document.getElementById('calendarPage');
+let rosterDateFilter=null,rosterLocFilter=null;
+const allPages=['rosterPage','listPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
-function showPage(pg){
-  [listPage,profilePage,calendarPage].forEach(p=>p.classList.remove('active'));
+function showPage(id){
+  allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
-  pg.classList.add('active');window.scrollTo(0,0);
-  if(pg===listPage)document.getElementById('navGirls').classList.add('active');
-  if(pg===calendarPage){document.getElementById('navCalendar').classList.add('active');renderCalendar()}
-}
-function showList(){showPage(listPage)}
+  if(id==='rosterPage')document.getElementById('navRoster').classList.add('active');
+  if(id==='listPage')document.getElementById('navGirls').classList.add('active');
+  if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');renderCalendar()}
+  if(id==='rosterPage')renderRoster();
+  window.scrollTo(0,0)}
 
-// Nav
-document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage(listPage)};
-document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage(calendarPage)};
+document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
+document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
+document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
 
+// Lightbox
 let lbPhotos=[],lbIdx=0;const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
 document.getElementById('lbClose').onclick=()=>lightbox.classList.remove('open');
 lightbox.onclick=e=>{if(e.target===lightbox)lightbox.classList.remove('open')};
@@ -352,71 +346,68 @@ document.getElementById('lbPrev').onclick=()=>{lbIdx=(lbIdx-1+lbPhotos.length)%l
 document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;lbImg.src=lbPhotos[lbIdx]};
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
-function renderProfileNav(idx){
-  const rail=document.getElementById('profileNavRail'),total=girls.length;rail.innerHTML='';
-  const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';
-  up.onclick=()=>showProfile(idx<=0?total-1:idx-1);rail.appendChild(up);
-  const dots=document.createElement('div');dots.className='pnav-dots';
-  const mx=5;let st=Math.max(0,idx-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-  for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');const g=girls[i];
-  d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;
-  d.onclick=()=>showProfile(i);dots.appendChild(d)}
-  rail.appendChild(dots);
-  const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
-  const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
-  dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
+// Profile nav
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail'),total=girls.length;rail.innerHTML='';
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';
+up.onclick=()=>showProfile(idx<=0?total-1:idx-1);rail.appendChild(up);
+const dots=document.createElement('div');dots.className='pnav-dots';
+const mx=5;let st=Math.max(0,idx-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
+for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');const g=girls[i];
+d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;
+d.onclick=()=>showProfile(i);dots.appendChild(d)}
+rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
+dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
 
 function showProfile(idx){
   const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
   const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
   const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
-  const todayStr=formatDate(getAEDTDate());
-  const isAvail=calData[g.name]&&calData[g.name][todayStr];
+  const todayStr=fmtDate(getAEDTDate());const isAvail=calData[g.name]&&calData[g.name][todayStr];
   const availHtml=isAvail?'<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today!</span>':'';
   const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Value 1',v:g.val1||'—'},{l:'Value 2',v:g.val2||'—'},{l:'Value 3',v:g.val3||'—'},{l:'Experience',v:g.exp||'—'}];
-  profileContent.innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back to Roster</button>
+  document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
   <div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
   <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${g.country}</span>${availHtml}</div><div class="profile-divider"></div>
   <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
   <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'—'}</div>
   <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'—'}</div>
   <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>${admin}</div></div>`;
-  document.getElementById('backBtn').onclick=showList;
+  document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
   if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
   renderThumbs(idx);renderProfileNav(idx);
-  [listPage,calendarPage].forEach(p=>p.classList.remove('active'));profilePage.classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
-  window.scrollTo(0,0)}
+  allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
 
-function renderThumbs(idx){
-  const g=girls[idx],c=document.getElementById('profThumbs');c.innerHTML='';
-  g.photos.forEach((src,i)=>{const w=document.createElement('div');w.className='thumb-wrap';
-  const t=document.createElement('div');t.className='profile-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;
-  t.onclick=()=>{document.getElementById('profMainImg').innerHTML=`<img src="${src}">`;c.querySelectorAll('.profile-thumb').forEach(x=>x.classList.remove('active'));t.classList.add('active')};
-  t.ondblclick=()=>openLightbox(g.photos,i);w.appendChild(t);
-  if(loggedIn){const rm=document.createElement('button');rm.className='profile-thumb-remove';rm.innerHTML='✕';
-  rm.onclick=async e=>{e.stopPropagation();const url=g.photos[i];if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url);
-  g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();showToast('Photo removed')};w.appendChild(rm)}
-  c.appendChild(w)})}
+function renderThumbs(idx){const g=girls[idx],c=document.getElementById('profThumbs');c.innerHTML='';
+g.photos.forEach((src,i)=>{const w=document.createElement('div');w.className='thumb-wrap';
+const t=document.createElement('div');t.className='profile-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;
+t.onclick=()=>{document.getElementById('profMainImg').innerHTML=`<img src="${src}">`;c.querySelectorAll('.profile-thumb').forEach(x=>x.classList.remove('active'));t.classList.add('active')};
+t.ondblclick=()=>openLightbox(g.photos,i);w.appendChild(t);
+if(loggedIn){const rm=document.createElement('button');rm.className='profile-thumb-remove';rm.innerHTML='✕';
+rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com')||src.includes('github.com'))await deleteFromGithub(src);
+g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();showToast('Photo removed')};w.appendChild(rm)}
+c.appendChild(w)})}
 
 // Auth
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
-  if(loggedIn){loginIconBtn.classList.add('logged-in');
-  userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-  document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');
-  document.getElementById('navCalendar').style.display='none';
-  if(calendarPage.classList.contains('active'))showPage(listPage);
-  renderDropdown();renderFilters();renderGrid()}}
-  else{loginIconBtn.classList.remove('logged-in');
-  userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
-  document.getElementById('lfBtn').onclick=doLogin;
-  document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-  document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
+if(loggedIn){loginIconBtn.classList.add('logged-in');
+userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
+document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');
+document.getElementById('navCalendar').style.display='none';
+if(document.getElementById('calendarPage').classList.contains('active'))showPage('rosterPage');
+renderDropdown();renderFilters();renderGrid();renderRoster()}}
+else{loginIconBtn.classList.remove('logged-in');
+userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
+document.getElementById('lfBtn').onclick=doLogin;
+document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;
 const match=CRED.find(c=>c.user===u&&c.pass===p);
 if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';
-renderDropdown();renderFilters();renderGrid();if(profilePage.classList.contains('active'))showProfile(currentProfileIdx);
+renderDropdown();renderFilters();renderGrid();renderRoster();
+if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
@@ -426,44 +417,73 @@ renderDropdown();
 const particlesEl=document.getElementById('particles');
 for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}
 
+// Girls filters
 function renderFilters(){const locs=["All",...new Set(girls.map(g=>g.location))];const fb=document.getElementById('filterBar');fb.innerHTML='';
 locs.forEach(c=>{const b=document.createElement('button');b.className='filter-btn'+(c===activeLocation?' active':'');b.textContent=c;b.onclick=()=>{activeLocation=c;renderFilters();renderGrid()};fb.appendChild(b)});
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
+// Girls grid
 const grid=document.getElementById('girlsGrid');
 function renderGrid(){const filtered=activeLocation==='All'?girls:girls.filter(g=>g.location===activeLocation);grid.innerHTML='';
+const todayStr=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">✎</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">✕</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div><div class="card-hover-line"></div></div>`;
-card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;showProfile(ri)};
+const avail=calData[g.name]&&calData[g.name][todayStr]?'<div class="card-avail">Available Today</div>':'';
+card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
+card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
 grid.appendChild(card)})}
 
-// Calendar
-function renderCalendar(){
-  const table=document.getElementById('calTable');
+// Roster
+function renderRosterFilters(){
+  const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';
   const dates=getWeekDates();const todayStr=dates[0];
-  let html='<thead><tr><th>Profile</th>';
-  dates.forEach((ds,i)=>{const f=formatDisplayDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});
-  html+='</tr></thead><tbody>';
-  girls.forEach((g,gi)=>{
-    const avatar=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
-    html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${avatar}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
-    dates.forEach((ds,di)=>{
-      const chk=calData[g.name]&&calData[g.name][ds]?'checked':'';
-      html+=`<td class="${di===0?'cal-today':''}"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${chk}></td>`;});
-    html+='</tr>'});
-  html+='</tbody>';table.innerHTML=html;
-  table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>showProfile(parseInt(el.dataset.idx))});
-  table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){
-    const n=this.dataset.name,d=this.dataset.date;
-    if(!calData[n])calData[n]={};
-    if(this.checked)calData[n][d]=true;else delete calData[n][d];
-    this.closest('td').classList.add('cal-saving');
-    await saveCalData();
-    this.closest('td').classList.remove('cal-saving')}})
+  if(!rosterDateFilter)rosterDateFilter=todayStr;
+  // Date filters
+  dates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');
+  b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');
+  b.textContent=ds===todayStr?'Today':f.day+' '+f.date;
+  b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
+  // Separator
+  const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
+  // Location filters
+  const locs=[...new Set(girls.map(g=>g.location))];
+  if(!rosterLocFilter&&locs.length)rosterLocFilter=locs[0];
+  locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(rosterLocFilter===loc?' active':'');b.textContent=loc;
+  b.onclick=()=>{rosterLocFilter=loc;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
 }
+function renderRosterGrid(){
+  const rg=document.getElementById('rosterGrid');rg.innerHTML='';
+  const todayStr=fmtDate(getAEDTDate());const ds=rosterDateFilter||todayStr;
+  let filtered=girls.filter(g=>calData[g.name]&&calData[g.name][ds]);
+  if(rosterLocFilter)filtered=filtered.filter(g=>g.location===rosterLocFilter);
+  if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
+  filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
+  const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
+  const isToday=ds===todayStr;
+  const avail=isToday?'<div class="card-avail">Available Today</div>':'';
+  card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
+  card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};
+  rg.appendChild(card)})}
+function renderRoster(){renderRosterFilters();renderRosterGrid()}
+
+// Calendar
+function renderCalendar(){const table=document.getElementById('calTable');const dates=getWeekDates();const todayStr=dates[0];
+let html='<thead><tr><th>Profile</th>';
+dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});
+html+='</tr></thead><tbody>';
+girls.forEach((g,gi)=>{const avatar=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
+html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${avatar}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
+dates.forEach((ds,di)=>{const chk=calData[g.name]&&calData[g.name][ds]?'checked':'';
+html+=`<td class="${di===0?'cal-today':''}"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${chk}></td>`});
+html+='</tr>'});html+='</tbody>';table.innerHTML=html;
+table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>{profileReturnPage='calendarPage';showProfile(parseInt(el.dataset.idx))}});
+table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){
+const n=this.dataset.name,d=this.dataset.date;if(!calData[n])calData[n]={};
+if(this.checked)calData[n][d]=true;else delete calData[n][d];
+this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');
+renderRoster();renderGrid()}})}
 
 // Form
 const formOverlay=document.getElementById('formOverlay');
@@ -508,17 +528,14 @@ for(const f of reqFields){const el=document.getElementById(f.id);if(!el.value.tr
 if(formPhotos.length===0){showToast('At least one photo is required','error');return}
 const name=document.getElementById('fName').value.trim();
 const saveBtn=document.getElementById('formSave');saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
-try{
-for(const url of formPhotosToDelete){if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url)}
-const finalPhotos=[];
-for(const src of formPhotos){if(src.startsWith('data:')){if(GITHUB_TOKEN){const ni=formNewPhotos.indexOf(src);const fn=ni>=0?formNewFiles[ni]:genFn();finalPhotos.push(await uploadToGithub(src,name,fn))}else finalPhotos.push(src)}else finalPhotos.push(src)}
+try{for(const url of formPhotosToDelete){if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url)}
+const finalPhotos=[];for(const src of formPhotos){if(src.startsWith('data:')){if(GITHUB_TOKEN){const ni=formNewPhotos.indexOf(src);finalPhotos.push(await uploadToGithub(src,name,ni>=0?formNewFiles[ni]:genFn()))}else finalPhotos.push(src)}else finalPhotos.push(src)}
 const o={name,location:document.getElementById('fLocation').value.trim(),country:document.getElementById('fCountry').value.trim(),age:document.getElementById('fAge').value.trim(),body:document.getElementById('fBody').value.trim(),height:document.getElementById('fHeight').value.trim(),cup:document.getElementById('fCup').value.trim(),
 val1:document.getElementById('fVal1').value.trim(),val2:document.getElementById('fVal2').value.trim(),val3:document.getElementById('fVal3').value.trim(),exp:document.getElementById('fExp').value.trim(),
 lang:document.getElementById('fLang').value.trim(),type:document.getElementById('fType').value.trim(),desc:document.getElementById('fDesc').value.trim(),photos:finalPhotos};
-const idx=parseInt(document.getElementById('editIndex').value);
-if(idx>=0)girls[idx]=o;else girls.push(o);
-const saved=await saveData();
-if(saved){formOverlay.classList.remove('open');renderFilters();renderGrid();if(profilePage.classList.contains('active')&&idx>=0)showProfile(idx);showToast(idx>=0?'Profile updated':'Profile added')}
+const idx=parseInt(document.getElementById('editIndex').value);if(idx>=0)girls[idx]=o;else girls.push(o);
+if(await saveData()){formOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();
+if(document.getElementById('profilePage').classList.contains('active')&&idx>=0)showProfile(idx);showToast(idx>=0?'Profile updated':'Profile added')}
 }catch(err){showToast('Error: '+err.message,'error')}
 finally{saveBtn.textContent='SAVE';saveBtn.style.pointerEvents='auto'}};
 
@@ -526,19 +543,17 @@ const deleteOverlay=document.getElementById('deleteOverlay');
 document.getElementById('deleteCancel').onclick=()=>deleteOverlay.classList.remove('open');
 deleteOverlay.onclick=e=>{if(e.target===deleteOverlay)deleteOverlay.classList.remove('open')};
 function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').textContent=`Remove "${girls[idx].name}" from the roster?`;deleteOverlay.classList.add('open')}
-document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){
-const g=girls[deleteTarget];
+document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){const g=girls[deleteTarget];
 if(g.photos&&GITHUB_TOKEN){for(const url of g.photos){if(url.includes('githubusercontent.com')||url.includes('github.com'))await deleteFromGithub(url)}}
-girls.splice(deleteTarget,1);await saveData();
-deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();
-if(profilePage.classList.contains('active'))showList();showToast('Profile deleted')}};
+girls.splice(deleteTarget,1);await saveData();deleteTarget=-1;deleteOverlay.classList.remove('open');
+renderFilters();renderGrid();renderRoster();
+if(document.getElementById('profilePage').classList.contains('active'))showPage('rosterPage');showToast('Profile deleted')}};
 
-// Init
-(async()=>{
-const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
+(async()=>{const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
 if(authData)CRED=authData;else showToast('Could not load auth','error');
 if(data!==null)girls=data;else showToast('Could not load data','error');
 if(cal)calData=cal;
-renderFilters();renderGrid();
+rosterDateFilter=fmtDate(getAEDTDate());
+renderFilters();renderGrid();renderRoster();
 const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)})();
 </script>
