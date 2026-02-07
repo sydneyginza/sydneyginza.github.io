@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
@@ -111,7 +111,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.
 renderDropdown();
 
 /* Particles */
-=======
+
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
 let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
@@ -224,5 +224,5 @@ document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.
 renderDropdown();
 
 /* Particles */
->>>>>>> 521be6a80e651a37db5c1eda8bbce0ce247023af
+
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}

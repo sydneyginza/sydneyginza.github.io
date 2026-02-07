@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /* === FORMS, DELETE & INIT === */
 
 const formOverlay=document.getElementById('formOverlay');
@@ -42,7 +42,7 @@ if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not loa
 if(data!==null)girls=data;else showToast('Could not load data','error');
 if(cal){for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};calData=cal}
 rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();
-=======
+
 /* === FORMS, DELETE & INIT === */
 
 const formOverlay=document.getElementById('formOverlay');
@@ -86,5 +86,5 @@ if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not loa
 if(data!==null)girls=data;else showToast('Could not load data','error');
 if(cal){for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};calData=cal}
 rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();
->>>>>>> 521be6a80e651a37db5c1eda8bbce0ce247023af
+
 const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)})();

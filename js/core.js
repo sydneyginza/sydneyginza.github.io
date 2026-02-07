@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 /* === CORE UTILITIES & API === */
 let CRED=[];
 const BT='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';
@@ -32,7 +32,7 @@ async function saveCalData(){try{const vd=getWeekDates(),cl={};for(const n in ca
 
 async function uploadToGithub(b64,name,fn){const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_'),path=`Images/${safe}/${fn}`,pure=b64.split(',')[1];let sha;try{const c=await fetch(`${GA}/${path}`,{headers:{'Authorization':`token ${GT}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;const r=await fetch(`${GA}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GT}`,'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error(r.status);return`https://raw.githubusercontent.com/${GR}/main/${path}`}
 async function deleteFromGithub(url){try{const m=url.match(/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/[^/]+\/(.+?)(\?|$)/);if(!m)return;const api=`https://api.github.com/repos/${m[1]}/contents/${decodeURIComponent(m[2])}`;const c=await fetch(api,{headers:{'Authorization':`token ${GT}`}});if(!c.ok)return;await fetch(api,{method:'DELETE',headers:{'Authorization':`token ${GT}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Delete',sha:(await c.json()).sha})})}catch(e){}}
-=======
+
 /* === CORE UTILITIES & API === */
 let CRED=[];
 const BT='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';
@@ -66,5 +66,5 @@ async function saveCalData(){try{const vd=getWeekDates(),cl={};for(const n in ca
 
 async function uploadToGithub(b64,name,fn){const safe=name.replace(/[^a-zA-Z0-9_-]/g,'_'),path=`Images/${safe}/${fn}`,pure=b64.split(',')[1];let sha;try{const c=await fetch(`${GA}/${path}`,{headers:{'Authorization':`token ${GT}`}});if(c.ok)sha=(await c.json()).sha}catch(e){}const body={message:`Upload ${path}`,content:pure};if(sha)body.sha=sha;const r=await fetch(`${GA}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GT}`,'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok)throw new Error(r.status);return`https://raw.githubusercontent.com/${GR}/main/${path}`}
 async function deleteFromGithub(url){try{const m=url.match(/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/[^/]+\/(.+?)(\?|$)/);if(!m)return;const api=`https://api.github.com/repos/${m[1]}/contents/${decodeURIComponent(m[2])}`;const c=await fetch(api,{headers:{'Authorization':`token ${GT}`}});if(!c.ok)return;await fetch(api,{method:'DELETE',headers:{'Authorization':`token ${GT}`,'Content-Type':'application/json'},body:JSON.stringify({message:'Delete',sha:(await c.json()).sha})})}catch(e){}}
->>>>>>> 521be6a80e651a37db5c1eda8bbce0ce247023af
+
 function genFn(){return'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
