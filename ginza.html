@@ -225,6 +225,7 @@ rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pn
 const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
 dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
 
+function fmtTime12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ampm=h<12?'AM':'PM';const hr=h===0?12:h>12?h-12:h;return hr+':'+String(m).padStart(2,'0')+' '+ampm}
 function getCalEntry(name,date){
   if(calData[name]&&calData[name][date]){
     const v=calData[name][date];
@@ -241,7 +242,7 @@ function showProfile(idx){
   const todayStr=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,todayStr);
   let availHtml='';
   if(entry&&entry.start&&entry.end){
-    availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+entry.start+' - '+entry.end+')</span>';
+    availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
   }
   const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Value 1',v:g.val1||'—'},{l:'Value 2',v:g.val2||'—'},{l:'Value 3',v:g.val3||'—'},{l:'Experience',v:g.exp||'—'}];
   document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
@@ -305,7 +306,7 @@ filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
 const entry=getCalEntry(g.name,todayStr);
-const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${entry.start} - ${entry.end})</div>`:'';
+const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
 card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
 card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
@@ -337,7 +338,7 @@ function renderRosterGrid(){
   const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';
   const isToday=ds===todayStr;
   const entry=getCalEntry(g.name,ds);
-  const timeStr=entry&&entry.start&&entry.end?' ('+entry.start+' - '+entry.end+')':'';
+  const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
   const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
   card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
   card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};
