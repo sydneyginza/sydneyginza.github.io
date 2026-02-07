@@ -77,7 +77,6 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-hover-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
 .girl-card:hover .card-hover-line{width:100%}
 
-/* Profile Page */
 .profile-page{padding:100px 40px;padding-top:120px;max-width:1200px;margin:0 auto}
 .back-btn{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));margin-bottom:40px}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -108,13 +107,9 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .profile-thumb:hover{border-color:rgba(255,255,255,0.3)}
 .profile-thumb.active{border-color:var(--accent)}
 .profile-thumb img{width:100%;height:100%;object-fit:cover}
-.profile-thumb-add{width:56px;height:56px;border:2px dashed rgba(0,229,255,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));color:var(--accent);font-size:22px}
-.profile-thumb-add:hover{border-color:var(--accent);background:rgba(0,229,255,0.06)}
 .profile-thumb-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(0,0,0,0.8);border:1px solid rgba(255,68,68,0.5);color:#ff4444;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;border-radius:2px;z-index:2}
 .thumb-wrap{position:relative;display:inline-block}
 .thumb-wrap:hover .profile-thumb-remove{display:flex}
-.photo-count{font-size:11px;letter-spacing:1px;color:var(--text-dim);margin-top:6px}
-.photo-count span{color:var(--accent)}
 
 .profile-details{padding-top:10px}
 .profile-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(28px,4vw,42px);letter-spacing:5px;text-transform:uppercase;color:#fff;line-height:1.2}
@@ -130,7 +125,6 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .profile-desc{color:var(--text-dim);font-size:16px;line-height:1.9}
 .profile-actions{display:flex;gap:12px;margin-top:32px}
 
-/* Lightbox */
 .lightbox-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
 .lightbox-overlay.open{opacity:1;pointer-events:all}
 .lightbox-overlay img{max-width:90vw;max-height:85vh;object-fit:contain;border:1px solid rgba(255,255,255,0.08)}
@@ -141,7 +135,6 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .lightbox-prev{left:20px}
 .lightbox-next{right:20px}
 
-/* Modals */
 .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .form-modal{width:90%;max-width:600px;background:#111118;border:1px solid rgba(255,255,255,0.08);clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));transform:scale(0.95);transition:transform .4s;max-height:90vh;overflow-y:auto;padding:40px}
@@ -151,6 +144,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .form-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:22px;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:30px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .form-row.full{grid-template-columns:1fr}
+.form-row.triple{grid-template-columns:1fr 1fr 1fr}
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)}
 .form-input,.form-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;padding:10px 14px;transition:border-color .3s;outline:none}
@@ -187,6 +181,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
   .pnav-dot .dot-letter{font-size:15px}
   .pnav-arrow svg{width:24px;height:24px}
   .form-row{grid-template-columns:1fr}
+  .form-row.triple{grid-template-columns:1fr}
   .form-modal{padding:24px}
 }
 </style>
@@ -219,7 +214,6 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
   <div class="profile-page" id="profileContent"></div>
 </div>
 
-<!-- Lightbox -->
 <div class="lightbox-overlay" id="lightbox">
   <button class="lightbox-close" id="lbClose">&times;</button>
   <button class="lightbox-nav lightbox-prev" id="lbPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button>
@@ -227,7 +221,6 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
   <button class="lightbox-nav lightbox-next" id="lbNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>
 </div>
 
-<!-- Form Modal -->
 <div class="modal-overlay" id="formOverlay">
   <div class="form-modal">
     <button class="modal-close" id="formClose">&times;</button>
@@ -249,6 +242,14 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
       <div class="form-group"><label class="form-label">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
       <div class="form-group"></div>
     </div>
+    <div class="form-row triple">
+      <div class="form-group"><label class="form-label">Value 1</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal1" type="number" min="0" style="padding-left:26px" placeholder="e.g. 100"></div></div>
+      <div class="form-group"><label class="form-label">Value 2</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div>
+      <div class="form-group"><label class="form-label">Value 3</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label class="form-label">Experience</label><input class="form-input" id="fExp" placeholder="e.g. 3 years"></div>
+    </div>
     <div class="form-row full">
       <div class="form-group">
         <label class="form-label">Photos <span style="color:var(--text-dim);font-weight:400" id="fPhotoCount">(0 / 10)</span></label>
@@ -269,7 +270,6 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
   </div>
 </div>
 
-<!-- Delete Confirm -->
 <div class="modal-overlay" id="deleteOverlay">
   <div class="form-modal" style="max-width:420px;text-align:center">
     <div class="form-title" style="margin-bottom:12px">Confirm Delete</div>
@@ -285,7 +285,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 
 <script>
 const CRED={user:'admin',pass:'UpdAtEr2dAyOstEr'};
-const GITHUB_TOKEN='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'; 
+const GITHUB_TOKEN='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';
 const GITHUB_REPO='sydneyginza.github.io';
 const GITHUB_API=`https://api.github.com/repos/${GITHUB_REPO}/contents`;
 let loggedIn=false;
@@ -294,19 +294,11 @@ const MAX_PHOTOS=10;
 async function uploadToGithub(base64Data,profileName,fileName){
   const path=`Images/${profileName}/${fileName}`;
   const pure=base64Data.split(',')[1];
-  // Check if file exists first
   let sha;
-  try{
-    const check=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});
-    if(check.ok){const d=await check.json();sha=d.sha}
-  }catch(e){}
+  try{const ck=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});if(ck.ok){const d=await ck.json();sha=d.sha}}catch(e){}
   const body={message:`Upload ${path}`,content:pure};
   if(sha)body.sha=sha;
-  const res=await fetch(`${GITHUB_API}/${path}`,{
-    method:'PUT',
-    headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
+  const res=await fetch(`${GITHUB_API}/${path}`,{method:'PUT',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!res.ok)throw new Error(`GitHub upload failed: ${res.status}`);
   const data=await res.json();
   return data.content.download_url;
@@ -314,29 +306,22 @@ async function uploadToGithub(base64Data,profileName,fileName){
 
 async function deleteFromGithub(url){
   try{
-    // Extract path from download URL
     const match=url.match(/githubusercontent\.com\/[^/]+\/[^/]+\/[^/]+\/(.+)/);
     if(!match)return;
     const path=decodeURIComponent(match[1]);
-    const check=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});
-    if(!check.ok)return;
-    const d=await check.json();
-    await fetch(`${GITHUB_API}/${path}`,{
-      method:'DELETE',
-      headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},
-      body:JSON.stringify({message:`Delete ${path}`,sha:d.sha})
-    });
+    const ck=await fetch(`${GITHUB_API}/${path}`,{headers:{'Authorization':`token ${GITHUB_TOKEN}`}});
+    if(!ck.ok)return;
+    const d=await ck.json();
+    await fetch(`${GITHUB_API}/${path}`,{method:'DELETE',headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},body:JSON.stringify({message:`Delete ${path}`,sha:d.sha})});
   }catch(e){console.error('GitHub delete error:',e)}
 }
 
 function generateFileName(){return 'img_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.jpg'}
-
-// Track original file names for new uploads
 let formNewFiles=[];
 
 let girls=[
-  {name:"Vanilla",location:"Empire",country:"Japanese",age:"19",body:"6",height:"153",cup:"B",lang:"",type:"",desc:"abc",photos:[]},
-  {name:"Yuyu",location:"Club",country:"Japanese",age:"23",body:"6",height:"162",cup:"B-C",lang:"",type:"",desc:"123",photos:[]},
+  {name:"Vanilla",location:"Empire",country:"Japanese",age:"19",body:"6",height:"153",cup:"B",val1:"190",val2:"250",val3:"300",exp:"Inexperienced",lang:"Japanese, Limited English",type:"Very young, small, cute, innocent",desc:"abc",photos:[]},
+  {name:"Yuyu",location:"Club",country:"Japanese",age:"23",body:"6",height:"162",cup:"B-C",val1:"210",val2:"270",val3:"320",exp:"Inexperienced",lang:"Japanese, limited English",type:"Elegant, cute, smiley, slim",desc:"123",photos:[]},
 ];
 let activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 
@@ -361,8 +346,7 @@ function renderProfileNav(idx){
   const rail=document.getElementById('profileNavRail');
   const total=girls.length;
   rail.innerHTML='';
-  const upBtn=document.createElement('button');
-  upBtn.className='pnav-arrow';
+  const upBtn=document.createElement('button');upBtn.className='pnav-arrow';
   upBtn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';
   upBtn.onclick=()=>showProfile(idx<=0?total-1:idx-1);
   rail.appendChild(upBtn);
@@ -372,11 +356,8 @@ function renderProfileNav(idx){
   for(let i=st;i<en;i++){
     const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');
     const g=girls[i];
-    if(g.photos&&g.photos.length>0){
-      d.innerHTML=`<div class="dot-inner"><img src="${g.photos[0]}"></div>`;
-    } else {
-      d.innerHTML=`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;
-    }
+    if(g.photos&&g.photos.length>0){d.innerHTML=`<div class="dot-inner"><img src="${g.photos[0]}"></div>`}
+    else{d.innerHTML=`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`}
     d.onclick=()=>showProfile(i);dots.appendChild(d);
   }
   rail.appendChild(dots);
@@ -395,23 +376,24 @@ function showProfile(idx){
   const mainImg=g.photos.length>0?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
   const adminBtns=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 
+  const stats=[
+    {label:'Age',val:g.age},{label:'Body Size',val:g.body},{label:'Height',val:g.height+' cm'},{label:'Cup Size',val:g.cup},
+    {label:'Value 1',val:g.val1||'—'},{label:'Value 2',val:g.val2||'—'},{label:'Value 3',val:g.val3||'—'}
+  ];
+
   profileContent.innerHTML=`
     <button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back to Roster</button>
     <div class="profile-layout">
       <div class="profile-image-area">
         <div class="profile-main-img" id="profMainImg">${mainImg}</div>
         <div class="profile-thumbs" id="profThumbs"></div>
-
       </div>
       <div class="profile-details">
         <div class="profile-name">${g.name}</div>
         <div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${g.country}</span></div>
         <div class="profile-divider"></div>
         <div class="profile-stats">
-          <div class="profile-stat"><div class="p-label">Age</div><div class="p-val">${g.age}</div></div>
-          <div class="profile-stat"><div class="p-label">Body Size</div><div class="p-val">${g.body}</div></div>
-          <div class="profile-stat"><div class="p-label">Height</div><div class="p-val">${g.height} cm</div></div>
-          <div class="profile-stat"><div class="p-label">Cup Size</div><div class="p-val">${g.cup}</div></div>
+          ${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.label}</div><div class="p-val">${s.val}</div></div>`).join('')}
         </div>
         <div class="profile-desc-title">Language</div>
         <div class="profile-desc" style="margin-bottom:24px">${g.lang||'—'}</div>
@@ -454,23 +436,6 @@ function renderThumbs(idx){
     }
     container.appendChild(wrap);
   });
-}
-
-function pickPhotos(idx){
-  const g=girls[idx];
-  const remaining=MAX_PHOTOS-g.photos.length;
-  if(remaining<=0)return;
-  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
-  inp.onchange=e=>{
-    const files=Array.from(e.target.files).slice(0,remaining);
-    let loaded=0;
-    files.forEach(f=>{
-      const r=new FileReader();
-      r.onload=ev=>{g.photos.push(ev.target.result);loaded++;if(loaded===files.length){showProfile(idx);renderGrid()}};
-      r.readAsDataURL(f);
-    });
-  };
-  inp.click();
 }
 
 document.getElementById('navGirls').onclick=e=>{e.preventDefault();showList()};
@@ -532,24 +497,29 @@ renderGrid();
 
 // Form
 const formOverlay=document.getElementById('formOverlay');
-const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fLang','fType','fDesc'];
+const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fVal1','fVal2','fVal3','fExp','fLang','fType','fDesc'];
 document.getElementById('formClose').onclick=()=>formOverlay.classList.remove('open');
 document.getElementById('formCancel').onclick=()=>formOverlay.classList.remove('open');
 formOverlay.onclick=e=>{if(e.target===formOverlay)formOverlay.classList.remove('open')};
 let formPhotos=[];
+let formPhotosToDelete=[];
+let formNewPhotos=[];
 
 function renderFormPhotos(){
-  const grid=document.getElementById('fPhotoGrid');
+  const g=document.getElementById('fPhotoGrid');
   const count=document.getElementById('fPhotoCount');
-  grid.innerHTML='';
+  g.innerHTML='';
   count.textContent=`(${formPhotos.length} / ${MAX_PHOTOS})`;
   formPhotos.forEach((src,i)=>{
     const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:inline-block';
     const thumb=document.createElement('div');thumb.style.cssText='width:64px;height:64px;border:2px solid rgba(255,255,255,0.1);overflow:hidden;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))';
     thumb.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover">`;
     const rm=document.createElement('button');rm.style.cssText='position:absolute;top:1px;right:1px;width:18px;height:18px;background:rgba(0,0,0,0.85);border:1px solid rgba(255,68,68,0.5);color:#ff4444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;z-index:2';
-    rm.innerHTML='✕';rm.onclick=()=>{formPhotos.splice(i,1);renderFormPhotos()};
-    wrap.appendChild(thumb);wrap.appendChild(rm);grid.appendChild(wrap);
+    rm.innerHTML='✕';rm.onclick=()=>{
+      const removed=formPhotos[i];
+      if(removed.startsWith('data:')){const ni=formNewPhotos.indexOf(removed);if(ni>=0){formNewPhotos.splice(ni,1);formNewFiles.splice(ni,1)}}
+      formPhotosToDelete.push(removed);formPhotos.splice(i,1);renderFormPhotos()};
+    wrap.appendChild(thumb);wrap.appendChild(rm);g.appendChild(wrap);
   });
   if(formPhotos.length<MAX_PHOTOS){
     const addBtn=document.createElement('div');
@@ -562,18 +532,21 @@ function renderFormPhotos(){
       const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
       inp.onchange=e=>{
         const files=Array.from(e.target.files).slice(0,remaining);let loaded=0;
-        files.forEach(f=>{const r=new FileReader();r.onload=ev=>{formPhotos.push(ev.target.result);loaded++;if(loaded===files.length)renderFormPhotos()};r.readAsDataURL(f)});
+        files.forEach(f=>{const r=new FileReader();r.onload=ev=>{formPhotos.push(ev.target.result);formNewPhotos.push(ev.target.result);formNewFiles.push(f.name);loaded++;if(loaded===files.length)renderFormPhotos()};r.readAsDataURL(f)});
       };inp.click();
     };
-    grid.appendChild(addBtn);
+    g.appendChild(addBtn);
   }
 }
 
 function openForm(idx=-1){
   document.getElementById('editIndex').value=idx;
+  formPhotosToDelete=[];formNewPhotos=[];formNewFiles=[];
   if(idx>=0){
     document.getElementById('formTitle').textContent='Edit Profile';const g=girls[idx];
-    document.getElementById('fName').value=g.name;document.getElementById('fLocation').value=g.location;document.getElementById('fCountry').value=g.country;document.getElementById('fAge').value=g.age;document.getElementById('fBody').value=g.body;document.getElementById('fHeight').value=g.height;document.getElementById('fCup').value=g.cup;document.getElementById('fLang').value=g.lang||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;
+    document.getElementById('fName').value=g.name;document.getElementById('fLocation').value=g.location;document.getElementById('fCountry').value=g.country;document.getElementById('fAge').value=g.age;document.getElementById('fBody').value=g.body;document.getElementById('fHeight').value=g.height;document.getElementById('fCup').value=g.cup;
+    document.getElementById('fVal1').value=g.val1||'';document.getElementById('fVal2').value=g.val2||'';document.getElementById('fVal3').value=g.val3||'';
+    document.getElementById('fLang').value=g.lang||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;
     formPhotos=[...(g.photos||[])];
   } else {
     document.getElementById('formTitle').textContent='Add New Girl';formFields.forEach(id=>document.getElementById(id).value='');
@@ -582,14 +555,30 @@ function openForm(idx=-1){
   renderFormPhotos();
   formOverlay.classList.add('open');
 }
-document.getElementById('formSave').onclick=()=>{
+
+document.getElementById('formSave').onclick=async()=>{
   const name=document.getElementById('fName').value.trim();
   if(!name){document.getElementById('fName').focus();return}
-  const o={name:name,location:document.getElementById('fLocation').value.trim(),country:document.getElementById('fCountry').value.trim(),age:document.getElementById('fAge').value.trim(),body:document.getElementById('fBody').value.trim(),height:document.getElementById('fHeight').value.trim(),cup:document.getElementById('fCup').value.trim(),lang:document.getElementById('fLang').value.trim(),type:document.getElementById('fType').value.trim(),desc:document.getElementById('fDesc').value.trim(),photos:[...formPhotos]};
-  const idx=parseInt(document.getElementById('editIndex').value);
-  if(idx>=0){girls[idx]=o}else{girls.push(o)}
-  formOverlay.classList.remove('open');renderFilters();renderGrid();
-  if(profilePage.classList.contains('active')&&idx>=0)showProfile(idx)
+  const saveBtn=document.getElementById('formSave');
+  saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
+  try{
+    for(const url of formPhotosToDelete){if(url.includes('githubusercontent.com')||url.includes('github.com')){await deleteFromGithub(url)}}
+    const finalPhotos=[];
+    for(const src of formPhotos){
+      if(src.startsWith('data:')){
+        if(GITHUB_TOKEN){const ni=formNewPhotos.indexOf(src);const fn=ni>=0?formNewFiles[ni]:generateFileName();const url=await uploadToGithub(src,name,fn);finalPhotos.push(url)}
+        else{finalPhotos.push(src)}
+      }else{finalPhotos.push(src)}
+    }
+    const o={name,location:document.getElementById('fLocation').value.trim(),country:document.getElementById('fCountry').value.trim(),age:document.getElementById('fAge').value.trim(),body:document.getElementById('fBody').value.trim(),height:document.getElementById('fHeight').value.trim(),cup:document.getElementById('fCup').value.trim(),
+      val1:document.getElementById('fVal1').value.trim(),val2:document.getElementById('fVal2').value.trim(),val3:document.getElementById('fVal3').value.trim(),
+      lang:document.getElementById('fLang').value.trim(),type:document.getElementById('fType').value.trim(),desc:document.getElementById('fDesc').value.trim(),photos:finalPhotos};
+    const idx=parseInt(document.getElementById('editIndex').value);
+    if(idx>=0){girls[idx]=o}else{girls.push(o)}
+    formOverlay.classList.remove('open');renderFilters();renderGrid();
+    if(profilePage.classList.contains('active')&&idx>=0)showProfile(idx);
+  }catch(err){alert('Error saving: '+err.message)}
+  finally{saveBtn.textContent='SAVE';saveBtn.style.pointerEvents='auto'}
 };
 
 // Delete
@@ -600,7 +589,6 @@ function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').t
 document.getElementById('deleteConfirm').onclick=async()=>{
   if(deleteTarget>=0){
     const g=girls[deleteTarget];
-    // Delete photos from GitHub
     if(g.photos&&GITHUB_TOKEN){for(const url of g.photos){if(url.includes('githubusercontent.com')||url.includes('github.com')){await deleteFromGithub(url)}}}
     girls.splice(deleteTarget,1);deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();
     if(profilePage.classList.contains('active'))showList()
