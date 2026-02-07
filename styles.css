@@ -191,7 +191,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .home-img-name{position:absolute;bottom:16px;left:0;right:0;text-align:center;z-index:2;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#fff;opacity:0;transition:opacity .3s}
 .home-img-card:hover .home-img-name{opacity:1}
 .home-divider{width:80px;height:1px;background:var(--accent);margin:0 auto 40px}
-.home-subtitle{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(18px,3vw,28px);letter-spacing:4px;text-transform:uppercase;color:#fff;margin-bottom:20px}
+.home-subtitle{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(18px,3vw,28px);letter-spacing:4px;text-transform:uppercase;color:#e1b97e;margin-bottom:20px}
 .home-summary{color:var(--text-dim);font-size:17px;line-height:1.9;max-width:720px;margin:0 auto 40px;letter-spacing:.5px}
 .home-cta{display:inline-block;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px 40px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .home-cta:hover{background:rgba(180,74,255,0.25)}
