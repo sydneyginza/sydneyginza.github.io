@@ -85,7 +85,7 @@
 <div class="form-group"><label class="form-label">Value 2</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Value 3</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
-<div class="form-group"></div></div>
+<div class="form-group"><label class="form-label">Start Date</label><input class="form-input" id="fStartDate" type="date"></div></div>
 <div class="form-row full"><div class="form-group">
 <label class="form-label">Photos <span style="color:var(--text-dim);font-weight:400" id="fPhotoCount">(0 / 10)</span></label>
 <div id="fPhotoGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div></div>
@@ -244,13 +244,13 @@ function showProfile(idx){
   if(entry&&entry.start&&entry.end){
     availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
   }
-  const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Value 1',v:g.val1||'—'},{l:'Value 2',v:g.val2||'—'},{l:'Value 3',v:g.val3||'—'},{l:'Experience',v:g.exp||'—'}];
+  const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Value 1',v:g.val1||'â€"'},{l:'Value 2',v:g.val2||'â€"'},{l:'Value 3',v:g.val3||'â€"'},{l:'Experience',v:g.exp||'â€"'}];
   document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
   <div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
   <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${g.country}</span>${availHtml}</div><div class="profile-divider"></div>
   <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
-  <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'—'}</div>
-  <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'—'}</div>
+  <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'â€"'}</div>
+  <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'â€"'}</div>
   <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>${admin}</div></div>`;
   document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
   if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
@@ -477,7 +477,7 @@ table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async funct
 }
 
 const formOverlay=document.getElementById('formOverlay');
-const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fVal1','fVal2','fVal3','fExp','fLang','fType','fDesc'];
+const formFields=['fName','fLocation','fCountry','fAge','fBody','fHeight','fCup','fVal1','fVal2','fVal3','fExp','fStartDate','fLang','fType','fDesc'];
 document.getElementById('formClose').onclick=()=>formOverlay.classList.remove('open');
 document.getElementById('formCancel').onclick=()=>formOverlay.classList.remove('open');
 formOverlay.onclick=e=>{if(e.target===formOverlay)formOverlay.classList.remove('open')};
@@ -505,15 +505,15 @@ function openForm(idx=-1){document.getElementById('editIndex').value=idx;formPho
 if(idx>=0){document.getElementById('formTitle').textContent='Edit Profile';const g=girls[idx];
 document.getElementById('fName').value=g.name;document.getElementById('fLocation').value=g.location;document.getElementById('fCountry').value=g.country;document.getElementById('fAge').value=g.age;document.getElementById('fBody').value=g.body;document.getElementById('fHeight').value=g.height;document.getElementById('fCup').value=g.cup;
 document.getElementById('fVal1').value=g.val1||'';document.getElementById('fVal2').value=g.val2||'';document.getElementById('fVal3').value=g.val3||'';
-document.getElementById('fExp').value=g.exp||'';document.getElementById('fLang').value=g.lang||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;
-formPhotos=[...(g.photos||[])]}else{document.getElementById('formTitle').textContent='Add New Girl';formFields.forEach(id=>document.getElementById(id).value='');formPhotos=[]}
+document.getElementById('fExp').value=g.exp||'';document.getElementById('fStartDate').value=g.startDate||fmtDate(getAEDTDate());document.getElementById('fLang').value=g.lang||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;
+formPhotos=[...(g.photos||[])]}else{document.getElementById('formTitle').textContent='Add New Girl';formFields.forEach(id=>document.getElementById(id).value='');document.getElementById('fStartDate').value=fmtDate(getAEDTDate());formPhotos=[]}
 renderFormPhotos();formOverlay.classList.add('open')}
 
 document.getElementById('formSave').onclick=async()=>{
 const reqFields=[{id:'fName',label:'Name'},{id:'fLocation',label:'Location'},{id:'fCountry',label:'Country'},
 {id:'fAge',label:'Age'},{id:'fBody',label:'Body Size'},{id:'fHeight',label:'Height'},
 {id:'fCup',label:'Cup Size'},{id:'fExp',label:'Experience'},{id:'fVal3',label:'Value 3'},
-{id:'fLang',label:'Language'},{id:'fType',label:'Type'},{id:'fDesc',label:'Description'}];
+{id:'fStartDate',label:'Start Date'},{id:'fLang',label:'Language'},{id:'fType',label:'Type'},{id:'fDesc',label:'Description'}];
 for(const f of reqFields){const el=document.getElementById(f.id);if(!el.value.trim()){el.focus();showToast(f.label+' is required','error');return}}
 if(formPhotos.length===0){showToast('At least one photo is required','error');return}
 const name=document.getElementById('fName').value.trim();
@@ -522,7 +522,7 @@ try{for(const url of formPhotosToDelete){if(url.includes('githubusercontent.com'
 const finalPhotos=[];for(const src of formPhotos){if(src.startsWith('data:')){if(GITHUB_TOKEN){const ni=formNewPhotos.indexOf(src);finalPhotos.push(await uploadToGithub(src,name,ni>=0?formNewFiles[ni]:genFn()))}else finalPhotos.push(src)}else finalPhotos.push(src)}
 const o={name,location:document.getElementById('fLocation').value.trim(),country:document.getElementById('fCountry').value.trim(),age:document.getElementById('fAge').value.trim(),body:document.getElementById('fBody').value.trim(),height:document.getElementById('fHeight').value.trim(),cup:document.getElementById('fCup').value.trim(),
 val1:document.getElementById('fVal1').value.trim(),val2:document.getElementById('fVal2').value.trim(),val3:document.getElementById('fVal3').value.trim(),exp:document.getElementById('fExp').value.trim(),
-lang:document.getElementById('fLang').value.trim(),type:document.getElementById('fType').value.trim(),desc:document.getElementById('fDesc').value.trim(),photos:finalPhotos};
+startDate:document.getElementById('fStartDate').value.trim(),lang:document.getElementById('fLang').value.trim(),type:document.getElementById('fType').value.trim(),desc:document.getElementById('fDesc').value.trim(),photos:finalPhotos};
 const idx=parseInt(document.getElementById('editIndex').value);if(idx>=0)girls[idx]=o;else girls.push(o);
 if(await saveData()){formOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();
 if(document.getElementById('profilePage').classList.contains('active')&&idx>=0)showProfile(idx);showToast(idx>=0?'Profile updated':'Profile added')}
