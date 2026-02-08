@@ -71,8 +71,9 @@ async function saveData() {
       headers: proxyHeaders(),
       body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error((await r.json()).message || r.status);
-    dataSha = (await r.json()).content.sha;
+    const rd = await r.json();
+    if (!r.ok) throw new Error(rd.message || r.status);
+    dataSha = rd.content.sha;
     return true;
   } catch (e) { showToast('Save failed: ' + e.message, 'error'); return false; }
 }
