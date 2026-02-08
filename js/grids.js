@@ -30,6 +30,7 @@ function renderRosterGrid(){const rg=document.getElementById('rosterGrid');rg.in
 if(!rosterDateFilter){rg.innerHTML='<div class="empty-msg">No girls available this week</div>';return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
 let filtered=girls.filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
+if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
