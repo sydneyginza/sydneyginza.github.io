@@ -6,7 +6,7 @@ locs.forEach(c=>{const b=document.createElement('button');b.className='filter-bt
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 const grid=document.getElementById('girlsGrid');
-function renderGrid(){const filtered=activeLocation==='All'?girls:girls.filter(g=>g.location===activeLocation);grid.innerHTML='';const ts=fmtDate(getAEDTDate());
+function renderGrid(){let filtered=activeLocation==='All'?girls:girls.filter(g=>g.location===activeLocation);if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
