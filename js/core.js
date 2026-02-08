@@ -1,6 +1,6 @@
 /* === CORE UTILITIES & API === */
 let CRED=[];
-const BT='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';
+const BT='__BOOTSTRAP_KEY__';
 const BR='sydneyginza/files',BA=`https://api.github.com/repos/${BR}/contents`,CP='data/config.json';
 let GT='',GR='',GRD='',GA='',GAD='';
 const DP='data/girls.json',AP='data/auth.json',KP='data/calendar.json';
