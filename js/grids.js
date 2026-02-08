@@ -1,4 +1,4 @@
-/* === GIRLS GRID, ROSTER & CALENDAR === */
+/* === GIRLS GRID, ROSTER, CALENDAR & VALUE === */
 
 /* Girls Grid */
 function renderFilters(){const locs=["All",...new Set(girls.map(g=>g.location))];const fb=document.getElementById('filterBar');fb.innerHTML='';
@@ -38,6 +38,29 @@ const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<
 card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
 card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};rg.appendChild(card)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
+
+/* Value Table */
+function renderValueTable(){
+const table=document.getElementById('valueTable');
+const vals=[
+{label:'Value 1',key:'val1'},
+{label:'Value 2',key:'val2'},
+{label:'Value 3',key:'val3'}
+];
+let html='<thead><tr><th style="text-align:left">Value</th><th style="text-align:left">Range</th></tr></thead><tbody>';
+vals.forEach(v=>{
+const nums=girls.map(g=>parseFloat(g[v.key])).filter(n=>!isNaN(n)&&n>0);
+let range='\u2014';
+if(nums.length){
+const min=Math.min(...nums);
+const max=Math.max(...nums);
+range=min===max?'$'+min:'$'+min+' - $'+max;
+}
+html+=`<tr><td style="text-align:left;font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:2px;color:#fff;text-transform:uppercase">${v.label}</td><td style="text-align:left;font-family:'Orbitron',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent)">${range}</td></tr>`;
+});
+html+='</tbody>';
+table.innerHTML=html;
+}
 
 /* Calendar */
 function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){const v=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');const h12=h===0?12:h>12?h-12:h;o.push(`<option value="${v}">${h12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}</option>`)}return o.join('')}
