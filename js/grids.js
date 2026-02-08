@@ -9,7 +9,7 @@ const grid=document.getElementById('girlsGrid');
 function renderGrid(){
 let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
-filtered.sort((a,b)=>{const an=a.name&&a.name.trim(),bn=b.name&&b.name.trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return an.toLowerCase().localeCompare(bn.toLowerCase())});
+filtered.sort((a,b)=>{const an=(a.name||'').trim();const bn=(b.name||'').trim();const aEmpty=an.length===0;const bEmpty=bn.length===0;if(aEmpty&&bEmpty)return 0;if(aEmpty)return 1;if(bEmpty)return -1;return an.toLowerCase().localeCompare(bn.toLowerCase())});
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
