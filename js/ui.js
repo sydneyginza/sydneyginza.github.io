@@ -3,7 +3,7 @@ let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfile
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
-const allPages=['homePage','rosterPage','listPage','valuePage','calendarPage','profilePage'].map(id=>document.getElementById(id));
+const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
@@ -13,6 +13,7 @@ if(id==='homePage'){document.getElementById('navHome').classList.add('active');r
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderRoster()}
 if(id==='listPage')document.getElementById('navGirls').classList.add('active');
 if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
+if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
 if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderCalendar()}
 window.scrollTo(0,0)}
 
@@ -20,6 +21,7 @@ document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('home
 document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
 document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
 document.getElementById('navValue').onclick=e=>{e.preventDefault();showPage('valuePage')};
+document.getElementById('navEmployment').onclick=e=>{e.preventDefault();showPage('employmentPage')};
 document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
 
 /* Copy Time Modal */
