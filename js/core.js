@@ -1,6 +1,6 @@
 /* === CORE UTILITIES & API === */
 let CRED=[];
-const BT='__BOOTSTRAP_KEY__';
+const BT='__BOOTSTRAP_KEY__'; 
 const BR='sydneyginza/files',BA=`https://api.github.com/repos/${BR}/contents`,CP='data/config.json';
 let GT='',GR='',GRD='',GA='',GAD='';
 const DP='data/girls.json',AP='data/auth.json',KP='data/calendar.json';
