@@ -43,11 +43,11 @@ function renderRoster(){renderRosterFilters();renderRosterGrid()}
 function renderValueTable(){
 const table=document.getElementById('valueTable');
 const vals=[
-{label:'Value 1',key:'val1'},
-{label:'Value 2',key:'val2'},
-{label:'Value 3',key:'val3'}
+{label:'30 mins',key:'val1'},
+{label:'45 mins',key:'val2'},
+{label:'60 mins',key:'val3'}
 ];
-let html='<thead><tr><th style="text-align:left">Value</th><th style="text-align:left">Range</th></tr></thead><tbody>';
+let html='<thead><tr><th style="text-align:left">Rates</th><th style="text-align:left">Price Range</th></tr></thead><tbody>';
 vals.forEach(v=>{
 const nums=girls.map(g=>parseFloat(g[v.key])).filter(n=>!isNaN(n)&&n>0);
 let range='\u2014';
