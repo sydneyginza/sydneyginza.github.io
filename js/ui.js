@@ -1,5 +1,5 @@
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
-let formNewFiles=[],girls=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
+let formNewFiles=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
