@@ -6,7 +6,7 @@ locs.forEach(c=>{const b=document.createElement('button');b.className='filter-bt
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 const grid=document.getElementById('girlsGrid');
-function renderGrid(){let filtered=activeLocation==='All'?girls:girls.filter(g=>g.location===activeLocation);if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);grid.innerHTML='';const ts=fmtDate(getAEDTDate());
+function renderGrid(){let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);filtered.sort((a,b)=>a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()));grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
@@ -32,6 +32,7 @@ const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
 let filtered=girls.filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
+filtered.sort((a,b)=>a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()));
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
