@@ -1,6 +1,6 @@
 /* === CORE UTILITIES & API === */
 let CRED=[];
-const BT='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';
+const BT='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';
 const BR='sydneyginza/files',BA=`https://api.github.com/repos/${BR}/contents`,CP='data/config.json';
 let GT='',GR='',GRD='',GA='',GAD='';
 const DP='data/girls.json',AP='data/auth.json',KP='data/calendar.json';
