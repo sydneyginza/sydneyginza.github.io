@@ -6,12 +6,16 @@ locs.forEach(c=>{const b=document.createElement('button');b.className='filter-bt
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 const grid=document.getElementById('girlsGrid');
-function renderGrid(){let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);filtered.sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));grid.innerHTML='';const ts=fmtDate(getAEDTDate());
+function renderGrid(){
+let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);
+if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
+filtered.sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));
+grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
+card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}<div class="card-hover-line"></div></div>`;
 card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}grid.appendChild(card)})}
 
@@ -37,7 +41,7 @@ if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name}</div><div class="card-country">${g.country}</div>${avail}<div class="card-hover-line"></div></div>`;
+card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}<div class="card-hover-line"></div></div>`;
 card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};rg.appendChild(card)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
@@ -69,7 +73,7 @@ function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(l
 
 function renderCalendar(){const fb=document.getElementById('calFilterBar');fb.innerHTML='';const locs=["All",...new Set(girls.map(g=>g.location))];if(!calLocFilter)calLocFilter='All';
 locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(calLocFilter===loc?' active':'');b.textContent=loc;b.onclick=()=>{calLocFilter=loc;renderCalendar()};fb.appendChild(b)});
-const fg=(calLocFilter==='All'?[...girls]:girls.filter(g=>g.location===calLocFilter)).filter(g=>g.name&&String(g.name).trim().length>0).sort((a,b)=>a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
+const fg=(calLocFilter==='All'?[...girls]:girls.filter(g=>g.location===calLocFilter)).filter(g=>g.name&&String(g.name).trim().length>0).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
 let html='<thead><tr><th>Profile</th>';dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});html+='</tr></thead><tbody>';
 fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
 html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
@@ -95,7 +99,7 @@ const td=this.closest('td');td.classList.add('cal-saving');await saveCalData();t
 else{calData[n][d]={start:'',end:''};if(!calPending[n])calPending[n]={};calPending[n][d]=true;if(tw){tw.style.display='flex';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent='Times required'}return}}
 calData[n][d]={start:'',end:''};if(!calPending[n])calPending[n]={};calPending[n][d]=true;
 if(tw){tw.style.display='flex';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent='Times required'}}
-else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d];if(tw){tw.style.display='none';const ss=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${d}"]`);if(ss)ss.value='';if(es)ss.value='';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent=''}this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');renderRoster();renderGrid();renderHome()}}});
+else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d];if(tw){tw.style.display='none';const ss=table.querySelector(`select[data-field="start"][data-tname="${n}"][data-tdate="${d}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${n}"][data-tdate="${ds}"]`);if(ss)ss.value='';if(es)es.value='';const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);if(w)w.textContent=''}this.closest('td').classList.add('cal-saving');await saveCalData();this.closest('td').classList.remove('cal-saving');renderRoster();renderGrid();renderHome()}}});
 
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=async function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';const td=this.closest('td');td.classList.add('cal-saving');await saveCalData();td.classList.remove('cal-saving');renderRoster();renderGrid();renderHome();showToast('Schedule saved')}
