@@ -2,7 +2,7 @@
 
 // ✅ No token in frontend! All requests go through your Cloudflare Worker.
 // Replace this with your actual worker URL after deploying.
-const PROXY = 'https://github-proxy.sydneyginza-api.workers.dev';
+const PROXY = 'https://github-proxy.sydneyginza-api-2.workers.dev';
 
 // Repo paths (no tokens needed)
 const DATA_REPO = 'sydneyginza/files';
