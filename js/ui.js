@@ -4,105 +4,129 @@ let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
-/* Shared filter state (persists across page switches, resets on refresh) */
-let sharedFilters={location:null,country:null,experience:null,labels:[]};
-
-function getFilterOptions(){
-const locs=[...new Set(girls.map(g=>g.location).filter(Boolean))].sort();
-const countries=[...new Set(girls.map(g=>g.country).filter(Boolean))].sort();
-const exps=[...new Set(girls.map(g=>g.exp).filter(Boolean))].sort();
-const labels=[...new Set(girls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
-return{locations:locs,countries:countries,experiences:exps,labels:labels}}
+/* ── Shared Filter State (resets on refresh) ── */
+let sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,labels:[]};
 
 function applySharedFilters(list){
 let f=list;
-if(sharedFilters.location)f=f.filter(g=>g.location===sharedFilters.location);
 if(sharedFilters.country)f=f.filter(g=>g.country===sharedFilters.country);
-if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
+if(sharedFilters.ageMin!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v>=sharedFilters.ageMin});
+if(sharedFilters.ageMax!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v<=sharedFilters.ageMax});
+if(sharedFilters.bodyMin!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v>=sharedFilters.bodyMin});
+if(sharedFilters.bodyMax!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v<=sharedFilters.bodyMax});
+if(sharedFilters.heightMin!=null)f=f.filter(g=>{const v=parseFloat(g.height);return !isNaN(v)&&v>=sharedFilters.heightMin});
+if(sharedFilters.heightMax!=null)f=f.filter(g=>{const v=parseFloat(g.height);return !isNaN(v)&&v<=sharedFilters.heightMax});
+if(sharedFilters.cupSize)f=f.filter(g=>g.cup&&g.cup.toUpperCase().includes(sharedFilters.cupSize.toUpperCase()));
+if(sharedFilters.val1Min!=null)f=f.filter(g=>{const v=parseFloat(g.val1);return !isNaN(v)&&v>=sharedFilters.val1Min});
+if(sharedFilters.val1Max!=null)f=f.filter(g=>{const v=parseFloat(g.val1);return !isNaN(v)&&v<=sharedFilters.val1Max});
+if(sharedFilters.val2Min!=null)f=f.filter(g=>{const v=parseFloat(g.val2);return !isNaN(v)&&v>=sharedFilters.val2Min});
+if(sharedFilters.val2Max!=null)f=f.filter(g=>{const v=parseFloat(g.val2);return !isNaN(v)&&v<=sharedFilters.val2Max});
+if(sharedFilters.val3Min!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v>=sharedFilters.val3Min});
+if(sharedFilters.val3Max!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v<=sharedFilters.val3Max});
 if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.location||sharedFilters.country||sharedFilters.experience||sharedFilters.labels.length)}
+function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.labels.length)}
 
-function clearAllFilters(){sharedFilters={location:null,country:null,experience:null,labels:[]}}
+function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,labels:[]}}
 
-function renderFilterPane(containerId,opts){
+function makeRangeSection(title,minKey,maxKey,minPh,maxPh,prefix){
+const sec=document.createElement('div');sec.className='fp-section';
+const pre=prefix||'';
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${minPh}" data-fkey="${minKey}" value="${sharedFilters[minKey]!=null?sharedFilters[minKey]:''}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${maxPh}" data-fkey="${maxKey}" value="${sharedFilters[maxKey]!=null?sharedFilters[maxKey]:''}"></div></div>`;
+return sec}
+
+function renderFilterPane(containerId){
 const pane=document.getElementById(containerId);if(!pane)return;
-const o=getFilterOptions();pane.innerHTML='';
-
-/* Location */
-if(o.locations.length){
-const sec=document.createElement('div');
-sec.innerHTML=`<div class="fp-section-title">Location</div><div class="fp-options" id="${containerId}_loc"></div>`;
-pane.appendChild(sec);
-const wrap=sec.querySelector('.fp-options');
-o.locations.forEach(loc=>{
-const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.location===loc?' active':'');
-const cnt=girls.filter(g=>g.location===loc).length;
-btn.innerHTML=`<span class="fp-check">${sharedFilters.location===loc?'✓':''}</span>${loc}<span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{sharedFilters.location=sharedFilters.location===loc?null:loc;onFiltersChanged(containerId)};
-wrap.appendChild(btn)})}
+pane.innerHTML='';
+const countries=[...new Set(girls.map(g=>g.country).filter(Boolean))].sort();
+const cups=[...new Set(girls.map(g=>g.cup).filter(Boolean))].sort();
+const labels=[...new Set(girls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
 /* Country */
-if(o.countries.length){
-pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-const sec=document.createElement('div');
-sec.innerHTML=`<div class="fp-section-title">Country</div><div class="fp-options"></div>`;
+if(countries.length){
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Country</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
-o.countries.forEach(c=>{
+countries.forEach(c=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country===c?' active':'');
 const cnt=girls.filter(g=>g.country===c).length;
 btn.innerHTML=`<span class="fp-check">${sharedFilters.country===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged(containerId)};
+btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged()};
 wrap.appendChild(btn)})}
 
-/* Experience */
-if(o.experiences.length){
+/* Age */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-const sec=document.createElement('div');
-sec.innerHTML=`<div class="fp-section-title">Experience</div><div class="fp-options"></div>`;
+pane.appendChild(makeRangeSection('Age','ageMin','ageMax','Min','Max'));
+
+/* Body Size */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection('Body Size','bodyMin','bodyMax','Min','Max'));
+
+/* Height */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection('Height (cm)','heightMin','heightMax','Min','Max'));
+
+/* Cup Size */
+if(cups.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Cup Size</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
-o.experiences.forEach(e=>{
-const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
-const cnt=girls.filter(g=>g.exp===e).length;
-btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${e}<span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged(containerId)};
+cups.forEach(c=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.cupSize===c?' active':'');
+const cnt=girls.filter(g=>g.cup===c).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.cupSize===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.cupSize=sharedFilters.cupSize===c?null:c;onFiltersChanged()};
 wrap.appendChild(btn)})}
 
-/* Labels (multi-select) */
-if(o.labels.length){
+/* Rates 30 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-const sec=document.createElement('div');
-sec.innerHTML=`<div class="fp-section-title">Labels</div><div class="fp-options"></div>`;
+pane.appendChild(makeRangeSection('Rates 30 mins','val1Min','val1Max','$Min','$Max'));
+
+/* Rates 45 mins */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection('Rates 45 mins','val2Min','val2Max','$Min','$Max'));
+
+/* Rates 60 mins */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection('Rates 60 mins','val3Min','val3Max','$Min','$Max'));
+
+/* Labels */
+if(labels.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Labels</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
-o.labels.forEach(l=>{
+labels.forEach(l=>{
 const isActive=sharedFilters.labels.includes(l);
 const btn=document.createElement('button');btn.className='fp-option'+(isActive?' active':'');
 const cnt=girls.filter(g=>g.labels&&g.labels.includes(l)).length;
 btn.innerHTML=`<span class="fp-check">${isActive?'✓':''}</span>${l}<span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{if(isActive)sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);else sharedFilters.labels.push(l);onFiltersChanged(containerId)};
+btn.onclick=()=>{if(isActive)sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);else sharedFilters.labels.push(l);onFiltersChanged()};
 wrap.appendChild(btn)})}
 
-/* Clear button */
+/* Clear */
 if(hasActiveFilters()){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
 const clr=document.createElement('button');clr.className='fp-clear';clr.textContent='Clear All Filters';
-clr.onclick=()=>{clearAllFilters();onFiltersChanged(containerId)};
-pane.appendChild(clr)}}
+clr.onclick=()=>{clearAllFilters();onFiltersChanged()};
+pane.appendChild(clr)}
 
-function onFiltersChanged(sourcePane){
-/* Sync location filter with existing filter systems */
-activeLocation=sharedFilters.location||'All';
-rosterLocFilter=sharedFilters.location||'All';
-calLocFilter=sharedFilters.location||'All';
-/* Re-render all filter panes and grids */
+/* Bind range inputs */
+pane.querySelectorAll('.fp-range-input').forEach(inp=>{
+let debounce;
+inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{const key=inp.dataset.fkey;const val=inp.value.trim();sharedFilters[key]=val===''?null:parseFloat(val);onFiltersChanged()},400)})})}
+
+function onFiltersChanged(){
 renderFilterPane('girlsFilterPane');
 renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
-renderFilters();renderGrid();renderRoster();renderCalendar()}
+renderFilters();renderGrid();renderRoster();
+if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar()}
 const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
