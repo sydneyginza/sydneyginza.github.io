@@ -68,7 +68,7 @@ function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.
 
 /* Profile Nav Rail */
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
-const named=girls.map((g,i)=>({g,i})).filter(x=>!loggedIn?x.g.name&&String(x.g.name).trim().length>0:true);
+const named=girls.map((g,i)=>({g,i})).filter(x=>!loggedIn?x.g.name&&String(x.g.name).trim().length>0:true).sort((a,b)=>{const an=(a.g.name||'').trim().toLowerCase(),bn=(b.g.name||'').trim().toLowerCase();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return an.localeCompare(bn)});
 const total=named.length;if(total===0)return;
 const pos=named.findIndex(x=>x.i===idx);if(pos<0)return;
 const prevIdx=named[(pos-1+total)%total].i;
