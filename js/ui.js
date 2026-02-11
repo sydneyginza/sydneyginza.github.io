@@ -31,10 +31,16 @@ function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMi
 
 function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
 
-function makeRangeSection(title,minKey,maxKey,minPh,maxPh,prefix){
+function getDataRange(field,prefix){
+const nums=girls.map(g=>parseFloat(g[field])).filter(n=>!isNaN(n)&&n>0);
+if(!nums.length)return{min:'Min',max:'Max'};
+const p=prefix||'';
+return{min:p+Math.min(...nums),max:p+Math.max(...nums)}}
+
+function makeRangeSection(title,minKey,maxKey,dataField,prefix){
 const sec=document.createElement('div');sec.className='fp-section';
-const pre=prefix||'';
-sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${minPh}" data-fkey="${minKey}" value="${sharedFilters[minKey]!=null?sharedFilters[minKey]:''}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${maxPh}" data-fkey="${maxKey}" value="${sharedFilters[maxKey]!=null?sharedFilters[maxKey]:''}"></div></div>`;
+const r=getDataRange(dataField,prefix);
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" value="${sharedFilters[minKey]!=null?sharedFilters[minKey]:''}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" value="${sharedFilters[maxKey]!=null?sharedFilters[maxKey]:''}"></div></div>`;
 return sec}
 
 function renderFilterPane(containerId){
@@ -60,15 +66,15 @@ wrap.appendChild(btn)})}
 
 /* Age */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Age','ageMin','ageMax','Min','Max'));
+pane.appendChild(makeRangeSection('Age','ageMin','ageMax','age'));
 
 /* Body Size */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Body Size','bodyMin','bodyMax','Min','Max'));
+pane.appendChild(makeRangeSection('Body Size','bodyMin','bodyMax','body'));
 
 /* Height */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Height (cm)','heightMin','heightMax','Min','Max'));
+pane.appendChild(makeRangeSection('Height (cm)','heightMin','heightMax','height'));
 
 /* Cup Size */
 if(cups.length){
@@ -86,15 +92,15 @@ wrap.appendChild(btn)})}
 
 /* Rates 30 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 30 mins','val1Min','val1Max','$Min','$Max'));
+pane.appendChild(makeRangeSection('Rates 30 mins','val1Min','val1Max','val1','$'));
 
 /* Rates 45 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 45 mins','val2Min','val2Max','$Min','$Max'));
+pane.appendChild(makeRangeSection('Rates 45 mins','val2Min','val2Max','val2','$'));
 
 /* Rates 60 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 60 mins','val3Min','val3Max','$Min','$Max'));
+pane.appendChild(makeRangeSection('Rates 60 mins','val3Min','val3Max','val3','$'));
 
 /* Experience */
 if(exps.length){
