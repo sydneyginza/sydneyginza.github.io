@@ -67,12 +67,17 @@ document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;l
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
 /* Profile Nav Rail */
-function renderProfileNav(idx){const rail=document.getElementById('profileNavRail'),total=girls.length;rail.innerHTML='';
-const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(idx<=0?total-1:idx-1);rail.appendChild(up);
-const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,idx-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');const g=girls[i];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;d.onclick=()=>showProfile(i);dots.appendChild(d)}
-rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
+const named=girls.map((g,i)=>({g,i})).filter(x=>!loggedIn?x.g.name&&String(x.g.name).trim().length>0:true);
+const total=named.length;if(total===0)return;
+const pos=named.findIndex(x=>x.i===idx);if(pos<0)return;
+const prevIdx=named[(pos-1+total)%total].i;
+const nextIdx=named[(pos+1)%total].i;
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
+const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,pos-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
+for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(named[i].i===idx?' active':'');const g=named[i].g;d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(named[i].i);dots.appendChild(d)}
+rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${pos+1}</span> / ${total}`;rail.appendChild(ctr);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn)}
 
 /* Profile Page */
 function showProfile(idx){
