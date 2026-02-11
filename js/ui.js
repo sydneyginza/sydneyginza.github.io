@@ -3,6 +3,106 @@ let formNewFiles=[],activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
+
+/* Shared filter state (persists across page switches, resets on refresh) */
+let sharedFilters={location:null,country:null,experience:null,labels:[]};
+
+function getFilterOptions(){
+const locs=[...new Set(girls.map(g=>g.location).filter(Boolean))].sort();
+const countries=[...new Set(girls.map(g=>g.country).filter(Boolean))].sort();
+const exps=[...new Set(girls.map(g=>g.exp).filter(Boolean))].sort();
+const labels=[...new Set(girls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
+return{locations:locs,countries:countries,experiences:exps,labels:labels}}
+
+function applySharedFilters(list){
+let f=list;
+if(sharedFilters.location)f=f.filter(g=>g.location===sharedFilters.location);
+if(sharedFilters.country)f=f.filter(g=>g.country===sharedFilters.country);
+if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
+if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
+return f}
+
+function hasActiveFilters(){return !!(sharedFilters.location||sharedFilters.country||sharedFilters.experience||sharedFilters.labels.length)}
+
+function clearAllFilters(){sharedFilters={location:null,country:null,experience:null,labels:[]}}
+
+function renderFilterPane(containerId,opts){
+const pane=document.getElementById(containerId);if(!pane)return;
+const o=getFilterOptions();pane.innerHTML='';
+
+/* Location */
+if(o.locations.length){
+const sec=document.createElement('div');
+sec.innerHTML=`<div class="fp-section-title">Location</div><div class="fp-options" id="${containerId}_loc"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+o.locations.forEach(loc=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.location===loc?' active':'');
+const cnt=girls.filter(g=>g.location===loc).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.location===loc?'✓':''}</span>${loc}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.location=sharedFilters.location===loc?null:loc;onFiltersChanged(containerId)};
+wrap.appendChild(btn)})}
+
+/* Country */
+if(o.countries.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');
+sec.innerHTML=`<div class="fp-section-title">Country</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+o.countries.forEach(c=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country===c?' active':'');
+const cnt=girls.filter(g=>g.country===c).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.country===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged(containerId)};
+wrap.appendChild(btn)})}
+
+/* Experience */
+if(o.experiences.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');
+sec.innerHTML=`<div class="fp-section-title">Experience</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+o.experiences.forEach(e=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
+const cnt=girls.filter(g=>g.exp===e).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${e}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged(containerId)};
+wrap.appendChild(btn)})}
+
+/* Labels (multi-select) */
+if(o.labels.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');
+sec.innerHTML=`<div class="fp-section-title">Labels</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+o.labels.forEach(l=>{
+const isActive=sharedFilters.labels.includes(l);
+const btn=document.createElement('button');btn.className='fp-option'+(isActive?' active':'');
+const cnt=girls.filter(g=>g.labels&&g.labels.includes(l)).length;
+btn.innerHTML=`<span class="fp-check">${isActive?'✓':''}</span>${l}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{if(isActive)sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);else sharedFilters.labels.push(l);onFiltersChanged(containerId)};
+wrap.appendChild(btn)})}
+
+/* Clear button */
+if(hasActiveFilters()){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const clr=document.createElement('button');clr.className='fp-clear';clr.textContent='Clear All Filters';
+clr.onclick=()=>{clearAllFilters();onFiltersChanged(containerId)};
+pane.appendChild(clr)}}
+
+function onFiltersChanged(sourcePane){
+/* Sync location filter with existing filter systems */
+activeLocation=sharedFilters.location||'All';
+rosterLocFilter=sharedFilters.location||'All';
+calLocFilter=sharedFilters.location||'All';
+/* Re-render all filter panes and grids */
+renderFilterPane('girlsFilterPane');
+renderFilterPane('rosterFilterPane');
+renderFilterPane('calFilterPane');
+renderFilters();renderGrid();renderRoster();renderCalendar()}
 const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
@@ -10,11 +110,11 @@ if(document.getElementById('calendarPage').classList.contains('active')&&id!=='c
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
-if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderRoster()}
-if(id==='listPage')document.getElementById('navGirls').classList.add('active');
+if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
+if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
 if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
 if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
-if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderCalendar()}
+if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
 window.scrollTo(0,0)}
 
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
@@ -67,17 +167,12 @@ document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;l
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
 /* Profile Nav Rail */
-function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
-const named=girls.map((g,i)=>({g,i})).filter(x=>!loggedIn?x.g.name&&String(x.g.name).trim().length>0:true).sort((a,b)=>{const an=(a.g.name||'').trim().toLowerCase(),bn=(b.g.name||'').trim().toLowerCase();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return an.localeCompare(bn)});
-const total=named.length;if(total===0)return;
-const pos=named.findIndex(x=>x.i===idx);if(pos<0)return;
-const prevIdx=named[(pos-1+total)%total].i;
-const nextIdx=named[(pos+1)%total].i;
-const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
-const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,pos-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(named[i].i===idx?' active':'');const g=named[i].g;d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(named[i].i);dots.appendChild(d)}
-rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${pos+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn)}
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail'),total=girls.length;rail.innerHTML='';
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(idx<=0?total-1:idx-1);rail.appendChild(up);
+const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,idx-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
+for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');const g=girls[i];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;d.onclick=()=>showProfile(i);dots.appendChild(d)}
+rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
 
 /* Profile Page */
 function showProfile(idx){

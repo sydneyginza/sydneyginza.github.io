@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ginza - Girls</title>
-<link rel="stylesheet" href="https://sydneyginza.github.io/styles.css?v=2">
+<link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
 </head>
 <body>
 <div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">Loading Data</div></div>
@@ -67,14 +67,24 @@
 
 <div class="page" id="rosterPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Roster</div></div></div>
+<div class="page-with-sidebar">
+<aside class="filter-pane" id="rosterFilterPane"></aside>
+<div class="page-main-content">
 <div class="filter-bar" id="rosterFilterBar"></div>
 <div class="girls-grid" id="rosterGrid"></div>
+</div>
+</div>
 </section></div>
 
 <div class="page" id="listPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div></div>
+<div class="page-with-sidebar">
+<aside class="filter-pane" id="girlsFilterPane"></aside>
+<div class="page-main-content">
 <div class="filter-bar" id="filterBar"></div>
 <div class="girls-grid" id="girlsGrid"></div>
+</div>
+</div>
 </section></div>
 
 <div class="page" id="valuePage"><section class="section">
@@ -160,8 +170,13 @@
 
 <div class="page" id="calendarPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><div class="section-title">Calendar</div></div></div>
+<div class="page-with-sidebar">
+<aside class="filter-pane" id="calFilterPane"></aside>
+<div class="page-main-content">
 <div class="filter-bar" id="calFilterBar"></div>
 <div style="overflow-x:auto"><table class="cal-table" id="calTable"></table></div>
+</div>
+</div>
 </section></div>
 
 <div class="page" id="profilePage">
@@ -224,9 +239,9 @@
 
 <footer><p>Ginza &copy; 2026 &mdash; All Rights Reserved</p></footer>
 
-<script src="https://sydneyginza.github.io/js/core.js?v=2"></script>
-<script src="https://sydneyginza.github.io/js/ui.js?v=2"></script>
-<script src="https://sydneyginza.github.io/js/grids.js?v=2"></script>
-<script src="https://sydneyginza.github.io/js/forms.js?v=2"></script>
+<script src="https://sydneyginza.github.io/js/core.js"></script>
+<script src="https://sydneyginza.github.io/js/ui.js"></script>
+<script src="https://sydneyginza.github.io/js/grids.js"></script>
+<script src="https://sydneyginza.github.io/js/forms.js"></script>
 </body>
 </html>
