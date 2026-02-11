@@ -5,7 +5,7 @@ let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,labels:[]};
+let sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
 
 function applySharedFilters(list){
 let f=list;
@@ -24,11 +24,12 @@ if(sharedFilters.val2Max!=null)f=f.filter(g=>{const v=parseFloat(g.val2);return 
 if(sharedFilters.val3Min!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v>=sharedFilters.val3Min});
 if(sharedFilters.val3Max!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v<=sharedFilters.val3Max});
 if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
+if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.labels.length)}
+function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
 
-function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,labels:[]}}
+function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
 
 function makeRangeSection(title,minKey,maxKey,minPh,maxPh,prefix){
 const sec=document.createElement('div');sec.className='fp-section';
@@ -41,6 +42,7 @@ const pane=document.getElementById(containerId);if(!pane)return;
 pane.innerHTML='';
 const countries=[...new Set(girls.map(g=>g.country).filter(Boolean))].sort();
 const cups=[...new Set(girls.map(g=>g.cup).filter(Boolean))].sort();
+const exps=[...new Set(girls.map(g=>g.exp).filter(Boolean))].sort();
 const labels=[...new Set(girls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
 /* Country */
@@ -93,6 +95,20 @@ pane.appendChild(makeRangeSection('Rates 45 mins','val2Min','val2Max','$Min','$M
 /* Rates 60 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
 pane.appendChild(makeRangeSection('Rates 60 mins','val3Min','val3Max','$Min','$Max'));
+
+/* Experience */
+if(exps.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Experience</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+exps.forEach(e=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
+const cnt=girls.filter(g=>g.exp===e).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${e}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
+wrap.appendChild(btn)})}
 
 /* Labels */
 if(labels.length){
