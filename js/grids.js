@@ -15,7 +15,8 @@ filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}<div class="card-hover-line"></div></div>`;
+const labelsHtml=g.labels&&g.labels.length?`<div class="card-labels">${g.labels.map(l=>`<span class="card-label">${l}</span>`).join('')}</div>`:'';
+card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}${labelsHtml}<div class="card-hover-line"></div></div>`;
 card.onclick=e=>{if(e.target.closest('.card-action-btn'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}grid.appendChild(card)})}
 
@@ -41,7 +42,8 @@ if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?`<img class="card-thumb" src="${g.photos[0]}">`:'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}<div class="card-hover-line"></div></div>`;
+const rLabelsHtml=g.labels&&g.labels.length?`<div class="card-labels">${g.labels.map(l=>`<span class="card-label">${l}</span>`).join('')}</div>`:'';
+card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${g.country||''}</div>${avail}${rLabelsHtml}<div class="card-hover-line"></div></div>`;
 card.onclick=()=>{profileReturnPage='rosterPage';showProfile(ri)};rg.appendChild(card)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 

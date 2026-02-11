@@ -263,3 +263,12 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .ng-arrow{width:42px;height:42px}.ng-arrow svg{width:20px;height:20px}
 .ng-dot{width:42px;height:42px}
 }
+
+/* Labels */
+.label-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:rgba(180,74,255,0.1);border:1px solid rgba(180,74,255,0.25);color:var(--accent);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));transition:all .3s}
+.label-tag .label-remove{background:none;border:none;color:rgba(255,68,68,0.7);font-size:13px;cursor:pointer;padding:0 0 0 4px;line-height:1;transition:color .2s}
+.label-tag .label-remove:hover{color:#ff4444}
+.profile-labels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.profile-label{display:inline-flex;padding:5px 14px;background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.2);color:var(--accent);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+.card-labels{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.card-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;font-family:'Orbitron',sans-serif;color:var(--accent);background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.15);padding:2px 7px;clip-path:polygon(0 0,calc(100% - 3px) 0,100% 3px,100% 100%,3px 100%,0 calc(100% - 3px))}
