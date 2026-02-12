@@ -174,6 +174,7 @@ const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage',
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+document.getElementById('profileNavRail').style.display=id==='profilePage'?'':'none';
 document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
