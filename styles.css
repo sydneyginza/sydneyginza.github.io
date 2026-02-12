@@ -72,7 +72,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .pnav-arrow{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.12);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0}
 .pnav-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,0.06)}
 .pnav-arrow svg{width:20px;height:20px;fill:currentColor}
-.pnav-dots{display:flex;flex-direction:row;gap:8px;padding:0 8px;overflow-x:auto;flex:1;justify-content:center}
+.pnav-dots{display:flex;flex-direction:row;gap:8px;padding:0 8px;overflow-x:auto;flex:1;min-width:0}
 .pnav-dots::-webkit-scrollbar{height:3px}.pnav-dots::-webkit-scrollbar-thumb{background:rgba(180,74,255,0.2);border-radius:2px}
 .pnav-dot{width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);overflow:hidden;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
 .pnav-dot:hover{border-color:rgba(255,255,255,0.3)}
