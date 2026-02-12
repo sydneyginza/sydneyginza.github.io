@@ -174,7 +174,6 @@ const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage',
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
-document.getElementById('profileNavRail').style.display=id==='profilePage'?'':'none';
 document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
@@ -255,6 +254,7 @@ const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 let availHtml='';if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Rates 30 mins',v:g.val1||'\u2014'},{l:'Rates 45 mins',v:g.val2||'\u2014'},{l:'Rates 60 mins',v:g.val3||'\u2014'},{l:'Experience',v:g.exp||'\u2014'}];
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
+<div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${g.country}</span>${availHtml}</div><div class="profile-divider"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
