@@ -32,7 +32,8 @@ function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMi
 function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
 
 function getDataRange(field,prefix){
-const nums=girls.map(g=>parseFloat(g[field])).filter(n=>!isNaN(n)&&n>0);
+const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
+const nums=namedOnly.map(g=>parseFloat(g[field])).filter(n=>!isNaN(n)&&n>0);
 if(!nums.length)return{min:'Min',max:'Max'};
 const p=prefix||'';
 return{min:p+Math.min(...nums),max:p+Math.max(...nums)}}
@@ -46,10 +47,11 @@ return sec}
 function renderFilterPane(containerId){
 const pane=document.getElementById(containerId);if(!pane)return;
 pane.innerHTML='';
-const countries=[...new Set(girls.map(g=>g.country).filter(Boolean))].sort();
-const cups=[...new Set(girls.map(g=>g.cup).filter(Boolean))].sort();
-const exps=[...new Set(girls.map(g=>g.exp).filter(Boolean))].sort();
-const labels=[...new Set(girls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
+const namedGirls=girls.filter(g=>g.name&&String(g.name).trim().length>0);
+const countries=[...new Set(namedGirls.map(g=>g.country).filter(Boolean))].sort();
+const cups=[...new Set(namedGirls.map(g=>g.cup).filter(Boolean))].sort();
+const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
+const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
 /* Country */
 if(countries.length){
@@ -59,7 +61,7 @@ pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 countries.forEach(c=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country===c?' active':'');
-const cnt=girls.filter(g=>g.country===c).length;
+const cnt=namedGirls.filter(g=>g.country===c).length;
 btn.innerHTML=`<span class="fp-check">${sharedFilters.country===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged()};
 wrap.appendChild(btn)})}
@@ -85,7 +87,7 @@ pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 cups.forEach(c=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.cupSize===c?' active':'');
-const cnt=girls.filter(g=>g.cup===c).length;
+const cnt=namedGirls.filter(g=>g.cup===c).length;
 btn.innerHTML=`<span class="fp-check">${sharedFilters.cupSize===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.cupSize=sharedFilters.cupSize===c?null:c;onFiltersChanged()};
 wrap.appendChild(btn)})}
@@ -111,7 +113,7 @@ pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 exps.forEach(e=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
-const cnt=girls.filter(g=>g.exp===e).length;
+const cnt=namedGirls.filter(g=>g.exp===e).length;
 btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${e}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
 wrap.appendChild(btn)})}
@@ -126,7 +128,7 @@ const wrap=sec.querySelector('.fp-options');
 labels.forEach(l=>{
 const isActive=sharedFilters.labels.includes(l);
 const btn=document.createElement('button');btn.className='fp-option'+(isActive?' active':'');
-const cnt=girls.filter(g=>g.labels&&g.labels.includes(l)).length;
+const cnt=namedGirls.filter(g=>g.labels&&g.labels.includes(l)).length;
 btn.innerHTML=`<span class="fp-check">${isActive?'✓':''}</span>${l}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{if(isActive)sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);else sharedFilters.labels.push(l);onFiltersChanged()};
 wrap.appendChild(btn)})}
@@ -213,12 +215,17 @@ document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;l
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
 /* Profile Nav Rail */
-function renderProfileNav(idx){const rail=document.getElementById('profileNavRail'),total=girls.length;rail.innerHTML='';
-const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(idx<=0?total-1:idx-1);rail.appendChild(up);
-const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,idx-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-for(let i=st;i<en;i++){const d=document.createElement('button');d.className='pnav-dot'+(i===idx?' active':'');const g=girls[i];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${g.name.charAt(0)}</span></div>`;d.onclick=()=>showProfile(i);dots.appendChild(d)}
-rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${idx+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(idx>=total-1?0:idx+1);rail.appendChild(dn)}
+function getNamedGirlIndices(){return girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0).map(x=>x.i)}
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
+const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
+const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
+const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
+const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
+const dots=document.createElement('div');dots.className='pnav-dots';const mx=5;let st=Math.max(0,safePos-Math.floor(mx/2)),en=Math.min(total,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
+for(let di=st;di<en;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(realIdx);dots.appendChild(d)}
+rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;rail.appendChild(ctr);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn)}
 
 /* Profile Page */
 function showProfile(idx){
