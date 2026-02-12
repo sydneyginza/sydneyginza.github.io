@@ -232,7 +232,7 @@ document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;l
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
 /* Profile Nav Rail */
-function getNamedGirlIndices(){return girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0).map(x=>x.i)}
+function getNamedGirlIndices(){return girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
 const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
