@@ -165,6 +165,7 @@ const focusPaneId=focusPane?focusPane.id:null;
 renderFilterPane('girlsFilterPane');
 renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
+renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
@@ -262,7 +263,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 ${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
-renderThumbs(idx);renderProfileNav(idx);allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
+renderThumbs(idx);renderProfileNav(idx);renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
 
 function renderThumbs(idx){const g=girls[idx],c=document.getElementById('profThumbs');c.innerHTML='';
 g.photos.forEach((src,i)=>{const w=document.createElement('div');w.className='thumb-wrap';const t=document.createElement('div');t.className='profile-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;

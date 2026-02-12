@@ -63,6 +63,8 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-hover-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
 .girl-card:hover .card-hover-line{width:100%}
 .profile-page{padding:100px 40px;padding-top:120px;max-width:1200px;margin:0 auto}
+#profilePage{display:flex;align-items:flex-start;gap:0}
+.profile-filter-pane{position:sticky;top:90px;margin-top:120px;margin-left:110px;flex-shrink:0}
 .back-btn{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));margin-bottom:40px}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
 .back-btn svg{width:16px;height:16px;fill:currentColor}
@@ -246,6 +248,7 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .section{padding:60px 20px;padding-top:100px}
 .girls-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
 .profile-page{padding:80px 20px;padding-left:80px}
+.profile-filter-pane{display:none}
 .profile-layout{grid-template-columns:1fr;gap:30px}
 .profile-main-img{max-width:320px}.profile-stats{grid-template-columns:1fr 1fr}
 .profile-nav-rail{left:10px}
