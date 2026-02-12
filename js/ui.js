@@ -35,14 +35,16 @@ function clearAllFilters(){sharedFilters={nameSearch:'',country:null,ageMin:null
 function getDataRange(field,prefix){
 const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
 const nums=namedOnly.map(g=>parseFloat(g[field])).filter(n=>!isNaN(n)&&n>0);
-if(!nums.length)return{min:'Min',max:'Max'};
+if(!nums.length)return{min:'Min',max:'Max',rawMin:null,rawMax:null};
 const p=prefix||'';
-return{min:p+Math.min(...nums),max:p+Math.max(...nums)}}
+return{min:p+Math.min(...nums),max:p+Math.max(...nums),rawMin:Math.min(...nums),rawMax:Math.max(...nums)}}
 
 function makeRangeSection(title,minKey,maxKey,dataField,prefix){
 const sec=document.createElement('div');sec.className='fp-section';
 const r=getDataRange(dataField,prefix);
-sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" value="${sharedFilters[minKey]!=null?sharedFilters[minKey]:''}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" value="${sharedFilters[maxKey]!=null?sharedFilters[maxKey]:''}"></div></div>`;
+const minVal=sharedFilters[minKey]!=null?sharedFilters[minKey]:(r.rawMin!=null?r.rawMin:'');
+const maxVal=sharedFilters[maxKey]!=null?sharedFilters[maxKey]:(r.rawMax!=null?r.rawMax:'');
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}" value="${minVal}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}" value="${maxVal}"></div></div>`;
 return sec}
 
 function renderFilterPane(containerId){
@@ -155,8 +157,7 @@ pane.appendChild(clr)}
 /* Bind range inputs */
 pane.querySelectorAll('.fp-range-input').forEach(inp=>{
 let debounce;
-inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{const key=inp.dataset.fkey;const val=inp.value.trim();sharedFilters[key]=val===''?null:parseFloat(val);onFiltersChanged()},400)})})}
-
+inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{const key=inp.dataset.fkey;const val=inp.value.trim();if(val===''){sharedFilters[key]=null}else{const num=parseFloat(val);const def=inp.dataset.default;sharedFilters[key]=(def!==''&&num===parseFloat(def))?null:num}onFiltersChanged()},400)})})}
 function onFiltersChanged(){
 const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
 const cursorPos=hadFocus?document.activeElement.selectionStart:0;
