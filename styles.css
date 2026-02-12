@@ -62,9 +62,9 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-avail{font-size:11px;color:#00c864;letter-spacing:1px;margin-top:3px;font-weight:600}
 .card-hover-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
 .girl-card:hover .card-hover-line{width:100%}
-.profile-page{padding:100px 40px;padding-top:120px;max-width:1200px;margin:0 auto}
+.profile-page{padding:100px 40px;padding-top:120px;max-width:1200px;margin:0 auto;flex:1;min-width:0}
 #profilePage{display:flex;align-items:flex-start;gap:0}
-.profile-filter-pane{position:sticky;top:90px;margin-top:120px;margin-left:110px;flex-shrink:0}
+.profile-filter-pane{position:sticky;top:90px;margin-top:120px;margin-right:20px;flex-shrink:0;order:2}
 .back-btn{display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));margin-bottom:40px}
 .back-btn:hover{border-color:var(--accent);color:var(--accent)}
 .back-btn svg{width:16px;height:16px;fill:currentColor}
