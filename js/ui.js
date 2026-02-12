@@ -53,6 +53,21 @@ const cups=[...new Set(namedGirls.map(g=>g.cup).filter(Boolean))].sort();
 const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
 const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
+/* Profiles */
+const sortedNamed=[...namedGirls].sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));
+if(sortedNamed.length){
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Profiles</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+sortedNamed.forEach(g=>{
+const ri=girls.indexOf(g);
+const btn=document.createElement('button');btn.className='fp-option';
+btn.innerHTML=`<span class="fp-check" style="border:none;background:none">${g.photos&&g.photos.length?`<img src="${g.photos[0]}" style="width:20px;height:20px;border-radius:50%;object-fit:cover">`:`<span style="width:20px;height:20px;border-radius:50%;background:rgba(180,74,255,0.15);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--accent)">${g.name.charAt(0)}</span>`}</span>${g.name}`;
+btn.onclick=()=>{profileReturnPage=containerId==='rosterFilterPane'?'rosterPage':containerId==='calFilterPane'?'calendarPage':'listPage';showProfile(ri)};
+wrap.appendChild(btn)});
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
+
 /* Country */
 if(countries.length){
 const sec=document.createElement('div');sec.className='fp-section';
