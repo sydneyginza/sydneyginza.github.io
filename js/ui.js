@@ -5,10 +5,11 @@ let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
+let sharedFilters={nameSearch:'',country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
 
 function applySharedFilters(list){
 let f=list;
+if(sharedFilters.nameSearch){const q=sharedFilters.nameSearch.toLowerCase();f=f.filter(g=>g.name&&g.name.toLowerCase().includes(q))}
 if(sharedFilters.country)f=f.filter(g=>g.country===sharedFilters.country);
 if(sharedFilters.ageMin!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v>=sharedFilters.ageMin});
 if(sharedFilters.ageMax!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v<=sharedFilters.ageMax});
@@ -27,9 +28,9 @@ if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.ever
 if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
+function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
 
-function clearAllFilters(){sharedFilters={country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
+function clearAllFilters(){sharedFilters={nameSearch:'',country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
 
 function getDataRange(field,prefix){
 const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
@@ -54,27 +55,14 @@ const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
 const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
 /* Profiles search */
-const sortedNamed=[...namedGirls].sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));
-if(sortedNamed.length){
+if(namedGirls.length){
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Profiles</div><input class="fp-range-input fp-profile-search" type="text" placeholder="Search by name..." style="text-align:left;padding:6px 10px;margin-bottom:4px;width:100%"><div class="fp-options fp-profile-results"></div>`;
+sec.innerHTML=`<div class="fp-title">Search</div><input class="fp-range-input" type="text" data-role="name-search" placeholder="Search by name..." style="text-align:left;padding:6px 10px;width:100%">`;
 pane.appendChild(sec);
-const searchInp=sec.querySelector('.fp-profile-search');
-const resultsWrap=sec.querySelector('.fp-profile-results');
-const returnPage=containerId==='rosterFilterPane'?'rosterPage':containerId==='calFilterPane'?'calendarPage':'listPage';
-function renderProfileResults(query){
-resultsWrap.innerHTML='';
-const q=query.trim().toLowerCase();
-if(!q)return;
-const matches=sortedNamed.filter(g=>g.name.toLowerCase().includes(q));
-if(!matches.length){resultsWrap.innerHTML='<div style="font-size:11px;color:var(--text-dim);padding:4px 8px;letter-spacing:1px">No matches</div>';return}
-matches.forEach(g=>{
-const ri=girls.indexOf(g);
-const btn=document.createElement('button');btn.className='fp-option';
-btn.innerHTML=`<span class="fp-check" style="border:none;background:none">${g.photos&&g.photos.length?`<img src="${g.photos[0]}" style="width:20px;height:20px;border-radius:50%;object-fit:cover">`:`<span style="width:20px;height:20px;border-radius:50%;background:rgba(180,74,255,0.15);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--accent)">${g.name.charAt(0)}</span>`}</span>${g.name}`;
-btn.onclick=()=>{profileReturnPage=returnPage;showProfile(ri)};
-resultsWrap.appendChild(btn)})}
-searchInp.addEventListener('input',()=>renderProfileResults(searchInp.value));
+const searchInp=sec.querySelector('[data-role="name-search"]');
+searchInp.value=sharedFilters.nameSearch||'';
+let debounce;
+searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();renderFilters();renderGrid();renderRoster();if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();document.querySelectorAll('[data-role="name-search"]').forEach(inp=>{if(inp!==searchInp){inp.value=sharedFilters.nameSearch}})},300)});
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
 /* Country */
@@ -170,11 +158,16 @@ let debounce;
 inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{const key=inp.dataset.fkey;const val=inp.value.trim();sharedFilters[key]=val===''?null:parseFloat(val);onFiltersChanged()},400)})})}
 
 function onFiltersChanged(){
+const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
+const cursorPos=hadFocus?document.activeElement.selectionStart:0;
+const focusPane=hadFocus?document.activeElement.closest('.filter-pane'):null;
+const focusPaneId=focusPane?focusPane.id:null;
 renderFilterPane('girlsFilterPane');
 renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
 renderFilters();renderGrid();renderRoster();
-if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar()}
+if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
+if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
 const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
