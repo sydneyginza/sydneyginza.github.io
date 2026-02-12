@@ -173,6 +173,7 @@ renderFilterPane('calFilterPane');
 renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
+if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage)}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
 const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
@@ -239,7 +240,7 @@ document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;l
 function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
 
 /* Profile Nav Rail */
-function getNamedGirlIndices(){return girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
+function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
 const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
