@@ -34,6 +34,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .login-form-inline .lf-error{color:#ff4444;font-size:12px;text-align:center;margin-top:8px;min-height:16px}
 .page{display:none}.page.active{display:block}
 .section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}
+#rosterPage>.section,#listPage>.section{max-width:none}
 .section-header{display:flex;align-items:center;gap:20px;margin-bottom:60px}
 .section-line{width:60px;height:1px;background:var(--accent)}
 .section-tag{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--accent)}
