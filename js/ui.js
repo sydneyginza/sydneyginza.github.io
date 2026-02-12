@@ -44,7 +44,9 @@ const sec=document.createElement('div');sec.className='fp-section';
 const r=getDataRange(dataField,prefix);
 const minVal=sharedFilters[minKey]!=null?sharedFilters[minKey]:(r.rawMin!=null?r.rawMin:'');
 const maxVal=sharedFilters[maxKey]!=null?sharedFilters[maxKey]:(r.rawMax!=null?r.rawMax:'');
-sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}" value="${minVal}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}" value="${maxVal}"></div></div>`;
+const minAttr=r.rawMin!=null?` min="${r.rawMin}"`:'';
+const maxAttr=r.rawMax!=null?` max="${r.rawMax}"`:'';
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}"${minAttr}${maxAttr} value="${minVal}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}"${minAttr}${maxAttr} value="${maxVal}"></div></div>`;
 return sec}
 
 function renderFilterPane(containerId){
@@ -157,7 +159,9 @@ pane.appendChild(clr)}
 /* Bind range inputs */
 pane.querySelectorAll('.fp-range-input').forEach(inp=>{
 let debounce;
-inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{const key=inp.dataset.fkey;const val=inp.value.trim();if(val===''){sharedFilters[key]=null}else{const num=parseFloat(val);const def=inp.dataset.default;sharedFilters[key]=(def!==''&&num===parseFloat(def))?null:num}onFiltersChanged()},400)})})}
+function clampAndApply(){const key=inp.dataset.fkey;let val=inp.value.trim();if(val===''){sharedFilters[key]=null}else{let num=parseFloat(val);if(isNaN(num)){sharedFilters[key]=null;return}const lo=inp.hasAttribute('min')?parseFloat(inp.min):null;const hi=inp.hasAttribute('max')?parseFloat(inp.max):null;if(lo!=null&&num<lo){num=lo;inp.value=num}if(hi!=null&&num>hi){num=hi;inp.value=num}const def=inp.dataset.default;sharedFilters[key]=(def!==''&&num===parseFloat(def))?null:num}onFiltersChanged()}
+inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(clampAndApply,400)});
+inp.addEventListener('blur',clampAndApply)})}
 function onFiltersChanged(){
 const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
 const cursorPos=hadFocus?document.activeElement.selectionStart:0;
