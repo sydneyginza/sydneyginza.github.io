@@ -13,6 +13,7 @@ const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json';
 let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 let girls = [];
+let GT = true;
 
 // ✅ No auth headers needed — the proxy injects the token server-side
 function proxyHeaders() {

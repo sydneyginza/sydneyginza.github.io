@@ -6,7 +6,7 @@ let formLabels=[];
 document.getElementById('formClose').onclick=()=>formOverlay.classList.remove('open');
 document.getElementById('formCancel').onclick=()=>formOverlay.classList.remove('open');
 formOverlay.onclick=e=>{if(e.target===formOverlay)formOverlay.classList.remove('open')};
-let formPhotos=[],formPhotosToDelete=[],formNewPhotos=[];
+let formPhotos=[],formPhotosToDelete=[],formNewPhotos=[],formNewFiles=[];
 
 /* Old URL preview helper */
 function updateOldUrlPreview(){const inp=document.getElementById('fOldUrl'),prev=document.getElementById('fOldUrlPreview');const url=inp.value.trim();if(url){const slug=url.split('/').filter(Boolean).pop()||url;prev.innerHTML=`<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;cursor:pointer">${slug}</a>`}else{prev.innerHTML=''}}
