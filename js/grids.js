@@ -3,7 +3,17 @@
 /* Girls Grid */
 function renderFilters(){const locs=["All",...new Set(girls.map(g=>g.location))];const fb=document.getElementById('filterBar');fb.innerHTML='';
 locs.forEach(c=>{const b=document.createElement('button');b.className='filter-btn'+(c===activeLocation?' active':'');b.textContent=c;b.onclick=()=>{activeLocation=c;renderFilters();renderGrid()};fb.appendChild(b)});
+/* Sort buttons */
+const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
+const sorts=[{key:'name',label:'A–Z'},{key:'newest',label:'Newest'},{key:'age',label:'Age'}];
+sorts.forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(gridSort===s.key?' active':'');b.textContent=s.label;b.onclick=()=>{gridSort=s.key;renderFilters();renderGrid();renderRoster();renderFavoritesGrid()};fb.appendChild(b)});
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
+
+function applySortOrder(list){
+const emptyLast=(a,b,cmp)=>{const an=(a.name||'').trim(),bn=(b.name||'').trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return cmp(a,b)};
+if(gridSort==='age')return list.sort((a,b)=>emptyLast(a,b,()=>{const aa=parseFloat(a.age)||999,ba=parseFloat(b.age)||999;return aa-ba}));
+if(gridSort==='newest')return list.sort((a,b)=>emptyLast(a,b,()=>{const ad=a.startDate||'',bd=b.startDate||'';if(!ad&&!bd)return 0;if(!ad)return 1;if(!bd)return -1;return bd.localeCompare(ad)}));
+return list.sort((a,b)=>emptyLast(a,b,()=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase())))}
 
 const grid=document.getElementById('girlsGrid');
 function cardFavBtn(name){const fav=name&&isFavorite(name);return `<button class="card-fav${fav?' active':''}" data-fav-name="${name||''}" title="${fav?'Remove from favorites':'Add to favorites'}">${favHeartSvg(fav)}</button>`}
@@ -12,7 +22,7 @@ function renderGrid(){
 let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
-filtered.sort((a,b)=>{const an=(a.name||'').trim();const bn=(b.name||'').trim();const aEmpty=an.length===0;const bEmpty=bn.length===0;if(aEmpty&&bEmpty)return 0;if(aEmpty)return 1;if(bEmpty)return -1;return an.toLowerCase().localeCompare(bn.toLowerCase())});
+applySortOrder(filtered);
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
@@ -41,7 +51,7 @@ let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.st
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
-filtered.sort((a,b)=>{const an=a.name&&a.name.trim(),bn=b.name&&b.name.trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return an.toLowerCase().localeCompare(bn.toLowerCase())});
+applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
@@ -55,7 +65,7 @@ function renderRoster(){renderRosterFilters();renderRosterGrid()}
 function renderFavoritesGrid(){const fg=document.getElementById('favoritesGrid');fg.innerHTML='';
 const favs=getFavorites();const ts=fmtDate(getAEDTDate());
 let filtered=girls.filter(g=>g.name&&favs.includes(g.name));
-filtered.sort((a,b)=>a.name.trim().toLowerCase().localeCompare(b.name.trim().toLowerCase()));
+applySortOrder(filtered);
 if(!filtered.length){fg.innerHTML='<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">No favorites yet</div><div class="fav-empty-hint">Tap the heart on any profile to save it here</div></div>';return}
 filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';

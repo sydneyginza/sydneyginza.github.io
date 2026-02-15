@@ -1,6 +1,7 @@
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
 let activeLocation="All",deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,rosterLocFilter=null,calLocFilter=null,calPending={};
+let gridSort='name';
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
