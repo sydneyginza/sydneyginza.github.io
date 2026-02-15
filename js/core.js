@@ -180,3 +180,44 @@ function lazyThumb(src, cls) {
 function lazyCalAvatar(src) {
   return `<img data-src="${src}">`;
 }
+
+/* === Card Entrance Animations === */
+const entranceObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const card = entry.target;
+      const delay = parseInt(card.style.getPropertyValue('--card-index') || 0) * 60;
+      card.classList.add('card-enter');
+      setTimeout(() => { card.classList.remove('card-enter'); card.classList.add('card-entered'); }, delay + 500);
+      entranceObserver.unobserve(card);
+    }
+  });
+}, { rootMargin: '50px 0px', threshold: 0.05 });
+
+function observeEntrance(container) {
+  if (!container) return;
+  container.querySelectorAll('.girl-card').forEach((card, i) => {
+    card.style.setProperty('--card-index', Math.min(i, 8));
+    entranceObserver.observe(card);
+  });
+}
+
+const calEntranceObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const row = entry.target;
+      const delay = parseInt(row.style.getPropertyValue('--row-index') || 0) * 50;
+      row.classList.add('cal-row-enter');
+      setTimeout(() => { row.classList.remove('cal-row-enter'); row.classList.add('cal-row-entered'); }, delay + 400);
+      calEntranceObserver.unobserve(row);
+    }
+  });
+}, { rootMargin: '30px 0px', threshold: 0.05 });
+
+function observeCalEntrance(table) {
+  if (!table) return;
+  table.querySelectorAll('tbody tr').forEach((row, i) => {
+    row.style.setProperty('--row-index', Math.min(i, 10));
+    calEntranceObserver.observe(row);
+  });
+}

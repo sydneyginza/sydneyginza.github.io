@@ -47,7 +47,10 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .add-btn{background:rgba(180,74,255,0.08);border-color:var(--accent);color:var(--accent);margin-left:auto}.add-btn:hover{background:rgba(180,74,255,0.2)}
 .filter-sep{width:1px;height:28px;background:rgba(255,255,255,0.1);margin:0 4px}
 .girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;transition:all .4s;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;transition:border-color .4s,box-shadow .4s;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));opacity:0;transform:translateY(20px);animation:none}
+.girl-card.card-enter{animation:cardEnter .5s cubic-bezier(0.23,1,0.32,1) forwards;animation-delay:calc(var(--card-index,0) * 60ms)}
+.girl-card.card-entered{opacity:1;transform:translateY(0);transition:border-color .4s,box-shadow .4s,transform .4s}
+@keyframes cardEnter{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .girl-card:hover{border-color:var(--accent);transform:translateY(-6px);box-shadow:0 20px 60px rgba(180,74,255,0.1)}
 .card-img{width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .card-img .silhouette{width:60%;height:80%;background:radial-gradient(ellipse,rgba(255,255,255,0.06),transparent);border-radius:50% 50% 0 0;filter:blur(1px)}
@@ -187,6 +190,10 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .cal-table td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
 .cal-table td:first-child{text-align:left}
 .cal-table tr:hover td{background:rgba(255,255,255,0.02)}
+.cal-table tbody tr{opacity:0;transform:translateY(12px);animation:none}
+.cal-table tbody tr.cal-row-enter{animation:calRowEnter .4s cubic-bezier(0.23,1,0.32,1) forwards;animation-delay:calc(var(--row-index,0) * 50ms)}
+.cal-table tbody tr.cal-row-entered{opacity:1;transform:none}
+@keyframes calRowEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .cal-profile{display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .3s}
 .cal-profile:hover{opacity:.8}
 .cal-avatar{width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center}
