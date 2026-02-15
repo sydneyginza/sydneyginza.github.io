@@ -210,6 +210,84 @@ document.getElementById('copyTimeCancel').onclick=()=>closeCopyTimeModal('cancel
 document.getElementById('copyTimeModal').onclick=e=>{if(e.target===document.getElementById('copyTimeModal'))closeCopyTimeModal('cancel')};
 window.addEventListener('beforeunload',()=>closeCopyTimeModal('cancel'));
 
+/* Copy Day Modal */
+let copyDaySource=null,copyDayTargets=[];
+
+function openCopyDayModal(){
+const dates=getWeekDates();
+copyDaySource=null;copyDayTargets=[];
+/* Pick first day that has entries as default source */
+for(const ds of dates){const count=getScheduledForDay(ds).length;if(count>0){copyDaySource=ds;break}}
+if(!copyDaySource)copyDaySource=dates[0];
+renderCopyDayModal();
+document.getElementById('copyDayModal').classList.add('open');
+}
+
+function getScheduledForDay(ds){return girls.filter(g=>{if(!g.name)return false;const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
+
+function renderCopyDayModal(){
+const dates=getWeekDates();const ts=dates[0];
+/* Source buttons */
+const sc=document.getElementById('copyDaySources');sc.innerHTML='';
+dates.forEach(ds=>{const f=dispDate(ds);const count=getScheduledForDay(ds).length;
+const b=document.createElement('button');b.className='copy-day-btn'+(ds===copyDaySource?' active':'')+(count===0?' disabled':'');
+b.innerHTML=(ds===ts?'Today':f.day)+' <span style="opacity:.5;font-size:11px">('+count+')</span>';
+b.onclick=()=>{copyDaySource=ds;copyDayTargets=copyDayTargets.filter(t=>t!==ds);renderCopyDayModal()};sc.appendChild(b)});
+/* Preview */
+const prev=document.getElementById('copyDayPreview');
+const scheduled=getScheduledForDay(copyDaySource);
+if(scheduled.length){
+const f=dispDate(copyDaySource);
+prev.innerHTML='<div class="copy-day-preview-title">'+f.day+' '+f.date+' — '+scheduled.length+' girl'+(scheduled.length>1?'s':'')+'</div><div class="copy-day-preview-list">'+
+scheduled.map(g=>{const e=getCalEntry(g.name,copyDaySource);return '<div class="copy-day-preview-item"><span class="cdp-name">'+g.name+'</span><span class="cdp-time">'+fmtTime12(e.start)+' — '+fmtTime12(e.end)+'</span></div>'}).join('')+'</div>';
+}else{prev.innerHTML='<div class="copy-day-preview-empty">No girls scheduled on this day</div>'}
+/* Target buttons */
+const tc=document.getElementById('copyDayTargets');tc.innerHTML='';
+dates.forEach(ds=>{if(ds===copyDaySource)return;
+const f=dispDate(ds);const existing=getScheduledForDay(ds).length;
+const b=document.createElement('button');b.className='copy-day-btn'+(copyDayTargets.includes(ds)?' target-active':'');
+b.innerHTML=(ds===ts?'Today':f.day)+(existing>0?' <span style="opacity:.5;font-size:11px">('+existing+')</span>':'');
+b.onclick=()=>{const idx=copyDayTargets.indexOf(ds);if(idx>=0)copyDayTargets.splice(idx,1);else copyDayTargets.push(ds);renderCopyDayModal()};tc.appendChild(b)});
+/* Select all targets shortcut */
+const allTargets=dates.filter(ds=>ds!==copyDaySource);
+if(allTargets.length>1){const ab=document.createElement('button');ab.className='copy-day-btn'+(copyDayTargets.length===allTargets.length?' target-active':'');
+ab.style.fontStyle='italic';ab.textContent='All';ab.onclick=()=>{if(copyDayTargets.length===allTargets.length)copyDayTargets=[];else copyDayTargets=[...allTargets];renderCopyDayModal()};tc.appendChild(ab)}
+/* Apply button state */
+const applyBtn=document.getElementById('copyDayApply');
+applyBtn.disabled=scheduled.length===0||copyDayTargets.length===0;
+applyBtn.style.opacity=applyBtn.disabled?'.4':'1';
+applyBtn.style.pointerEvents=applyBtn.disabled?'none':'auto';
+}
+
+function closeCopyDayModal(){document.getElementById('copyDayModal').classList.remove('open')}
+
+document.getElementById('copyDayCancel').onclick=closeCopyDayModal;
+document.getElementById('copyDayModal').onclick=e=>{if(e.target===document.getElementById('copyDayModal'))closeCopyDayModal()};
+
+document.getElementById('copyDayApply').onclick=async function(){
+const scheduled=getScheduledForDay(copyDaySource);
+if(!scheduled.length||!copyDayTargets.length)return;
+const overwrite=document.getElementById('copyDayOverwrite').checked;
+let copied=0;
+copyDayTargets.forEach(targetDate=>{
+scheduled.forEach(g=>{
+const entry=getCalEntry(g.name,copyDaySource);
+if(!entry||!entry.start||!entry.end)return;
+const existing=getCalEntry(g.name,targetDate);
+if(existing&&existing.start&&existing.end&&!overwrite)return;
+if(!calData[g.name])calData[g.name]={};
+calData[g.name][targetDate]={start:entry.start,end:entry.end};
+copied++;
+})});
+if(copied>0){
+this.textContent='Saving...';this.style.pointerEvents='none';
+await saveCalData();
+this.textContent='Copy Schedule';this.style.pointerEvents='auto';
+renderCalendar();renderRoster();renderGrid();renderHome();
+showToast('Copied '+scheduled.length+' schedule'+(scheduled.length>1?'s':'')+' to '+copyDayTargets.length+' day'+(copyDayTargets.length>1?'s':''));
+}else{showToast('Nothing to copy (all targets already have entries)','error')}
+closeCopyDayModal();};
+
 /* Home Page */
 function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
 
