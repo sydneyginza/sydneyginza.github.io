@@ -71,6 +71,35 @@ function updateCalCache() {
   if (calSha) try { localStorage.setItem(CACHE_KEY_CAL_SHA, calSha); } catch(e) {}
 }
 
+/* === Favorites === */
+const FAV_KEY = 'ginza_favorites';
+
+function getFavorites() {
+  try { const v = localStorage.getItem(FAV_KEY); return v ? JSON.parse(v) : []; }
+  catch (e) { return []; }
+}
+
+function saveFavorites(favs) {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) {}
+}
+
+function isFavorite(name) {
+  return getFavorites().includes(name);
+}
+
+function toggleFavorite(name) {
+  const favs = getFavorites();
+  const idx = favs.indexOf(name);
+  if (idx >= 0) favs.splice(idx, 1); else favs.push(name);
+  saveFavorites(favs);
+  return idx < 0;
+}
+
+function getFavCount() {
+  const favs = getFavorites();
+  return girls.filter(g => g.name && favs.includes(g.name)).length;
+}
+
 /* === API Functions (with retry) === */
 
 async function fetchWithRetry(url, opts = {}, { retries = 3, baseDelay = 600 } = {}) {

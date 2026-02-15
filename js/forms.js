@@ -56,7 +56,7 @@ function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkel
 
 function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};return cal}
 
-function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome()}
+function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
 (async()=>{
 try{

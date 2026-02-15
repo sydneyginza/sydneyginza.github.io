@@ -175,7 +175,7 @@ renderFilters();renderGrid();renderRoster();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
 if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage)}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
-const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
+const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
@@ -185,6 +185,7 @@ document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');document.getElementById('rosterFilterPane').style.display='';renderFilterPane('rosterFilterPane');renderRoster()}
 if(id==='listPage'){document.getElementById('navGirls').classList.add('active');document.getElementById('girlsFilterPane').style.display='';renderFilterPane('girlsFilterPane');renderGrid()}
+if(id==='favoritesPage'){document.getElementById('navFavorites').classList.add('active');renderFavoritesGrid()}
 if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
 if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
 if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');document.getElementById('calFilterPane').style.display='';calPending={};renderFilterPane('calFilterPane');renderCalendar()}
@@ -193,6 +194,7 @@ window.scrollTo(0,0)}
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
 document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
 document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
+document.getElementById('navFavorites').onclick=e=>{e.preventDefault();showPage('favoritesPage')};
 document.getElementById('navValue').onclick=e=>{e.preventDefault();showPage('valuePage')};
 document.getElementById('navEmployment').onclick=e=>{e.preventDefault();showPage('employmentPage')};
 document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
@@ -278,6 +280,10 @@ const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML
 const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
 
 /* Profile Page */
+function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)return;const c=getFavCount();b.textContent=c>0?c:''}
+
+function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
+
 function showProfile(idx){
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
@@ -289,10 +295,12 @@ const hasMultiple=g.photos.length>1;
 const arrows=hasMultiple?`<button class="gallery-main-arrow prev" id="galPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><button class="gallery-main-arrow next" id="galNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>`:'';
 const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><span>1</span> / ${g.photos.length}</div>`:'';
 const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</div>`:'';
+const isFav=g.name&&isFavorite(g.name);
+const favBtn=g.name?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?'Favorited':'Add to Favorites'}</button>`:'';
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
-<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-divider"></div>
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div>${favBtn}<div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">Special Requests</div><div class="profile-desc" style="margin-bottom:24px">${g.special||'\u2014'}</div>
 <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
@@ -301,6 +309,8 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 ${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
+const profFav=document.getElementById('profFavBtn');
+if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
 renderGallery(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
 
 /* Profile Gallery */
@@ -348,6 +358,6 @@ renderDropdown();
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}
 
 /* Back to Top */
-(function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','calendarPage'];
+(function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','favoritesPage','calendarPage'];
 window.addEventListener('scroll',()=>{const active=targetPages.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});if(active&&window.scrollY>300)btn.classList.add('visible');else btn.classList.remove('visible')});
 btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})()

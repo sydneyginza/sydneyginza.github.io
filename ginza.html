@@ -17,6 +17,7 @@
 <a href="#" id="navHome" class="active">Home</a>
 <a href="#" id="navRoster">Roster</a>
 <a href="#" id="navGirls">Girls</a>
+<a href="#" id="navFavorites"><span class="nav-fav-wrap">Favorites<span class="nav-fav-badge" id="navFavBadge"></span></span></a>
 <a href="#" id="navValue">Rates</a>
 <a href="#" id="navEmployment">Employment</a>
 <a href="#" id="navCalendar" style="display:none">Calendar</a>
@@ -83,6 +84,11 @@
 </div>
 <aside class="filter-pane" id="girlsFilterPane" style="display:none"></aside>
 </div>
+</section></div>
+
+<div class="page" id="favoritesPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Favorites</div></div></div>
+<div class="girls-grid" id="favoritesGrid"></div>
 </section></div>
 
 <div class="page" id="valuePage"><section class="section">
@@ -183,9 +189,13 @@
 
 <div class="lightbox-overlay" id="lightbox">
 <button class="lightbox-close" id="lbClose">&times;</button>
+<div class="lightbox-counter" id="lbCounter"></div>
+<div class="lightbox-main">
 <button class="lightbox-nav lightbox-prev" id="lbPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button>
 <img id="lbImg" src="">
 <button class="lightbox-nav lightbox-next" id="lbNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>
+</div>
+<div class="lightbox-strip" id="lbStrip"></div>
 </div>
 
 <div class="modal-overlay" id="formOverlay"><div class="form-modal">
