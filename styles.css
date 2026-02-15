@@ -124,6 +124,8 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--text-dim);font-size:28px;cursor:pointer;z-index:5;transition:color .3s}.modal-close:hover{color:#fff}
 .form-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:22px;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:30px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-row.country-stats-row{grid-template-columns:1fr 1fr;align-items:start}
+.form-stack-right{display:flex;flex-direction:column;gap:12px}
 .form-row.full{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr 1fr 1fr}
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)}
@@ -257,7 +259,7 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .profile-main-img{max-width:320px}.profile-stats{grid-template-columns:1fr 1fr}
 .pnav-dot{width:38px;height:38px}.pnav-dot .dot-inner{width:28px;height:28px}.pnav-dot .dot-letter{font-size:11px}
 .pnav-arrow{width:32px;height:32px}.pnav-arrow svg{width:16px;height:16px}
-.form-row{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr}.form-modal{padding:24px}
+.form-row{grid-template-columns:1fr}.form-row.country-stats-row{grid-template-columns:1fr}.form-row.triple{grid-template-columns:1fr}.form-modal{padding:24px}
 .cal-table{font-size:12px}.cal-table th{padding:10px 6px;font-size:9px}.cal-table td{padding:8px 6px}
 .cal-avatar{width:32px;height:32px}.cal-name{font-size:10px}.cal-check{width:18px;height:18px}
 .home-section{padding:100px 20px 60px}.home-images{gap:12px}.home-img-card{width:160px;height:234px}
