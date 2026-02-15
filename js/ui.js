@@ -10,7 +10,7 @@ let sharedFilters={nameSearch:'',country:null,ageMin:null,ageMax:null,bodyMin:nu
 function applySharedFilters(list){
 let f=list;
 if(sharedFilters.nameSearch){const q=sharedFilters.nameSearch.toLowerCase();f=f.filter(g=>g.name&&g.name.toLowerCase().includes(q))}
-if(sharedFilters.country)f=f.filter(g=>g.country===sharedFilters.country);
+if(sharedFilters.country)f=f.filter(g=>{const gc=g.country;if(Array.isArray(gc))return gc.includes(sharedFilters.country);return gc===sharedFilters.country});
 if(sharedFilters.ageMin!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v>=sharedFilters.ageMin});
 if(sharedFilters.ageMax!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v<=sharedFilters.ageMax});
 if(sharedFilters.bodyMin!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v>=sharedFilters.bodyMin});
@@ -53,7 +53,7 @@ function renderFilterPane(containerId){
 const pane=document.getElementById(containerId);if(!pane)return;
 pane.innerHTML='';
 const namedGirls=girls.filter(g=>g.name&&String(g.name).trim().length>0);
-const countries=[...new Set(namedGirls.map(g=>g.country).filter(Boolean))].sort();
+const countries=[...new Set(namedGirls.flatMap(g=>Array.isArray(g.country)?g.country:[g.country]).filter(Boolean))].sort();
 const cups=[...new Set(namedGirls.map(g=>g.cup).filter(Boolean))].sort();
 const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
 const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
@@ -77,7 +77,7 @@ pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 countries.forEach(c=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country===c?' active':'');
-const cnt=namedGirls.filter(g=>g.country===c).length;
+const cnt=namedGirls.filter(g=>{const gc=g.country;return Array.isArray(gc)?gc.includes(c):gc===c}).length;
 btn.innerHTML=`<span class="fp-check">${sharedFilters.country===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged()};
 wrap.appendChild(btn)})}
@@ -265,7 +265,7 @@ const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+'
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
-<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${g.country}</span>${availHtml}</div><div class="profile-divider"></div>
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-divider"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
 <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>

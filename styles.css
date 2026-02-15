@@ -302,6 +302,10 @@ nav{padding:0 20px}.nav-links{gap:16px}.nav-links a{font-size:12px}
 .label-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:rgba(180,74,255,0.1);border:1px solid rgba(180,74,255,0.25);color:var(--accent);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));transition:all .3s}
 .label-tag .label-remove{background:none;border:none;color:rgba(255,68,68,0.7);font-size:13px;cursor:pointer;padding:0 0 0 4px;line-height:1;transition:color .2s}
 .label-tag .label-remove:hover{color:#ff4444}
+.country-multi-wrap{display:flex;gap:8px;flex-wrap:wrap}
+.country-multi-wrap .country-opt{display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:var(--text-dim);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Orbitron',sans-serif;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+.country-multi-wrap .country-opt:hover{border-color:rgba(180,74,255,0.4);color:#fff}
+.country-multi-wrap .country-opt.selected{background:rgba(180,74,255,0.12);border-color:rgba(180,74,255,0.4);color:var(--accent)}
 .profile-labels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
 .profile-label{display:inline-flex;padding:5px 14px;background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.2);color:var(--accent);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
 .card-labels{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
