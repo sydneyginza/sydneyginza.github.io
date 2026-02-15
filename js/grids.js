@@ -88,12 +88,19 @@ const vals=[
 ];
 let html='<thead><tr><th style="text-align:left">Rates</th><th style="text-align:left">Price Range</th></tr></thead><tbody>';
 vals.forEach(v=>{
-const nums=girls.map(g=>parseFloat(g[v.key])).filter(n=>!isNaN(n)&&n>0);
+const nums=[];
+girls.forEach(g=>{
+const raw=g[v.key];if(!raw)return;
+const cleaned=String(raw).replace(/[\$,\s]/g,'');
+/* Handle ranges like "350-400" */
+const parts=cleaned.split(/[-–—~]+/);
+parts.forEach(p=>{const n=parseFloat(p);if(!isNaN(n)&&n>0)nums.push(n)});
+});
 let range='\u2014';
 if(nums.length){
 const min=Math.min(...nums);
 const max=Math.max(...nums);
-range=min===max?'$'+min:'$'+min+' - $'+max;
+range=min===max?'$'+min:'$'+min+' – $'+max;
 }
 html+=`<tr><td style="text-align:left;font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:2px;color:#fff;text-transform:uppercase">${v.label}</td><td style="text-align:left;font-family:'Orbitron',sans-serif;font-size:16px;letter-spacing:2px;color:var(--accent)">${range}</td></tr>`;
 });
