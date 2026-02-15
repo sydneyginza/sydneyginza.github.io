@@ -5,12 +5,12 @@ let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={nameSearch:'',country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
+let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
 
 function applySharedFilters(list){
 let f=list;
 if(sharedFilters.nameSearch){const q=sharedFilters.nameSearch.toLowerCase();f=f.filter(g=>g.name&&g.name.toLowerCase().includes(q))}
-if(sharedFilters.country)f=f.filter(g=>{const gc=g.country;if(Array.isArray(gc))return gc.includes(sharedFilters.country);return gc===sharedFilters.country});
+if(sharedFilters.country.length)f=f.filter(g=>{const gc=g.country;if(Array.isArray(gc))return sharedFilters.country.some(c=>gc.includes(c));return sharedFilters.country.includes(gc)});
 if(sharedFilters.ageMin!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v>=sharedFilters.ageMin});
 if(sharedFilters.ageMax!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v<=sharedFilters.ageMax});
 if(sharedFilters.bodyMin!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v>=sharedFilters.bodyMin});
@@ -28,9 +28,9 @@ if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.ever
 if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
+function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
 
-function clearAllFilters(){sharedFilters={nameSearch:'',country:null,ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
+function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
 
 function getDataRange(field,prefix){
 const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
@@ -76,10 +76,10 @@ sec.innerHTML=`<div class="fp-title">Country</div><div class="fp-options"></div>
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 countries.forEach(c=>{
-const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country===c?' active':'');
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country.includes(c)?' active':'');
 const cnt=namedGirls.filter(g=>{const gc=g.country;return Array.isArray(gc)?gc.includes(c):gc===c}).length;
-btn.innerHTML=`<span class="fp-check">${sharedFilters.country===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{sharedFilters.country=sharedFilters.country===c?null:c;onFiltersChanged()};
+btn.innerHTML=`<span class="fp-check">${sharedFilters.country.includes(c)?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{if(sharedFilters.country.includes(c))sharedFilters.country=sharedFilters.country.filter(x=>x!==c);else sharedFilters.country.push(c);onFiltersChanged()};
 wrap.appendChild(btn)})}
 
 /* Age */
