@@ -52,9 +52,10 @@ function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').t
 document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){const g=girls[deleteTarget];if(g.photos&&GT)for(const url of g.photos){if(url.includes('githubusercontent.com'))await deleteFromGithub(url)}girls.splice(deleteTarget,1);await saveData();deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showPage('homePage');showToast('Profile deleted')}};
 
 /* Init */
+function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
 (async()=>{try{await loadConfig();const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 if(data!==null)girls=data;else showToast('Could not load data','error');
 if(cal){for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};calData=cal}
 rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();
-const ls=document.getElementById('loadingScreen');ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)}catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');const ls=document.getElementById('loadingScreen');if(ls){ls.classList.add('hidden');setTimeout(()=>ls.remove(),600)}}})();
+removeSkeletons()}catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}})();

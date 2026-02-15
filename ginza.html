@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
 </head>
 <body>
-<div class="loading-screen" id="loadingScreen"><div class="loading-spinner"></div><div class="loading-text">Loading Data</div></div>
 <div class="toast" id="toast"></div>
 <div class="particles" id="particles"></div>
 <nav>
@@ -30,7 +29,7 @@
 <div class="page active" id="homePage"><section class="home-section">
 <div class="home-title">GINZA</div>
 <div class="home-tagline">Sydney's Premier Experience</div>
-<div class="home-images" id="homeImages"></div>
+<div class="home-images" id="homeImages"><div class="skeleton-fade" id="homeSkeleton"><div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap"><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div></div></div></div>
 <div class="home-mid">
 <div class="home-mid-left">
 <div class="home-divider-sm"></div>
@@ -67,20 +66,20 @@
 </section></div>
 
 <div class="page" id="rosterPage"><section class="section">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Roster</div></div><div class="filter-bar" id="rosterFilterBar"></div></div>
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Roster</div></div><div class="filter-bar" id="rosterFilterBar"><div class="skeleton-fade" id="rosterFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
-<div class="girls-grid" id="rosterGrid"></div>
+<div class="girls-grid" id="rosterGrid"><div class="skeleton-fade" id="rosterSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
 </div>
 <aside class="filter-pane" id="rosterFilterPane" style="display:none"></aside>
 </div>
 </section></div>
 
 <div class="page" id="listPage"><section class="section">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div><div class="filter-bar" id="filterBar"></div></div>
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div><div class="filter-bar" id="filterBar"><div class="skeleton-fade" id="girlsFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
-<div class="girls-grid" id="girlsGrid"></div>
+<div class="girls-grid" id="girlsGrid"><div class="skeleton-fade" id="girlsSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
 </div>
 <aside class="filter-pane" id="girlsFilterPane" style="display:none"></aside>
 </div>
@@ -171,7 +170,7 @@
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><div class="section-title">Calendar</div></div><div class="filter-bar" id="calFilterBar"></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
-<div style="overflow-x:auto"><table class="cal-table" id="calTable"></table></div>
+<div style="overflow-x:auto"><table class="cal-table" id="calTable"></table><div class="skeleton-fade" id="calSkeleton"><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w50 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w40 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w60 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w30 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w40 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w50 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w70 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w40 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div></div></div>
 </div>
 <aside class="filter-pane" id="calFilterPane" style="display:none"></aside>
 </div>
