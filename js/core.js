@@ -150,3 +150,33 @@ async function loadConfig() {
   // No token management needed — just set repo paths
   return true;
 }
+
+/* === Lazy Loading === */
+const lazyObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      const src = img.dataset.src;
+      if (src) {
+        img.src = src;
+        img.onload = () => img.classList.add('lazy-loaded');
+        img.onerror = () => { img.classList.add('lazy-loaded'); };
+        delete img.dataset.src;
+      }
+      lazyObserver.unobserve(img);
+    }
+  });
+}, { rootMargin: '200px 0px', threshold: 0.01 });
+
+function observeLazy(container) {
+  if (!container) return;
+  container.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
+}
+
+function lazyThumb(src, cls) {
+  return `<img class="${cls || 'card-thumb'}" data-src="${src}">`;
+}
+
+function lazyCalAvatar(src) {
+  return `<img data-src="${src}">`;
+}
