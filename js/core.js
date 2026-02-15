@@ -221,6 +221,48 @@ async function deleteFromGithub(url) {
   } catch (e) { console.error('deleteFromGithub error:', e); }
 }
 
+/* === Debounced Calendar Save === */
+let _calSaveTimer = null;
+let _calSaving = false;
+let _calSaveQueued = false;
+let _calSavingCells = new Set();
+
+function _markCellSaving(td) {
+  if (td) { td.classList.add('cal-saving'); _calSavingCells.add(td); }
+}
+
+function _clearSavingCells() {
+  _calSavingCells.forEach(td => td.classList.remove('cal-saving'));
+  _calSavingCells.clear();
+}
+
+async function _execCalSave() {
+  if (_calSaving) { _calSaveQueued = true; return; }
+  _calSaving = true;
+  try {
+    await saveCalData();
+    renderRoster(); renderGrid(); renderHome();
+  } finally {
+    _calSaving = false;
+    _clearSavingCells();
+    if (_calSaveQueued) {
+      _calSaveQueued = false;
+      _execCalSave();
+    }
+  }
+}
+
+function queueCalSave(td, delay) {
+  _markCellSaving(td);
+  clearTimeout(_calSaveTimer);
+  _calSaveTimer = setTimeout(() => _execCalSave(), delay != null ? delay : 800);
+}
+
+function flushCalSave() {
+  clearTimeout(_calSaveTimer);
+  if (_calSavingCells.size > 0 || _calSaveQueued) { _execCalSave(); }
+}
+
 // ✅ loadConfig is no longer needed since the proxy handles the token.
 // If you still need config for other settings, simplify it:
 async function loadConfig() {

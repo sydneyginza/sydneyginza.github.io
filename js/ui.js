@@ -178,7 +178,7 @@ if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored)
 const allPages=['homePage','rosterPage','listPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
-if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
+if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 ['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});
 document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
@@ -232,12 +232,35 @@ disp.querySelector('.ng-photo').onclick=()=>{profileReturnPage='homePage';showPr
 disp.querySelector('.ng-name').onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
 
 /* Lightbox */
-let lbPhotos=[],lbIdx=0;const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg');
-document.getElementById('lbClose').onclick=()=>lightbox.classList.remove('open');
-lightbox.onclick=e=>{if(e.target===lightbox)lightbox.classList.remove('open')};
-document.getElementById('lbPrev').onclick=()=>{lbIdx=(lbIdx-1+lbPhotos.length)%lbPhotos.length;lbImg.src=lbPhotos[lbIdx]};
-document.getElementById('lbNext').onclick=()=>{lbIdx=(lbIdx+1)%lbPhotos.length;lbImg.src=lbPhotos[lbIdx]};
-function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lightbox.classList.add('open')}
+let lbPhotos=[],lbIdx=0;
+const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg'),lbStrip=document.getElementById('lbStrip'),lbCounter=document.getElementById('lbCounter');
+
+function lbUpdateCounter(){lbCounter.innerHTML=`<span>${lbIdx+1}</span> / ${lbPhotos.length}`}
+
+function lbUpdateStrip(){lbStrip.querySelectorAll('.lb-strip-thumb').forEach((t,i)=>{t.classList.toggle('active',i===lbIdx)});
+const active=lbStrip.querySelector('.lb-strip-thumb.active');if(active)active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
+
+function lbRenderStrip(){lbStrip.innerHTML='';
+lbPhotos.forEach((src,i)=>{const t=document.createElement('div');t.className='lb-strip-thumb'+(i===lbIdx?' active':'');t.innerHTML=`<img src="${src}">`;t.onclick=()=>lbGoTo(i);lbStrip.appendChild(t)})}
+
+function lbGoTo(i){if(i===lbIdx)return;lbImg.classList.add('lb-fade');setTimeout(()=>{lbIdx=i;lbImg.src=lbPhotos[lbIdx];lbImg.onload=()=>{lbImg.classList.remove('lb-fade')};lbUpdateCounter();lbUpdateStrip()},150)}
+
+function closeLightbox(){lightbox.classList.remove('open');document.body.style.overflow=''}
+
+document.getElementById('lbClose').onclick=closeLightbox;
+lightbox.onclick=e=>{if(e.target===lightbox||e.target.classList.contains('lightbox-main'))closeLightbox()};
+document.getElementById('lbPrev').onclick=e=>{e.stopPropagation();lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)};
+document.getElementById('lbNext').onclick=e=>{e.stopPropagation();lbGoTo((lbIdx+1)%lbPhotos.length)};
+
+function openLightbox(p,i){lbPhotos=p;lbIdx=i;lbImg.src=p[i];lbImg.classList.remove('lb-fade');lbUpdateCounter();lbRenderStrip();lightbox.classList.add('open');document.body.style.overflow='hidden'}
+
+/* Keyboard nav for lightbox */
+document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length);if(e.key==='ArrowRight')lbGoTo((lbIdx+1)%lbPhotos.length)});
+
+/* Touch swipe for lightbox */
+(function(){let sx=0,sy=0;const el=document.getElementById('lightbox');
+el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if(dx<0)lbGoTo((lbIdx+1)%lbPhotos.length);else lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)}},{passive:true})})();
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
@@ -257,14 +280,18 @@ const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout((
 /* Profile Page */
 function showProfile(idx){
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
-const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 let availHtml='';if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Rates 30 mins',v:g.val1||'\u2014'},{l:'Rates 45 mins',v:g.val2||'\u2014'},{l:'Rates 60 mins',v:g.val3||'\u2014'},{l:'Experience',v:g.exp||'\u2014'}];
+const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
+const hasMultiple=g.photos.length>1;
+const arrows=hasMultiple?`<button class="gallery-main-arrow prev" id="galPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><button class="gallery-main-arrow next" id="galNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>`:'';
+const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><span>1</span> / ${g.photos.length}</div>`:'';
+const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</div>`:'';
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
-<div class="profile-layout"><div class="profile-image-area"><div class="profile-main-img" id="profMainImg">${mainImg}</div><div class="profile-thumbs" id="profThumbs"></div></div>
+<div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-divider"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">Special Requests</div><div class="profile-desc" style="margin-bottom:24px">${g.special||'\u2014'}</div>
@@ -274,13 +301,34 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 ${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
-renderThumbs(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
+renderGallery(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
 
-function renderThumbs(idx){const g=girls[idx],c=document.getElementById('profThumbs');c.innerHTML='';
-g.photos.forEach((src,i)=>{const w=document.createElement('div');w.className='thumb-wrap';const t=document.createElement('div');t.className='profile-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;
-t.onclick=()=>{document.getElementById('profMainImg').innerHTML=`<img src="${src}">`;c.querySelectorAll('.profile-thumb').forEach(x=>x.classList.remove('active'));t.classList.add('active')};
-t.ondblclick=()=>openLightbox(g.photos,i);w.appendChild(t);
-if(loggedIn){const rm=document.createElement('button');rm.className='profile-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};w.appendChild(rm)}c.appendChild(w)})}
+/* Profile Gallery */
+let galIdx=0;
+function galGoTo(idx,photos){
+const main=document.getElementById('galMain');if(!main)return;
+const img=main.querySelector('img');if(!img)return;
+img.classList.add('gallery-fade-out');
+setTimeout(()=>{galIdx=idx;img.src=photos[idx];img.onload=()=>img.classList.remove('gallery-fade-out');
+const counter=document.getElementById('galCounter');if(counter)counter.innerHTML=`<span>${idx+1}</span> / ${photos.length}`;
+const thumbs=document.getElementById('galThumbs');if(thumbs){thumbs.querySelectorAll('.gallery-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));const active=thumbs.querySelector('.gallery-thumb.active');if(active)active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}},180)}
+
+function renderGallery(idx){
+const g=girls[idx];if(!g||!g.photos)return;
+galIdx=0;
+/* Main image click opens lightbox */
+const main=document.getElementById('galMain');
+if(main&&g.photos.length){main.onclick=e=>{if(e.target.closest('.gallery-main-arrow'))return;openLightbox(g.photos,galIdx)}}
+/* Prev/next arrows on main image */
+const prevBtn=document.getElementById('galPrev'),nextBtn=document.getElementById('galNext');
+if(prevBtn)prevBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx-1+g.photos.length)%g.photos.length,g.photos)};
+if(nextBtn)nextBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx+1)%g.photos.length,g.photos)};
+/* Thumbnails */
+const c=document.getElementById('galThumbs');if(!c)return;c.innerHTML='';
+g.photos.forEach((src,i)=>{const t=document.createElement('div');t.className='gallery-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;
+t.onclick=()=>galGoTo(i,g.photos);
+if(loggedIn){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
+c.appendChild(t)})}
 
 /* Auth / Login */
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
