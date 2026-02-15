@@ -71,15 +71,40 @@ function updateCalCache() {
   if (calSha) try { localStorage.setItem(CACHE_KEY_CAL_SHA, calSha); } catch(e) {}
 }
 
-/* === API Functions (now using proxy) === */
+/* === API Functions (with retry) === */
+
+async function fetchWithRetry(url, opts = {}, { retries = 3, baseDelay = 600 } = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const r = await fetch(url, opts);
+      // Don't retry client errors (4xx) except 429 (rate limit)
+      if (r.ok || (r.status >= 400 && r.status < 500 && r.status !== 429)) return r;
+      // Retryable server error or rate limit
+      lastErr = new Error(`HTTP ${r.status}`);
+      if (attempt < retries) {
+        const retryAfter = r.headers.get('Retry-After');
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : baseDelay * Math.pow(2, attempt);
+        await new Promise(res => setTimeout(res, delay));
+      }
+    } catch (e) {
+      // Network error — retryable
+      lastErr = e;
+      if (attempt < retries) {
+        await new Promise(res => setTimeout(res, baseDelay * Math.pow(2, attempt)));
+      }
+    }
+  }
+  throw lastErr;
+}
 
 async function loadAuth() {
   try {
-    const r = await fetch(`${DATA_API}/${AP}`, { headers: proxyHeaders() });
+    const r = await fetchWithRetry(`${DATA_API}/${AP}`, { headers: proxyHeaders() });
     if (r.ok) return dec((await r.json()).content);
     if (r.status === 404) {
       const d = [{ user: 'admin', pass: 'admin123' }];
-      await fetch(`${DATA_API}/${AP}`, {
+      await fetchWithRetry(`${DATA_API}/${AP}`, {
         method: 'PUT',
         headers: proxyHeaders(),
         body: JSON.stringify({ message: 'Create auth', content: enc(d) })
@@ -92,24 +117,32 @@ async function loadAuth() {
 
 async function loadData() {
   try {
-    const r = await fetch(`${DATA_API}/${DP}`, { headers: proxyHeaders() });
+    const r = await fetchWithRetry(`${DATA_API}/${DP}`, { headers: proxyHeaders() });
     if (r.ok) { const d = await r.json(); dataSha = d.sha; return dec(d.content); }
     if (r.status === 404) { dataSha = null; return []; }
   } catch (e) { console.error('loadData error:', e); }
   return null;
 }
 
-async function saveData() {
+async function saveData(retryOnConflict = true) {
   try {
     const body = { message: 'Update girls', content: enc(girls) };
     if (dataSha) body.sha = dataSha;
-    const r = await fetch(`${DATA_API}/${DP}`, {
+    const r = await fetchWithRetry(`${DATA_API}/${DP}`, {
       method: 'PUT',
       headers: proxyHeaders(),
       body: JSON.stringify(body)
-    });
+    }, { retries: 2 });
     const rd = await r.json();
-    if (!r.ok) throw new Error(rd.message || r.status);
+    if (!r.ok) {
+      // SHA conflict — refetch and retry once
+      if (r.status === 409 && retryOnConflict) {
+        console.warn('Save conflict — refetching SHA and retrying');
+        const fresh = await fetchWithRetry(`${DATA_API}/${DP}`, { headers: proxyHeaders() });
+        if (fresh.ok) { dataSha = (await fresh.json()).sha; return saveData(false); }
+      }
+      throw new Error(rd.message || r.status);
+    }
     dataSha = rd.content.sha;
     updateGirlsCache();
     return true;
@@ -118,26 +151,33 @@ async function saveData() {
 
 async function loadCalData() {
   try {
-    const r = await fetch(`${DATA_API}/${KP}`, { headers: proxyHeaders() });
+    const r = await fetchWithRetry(`${DATA_API}/${KP}`, { headers: proxyHeaders() });
     if (r.ok) { const d = await r.json(); calSha = d.sha; return dec(d.content); }
     if (r.status === 404) { calSha = null; return {}; }
   } catch (e) { console.error('loadCalData error:', e); }
   return {};
 }
 
-async function saveCalData() {
+async function saveCalData(retryOnConflict = true) {
   try {
     const vd = getWeekDates(), cl = {};
     for (const n in calData) { cl[n] = {}; for (const dt of vd) { if (calData[n] && calData[n][dt]) cl[n][dt] = calData[n][dt] } }
     calData = cl;
     const body = { message: 'Update calendar', content: enc(calData) };
     if (calSha) body.sha = calSha;
-    const r = await fetch(`${DATA_API}/${KP}`, {
+    const r = await fetchWithRetry(`${DATA_API}/${KP}`, {
       method: 'PUT',
       headers: proxyHeaders(),
       body: JSON.stringify(body)
-    });
-    if (!r.ok) throw new Error(r.status);
+    }, { retries: 2 });
+    if (!r.ok) {
+      if (r.status === 409 && retryOnConflict) {
+        console.warn('Calendar save conflict — refetching SHA and retrying');
+        const fresh = await fetchWithRetry(`${DATA_API}/${KP}`, { headers: proxyHeaders() });
+        if (fresh.ok) { calSha = (await fresh.json()).sha; return saveCalData(false); }
+      }
+      throw new Error(r.status);
+    }
     calSha = (await r.json()).content.sha;
     updateCalCache();
     return true;
@@ -150,16 +190,16 @@ async function uploadToGithub(b64, name, fn) {
   const pure = b64.split(',')[1];
   let sha;
   try {
-    const c = await fetch(`${SITE_API}/${path}`, { headers: proxyHeaders() });
+    const c = await fetchWithRetry(`${SITE_API}/${path}`, { headers: proxyHeaders() });
     if (c.ok) sha = (await c.json()).sha;
   } catch (e) {}
   const body = { message: `Upload ${path}`, content: pure };
   if (sha) body.sha = sha;
-  const r = await fetch(`${SITE_API}/${path}`, {
+  const r = await fetchWithRetry(`${SITE_API}/${path}`, {
     method: 'PUT',
     headers: proxyHeaders(),
     body: JSON.stringify(body)
-  });
+  }, { retries: 2 });
   if (!r.ok) throw new Error(r.status);
   return `https://raw.githubusercontent.com/${SITE_REPO}/main/${path}`;
 }
@@ -168,17 +208,16 @@ async function deleteFromGithub(url) {
   try {
     const m = url.match(/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/[^/]+\/(.+?)(\?|$)/);
     if (!m) return;
-    // Determine which proxy path to use based on the repo
     const repo = m[1];
     const filePath = decodeURIComponent(m[2]);
     const api = `${PROXY}/repos/${repo}/contents/${filePath}`;
-    const c = await fetch(api, { headers: proxyHeaders() });
+    const c = await fetchWithRetry(api, { headers: proxyHeaders() });
     if (!c.ok) return;
-    await fetch(api, {
+    await fetchWithRetry(api, {
       method: 'DELETE',
       headers: proxyHeaders(),
       body: JSON.stringify({ message: 'Delete', sha: (await c.json()).sha })
-    });
+    }, { retries: 2 });
   } catch (e) { console.error('deleteFromGithub error:', e); }
 }
 
