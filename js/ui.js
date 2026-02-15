@@ -288,15 +288,75 @@ showToast('Copied '+scheduled.length+' schedule'+(scheduled.length>1?'s':'')+' t
 }else{showToast('Nothing to copy (all targets already have entries)','error')}
 closeCopyDayModal();};
 
+/* Bulk Time Modal (mark available all week) */
+let bulkTimeName='',bulkTimeDays=[];
+
+function openBulkTimeModal(name){
+bulkTimeName=name;
+const dates=getWeekDates();
+/* Pre-select days that don't have entries yet */
+bulkTimeDays=dates.filter(ds=>{const e=getCalEntry(name,ds);return !e||!e.start||!e.end});
+if(!bulkTimeDays.length)bulkTimeDays=[...dates];
+/* Find existing time to pre-fill */
+let preStart='',preEnd='';
+for(const ds of dates){const e=getCalEntry(name,ds);if(e&&e.start&&e.end){preStart=e.start;preEnd=e.end;break}}
+document.getElementById('bulkTimeName').textContent=name;
+/* Populate time selects */
+const tOpts=generateTimeOptions();
+document.getElementById('bulkTimeStart').innerHTML=tOpts;
+document.getElementById('bulkTimeEnd').innerHTML=tOpts;
+if(preStart)document.getElementById('bulkTimeStart').value=preStart;
+if(preEnd)document.getElementById('bulkTimeEnd').value=preEnd;
+renderBulkTimeDays();
+document.getElementById('bulkTimeModal').classList.add('open');
+}
+
+function renderBulkTimeDays(){
+const dates=getWeekDates();const ts=dates[0];
+const tc=document.getElementById('bulkTimeDays');tc.innerHTML='';
+dates.forEach(ds=>{const f=dispDate(ds);const has=getCalEntry(bulkTimeName,ds);
+const b=document.createElement('button');b.className='copy-day-btn'+(bulkTimeDays.includes(ds)?' target-active':'');
+b.innerHTML=(ds===ts?'Today':f.day)+(has&&has.start?' <span style="opacity:.4;font-size:10px">\u2713</span>':'');
+b.onclick=()=>{const idx=bulkTimeDays.indexOf(ds);if(idx>=0)bulkTimeDays.splice(idx,1);else bulkTimeDays.push(ds);renderBulkTimeDays()};tc.appendChild(b)});
+/* All button */
+const ab=document.createElement('button');ab.className='copy-day-btn'+(bulkTimeDays.length===dates.length?' target-active':'');
+ab.style.fontStyle='italic';ab.textContent='All';
+ab.onclick=()=>{if(bulkTimeDays.length===dates.length)bulkTimeDays=[];else bulkTimeDays=[...dates];renderBulkTimeDays()};tc.appendChild(ab);
+/* Update apply state */
+const applyBtn=document.getElementById('bulkTimeApply');
+applyBtn.disabled=bulkTimeDays.length===0;
+applyBtn.style.opacity=applyBtn.disabled?'.4':'1';
+applyBtn.style.pointerEvents=applyBtn.disabled?'none':'auto';
+}
+
+function closeBulkTimeModal(){document.getElementById('bulkTimeModal').classList.remove('open')}
+document.getElementById('bulkTimeCancel').onclick=closeBulkTimeModal;
+document.getElementById('bulkTimeModal').onclick=e=>{if(e.target===document.getElementById('bulkTimeModal'))closeBulkTimeModal()};
+
+document.getElementById('bulkTimeApply').onclick=async function(){
+const start=document.getElementById('bulkTimeStart').value;
+const end=document.getElementById('bulkTimeEnd').value;
+if(!start||!end){showToast('Please set both start and end times','error');return}
+const name=bulkTimeName;
+if(!calData[name])calData[name]={};
+bulkTimeDays.forEach(ds=>{calData[name][ds]={start,end};if(calPending[name])delete calPending[name][ds]});
+this.textContent='Saving...';this.style.pointerEvents='none';
+await saveCalData();
+this.textContent='Apply';this.style.pointerEvents='auto';
+renderCalendar();renderRoster();renderGrid();renderHome();
+showToast(name+' marked available for '+bulkTimeDays.length+' day'+(bulkTimeDays.length>1?'s':''));
+closeBulkTimeModal();
+};
+
 /* Home Page */
 function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
 
-function renderHome(){
+function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML='<p></p>';
-ngList=getNewGirls();ngIdx=0;renderNewGirls()}
+ngList=getNewGirls();ngIdx=0;renderNewGirls()})}
 
 function renderNewGirls(){
 const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDisplay');nav.innerHTML='';disp.innerHTML='';
@@ -363,7 +423,7 @@ function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)r
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
-function showProfile(idx){
+function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
@@ -390,7 +450,7 @@ document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)}
+renderGallery(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;

@@ -299,6 +299,17 @@ async function loadConfig() {
   return true;
 }
 
+/* === Error Boundaries === */
+function safeRender(name, fn) {
+  try { fn(); }
+  catch (e) { console.error(`[${name}] render error:`, e); showToast(`${name} render failed`, 'error'); }
+}
+
+function safeCardRender(g, idx, fn) {
+  try { return fn(g, idx); }
+  catch (e) { console.warn(`[Card] skipped index ${idx} (${g&&g.name||'unnamed'}):`, e); return null; }
+}
+
 /* === Lazy Loading === */
 const lazyObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {

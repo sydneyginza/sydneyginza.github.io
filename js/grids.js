@@ -18,20 +18,21 @@ return list.sort((a,b)=>emptyLast(a,b,()=>(a.name||'').trim().toLowerCase().loca
 const grid=document.getElementById('girlsGrid');
 function cardFavBtn(name){const fav=name&&isFavorite(name);return `<button class="card-fav${fav?' active':''}" data-fav-name="${name||''}" title="${fav?'Remove from favorites':'Add to favorites'}">${favHeartSvg(fav)}</button>`}
 function bindCardFavs(container){container.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;const nowFav=toggleFavorite(name);btn.classList.toggle('active',nowFav);btn.innerHTML=favHeartSvg(nowFav);btn.title=nowFav?'Remove from favorites':'Add to favorites';btn.classList.remove('fav-pop');void btn.offsetWidth;btn.classList.add('fav-pop');updateFavBadge()}})}
-function renderGrid(){
+function renderGrid(){safeRender('Girls Grid',()=>{
 let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 applySortOrder(filtered);
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());
-filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
+filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
 const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
 const fav=g.name?cardFavBtn(g.name):'';
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-card.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav'))return;profileReturnPage='listPage';showProfile(ri)};
-if(loggedIn){card.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};card.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid)}
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav'))return;profileReturnPage='listPage';showProfile(ri)};
+if(loggedIn){el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};el.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
+return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid)})}
 
 /* Roster */
 function hasGirlsOnDate(ds,loc){return girls.some(g=>{if(loc&&loc!=='All'&&g.location!==loc)return false;const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
@@ -44,7 +45,7 @@ availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('but
 const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const locs=["All",...new Set(girls.map(g=>g.location))];if(!rosterLocFilter)rosterLocFilter='All';
 locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(rosterLocFilter===loc?' active':'');b.textContent=loc;b.onclick=()=>{rosterLocFilter=loc;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)})}
 
-function renderRosterGrid(){const rg=document.getElementById('rosterGrid');rg.innerHTML='';
+function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';
 if(!rosterDateFilter){rg.innerHTML='<div class="empty-msg">No girls available this week</div>';return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
 let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
@@ -53,33 +54,32 @@ if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0)
 if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
 applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
-filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
+filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
 const fav=g.name?cardFavBtn(g.name):'';
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-card.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='rosterPage';showProfile(ri)};rg.appendChild(card)});bindCardFavs(rg);observeLazy(rg);observeEntrance(rg)}
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);observeLazy(rg);observeEntrance(rg)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
 /* Favorites Grid */
-function renderFavoritesGrid(){const fg=document.getElementById('favoritesGrid');fg.innerHTML='';
+function renderFavoritesGrid(){safeRender('Favorites Grid',()=>{const fg=document.getElementById('favoritesGrid');fg.innerHTML='';
 const favs=getFavorites();const ts=fmtDate(getAEDTDate());
 let filtered=girls.filter(g=>g.name&&favs.includes(g.name));
 applySortOrder(filtered);
 if(!filtered.length){fg.innerHTML='<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">No favorites yet</div><div class="fav-empty-hint">Tap the heart on any profile to save it here</div></div>';return}
-filtered.forEach(g=>{const ri=girls.indexOf(g);const card=document.createElement('div');card.className='girl-card';
+filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';
 const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
 const fav=cardFavBtn(g.name);
-card.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-card.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='favoritesPage';showProfile(ri)};fg.appendChild(card)});
-/* Re-bind favs with special behavior: unfavoriting removes the card */
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='favoritesPage';showProfile(ri)};return el});if(card)fg.appendChild(card)});
 fg.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;toggleFavorite(name);updateFavBadge();renderFavoritesGrid()}});
-observeLazy(fg);observeEntrance(fg)}
+observeLazy(fg);observeEntrance(fg)})}
 
 /* Value Table */
-function renderValueTable(){
+function renderValueTable(){safeRender('Value Table',()=>{
 const table=document.getElementById('valueTable');
 const vals=[
 {label:'30 mins',key:'val1'},
@@ -99,25 +99,35 @@ html+=`<tr><td style="text-align:left;font-family:'Orbitron',sans-serif;font-siz
 });
 html+='</tbody>';
 table.innerHTML=html;
-}
+})}
 
 /* Calendar */
 function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){const v=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');const h12=h===0?12:h>12?h-12:h;o.push(`<option value="${v}">${h12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}</option>`)}return o.join('')}
 
-function renderCalendar(){const fb=document.getElementById('calFilterBar');fb.innerHTML='';const locs=["All",...new Set(girls.map(g=>g.location))];if(!calLocFilter)calLocFilter='All';
+function renderCalendar(){safeRender('Calendar',()=>{const fb=document.getElementById('calFilterBar');fb.innerHTML='';const locs=["All",...new Set(girls.map(g=>g.location))];if(!calLocFilter)calLocFilter='All';
 locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(calLocFilter===loc?' active':'');b.textContent=loc;b.onclick=()=>{calLocFilter=loc;renderCalendar()};fb.appendChild(b)});
 if(loggedIn){const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
 const fg=applySharedFilters((calLocFilter==='All'?[...girls]:girls.filter(g=>g.location===calLocFilter)).filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
 let html='<thead><tr><th>Profile</th>';dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});html+='</tr></thead><tbody>';
 fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0]):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
-html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div></div></div></td>`;
+const bulkActions=loggedIn?`<div class="cal-bulk-actions"><button class="cal-bulk-btn cal-bulk-all" data-bulk-name="${g.name}" title="Mark available all week">All Week</button><button class="cal-bulk-btn cal-bulk-clear" data-bulk-name="${g.name}" title="Clear entire week">Clear</button></div>`:'';
+html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div>${bulkActions}</div></div></td>`;
 dates.forEach((ds,di)=>{const entry=getCalEntry(g.name,ds);const ck=entry?'checked':'';const sh=!!entry;
 html+=`<td class="${di===0?'cal-today':''}"><div class="cal-cell-inner"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${ck}><div class="cal-time-wrap" style="display:${sh?'flex':'none'}" data-time-name="${g.name}" data-time-date="${ds}"><div class="cal-time-row"><label>Start</label><select class="cal-time-input" data-field="start" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-row"><label>End</label><select class="cal-time-input" data-field="end" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-warn" data-warn-name="${g.name}" data-warn-date="${ds}"></div></div></div></td>`});html+='</tr>'});html+='</tbody>';table.innerHTML=html;observeLazy(table);observeCalEntrance(table);
 
 fg.forEach(g=>{getWeekDates().forEach(ds=>{const entry=getCalEntry(g.name,ds);if(entry){const ss=table.querySelector(`select[data-field="start"][data-tname="${g.name}"][data-tdate="${ds}"]`),es=table.querySelector(`select[data-field="end"][data-tname="${g.name}"][data-tdate="${ds}"]`);if(ss&&entry.start)ss.value=entry.start;if(es&&entry.end)es.value=entry.end;
 if(!entry.start||!entry.end){if(!calPending[g.name])calPending[g.name]={};calPending[g.name][ds]=true;const w=table.querySelector(`[data-warn-name="${g.name}"][data-warn-date="${ds}"]`);if(w)w.textContent='Times required'}}})});
 
-table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=()=>{profileReturnPage='calendarPage';showProfile(parseInt(el.dataset.idx))}});
+table.querySelectorAll('.cal-profile').forEach(el=>{el.onclick=e=>{if(e.target.closest('.cal-bulk-btn'))return;profileReturnPage='calendarPage';showProfile(parseInt(el.dataset.idx))}});
+
+/* Bulk calendar actions */
+if(loggedIn){
+table.querySelectorAll('.cal-bulk-all').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.bulkName;openBulkTimeModal(name)}});
+table.querySelectorAll('.cal-bulk-clear').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.bulkName;
+const dates=getWeekDates();let cleared=0;
+dates.forEach(ds=>{if(calData[name]&&calData[name][ds]){delete calData[name][ds];cleared++}if(calPending[name])delete calPending[name][ds]});
+if(cleared>0){queueCalSave(null,100);renderCalendar();renderRoster();renderGrid();renderHome();showToast(name+' cleared for the week')}
+}})}
 
 table.querySelectorAll('.cal-check').forEach(cb=>{cb.onchange=async function(){const n=this.dataset.name,d=this.dataset.date;const tw=table.querySelector(`[data-time-name="${n}"][data-time-date="${d}"]`);
 if(this.checked){
@@ -137,4 +147,4 @@ else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d]
 
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';queueCalSave(this.closest('td'));showToast('Schedule saved')}
-else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});}
+else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});})}
