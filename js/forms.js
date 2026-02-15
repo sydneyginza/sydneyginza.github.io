@@ -53,9 +53,64 @@ document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){c
 
 /* Init */
 function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
-(async()=>{try{await loadConfig();const[authData,data,cal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
+
+function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};return cal}
+
+function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome()}
+
+(async()=>{
+try{
+await loadConfig();
+
+/* Phase 1: Instant render from cache */
+const cachedGirls=getCachedGirls();
+const cachedCal=getCachedCal();
+let renderedFromCache=false;
+
+if(cachedGirls&&cachedGirls.length){
+girls=cachedGirls;
+calData=normalizeCalData(cachedCal||{});
+fullRender();
+removeSkeletons();
+renderedFromCache=true;
+}
+
+/* Phase 2: Fetch fresh data in background */
+const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
+
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
-if(data!==null)girls=data;else showToast('Could not load data','error');
-if(cal){for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};calData=cal}
-rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();
-removeSkeletons()}catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}})();
+
+/* Compare and update girls if changed */
+let girlsChanged=false;
+if(freshData!==null){
+const cachedSha=getCachedGirlsSha();
+if(!renderedFromCache||cachedSha!==dataSha){
+girls=freshData;
+girlsChanged=true;
+updateGirlsCache();
+}
+}else if(!renderedFromCache){showToast('Could not load data','error')}
+
+/* Compare and update calendar if changed */
+let calChanged=false;
+if(freshCal){
+const cachedCalSha=getCachedCalSha();
+const normalizedCal=normalizeCalData(freshCal);
+if(!renderedFromCache||cachedCalSha!==calSha){
+calData=normalizedCal;
+calChanged=true;
+updateCalCache();
+}
+}
+
+/* Phase 3: Re-render only if data actually changed */
+if(!renderedFromCache){
+fullRender();
+removeSkeletons();
+}else if(girlsChanged||calChanged){
+fullRender();
+if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
+}
+
+}catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}
+})();

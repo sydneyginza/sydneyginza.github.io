@@ -35,6 +35,42 @@ function fmtTime12(t) { if (!t) return ''; const [h, m] = t.split(':').map(Numbe
 function getCalEntry(name, date) { if (calData[name] && calData[name][date]) { const v = calData[name][date]; return typeof v === 'object' ? v : { start: '', end: '' }; } return null }
 function genFn() { return 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.jpg' }
 
+/* === Local Cache (stale-while-revalidate) === */
+const CACHE_KEY_GIRLS = 'ginza_cache_girls';
+const CACHE_KEY_CAL = 'ginza_cache_cal';
+const CACHE_KEY_GIRLS_SHA = 'ginza_cache_girls_sha';
+const CACHE_KEY_CAL_SHA = 'ginza_cache_cal_sha';
+
+function cacheGet(key) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+  catch (e) { return null; }
+}
+
+function cacheSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); }
+  catch (e) { /* quota exceeded or unavailable — silently ignore */ }
+}
+
+function cacheClear() {
+  try { [CACHE_KEY_GIRLS, CACHE_KEY_CAL, CACHE_KEY_GIRLS_SHA, CACHE_KEY_CAL_SHA].forEach(k => localStorage.removeItem(k)); }
+  catch (e) {}
+}
+
+function getCachedGirls() { return cacheGet(CACHE_KEY_GIRLS); }
+function getCachedCal() { return cacheGet(CACHE_KEY_CAL); }
+function getCachedGirlsSha() { try { return localStorage.getItem(CACHE_KEY_GIRLS_SHA) || null; } catch(e) { return null; } }
+function getCachedCalSha() { try { return localStorage.getItem(CACHE_KEY_CAL_SHA) || null; } catch(e) { return null; } }
+
+function updateGirlsCache() {
+  cacheSet(CACHE_KEY_GIRLS, girls);
+  if (dataSha) try { localStorage.setItem(CACHE_KEY_GIRLS_SHA, dataSha); } catch(e) {}
+}
+
+function updateCalCache() {
+  cacheSet(CACHE_KEY_CAL, calData);
+  if (calSha) try { localStorage.setItem(CACHE_KEY_CAL_SHA, calSha); } catch(e) {}
+}
+
 /* === API Functions (now using proxy) === */
 
 async function loadAuth() {
@@ -75,6 +111,7 @@ async function saveData() {
     const rd = await r.json();
     if (!r.ok) throw new Error(rd.message || r.status);
     dataSha = rd.content.sha;
+    updateGirlsCache();
     return true;
   } catch (e) { showToast('Save failed: ' + e.message, 'error'); return false; }
 }
@@ -102,6 +139,7 @@ async function saveCalData() {
     });
     if (!r.ok) throw new Error(r.status);
     calSha = (await r.json()).content.sha;
+    updateCalCache();
     return true;
   } catch (e) { showToast('Calendar save failed', 'error'); return false; }
 }
