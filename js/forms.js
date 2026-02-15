@@ -8,7 +8,7 @@ document.getElementById('formCancel').onclick=()=>formOverlay.classList.remove('
 formOverlay.onclick=e=>{if(e.target===formOverlay)formOverlay.classList.remove('open')};
 let formPhotos=[],formPhotosToDelete=[],formNewPhotos=[],formNewFiles=[];
 let formCountries=[];
-const COUNTRY_OPTIONS=['Chinese','Japanese','Korean','Vietnamese','Other'];
+const COUNTRY_OPTIONS=['Chinese','French','Italian','Japanese','Korean','Thailand','Vietnamese','Other'];
 
 function renderFormCountries(){const wrap=document.getElementById('fCountryOptions');wrap.innerHTML='';
 COUNTRY_OPTIONS.forEach(c=>{const btn=document.createElement('div');btn.className='country-opt'+(formCountries.includes(c)?' selected':'');btn.textContent=c;btn.onclick=()=>{if(formCountries.includes(c))formCountries=formCountries.filter(x=>x!==c);else formCountries.push(c);renderFormCountries()};wrap.appendChild(btn)})}
