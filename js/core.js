@@ -332,12 +332,12 @@ function observeLazy(container) {
   container.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
 }
 
-function lazyThumb(src, cls) {
-  return `<img class="${cls || 'card-thumb'}" data-src="${src}">`;
+function lazyThumb(src, cls, alt) {
+  return `<img class="${cls || 'card-thumb'}" data-src="${src}" alt="${alt || 'Profile photo'}">`;
 }
 
-function lazyCalAvatar(src) {
-  return `<img data-src="${src}">`;
+function lazyCalAvatar(src, alt) {
+  return `<img data-src="${src}" alt="${alt || 'Avatar'}">`;
 }
 
 /* === Card Entrance Animations === */

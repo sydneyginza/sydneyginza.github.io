@@ -25,8 +25,8 @@ if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0)
 applySortOrder(filtered);
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
-const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
-const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
+const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edit" title="Edit" data-idx="${ri}" aria-label="Edit ${g.name||'profile'}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}" aria-label="Delete ${g.name||'profile'}">&#x2715;</button></div>`:'';
+const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',(g.name||'Girl')+' – photo'):'<div class="silhouette" role="img" aria-label="No photo available"></div>';const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
 const fav=g.name?cardFavBtn(g.name):'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
@@ -54,7 +54,7 @@ if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0)
 if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
 applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
-filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
+filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',(g.name||'Girl')+' – photo'):'<div class="silhouette" role="img" aria-label="No photo available"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`;
 const fav=g.name?cardFavBtn(g.name):'';
@@ -69,7 +69,7 @@ let filtered=girls.filter(g=>g.name&&favs.includes(g.name));
 applySortOrder(filtered);
 if(!filtered.length){fg.innerHTML='<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">No favorites yet</div><div class="fav-empty-hint">Tap the heart on any profile to save it here</div></div>';return}
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
-const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';
+const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',(g.name||'Girl')+' – photo'):'<div class="silhouette" role="img" aria-label="No photo available"></div>';
 const entry=getCalEntry(g.name,ts);
 const avail=entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'';
 const fav=cardFavBtn(g.name);
@@ -116,7 +116,7 @@ locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-
 if(loggedIn){const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
 const fg=applySharedFilters((calLocFilter==='All'?[...girls]:girls.filter(g=>g.location===calLocFilter)).filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
 let html='<thead><tr><th>Profile</th>';dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});html+='</tr></thead><tbody>';
-fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0]):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
+fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name+' avatar'):`<span class="cal-letter" role="img" aria-label="${g.name}">${g.name.charAt(0)}</span>`;
 const bulkActions=loggedIn?`<div class="cal-bulk-actions"><button class="cal-bulk-btn cal-bulk-all" data-bulk-name="${g.name}" title="Mark available all week">All Week</button><button class="cal-bulk-btn cal-bulk-clear" data-bulk-name="${g.name}" title="Clear entire week">Clear</button></div>`:'';
 html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div><div class="cal-name">${g.name}</div><div class="cal-loc">${g.location}</div>${bulkActions}</div></div></td>`;
 dates.forEach((ds,di)=>{const entry=getCalEntry(g.name,ds);const ck=entry?'checked':'';const sh=!!entry;
