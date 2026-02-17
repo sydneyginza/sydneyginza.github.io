@@ -77,6 +77,23 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-name{font-family:'Orbitron',sans-serif;font-weight:600;font-size:14px;letter-spacing:2px;color:#fff;text-transform:uppercase}
 .card-country{font-size:12px;color:var(--text-dim);letter-spacing:1px;margin-top:4px}
 .card-avail{font-size:11px;color:#00c864;letter-spacing:1px;margin-top:3px;font-weight:600}
+
+/* Available Now — live badge on cards */
+.card-avail-live{display:flex;align-items:center;gap:5px;color:#00ff7f;font-weight:700;text-shadow:0 0 8px rgba(0,255,127,0.3)}
+
+/* Pulsing green dot (shared across cards, filter pane, roster bar, profile) */
+.avail-now-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#00ff7f;box-shadow:0 0 6px rgba(0,255,127,0.6),0 0 12px rgba(0,255,127,0.3);animation:availPulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes availPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(0,255,127,0.6),0 0 12px rgba(0,255,127,0.3)}50%{opacity:.55;box-shadow:0 0 3px rgba(0,255,127,0.3)}}
+
+/* Available Now button in filter bars */
+.avail-now-btn{display:flex!important;align-items:center;gap:5px}
+.avail-now-btn.active{background:rgba(0,255,127,0.12)!important;border-color:rgba(0,255,127,0.4)!important;color:#00ff7f!important}
+
+/* Available Now in filter pane */
+.fp-avail-now.active{background:rgba(0,255,127,0.1)!important;border-color:rgba(0,255,127,0.3)!important;color:#00ff7f!important}
+
+/* Profile page live availability */
+.profile-avail-live{color:#00ff7f;font-weight:700;display:inline-flex;align-items:center;gap:5px;text-shadow:0 0 8px rgba(0,255,127,0.2)}
 .card-hover-line{position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
 .girl-card:hover .card-hover-line{width:100%}
 

@@ -58,6 +58,20 @@ function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt 
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
+/* Auto-refresh Available Now badges every 60s */
+setInterval(()=>{
+try{
+const activePage=document.querySelector('.page.active');
+if(!activePage)return;
+const id=activePage.id;
+if(id==='rosterPage'){renderRoster()}
+else if(id==='listPage'){renderGrid()}
+else if(id==='favoritesPage'){renderFavoritesGrid()}
+else if(id==='homePage'){renderHome()}
+else if(id==='profilePage'&&currentProfileIdx>=0){showProfile(currentProfileIdx)}
+}catch(e){/* silent */}
+},60000);
+
 /* After data loads, resolve the current URL to show the right page */
 function fullRenderAndRoute(){
 fullRender();

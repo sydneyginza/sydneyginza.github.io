@@ -33,6 +33,30 @@ function dec(c) { return JSON.parse(decodeURIComponent(escape(atob(c.replace(/\n
 function enc(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o, null, 2)))) }
 function fmtTime12(t) { if (!t) return ''; const [h, m] = t.split(':').map(Number); const ap = h < 12 ? 'AM' : 'PM'; const hr = h === 0 ? 12 : h > 12 ? h - 12 : h; return hr + ':' + String(m).padStart(2, '0') + ' ' + ap }
 function getCalEntry(name, date) { if (calData[name] && calData[name][date]) { const v = calData[name][date]; return typeof v === 'object' ? v : { start: '', end: '' }; } return null }
+
+/* Check if a girl is available RIGHT NOW based on current AEDT time vs today's scheduled hours */
+function isAvailableNow(name) {
+  const now = getAEDTDate();
+  const today = fmtDate(now);
+  const entry = getCalEntry(name, today);
+  if (!entry || !entry.start || !entry.end) return false;
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const [sh, sm] = entry.start.split(':').map(Number);
+  const [eh, em] = entry.end.split(':').map(Number);
+  const startMins = sh * 60 + sm;
+  const endMins = eh * 60 + em;
+  /* Handle overnight shifts (e.g. 22:00 - 02:00) */
+  if (endMins <= startMins) {
+    return nowMins >= startMins || nowMins < endMins;
+  }
+  return nowMins >= startMins && nowMins < endMins;
+}
+
+/* Count how many girls are available right now */
+function getAvailableNowCount() {
+  return girls.filter(g => g.name && isAvailableNow(g.name)).length;
+}
+
 function genFn() { return 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.jpg' }
 
 /* === Local Cache (stale-while-revalidate) === */

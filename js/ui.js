@@ -6,7 +6,7 @@ let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]};
+let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false};
 
 function applySharedFilters(list){
 let f=list;
@@ -27,11 +27,12 @@ if(sharedFilters.val3Min!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return 
 if(sharedFilters.val3Max!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v<=sharedFilters.val3Max});
 if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
 if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
+if(sharedFilters.availableNow)f=f.filter(g=>g.name&&isAvailableNow(g.name));
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length)}
+function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length||sharedFilters.availableNow)}
 
-function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[]}}
+function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false}}
 
 function getDataRange(field,prefix){
 const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
@@ -68,6 +69,18 @@ const searchInp=sec.querySelector('[data-role="name-search"]');
 searchInp.value=sharedFilters.nameSearch||'';
 let debounce;
 searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();renderFilters();renderGrid();renderRoster();if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();document.querySelectorAll('[data-role="name-search"]').forEach(inp=>{if(inp!==searchInp){inp.value=sharedFilters.nameSearch}})},300)});
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
+
+/* Available Now toggle */
+{const nowCount=getAvailableNowCount();
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">Availability</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+const btn=document.createElement('button');btn.className='fp-option fp-avail-now'+(sharedFilters.availableNow?' active':'');
+btn.innerHTML=`<span class="fp-check">${sharedFilters.availableNow?'✓':''}</span><span class="avail-now-dot"></span>Available Now<span class="fp-count">${nowCount}</span>`;
+btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};
+wrap.appendChild(btn);
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
 /* Country */
@@ -451,7 +464,9 @@ document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
-let availHtml='';if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
+const liveNow=g.name&&isAvailableNow(g.name);
+let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>Available Now ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
+else if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Rates 30 mins',v:g.val1||'\u2014'},{l:'Rates 45 mins',v:g.val2||'\u2014'},{l:'Rates 60 mins',v:g.val3||'\u2014'},{l:'Experience',v:g.exp||'\u2014'}];
 const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
 const hasMultiple=g.photos.length>1;
