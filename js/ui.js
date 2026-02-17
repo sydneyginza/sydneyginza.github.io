@@ -519,6 +519,8 @@ const pane=document.getElementById(_activeFilterPaneId);if(!pane)return;
 /* Hide all panes first */
 ['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
 const el=document.getElementById(fp);if(el)el.classList.remove('open')});
+/* Ensure content is rendered */
+renderFilterPane(_activeFilterPaneId);
 pane.classList.add('open');
 _filterToggle.classList.add('open');
 _filterBackdrop.classList.add('open');
