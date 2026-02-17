@@ -38,7 +38,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .login-form-inline .lf-btn{width:100%;margin-top:12px;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:10px;cursor:pointer;transition:all .3s}
 .login-form-inline .lf-btn:hover{background:rgba(180,74,255,0.22)}
 .login-form-inline .lf-error{color:#ff4444;font-size:12px;text-align:center;margin-top:8px;min-height:16px}
-.page{display:none}.page.active{display:block}
+.page{display:none;opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease}.page.active{display:block}.page.visible{opacity:1;transform:translateY(0)}@media(prefers-reduced-motion:reduce){.page{transition:none;opacity:1;transform:none}}
 .section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}
 #rosterPage>.section,#listPage>.section,#calendarPage>.section{max-width:none}
 .section-header{display:flex;align-items:center;gap:20px;margin-bottom:60px;flex-wrap:wrap}

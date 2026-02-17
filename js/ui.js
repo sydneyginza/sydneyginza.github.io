@@ -194,7 +194,7 @@ const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','
 
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
-allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+const prev=allPages.find(p=>p.classList.contains('active'));const next=document.getElementById(id);if(prev&&prev!==next){prev.classList.remove('visible');let _done=false;const onEnd=()=>{if(_done)return;_done=true;prev.removeEventListener('transitionend',onEnd);prev.classList.remove('active');next.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>next.classList.add('visible')))};prev.addEventListener('transitionend',onEnd);setTimeout(onEnd,300)}else{allPages.forEach(p=>{p.classList.remove('active','visible')});next.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>next.classList.add('visible')))}
 closeFilterPanel();
 /* URL routing & dynamic title */
 const titleMap={homePage:'Ginza',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar'};
@@ -489,7 +489,7 @@ document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){wind
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');const _prev=allPages.find(p=>p.classList.contains('active'));const _next=document.getElementById('profilePage');if(_prev&&_prev!==_next){_prev.classList.remove('visible');let _done2=false;const _onEnd=()=>{if(_done2)return;_done2=true;_prev.removeEventListener('transitionend',_onEnd);_prev.classList.remove('active');_next.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>_next.classList.add('visible')))};_prev.addEventListener('transitionend',_onEnd);setTimeout(_onEnd,300)}else{allPages.forEach(p=>{p.classList.remove('active','visible')});_next.classList.add('active');requestAnimationFrame(()=>requestAnimationFrame(()=>_next.classList.add('visible')))}document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
