@@ -414,7 +414,8 @@ const Router = (function() {
     favoritesPage:  '/favorites',
     valuePage:      '/rates',
     employmentPage: '/employment',
-    calendarPage:   '/calendar'
+    calendarPage:   '/calendar',
+    analyticsPage:  '/analytics'
   };
   const PATH_TO_PAGE = {};
   for (const id in PAGE_ROUTES) PATH_TO_PAGE[PAGE_ROUTES[id]] = id;
@@ -484,6 +485,13 @@ const Router = (function() {
     const pageId = PATH_TO_PAGE[path];
     if (pageId) {
       if (pageId === 'calendarPage' && !loggedIn) {
+        _suppressPush = true;
+        showPage('homePage');
+        _suppressPush = false;
+        replace('/', 'Ginza');
+        return true;
+      }
+      if (pageId === 'analyticsPage' && !loggedIn) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
