@@ -175,7 +175,7 @@ renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
 updateFilterToggle();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
-if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
+if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage)}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
 const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
@@ -183,11 +183,6 @@ function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
-/* Dynamic page title & URL routing */
-const titleMap={homePage:'Ginza – Sydney\'s Premier Experience',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',profilePage:'Ginza – Profile'};
-const pageTitle=titleMap[id]||'Ginza';
-document.title=pageTitle;
-Router.push(Router.pathForPage(id),pageTitle);
 /* Determine which filter pane is active for this page */
 const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
 _activeFilterPaneId=paneMap[id]||null;
@@ -200,6 +195,8 @@ if(id==='valuePage'){document.getElementById('navValue').classList.add('active')
 if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
 if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
 updateFilterToggle();
+if(window._syncTabBar)window._syncTabBar();
+if(window._syncCalendarTab)window._syncCalendarTab();
 window.scrollTo(0,0)}
 
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
@@ -423,35 +420,26 @@ el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;cons
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
-/* Navigate profile via nav rail – uses replaceState to avoid polluting history */
-function showProfileReplace(idx){
-const origPush=Router.push;
-Router.push=Router.replace;
-try{showProfile(idx)}finally{Router.push=origPush}}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
 const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
 const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
 const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
-const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfileReplace(prevIdx);rail.appendChild(up);
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
 const dots=document.createElement('div');dots.className='pnav-dots';
-for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfileReplace(realIdx);dots.appendChild(d)}
+for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(realIdx);dots.appendChild(d)}
 rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfileReplace(nextIdx);rail.appendChild(dn);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn);
 /* scroll active dot into view */
 const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
 
 /* Profile Page */
-function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)return;const c=getFavCount();b.textContent=c>0?c:''}
+function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)return;const c=getFavCount();b.textContent=c>0?c:'';if(window._updateTabFavBadge)window._updateTabFavBadge()}
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
 function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
-/* Dynamic page title & URL routing */
-const profTitle=g.name?'Ginza – '+g.name:'Ginza – Profile';
-document.title=profTitle;
-Router.push(Router.pathForProfile(idx),profTitle);
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 let availHtml='';if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
@@ -473,11 +461,14 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>
 ${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
-document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
+document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();if(window._syncTabBar)window._syncTabBar();
+/* Inject swipe hint on mobile (shown once) */
+if(window.innerWidth<=768&&!document.querySelector('.profile-swipe-hint')&&!sessionStorage.getItem('ginza_swipe_hinted')){const hint=document.createElement('div');hint.className='profile-swipe-hint';hint.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg> Swipe to browse profiles <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';const layout=document.querySelector('.profile-layout');if(layout)layout.parentNode.insertBefore(hint,layout.nextSibling);setTimeout(()=>hint.classList.add('visible'),300);sessionStorage.setItem('ginza_swipe_hinted','1')}
+window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
@@ -510,11 +501,11 @@ c.appendChild(t)})}
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';if(document.getElementById('calendarPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
+document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';if(document.getElementById('calendarPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(window._syncCalendarTab)window._syncCalendarTab()}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
 document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);if(window._syncCalendarTab)window._syncCalendarTab();setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
@@ -566,4 +557,173 @@ _filterBackdrop.onclick=closeFilterPanel;
 /* Back to Top */
 (function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','favoritesPage','calendarPage'];
 window.addEventListener('scroll',()=>{const active=targetPages.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});if(active&&window.scrollY>300)btn.classList.add('visible');else btn.classList.remove('visible')});
-btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})()
+btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
+
+/* ── Mobile Bottom Tab Bar ── */
+(function(){
+const tabBar=document.getElementById('mobileTabBar');
+const moreMenu=document.getElementById('tabMoreMenu');
+const moreBackdrop=document.getElementById('tabMoreBackdrop');
+const tabMore=document.getElementById('tabMore');
+if(!tabBar)return;
+
+/* Map of pageId → tab button id */
+const TAB_MAP={homePage:'tabHome',rosterPage:'tabRoster',listPage:'tabGirls',favoritesPage:'tabFavorites'};
+/* Pages that appear in the "More" menu */
+const MORE_PAGES=['valuePage','employmentPage','calendarPage'];
+
+function closeMoreMenu(){
+moreMenu.classList.remove('open');
+moreBackdrop.classList.remove('open');
+tabMore.classList.remove('active');
+}
+
+function openMoreMenu(){
+/* Sync active state for more items */
+moreMenu.querySelectorAll('.tab-more-item').forEach(item=>{
+const pg=item.dataset.tab;
+item.classList.toggle('active',document.getElementById(pg)&&document.getElementById(pg).classList.contains('active'));
+});
+moreMenu.classList.add('open');
+moreBackdrop.classList.add('open');
+tabMore.classList.add('active');
+}
+
+/* Update tab bar active state whenever page changes */
+function syncTabBar(){
+const items=tabBar.querySelectorAll('.tab-item');
+items.forEach(t=>t.classList.remove('active'));
+/* Find which page is active */
+for(const pageId in TAB_MAP){
+if(document.getElementById(pageId)&&document.getElementById(pageId).classList.contains('active')){
+const btn=document.getElementById(TAB_MAP[pageId]);
+if(btn)btn.classList.add('active');
+return;
+}}
+/* Check if a "More" page is active */
+for(const pg of MORE_PAGES){
+if(document.getElementById(pg)&&document.getElementById(pg).classList.contains('active')){
+tabMore.classList.add('active');
+return;
+}}
+/* Profile page: no tab highlighted (or Girls if that was the source) */
+if(document.getElementById('profilePage')&&document.getElementById('profilePage').classList.contains('active')){
+const src=profileReturnPage;
+const btn=document.getElementById(TAB_MAP[src]);
+if(btn)btn.classList.add('active');
+}}
+
+/* Bind tab clicks */
+tabBar.querySelectorAll('.tab-item').forEach(btn=>{
+btn.onclick=()=>{
+const tab=btn.dataset.tab;
+if(tab==='more'){
+if(moreMenu.classList.contains('open'))closeMoreMenu();else openMoreMenu();
+return;
+}
+closeMoreMenu();
+showPage(tab);
+}});
+
+/* Bind More menu items */
+moreMenu.querySelectorAll('.tab-more-item').forEach(btn=>{
+btn.onclick=()=>{
+closeMoreMenu();
+showPage(btn.dataset.tab);
+}});
+
+moreBackdrop.onclick=closeMoreMenu;
+
+/* Show calendar in More menu when logged in */
+function syncCalendarTab(){
+const calItem=document.getElementById('tabMoreCalendar');
+if(calItem)calItem.style.display=loggedIn?'':'none';
+}
+
+/* Update fav badge on tab bar */
+function updateTabFavBadge(){
+const b=document.getElementById('tabFavBadge');
+if(!b)return;
+const c=getFavCount();
+b.textContent=c>0?c:'';
+}
+
+/* Expose sync functions globally */
+window._syncTabBar=syncTabBar;
+window._syncCalendarTab=syncCalendarTab;
+window._updateTabFavBadge=updateTabFavBadge;
+
+/* Initial sync */
+syncTabBar();
+syncCalendarTab();
+updateTabFavBadge();
+})();
+
+/* ── Profile Swipe Gestures (mobile) ── */
+(function(){
+const SWIPE_THRESHOLD=60;
+const SWIPE_V_LIMIT=100; /* max vertical movement before we cancel */
+let sx=0,sy=0,tracking=false,swiped=false;
+let profileLayout=null;
+
+function isMobile(){return window.innerWidth<=768}
+
+function getSwipeTarget(){
+/* Only enable on profile page */
+if(!document.getElementById('profilePage')||!document.getElementById('profilePage').classList.contains('active'))return null;
+return document.querySelector('.profile-layout');
+}
+
+function handleTouchStart(e){
+if(!isMobile())return;
+profileLayout=getSwipeTarget();
+if(!profileLayout)return;
+/* Don't capture swipe on gallery thumbs or lightbox */
+if(e.target.closest('.gallery-thumbs')||e.target.closest('.lightbox-overlay')||e.target.closest('.gallery-main'))return;
+sx=e.touches[0].clientX;
+sy=e.touches[0].clientY;
+tracking=true;
+swiped=false;
+}
+
+function handleTouchMove(e){
+if(!tracking||!profileLayout)return;
+const dx=e.touches[0].clientX-sx;
+const dy=e.touches[0].clientY-sy;
+if(Math.abs(dy)>SWIPE_V_LIMIT){tracking=false;profileLayout.classList.remove('swiping-left','swiping-right');return}
+if(Math.abs(dx)>30){
+profileLayout.classList.toggle('swiping-left',dx<-30);
+profileLayout.classList.toggle('swiping-right',dx>30);
+}
+}
+
+function handleTouchEnd(e){
+if(!tracking||!profileLayout){tracking=false;return}
+const dx=e.changedTouches[0].clientX-sx;
+const dy=e.changedTouches[0].clientY-sy;
+profileLayout.classList.remove('swiping-left','swiping-right');
+tracking=false;
+if(Math.abs(dy)>SWIPE_V_LIMIT)return;
+if(Math.abs(dx)<SWIPE_THRESHOLD)return;
+/* Get navigation indices */
+const namedIndices=getNamedGirlIndices();
+const total=namedIndices.length;
+if(total<=1)return;
+const posInList=namedIndices.indexOf(currentProfileIdx);
+const safePos=posInList>=0?posInList:0;
+const dir=dx<0?'left':'right';
+const nextIdx=dir==='left'?namedIndices[safePos>=total-1?0:safePos+1]:namedIndices[safePos<=0?total-1:safePos-1];
+/* Animate exit */
+profileLayout.classList.add(dir==='left'?'swipe-exit-left':'swipe-exit-right');
+swiped=true;
+setTimeout(()=>{showProfile(nextIdx);
+/* Dismiss swipe hint after first successful swipe */
+const hint=document.querySelector('.profile-swipe-hint');
+if(hint)hint.remove();
+},280);
+}
+
+document.addEventListener('touchstart',handleTouchStart,{passive:true});
+document.addEventListener('touchmove',handleTouchMove,{passive:true});
+document.addEventListener('touchend',handleTouchEnd,{passive:true});
+})()
