@@ -853,21 +853,38 @@ sortedRefs.forEach(([name,count])=>{
 if(!sortedRefs.length)refsHtml+='<div class="an-empty">No data</div>';
 refsHtml+='</div></div>';
 
-/* ── Recent Visitors Table ── */
-const recentSessions=entries.filter(e=>e.type==='session'||!e.type).slice(-20).reverse();
-let tableHtml='<div class="an-section"><div class="an-section-title">Recent Sessions <span class="an-hint">(last 20)</span></div>';
-if(recentSessions.length){
-  tableHtml+='<div class="an-table-wrap"><table class="an-table"><thead><tr><th>Time</th><th>UUID</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th><th>Lang</th><th>Timezone</th></tr></thead><tbody>';
-  recentSessions.forEach(e=>{
-    const t=e.timestamp?new Date(e.timestamp).toLocaleString('en-AU',{timeZone:'Australia/Sydney',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
+/* ── Recent Unique Visitors Table (one row per UUID per day) ── */
+const allSessions=entries.filter(e=>e.type==='session'||!e.type);
+const seenUUIDDay=new Set();
+const uniqueDayVisitors=[];
+/* Walk from newest to oldest so we keep the most recent appearance */
+for(let i=allSessions.length-1;i>=0;i--){
+  const e=allSessions[i];
+  let dayKey='';
+  try{
+    const dt=new Date(e.timestamp);
+    const aedtDate=new Date(dt.toLocaleString('en-US',{timeZone:'Australia/Sydney'}));
+    dayKey=aedtDate.getFullYear()+'-'+String(aedtDate.getMonth()+1).padStart(2,'0')+'-'+String(aedtDate.getDate()).padStart(2,'0');
+  }catch(_){dayKey='unknown'}
+  const key=(e.uuid||'anon')+'|'+dayKey;
+  if(!seenUUIDDay.has(key)){
+    seenUUIDDay.add(key);
+    uniqueDayVisitors.push({...e,_day:dayKey});
+  }
+  if(uniqueDayVisitors.length>=20)break;
+}
+let tableHtml='<div class="an-section"><div class="an-section-title">Recent Unique Visitors <span class="an-hint">(last 20, per day)</span></div>';
+if(uniqueDayVisitors.length){
+  tableHtml+='<div class="an-table-wrap"><table class="an-table"><thead><tr><th>Date</th><th>UUID</th><th>Browser</th><th>OS</th><th>Device</th><th>Lang</th><th>Timezone</th></tr></thead><tbody>';
+  uniqueDayVisitors.forEach(e=>{
+    const dateStr=e._day!=='unknown'?(function(d){const dt=new Date(d+'T00:00:00');return dt.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()]})(e._day):'—';
     const uuid=(e.uuid||'—').slice(0,12);
-    const pg=(e.page||'/').length>20?(e.page||'/').slice(0,20)+'…':(e.page||'/');
     const br=e.browser||'—';
     const os=e.os||'—';
     const dev=e.device||'—';
     const lang=(e.language||'—').split('-')[0];
     const tz=(e.timezone||'—').replace('Australia/','AU/').replace('America/','US/');
-    tableHtml+=`<tr><td>${t}</td><td class="an-mono">${uuid}</td><td title="${e.page||'/'}">${pg}</td><td>${br}</td><td>${os}</td><td>${dev}</td><td>${lang}</td><td title="${e.timezone||''}">${tz}</td></tr>`;
+    tableHtml+=`<tr><td>${dateStr}</td><td class="an-mono">${uuid}</td><td>${br}</td><td>${os}</td><td>${dev}</td><td>${lang}</td><td title="${e.timezone||''}">${tz}</td></tr>`;
   });
   tableHtml+='</tbody></table></div>';
 }else{
