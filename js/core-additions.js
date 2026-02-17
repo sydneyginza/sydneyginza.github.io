@@ -223,27 +223,7 @@ function queueRender(parts) {
 // queueRender({ filters:true, grid:true, roster:true, home:true, availableNow:true });
 
 
-/* === 5. IMAGE OPTIMIZATION HELPER === */
-
-// If you add a CDN with resize params (e.g., Cloudflare Image Resizing, imgix, etc.),
-// use this to generate thumbnail URLs
-function thumbUrl(originalUrl, width) {
-  if (!originalUrl) return '';
-  // For GitHub raw URLs, you'd proxy through a resizing service:
-  // return 'https://your-cdn.com/resize?url=' + encodeURIComponent(originalUrl) + '&w=' + width;
-  
-  // For now, just add a cache-buster-less URL to avoid re-fetching
-  return originalUrl;
-}
-
-// Recommended: Add <img loading="lazy" decoding="async"> attributes
-function lazyThumbOptimized(src, cls) {
-  return '<img class="' + (cls || 'card-thumb') + '" data-src="' + thumbUrl(src, 400) +
-         '" loading="lazy" decoding="async" alt="">';
-}
-
-
-/* === 6. ANALYTICS (Privacy-Respecting) === */
+/* === 5. ANALYTICS (Privacy-Respecting) === */
 
 var GinzaAnalytics = {
   _events: [],
