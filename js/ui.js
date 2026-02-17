@@ -418,18 +418,41 @@ el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;cons
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
-function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
-const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');
+const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0){rail.innerHTML='';return}
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
 const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
 const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
+
+/* Check if the rail already has the same set of dots (same indices, same order) */
+const existingDots=rail.querySelector('.pnav-dots');
+const existingKey=rail.dataset.navKey||'';
+const newKey=namedIndices.join(',');
+const canPatch=existingDots&&existingKey===newKey;
+
+if(canPatch){
+/* Just update active state, arrows, and counter in-place */
+existingDots.querySelectorAll('.pnav-dot').forEach((d,di)=>{
+const realIdx=namedIndices[di];
+d.classList.toggle('active',realIdx===idx);
+d.onclick=()=>showProfile(realIdx)});
+const arrows=rail.querySelectorAll('.pnav-arrow');
+if(arrows[0])arrows[0].onclick=()=>showProfile(prevIdx);
+if(arrows[1])arrows[1].onclick=()=>showProfile(nextIdx);
+const ctr=rail.querySelector('.pnav-counter');
+if(ctr)ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;
+const activeDot=existingDots.querySelector('.pnav-dot.active');
+if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),30);
+}else{
+/* Full rebuild needed (first load or filter change) */
+rail.innerHTML='';rail.dataset.navKey=newKey;
 const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
 const dots=document.createElement('div');dots.className='pnav-dots';
 for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(realIdx);dots.appendChild(d)}
 rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;rail.appendChild(ctr);
 const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn);
-/* scroll active dot into view */
-const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
+/* Use instant scroll on first build to avoid visible scroll-from-left */
+const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'instant'}),10)}}
 
 /* Profile Page */
 function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)return;const c=getFavCount();b.textContent=c>0?c:''}
@@ -449,7 +472,12 @@ const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><spa
 const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</div>`:'';
 const isFav=g.name&&isFavorite(g.name);
 const favBtn=g.name?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?'Favorited':'Add to Favorites'}</button>`:'';
-document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
+/* Preserve nav rail DOM to avoid scroll reset */
+const profileContent=document.getElementById('profileContent');
+const existingRail=profileContent.querySelector('#profileNavRail');
+let savedRail=null;
+if(existingRail&&existingRail.querySelector('.pnav-dots')){savedRail=existingRail;savedRail.remove()}
+profileContent.innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div>${favBtn}<div class="profile-divider" style="margin-top:24px"></div>
@@ -460,6 +488,8 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>
 ${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
+/* Reattach preserved nav rail if available */
+if(savedRail){const placeholder=profileContent.querySelector('#profileNavRail');if(placeholder)placeholder.replaceWith(savedRail)}
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
