@@ -186,7 +186,7 @@ closeFilterPanel();
 /* Determine which filter pane is active for this page */
 const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
 _activeFilterPaneId=paneMap[id]||null;
-document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
 if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
@@ -204,6 +204,14 @@ document.getElementById('navFavorites').onclick=e=>{e.preventDefault();showPage(
 document.getElementById('navValue').onclick=e=>{e.preventDefault();showPage('valuePage')};
 document.getElementById('navEmployment').onclick=e=>{e.preventDefault();showPage('employmentPage')};
 document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
+
+/* Nav Dropdown Menu Toggle */
+const navMenuBtn=document.getElementById('navMenuBtn');
+const navDropdown=document.getElementById('navDropdown');
+navMenuBtn.onclick=()=>{navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open')};
+function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open')}
+navDropdown.querySelectorAll('a').forEach(a=>{const orig=a.onclick;a.addEventListener('click',()=>closeNavMenu())});
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-menu-wrap'))closeNavMenu()});
 
 /* Copy Time Modal */
 function findExistingTimes(name,excludeDate){const dates=getWeekDates();for(const dt of dates){if(dt===excludeDate)continue;const entry=getCalEntry(name,dt);if(entry&&entry.start&&entry.end)return{date:dt,start:entry.start,end:entry.end}}return null}
@@ -455,7 +463,7 @@ document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
