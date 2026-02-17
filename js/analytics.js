@@ -7,6 +7,7 @@
  * Data retained for 90 days, auto-pruned on load.
  *
  * + GitHub Visitor Logs: append-only daily JSON files in data/logs/ on the DATA_REPO.
+ *   Each visitor session logs: initial visit info + every page view + every profile view.
  *   Captures: anonymous UUID, user-agent, language, timezone, page path, timestamp.
  */
 
@@ -124,8 +125,13 @@ const VisitorLog=(function(){
 
 const UUID_KEY='ginza_visitor_uuid';
 const LOG_DIR='data/logs';
-const THROTTLE_KEY='ginza_log_last';
-const THROTTLE_MS=30000; /* min 30s between log writes to avoid spamming */
+
+/* ── In-memory queue of entries to flush to GitHub ── */
+let _queue=[];
+let _flushTimer=null;
+let _flushing=false;
+const FLUSH_INTERVAL=15000; /* batch-write every 15s if queue has entries */
+const FLUSH_ON_UNLOAD=true;
 
 /* Generate or retrieve persistent anonymous UUID */
 function getUUID(){
@@ -141,12 +147,10 @@ function getUUID(){
   }
 }
 
-/* Collect visitor fingerprint */
-function collectInfo(){
+/* Parse UA once for the session */
+function _parseUA(){
   const ua=navigator.userAgent||'';
   let device='Desktop',browser='Unknown',os='Unknown';
-
-  /* Parse OS */
   if(/Windows/i.test(ua))os='Windows';
   else if(/Macintosh|Mac OS/i.test(ua))os='macOS';
   else if(/Android/i.test(ua)){os='Android';device='Mobile'}
@@ -154,22 +158,30 @@ function collectInfo(){
   else if(/iPad/i.test(ua)){os='iOS';device='Tablet'}
   else if(/Linux/i.test(ua))os='Linux';
   else if(/CrOS/i.test(ua))os='ChromeOS';
-
-  /* Parse browser */
   if(/Edg\//i.test(ua))browser='Edge';
   else if(/OPR\//i.test(ua)||/Opera/i.test(ua))browser='Opera';
   else if(/SamsungBrowser/i.test(ua))browser='Samsung';
   else if(/Chrome/i.test(ua))browser='Chrome';
   else if(/Safari/i.test(ua)&&!/Chrome/i.test(ua))browser='Safari';
   else if(/Firefox/i.test(ua))browser='Firefox';
+  return{ua,browser,os,device};
+}
 
+const _uaInfo=_parseUA();
+const _sessionUUID=getUUID();
+
+/* ── Create log entries ── */
+
+/* Session entry — logged once on page load */
+function _makeSessionEntry(){
   return{
-    uuid:getUUID(),
+    type:'session',
+    uuid:_sessionUUID,
     timestamp:new Date().toISOString(),
-    userAgent:ua,
-    browser:browser,
-    os:os,
-    device:device,
+    userAgent:_uaInfo.ua,
+    browser:_uaInfo.browser,
+    os:_uaInfo.os,
+    device:_uaInfo.device,
     language:navigator.language||navigator.userLanguage||'unknown',
     timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'unknown',
     tzOffset:new Date().getTimezoneOffset(),
@@ -180,31 +192,70 @@ function collectInfo(){
   };
 }
 
-/* Check throttle — don't spam GitHub API */
-function shouldLog(){
-  try{
-    const last=localStorage.getItem(THROTTLE_KEY);
-    if(last&&(Date.now()-parseInt(last))<THROTTLE_MS)return false;
-    localStorage.setItem(THROTTLE_KEY,String(Date.now()));
-    return true;
-  }catch(e){return true}
+/* Page view entry — logged on every page navigation */
+function _makePageViewEntry(pageId){
+  return{
+    type:'pageView',
+    uuid:_sessionUUID,
+    timestamp:new Date().toISOString(),
+    page:pageId
+  };
+}
+
+/* Profile view entry — logged on every profile open */
+function _makeProfileViewEntry(profileName){
+  return{
+    type:'profileView',
+    uuid:_sessionUUID,
+    timestamp:new Date().toISOString(),
+    profile:profileName
+  };
+}
+
+/* ── Queue management ── */
+
+function enqueue(entry){
+  _queue.push(entry);
+  /* Start periodic flush timer if not running */
+  if(!_flushTimer){
+    _flushTimer=setInterval(()=>{
+      if(_queue.length>0)flush();
+    },FLUSH_INTERVAL);
+  }
+}
+
+/* Track a page view (called from hooks) */
+function trackPageView(pageId){
+  if(!pageId)return;
+  enqueue(_makePageViewEntry(pageId));
+}
+
+/* Track a profile view (called from hooks) */
+function trackProfileView(profileName){
+  if(!profileName)return;
+  enqueue(_makeProfileViewEntry(profileName));
 }
 
 /* Get today's log filename in AEDT */
-function logFileName(){
+function _logFileName(){
   const d=new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}));
   const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   return `${LOG_DIR}/${ds}.json`;
 }
 
-/* Append a visit entry to today's log file on GitHub */
-async function logVisit(){
-  if(!shouldLog())return;
-  const entry=collectInfo();
-  const filePath=logFileName();
+/* Flush queued entries to GitHub */
+async function flush(){
+  if(_flushing||_queue.length===0)return;
+  _flushing=true;
+
+  /* Grab current queue and reset */
+  const entries=[..._queue];
+  _queue=[];
+
+  const filePath=_logFileName();
 
   try{
-    /* Try to read existing log file */
+    /* Read existing log file */
     let existing=[];
     let sha=null;
 
@@ -216,39 +267,77 @@ async function logVisit(){
       catch(e){existing=[];}
     }
 
-    /* Append new entry */
-    existing.push(entry);
+    /* Append all queued entries */
+    existing.push(...entries);
 
     /* Write back */
     const body={
-      message:'Log visit '+entry.timestamp,
+      message:'Log '+entries.length+' entries',
       content:btoa(unescape(encodeURIComponent(JSON.stringify(existing,null,2))))
     };
     if(sha)body.sha=sha;
 
-    await fetchWithRetry(`${DATA_API}/${filePath}`,{
+    const putR=await fetchWithRetry(`${DATA_API}/${filePath}`,{
       method:'PUT',
       headers:proxyHeaders(),
       body:JSON.stringify(body)
     },{retries:1,baseDelay:500});
 
+    if(!putR.ok){
+      /* Put entries back in queue for next attempt */
+      _queue.unshift(...entries);
+    }
+
   }catch(e){
-    /* Silently fail — visitor logging should never break the site */
-    console.warn('Visitor log failed:',e.message);
+    /* Put entries back in queue for next attempt */
+    _queue.unshift(...entries);
+    console.warn('Visitor log flush failed:',e.message);
+  }finally{
+    _flushing=false;
   }
+}
+
+/* Flush on page unload (best-effort) */
+function _flushOnUnload(){
+  if(_queue.length===0)return;
+  const entries=[..._queue];
+  _queue=[];
+  /* Use sendBeacon for reliable delivery on unload */
+  try{
+    const filePath=_logFileName();
+    /* sendBeacon can't do read-then-write, so we store pending entries
+       in localStorage and flush them on next visit */
+    const PENDING_KEY='ginza_log_pending';
+    let pending=[];
+    try{const raw=localStorage.getItem(PENDING_KEY);if(raw)pending=JSON.parse(raw);}catch(e){}
+    pending.push(...entries);
+    localStorage.setItem(PENDING_KEY,JSON.stringify(pending));
+  }catch(e){/* silent */}
+}
+
+/* Flush any pending entries from a previous session that didn't complete */
+async function _flushPending(){
+  const PENDING_KEY='ginza_log_pending';
+  try{
+    const raw=localStorage.getItem(PENDING_KEY);
+    if(!raw)return;
+    const pending=JSON.parse(raw);
+    if(!pending.length)return;
+    localStorage.removeItem(PENDING_KEY);
+    _queue.unshift(...pending);
+    await flush();
+  }catch(e){/* silent */}
 }
 
 /* Load log files for a date range from GitHub */
 async function loadLogs(startDate,endDate){
   const logs=[];
   try{
-    /* List all files in the logs directory */
     const r=await fetchWithRetry(`${DATA_API}/${LOG_DIR}`,{headers:proxyHeaders()},{retries:1,baseDelay:500});
     if(!r.ok)return logs;
     const files=await r.json();
     if(!Array.isArray(files))return logs;
 
-    /* Filter to date range and fetch each */
     const filesToFetch=files.filter(f=>{
       const m=f.name.match(/^(\d{4}-\d{2}-\d{2})\.json$/);
       if(!m)return false;
@@ -256,7 +345,6 @@ async function loadLogs(startDate,endDate){
       return dt>=startDate&&dt<=endDate;
     });
 
-    /* Fetch in parallel (max 10 concurrent) */
     const batches=[];
     for(let i=0;i<filesToFetch.length;i+=10){
       batches.push(filesToFetch.slice(i,i+10));
@@ -279,7 +367,10 @@ async function loadLogs(startDate,endDate){
   return logs;
 }
 
-/* Aggregate visitor log data */
+/* ══════════════════════════════════════
+   AGGREGATION
+   ══════════════════════════════════════ */
+
 function aggregateLogs(entries){
   const uuids=new Set();
   const browsers={};
@@ -287,57 +378,91 @@ function aggregateLogs(entries){
   const devices={};
   const languages={};
   const timezones={};
-  const pages={};
   const referrers={};
+  const screens={};
   const hourly={};
   const daily={};
   const dailyUniques={};
-  const screens={};
+
+  /* Page views: total count + unique UUIDs per page */
+  const pageViewsTotal={};
+  const pageViewsUniques={}; /* page -> Set of uuids */
+
+  /* Profile views: total count + unique UUIDs per profile */
+  const profileViewsTotal={};
+  const profileViewsUniques={}; /* profile -> Set of uuids */
+
   let totalHits=0;
+  let totalPageViews=0;
+  let totalProfileViews=0;
 
   for(let h=0;h<24;h++)hourly[String(h).padStart(2,'0')]=0;
 
   entries.forEach(e=>{
-    totalHits++;
-    uuids.add(e.uuid);
+    const uuid=e.uuid||'unknown';
 
-    /* Browser */
-    const br=e.browser||_parseUABrowser(e.userAgent);
-    browsers[br]=(browsers[br]||0)+1;
+    /* ── Session entries (initial visit) ── */
+    if(e.type==='session'||!e.type){
+      totalHits++;
+      uuids.add(uuid);
 
-    /* OS */
-    const os=e.os||_parseUAOS(e.userAgent);
-    oses[os]=(oses[os]||0)+1;
+      const br=e.browser||_parseUABrowser(e.userAgent);
+      browsers[br]=(browsers[br]||0)+1;
 
-    /* Device */
-    const dev=e.device||'Unknown';
-    devices[dev]=(devices[dev]||0)+1;
+      const os=e.os||_parseUAOS(e.userAgent);
+      oses[os]=(oses[os]||0)+1;
 
-    /* Language */
-    const lang=(e.language||'unknown').split('-')[0];
-    languages[lang]=(languages[lang]||0)+1;
+      const dev=e.device||'Unknown';
+      devices[dev]=(devices[dev]||0)+1;
 
-    /* Timezone */
-    const tz=e.timezone||'unknown';
-    timezones[tz]=(timezones[tz]||0)+1;
+      const lang=(e.language||'unknown').split('-')[0];
+      languages[lang]=(languages[lang]||0)+1;
 
-    /* Page */
-    const pg=e.page||'/';
-    pages[pg]=(pages[pg]||0)+1;
+      const tz=e.timezone||'unknown';
+      timezones[tz]=(timezones[tz]||0)+1;
 
-    /* Referrer */
-    let ref='direct';
-    if(e.referrer&&e.referrer!=='direct'){
-      try{ref=new URL(e.referrer).hostname}catch(_){ref=e.referrer}
+      let ref='direct';
+      if(e.referrer&&e.referrer!=='direct'){
+        try{ref=new URL(e.referrer).hostname}catch(_){ref=e.referrer}
+      }
+      referrers[ref]=(referrers[ref]||0)+1;
+
+      if(e.screen&&e.screen!=='unknown'){
+        screens[e.screen]=(screens[e.screen]||0)+1;
+      }
+
+      /* Also count the initial page as a page view */
+      if(e.page){
+        const pg=e.page;
+        pageViewsTotal[pg]=(pageViewsTotal[pg]||0)+1;
+        if(!pageViewsUniques[pg])pageViewsUniques[pg]=new Set();
+        pageViewsUniques[pg].add(uuid);
+        totalPageViews++;
+      }
     }
-    referrers[ref]=(referrers[ref]||0)+1;
 
-    /* Screen size */
-    if(e.screen&&e.screen!=='unknown'){
-      screens[e.screen]=(screens[e.screen]||0)+1;
+    /* ── Page view entries ── */
+    if(e.type==='pageView'){
+      const pg=e.page||'unknown';
+      pageViewsTotal[pg]=(pageViewsTotal[pg]||0)+1;
+      if(!pageViewsUniques[pg])pageViewsUniques[pg]=new Set();
+      pageViewsUniques[pg].add(uuid);
+      totalPageViews++;
+      /* Also count this UUID as a visitor if not already seen */
+      uuids.add(uuid);
     }
 
-    /* Hourly (use AEDT) */
+    /* ── Profile view entries ── */
+    if(e.type==='profileView'){
+      const pf=e.profile||'unknown';
+      profileViewsTotal[pf]=(profileViewsTotal[pf]||0)+1;
+      if(!profileViewsUniques[pf])profileViewsUniques[pf]=new Set();
+      profileViewsUniques[pf].add(uuid);
+      totalProfileViews++;
+      uuids.add(uuid);
+    }
+
+    /* Hourly (use AEDT) — for all entry types */
     if(e.timestamp){
       try{
         const dt=new Date(e.timestamp);
@@ -347,7 +472,7 @@ function aggregateLogs(entries){
       }catch(_){}
     }
 
-    /* Daily */
+    /* Daily — for all entry types */
     if(e.timestamp){
       try{
         const dt=new Date(e.timestamp);
@@ -355,20 +480,30 @@ function aggregateLogs(entries){
         const ds=aedtDate.getFullYear()+'-'+String(aedtDate.getMonth()+1).padStart(2,'0')+'-'+String(aedtDate.getDate()).padStart(2,'0');
         daily[ds]=(daily[ds]||0)+1;
         if(!dailyUniques[ds])dailyUniques[ds]=new Set();
-        dailyUniques[ds].add(e.uuid);
+        dailyUniques[ds].add(uuid);
       }catch(_){}
     }
   });
 
-  /* Convert dailyUniques sets to counts */
+  /* Convert Sets to counts */
   const dailyUniqueCounts={};
   for(const d in dailyUniques)dailyUniqueCounts[d]=dailyUniques[d].size;
 
+  const pageViewsUniqueCounts={};
+  for(const p in pageViewsUniques)pageViewsUniqueCounts[p]=pageViewsUniques[p].size;
+
+  const profileViewsUniqueCounts={};
+  for(const p in profileViewsUniques)profileViewsUniqueCounts[p]=profileViewsUniques[p].size;
+
   return{
     totalHits,
+    totalPageViews,
+    totalProfileViews,
     uniqueVisitors:uuids.size,
-    browsers,oses,devices,languages,timezones,pages,referrers,screens,
-    hourly,daily,dailyUniqueCounts
+    browsers,oses,devices,languages,timezones,referrers,screens,
+    hourly,daily,dailyUniqueCounts,
+    pageViewsTotal,pageViewsUniqueCounts,
+    profileViewsTotal,profileViewsUniqueCounts
   };
 }
 
@@ -393,11 +528,23 @@ function _parseUAOS(ua){
   return 'Other';
 }
 
-return{logVisit,loadLogs,aggregateLogs,getUUID};
-})();
+/* ── Init: queue session entry on load ── */
+enqueue(_makeSessionEntry());
 
-/* Fire visitor log on page load (non-blocking) */
-VisitorLog.logVisit();
+/* Flush pending entries from previous session, then flush current queue */
+_flushPending().then(()=>flush());
+
+/* Set up periodic flush timer */
+setInterval(()=>{if(_queue.length>0)flush()},FLUSH_INTERVAL);
+
+/* On page unload, stash remaining queue to localStorage for next visit */
+window.addEventListener('beforeunload',()=>{
+  if(_queue.length===0)return;
+  _flushOnUnload();
+});
+
+return{trackPageView,trackProfileView,flush,loadLogs,aggregateLogs,getUUID};
+})();
 
 
 /* ══════════════════════════════════════
@@ -568,25 +715,25 @@ if(cachedVisitorData&&cachedVisitorPeriod===analyticsPeriod){
   cachedVisitorPeriod=analyticsPeriod;
 }
 
-const vStats=VisitorLog.aggregateLogs(entries);
+const v=VisitorLog.aggregateLogs(entries);
 
 /* ── Summary cards ── */
-const activeDays=Object.keys(vStats.daily).length;
-const avgDaily=activeDays>0?Math.round(vStats.totalHits/activeDays):0;
-const avgUniqueDaily=activeDays>0?Math.round(vStats.uniqueVisitors/activeDays):0;
+const activeDays=Object.keys(v.daily).length;
+const avgDaily=activeDays>0?Math.round(v.totalHits/activeDays):0;
+const avgUniqueDaily=activeDays>0?Math.round(v.uniqueVisitors/activeDays):0;
 const summaryHtml=`<div class="an-summary">
-<div class="an-card"><div class="an-card-val">${vStats.uniqueVisitors}</div><div class="an-card-label">Unique Visitors</div></div>
-<div class="an-card"><div class="an-card-val">${vStats.totalHits}</div><div class="an-card-label">Total Hits</div></div>
-<div class="an-card"><div class="an-card-val">${avgDaily}</div><div class="an-card-label">Avg Daily Hits</div></div>
-<div class="an-card"><div class="an-card-val">${avgUniqueDaily}</div><div class="an-card-label">Avg Daily Uniques</div></div>
+<div class="an-card"><div class="an-card-val">${v.uniqueVisitors}</div><div class="an-card-label">Unique Visitors</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalHits}</div><div class="an-card-label">Sessions</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalPageViews}</div><div class="an-card-label">Total Page Views</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalProfileViews}</div><div class="an-card-label">Total Profile Views</div></div>
 </div>`;
 
 /* ── Daily Visitors Trend (hits + uniques) ── */
-const sortedDays=Object.entries(vStats.daily).sort((a,b)=>a[0].localeCompare(b[0]));
+const sortedDays=Object.entries(v.daily).sort((a,b)=>a[0].localeCompare(b[0]));
 const maxDayVal=Math.max(...sortedDays.map(d=>d[1]),1);
 let trendHtml='<div class="an-section"><div class="an-section-title">Daily Visitors <span class="an-hint">(hits vs uniques)</span></div><div class="an-trend an-trend-dual">';
 sortedDays.forEach(([date,count])=>{
-  const uniques=vStats.dailyUniqueCounts[date]||0;
+  const uniques=v.dailyUniqueCounts[date]||0;
   const pctH=count/maxDayVal*100;
   const pctU=uniques/maxDayVal*100;
   const dd=date.slice(5);
@@ -602,19 +749,45 @@ if(sortedDays.length)trendHtml+='<div class="an-legend"><span class="an-legend-d
 trendHtml+='</div>';
 
 /* ── Peak Hours ── */
-const maxH=Math.max(...Object.values(vStats.hourly),1);
+const maxH=Math.max(...Object.values(v.hourly),1);
 let hoursHtml='<div class="an-section"><div class="an-section-title">Peak Visit Hours <span class="an-hint">(AEDT)</span></div><div class="an-hours">';
 for(let h=0;h<24;h++){
   const key=String(h).padStart(2,'0');
-  const val=vStats.hourly[key]||0;
+  const val=v.hourly[key]||0;
   const pct=val/maxH;
   const h12=h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
   hoursHtml+=`<div class="an-hour" title="${h12}: ${val} visits"><div class="an-hour-bar an-hour-visitor" style="height:${Math.max(pct*100,2)}%;opacity:${0.25+pct*0.75}"></div><div class="an-hour-label">${h%3===0?h12:''}</div></div>`;
 }
 hoursHtml+='</div></div>';
 
+/* ── Page Views (unique + total) ── */
+const sortedPV=Object.entries(v.pageViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
+const maxPV=sortedPV.length?sortedPV[0][1]:1;
+let pvHtml='<div class="an-section"><div class="an-section-title">Page Views <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+sortedPV.forEach(([page,total])=>{
+  const unique=v.pageViewsUniqueCounts[page]||0;
+  const pct=total/maxPV*100;
+  const label=page==='/'?'Home':page.replace(/^\//,'').replace(/\//g,' › ');
+  pvHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${page}">${label}</div><div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+});
+if(!sortedPV.length)pvHtml+='<div class="an-empty">No page views recorded yet</div>';
+pvHtml+='</div></div>';
+
+/* ── Most Viewed Profiles (unique + total) ── */
+const sortedPF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
+const maxPF=sortedPF.length?sortedPF[0][1]:1;
+let pfHtml='<div class="an-section"><div class="an-section-title">Most Viewed Profiles <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+sortedPF.forEach(([name,total],i)=>{
+  const unique=v.profileViewsUniqueCounts[name]||0;
+  const pct=total/maxPF*100;
+  const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+  pfHtml+=`<div class="an-bar-row"><div class="an-bar-label">${medal} ${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+});
+if(!sortedPF.length)pfHtml+='<div class="an-empty">No profile views recorded yet</div>';
+pfHtml+='</div></div>';
+
 /* ── Browsers ── */
-const sortedBrowsers=Object.entries(vStats.browsers).sort((a,b)=>b[1]-a[1]);
+const sortedBrowsers=Object.entries(v.browsers).sort((a,b)=>b[1]-a[1]);
 const maxBr=sortedBrowsers.length?sortedBrowsers[0][1]:1;
 let browsersHtml='<div class="an-section"><div class="an-section-title">Browsers</div><div class="an-bars">';
 sortedBrowsers.forEach(([name,count])=>{
@@ -625,7 +798,7 @@ if(!sortedBrowsers.length)browsersHtml+='<div class="an-empty">No data</div>';
 browsersHtml+='</div></div>';
 
 /* ── Operating Systems ── */
-const sortedOS=Object.entries(vStats.oses).sort((a,b)=>b[1]-a[1]);
+const sortedOS=Object.entries(v.oses).sort((a,b)=>b[1]-a[1]);
 const maxOS=sortedOS.length?sortedOS[0][1]:1;
 let osHtml='<div class="an-section"><div class="an-section-title">Operating Systems</div><div class="an-bars">';
 sortedOS.forEach(([name,count])=>{
@@ -636,7 +809,7 @@ if(!sortedOS.length)osHtml+='<div class="an-empty">No data</div>';
 osHtml+='</div></div>';
 
 /* ── Devices ── */
-const sortedDev=Object.entries(vStats.devices).sort((a,b)=>b[1]-a[1]);
+const sortedDev=Object.entries(v.devices).sort((a,b)=>b[1]-a[1]);
 const maxDev=sortedDev.length?sortedDev[0][1]:1;
 let devHtml='<div class="an-section"><div class="an-section-title">Devices</div><div class="an-bars">';
 sortedDev.forEach(([name,count])=>{
@@ -647,7 +820,7 @@ if(!sortedDev.length)devHtml+='<div class="an-empty">No data</div>';
 devHtml+='</div></div>';
 
 /* ── Languages ── */
-const sortedLangs=Object.entries(vStats.languages).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const sortedLangs=Object.entries(v.languages).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxLang=sortedLangs.length?sortedLangs[0][1]:1;
 let langHtml='<div class="an-section"><div class="an-section-title">Languages</div><div class="an-bars">';
 sortedLangs.forEach(([name,count])=>{
@@ -658,7 +831,7 @@ if(!sortedLangs.length)langHtml+='<div class="an-empty">No data</div>';
 langHtml+='</div></div>';
 
 /* ── Timezones ── */
-const sortedTZ=Object.entries(vStats.timezones).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const sortedTZ=Object.entries(v.timezones).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxTZ=sortedTZ.length?sortedTZ[0][1]:1;
 let tzHtml='<div class="an-section"><div class="an-section-title">Timezones</div><div class="an-bars">';
 sortedTZ.forEach(([name,count])=>{
@@ -669,20 +842,8 @@ sortedTZ.forEach(([name,count])=>{
 if(!sortedTZ.length)tzHtml+='<div class="an-empty">No data</div>';
 tzHtml+='</div></div>';
 
-/* ── Top Pages ── */
-const sortedPages=Object.entries(vStats.pages).sort((a,b)=>b[1]-a[1]).slice(0,15);
-const maxPg=sortedPages.length?sortedPages[0][1]:1;
-let pagesHtml='<div class="an-section"><div class="an-section-title">Top Pages</div><div class="an-bars">';
-sortedPages.forEach(([name,count])=>{
-  const pct=count/maxPg*100;
-  const shortName=name.length>30?name.slice(0,30)+'…':name;
-  pagesHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${name}">${shortName}</div><div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
-});
-if(!sortedPages.length)pagesHtml+='<div class="an-empty">No data</div>';
-pagesHtml+='</div></div>';
-
 /* ── Referrers ── */
-const sortedRefs=Object.entries(vStats.referrers).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const sortedRefs=Object.entries(v.referrers).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxRef=sortedRefs.length?sortedRefs[0][1]:1;
 let refsHtml='<div class="an-section"><div class="an-section-title">Referrers</div><div class="an-bars">';
 sortedRefs.forEach(([name,count])=>{
@@ -693,11 +854,11 @@ if(!sortedRefs.length)refsHtml+='<div class="an-empty">No data</div>';
 refsHtml+='</div></div>';
 
 /* ── Recent Visitors Table ── */
-const recent=entries.slice(-20).reverse();
-let tableHtml='<div class="an-section"><div class="an-section-title">Recent Visitors <span class="an-hint">(last 20)</span></div>';
-if(recent.length){
+const recentSessions=entries.filter(e=>e.type==='session'||!e.type).slice(-20).reverse();
+let tableHtml='<div class="an-section"><div class="an-section-title">Recent Sessions <span class="an-hint">(last 20)</span></div>';
+if(recentSessions.length){
   tableHtml+='<div class="an-table-wrap"><table class="an-table"><thead><tr><th>Time</th><th>UUID</th><th>Page</th><th>Browser</th><th>OS</th><th>Device</th><th>Lang</th><th>Timezone</th></tr></thead><tbody>';
-  recent.forEach(e=>{
+  recentSessions.forEach(e=>{
     const t=e.timestamp?new Date(e.timestamp).toLocaleString('en-AU',{timeZone:'Australia/Sydney',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
     const uuid=(e.uuid||'—').slice(0,12);
     const pg=(e.page||'/').length>20?(e.page||'/').slice(0,20)+'…':(e.page||'/');
@@ -721,10 +882,11 @@ const actionsHtml=`<div class="an-actions">
 </div>`;
 
 container.innerHTML=tabHtml+periodHtml+summaryHtml+trendHtml+hoursHtml
+  +'<div class="an-two-col">'+pvHtml+pfHtml+'</div>'
   +'<div class="an-two-col">'+browsersHtml+osHtml+'</div>'
   +'<div class="an-two-col">'+devHtml+langHtml+'</div>'
   +'<div class="an-two-col">'+tzHtml+refsHtml+'</div>'
-  +pagesHtml+tableHtml+actionsHtml;
+  +tableHtml+actionsHtml;
 
 /* Bind tabs */
 _bindTabButtons(container);
@@ -757,24 +919,31 @@ function _bindTabButtons(container){
    HOOK INTO EXISTING CODE
    ══════════════════════════════════════ */
 
-/* Patch showPage to track page views */
+/* Patch showPage to track page views (local + visitor log) */
 (function(){
 const _origShowPage=showPage;
 window.showPage=function(id){
 _origShowPage(id);
 Analytics.trackPageView(id);
+/* Also log to GitHub visitor log */
+const label=id.replace('Page','');
+VisitorLog.trackPageView(label);
 /* Track analytics page render */
 if(id==='analyticsPage')renderAnalytics();
 };
 })();
 
-/* Patch showProfile to track profile views */
+/* Patch showProfile to track profile views (local + visitor log) */
 (function(){
 const _origShowProfile=showProfile;
 window.showProfile=function(idx){
 _origShowProfile(idx);
 const g=girls[idx];
-if(g&&g.name)Analytics.trackProfileView(g.name);
+if(g&&g.name){
+  Analytics.trackProfileView(g.name);
+  /* Also log to GitHub visitor log */
+  VisitorLog.trackProfileView(g.name);
+}
 };
 })();
 
