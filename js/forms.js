@@ -58,46 +58,17 @@ function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt 
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
-/* === SPA Route Resolution === */
-function resolveRoute(){
-  var route=window.__spaRoute;
-  if(!route)return;
-  delete window.__spaRoute;
-  // Normalize: strip leading/trailing slashes
-  var parts=route.replace(/^\/+|\/+$/g,'').split('/');
-  // /girls/Name → show profile for that name
-  if(parts[0]==='girls'&&parts[1]){
-    var name=decodeURIComponent(parts[1]).replace(/[-_]/g,' ');
-    var idx=girls.findIndex(function(g){
-      return g.name&&g.name.toLowerCase()===name.toLowerCase()
-    });
-    // Also try exact match with original URL encoding (hyphens, underscores)
-    if(idx<0){
-      idx=girls.findIndex(function(g){
-        return g.name&&g.name.toLowerCase().replace(/\s+/g,'-')===parts[1].toLowerCase()
-      });
-    }
-    if(idx<0){
-      idx=girls.findIndex(function(g){
-        return g.name&&g.name.toLowerCase().replace(/\s+/g,'_')===parts[1].toLowerCase()
-      });
-    }
-    // Partial match as fallback
-    if(idx<0){
-      var lower=parts[1].toLowerCase();
-      idx=girls.findIndex(function(g){
-        return g.name&&g.name.toLowerCase().includes(lower)
-      });
-    }
-    if(idx>=0){profileReturnPage='homePage';showProfile(idx)}
-    else{showToast('Profile not found: '+parts[1],'error')}
-  }
-  // /roster, /calendar, /favorites, etc.
-  else if(parts[0]==='roster')showPage('rosterPage');
-  else if(parts[0]==='calendar')showPage('calendarPage');
-  else if(parts[0]==='favorites')showPage('favoritesPage');
-  else if(parts[0]==='value')showPage('valuePage');
-  else if(parts[0]==='list'||parts[0]==='girls')showPage('listPage');
+/* Route-aware render: after data is ready, resolve the URL to show the right page */
+function fullRenderAndRoute(){
+rosterDateFilter=fmtDate(getAEDTDate());
+renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();
+/* Resolve the current URL – this will call showPage/showProfile as needed */
+if(window.location.pathname!=='/'){
+Router.resolve();
+}else{
+/* We're on home – set initial state */
+history.replaceState({path:'/'},'Ginza – Sydney\'s Premier Experience','/');
+}
 }
 
 (async()=>{
@@ -112,9 +83,8 @@ let renderedFromCache=false;
 if(cachedGirls&&cachedGirls.length){
 girls=cachedGirls;
 calData=normalizeCalData(cachedCal||{});
-fullRender();
+fullRenderAndRoute();
 removeSkeletons();
-resolveRoute();
 renderedFromCache=true;
 }
 
@@ -148,9 +118,8 @@ updateCalCache();
 
 /* Phase 3: Re-render only if data actually changed */
 if(!renderedFromCache){
-fullRender();
+fullRenderAndRoute();
 removeSkeletons();
-resolveRoute();
 }else if(girlsChanged||calChanged){
 fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);

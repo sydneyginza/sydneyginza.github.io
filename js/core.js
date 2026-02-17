@@ -380,3 +380,134 @@ function observeCalEntrance(table) {
     calEntranceObserver.observe(row);
   });
 }
+
+/* === URL Router (pushState / popstate) === */
+const Router = (function() {
+  /* Map page IDs ↔ URL paths */
+  const PAGE_ROUTES = {
+    homePage:       '/',
+    rosterPage:     '/roster',
+    listPage:       '/girls',
+    favoritesPage:  '/favorites',
+    valuePage:      '/rates',
+    employmentPage: '/employment',
+    calendarPage:   '/calendar'
+  };
+  const PATH_TO_PAGE = {};
+  for (const id in PAGE_ROUTES) PATH_TO_PAGE[PAGE_ROUTES[id]] = id;
+
+  /* Slug helpers – URL-safe name encoding */
+  function nameToSlug(name) {
+    return encodeURIComponent((name || '').trim().replace(/\s+/g, '-'));
+  }
+  function slugToName(slug) {
+    return decodeURIComponent(slug || '').replace(/-/g, ' ');
+  }
+
+  /* Find girl index by name (case-insensitive) */
+  function findGirlByName(name) {
+    const lower = name.toLowerCase();
+    return girls.findIndex(g => g.name && g.name.trim().toLowerCase() === lower);
+  }
+
+  /* Build the current path for a page or profile */
+  function pathForPage(pageId) {
+    return PAGE_ROUTES[pageId] || '/';
+  }
+  function pathForProfile(idx) {
+    const g = girls[idx];
+    if (!g || !g.name) return '/girls';
+    return '/girls/' + nameToSlug(g.name);
+  }
+
+  /* Suppress pushState when handling popstate */
+  let _suppressPush = false;
+
+  /* Push a new history entry (for user-initiated navigation) */
+  function push(path, title) {
+    if (_suppressPush) return;
+    const fullTitle = title || 'Ginza';
+    document.title = fullTitle;
+    if (window.location.pathname !== path) {
+      history.pushState({ path: path }, fullTitle, path);
+    }
+  }
+
+  /* Replace current entry (for profile prev/next, filter changes, etc.) */
+  function replace(path, title) {
+    if (_suppressPush) return;
+    const fullTitle = title || 'Ginza';
+    document.title = fullTitle;
+    history.replaceState({ path: path }, fullTitle, path);
+  }
+
+  /* Parse the current URL and navigate to the right view.
+     Returns true if a route was matched, false otherwise. */
+  function resolve() {
+    const path = window.location.pathname;
+
+    /* Profile: /girls/SomeName */
+    const profileMatch = path.match(/^\/girls\/(.+)$/);
+    if (profileMatch) {
+      const name = slugToName(profileMatch[1]);
+      const idx = findGirlByName(name);
+      if (idx >= 0) {
+        /* Don't push state – we're already at this URL */
+        _suppressPush = true;
+        profileReturnPage = 'listPage';
+        showProfile(idx);
+        _suppressPush = false;
+        return true;
+      }
+      /* Name not found (data not loaded yet or invalid) – fall through to /girls */
+      _suppressPush = true;
+      showPage('listPage');
+      _suppressPush = false;
+      replace('/girls', 'Ginza – Girls');
+      return true;
+    }
+
+    /* Standard pages */
+    const pageId = PATH_TO_PAGE[path];
+    if (pageId) {
+      /* Calendar requires login – redirect to home if not logged in */
+      if (pageId === 'calendarPage' && !loggedIn) {
+        _suppressPush = true;
+        showPage('homePage');
+        _suppressPush = false;
+        replace('/', 'Ginza – Sydney\'s Premier Experience');
+        return true;
+      }
+      _suppressPush = true;
+      showPage(pageId);
+      _suppressPush = false;
+      return true;
+    }
+
+    /* Unknown path – default to home */
+    _suppressPush = true;
+    showPage('homePage');
+    _suppressPush = false;
+    replace('/', 'Ginza – Sydney\'s Premier Experience');
+    return true;
+  }
+
+  /* Listen for browser back/forward */
+  window.addEventListener('popstate', function(e) {
+    resolve();
+  });
+
+  return {
+    PAGE_ROUTES,
+    push,
+    replace,
+    resolve,
+    pathForPage,
+    pathForProfile,
+    nameToSlug,
+    slugToName,
+    findGirlByName,
+    get suppressPush() { return _suppressPush; },
+    set suppressPush(v) { _suppressPush = v; }
+  };
+})();
