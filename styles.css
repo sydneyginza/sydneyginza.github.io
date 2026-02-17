@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--accent:#b44aff;--accent2:#ff6f00;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.04);--text:#e0e0e0;--text-dim:#888}
 body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}
@@ -594,3 +594,48 @@ footer{padding-bottom:100px}
 .an-action-btn.an-danger:hover{border-color:#ff4444;color:#ff4444}
 
 .an-empty{color:rgba(255,255,255,0.25);font-size:13px;padding:20px 0;text-align:center}
+
+/* Analytics Tabs */
+.an-tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.an-tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);padding:10px 20px;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .25s}
+.an-tab-btn:hover{color:rgba(255,255,255,0.7)}
+.an-tab-btn.active{color:#fff;border-bottom-color:var(--accent)}
+
+/* Visitor Log Bar Colors */
+.an-bar-fill.an-bar-visitor{background:linear-gradient(90deg,rgba(56,189,248,0.8),rgba(56,189,248,0.3))}
+.an-bar-fill.an-bar-os{background:linear-gradient(90deg,rgba(251,146,60,0.8),rgba(251,146,60,0.3))}
+.an-bar-fill.an-bar-device{background:linear-gradient(90deg,rgba(168,85,247,0.8),rgba(168,85,247,0.3))}
+.an-bar-fill.an-bar-lang{background:linear-gradient(90deg,rgba(52,211,153,0.8),rgba(52,211,153,0.3))}
+.an-bar-fill.an-bar-tz{background:linear-gradient(90deg,rgba(244,114,182,0.8),rgba(244,114,182,0.3))}
+.an-bar-fill.an-bar-ref{background:linear-gradient(90deg,rgba(250,204,21,0.8),rgba(250,204,21,0.3))}
+
+/* Visitor Hour Bar */
+.an-hour-bar.an-hour-visitor{background:linear-gradient(to top,rgba(56,189,248,0.9),rgba(56,189,248,0.3))}
+
+/* Dual Trend (hits + uniques overlay) */
+.an-trend.an-trend-dual .an-trend-bar{position:relative}
+.an-trend.an-trend-dual .an-trend-fill{position:absolute;bottom:0;left:0;right:0}
+.an-trend.an-trend-dual .an-trend-fill:first-child{background:linear-gradient(to top,rgba(180,74,255,0.5),rgba(180,74,255,0.15));z-index:1}
+.an-trend.an-trend-dual .an-trend-fill.an-trend-unique{background:linear-gradient(to top,rgba(56,189,248,0.9),rgba(56,189,248,0.4));z-index:2;width:60%;left:20%}
+.an-trend.an-trend-dual .an-trend-label{position:relative;z-index:3}
+
+/* Legend */
+.an-legend{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:11px;color:rgba(255,255,255,0.4)}
+.an-legend-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.an-legend-dot.an-legend-hits{background:rgba(180,74,255,0.6)}
+.an-legend-dot.an-legend-uniques{background:rgba(56,189,248,0.8)}
+
+/* Loading Spinner */
+.an-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px}
+.an-loading-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.08);border-top-color:var(--accent);border-radius:50%;animation:anSpin .8s linear infinite}
+@keyframes anSpin{to{transform:rotate(360deg)}}
+.an-loading-text{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35)}
+
+/* Visitor Table */
+.an-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px}
+.an-table{width:100%;border-collapse:collapse;font-size:11px}
+.an-table th{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.35);text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.08);white-space:nowrap}
+.an-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.55);white-space:nowrap}
+.an-table tr:hover td{background:rgba(180,74,255,0.04);color:rgba(255,255,255,0.75)}
+.an-table .an-mono{font-family:'Courier New',monospace;font-size:10px;color:rgba(56,189,248,0.7);letter-spacing:0.5px}
+@media(max-width:768px){.an-table{font-size:10px}.an-table th,.an-table td{padding:5px 6px}}
