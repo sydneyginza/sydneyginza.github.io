@@ -175,7 +175,7 @@ renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
 updateFilterToggle();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
-if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage)}}
+if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
 const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','profilePage'].map(id=>document.getElementById(id));
 
@@ -183,11 +183,11 @@ function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
-/* Dynamic page title for SEO & browser tab clarity */
+/* Dynamic page title & URL routing */
 const titleMap={homePage:'Ginza – Sydney\'s Premier Experience',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',profilePage:'Ginza – Profile'};
-document.title=titleMap[id]||'Ginza';
-/* Update ARIA expanded states */
-const menuBtn=document.getElementById('navMenuBtn');if(menuBtn)menuBtn.setAttribute('aria-expanded','false');
+const pageTitle=titleMap[id]||'Ginza';
+document.title=pageTitle;
+Router.push(Router.pathForPage(id),pageTitle);
 /* Determine which filter pane is active for this page */
 const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
 _activeFilterPaneId=paneMap[id]||null;
@@ -213,8 +213,8 @@ document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('
 /* Nav Dropdown Menu Toggle */
 const navMenuBtn=document.getElementById('navMenuBtn');
 const navDropdown=document.getElementById('navDropdown');
-navMenuBtn.onclick=()=>{navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open');navMenuBtn.setAttribute('aria-expanded',navDropdown.classList.contains('open'))};
-function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open');navMenuBtn.setAttribute('aria-expanded','false')}
+navMenuBtn.onclick=()=>{navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open')};
+function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open')}
 navDropdown.querySelectorAll('a').forEach(a=>{const orig=a.onclick;a.addEventListener('click',()=>closeNavMenu())});
 document.addEventListener('click',e=>{if(!e.target.closest('.nav-menu-wrap'))closeNavMenu()});
 
@@ -372,7 +372,7 @@ function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
-for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
+for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML='<p></p>';
 ngList=getNewGirls();ngIdx=0;renderNewGirls()})}
 
@@ -380,12 +380,12 @@ function renderNewGirls(){
 const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDisplay');nav.innerHTML='';disp.innerHTML='';
 if(!ngList.length){disp.innerHTML='<div class="ng-empty">No new girls this month</div>';return}
 if(ngIdx>=ngList.length)ngIdx=0;if(ngIdx<0)ngIdx=ngList.length-1;
-const up=document.createElement('button');up.className='ng-arrow';up.setAttribute('aria-label','Previous girl');up.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>{ngIdx=(ngIdx-1+ngList.length)%ngList.length;renderNewGirls()};nav.appendChild(up);
+const up=document.createElement('button');up.className='ng-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>{ngIdx=(ngIdx-1+ngList.length)%ngList.length;renderNewGirls()};nav.appendChild(up);
 const dots=document.createElement('div');dots.className='ng-dots';const mx=3;let st=Math.max(0,ngIdx-Math.floor(mx/2)),en=Math.min(ngList.length,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-for(let i=st;i<en;i++){const dot=document.createElement('button');dot.className='ng-dot'+(i===ngIdx?' active':'');const g=ngList[i];dot.innerHTML=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name}">`:`<span>${g.name.charAt(0)}</span>`;dot.setAttribute('aria-label',g.name);dot.onclick=()=>{ngIdx=i;renderNewGirls()};dots.appendChild(dot)}
-nav.appendChild(dots);const ctr=document.createElement('div');ctr.className='ng-counter';ctr.setAttribute('aria-live','polite');ctr.innerHTML=`<span>${ngIdx+1}</span> / ${ngList.length}`;nav.appendChild(ctr);
-const dn=document.createElement('button');dn.className='ng-arrow';dn.setAttribute('aria-label','Next girl');dn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
-const g=ngList[ngIdx],ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name} – photo">`:'<div class="ng-placeholder" role="img" aria-label="No photo available"></div>';
+for(let i=st;i<en;i++){const dot=document.createElement('button');dot.className='ng-dot'+(i===ngIdx?' active':'');const g=ngList[i];dot.innerHTML=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:`<span>${g.name.charAt(0)}</span>`;dot.onclick=()=>{ngIdx=i;renderNewGirls()};dots.appendChild(dot)}
+nav.appendChild(dots);const ctr=document.createElement('div');ctr.className='ng-counter';ctr.innerHTML=`<span>${ngIdx+1}</span> / ${ngList.length}`;nav.appendChild(ctr);
+const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
+const g=ngList[ngIdx],ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}">`:'<div class="ng-placeholder"></div>';
 disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" style="cursor:pointer">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
 disp.querySelector('.ng-photo').onclick=()=>{profileReturnPage='homePage';showProfile(ri)};
 disp.querySelector('.ng-name').onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
@@ -400,7 +400,7 @@ function lbUpdateStrip(){lbStrip.querySelectorAll('.lb-strip-thumb').forEach((t,
 const active=lbStrip.querySelector('.lb-strip-thumb.active');if(active)active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
 
 function lbRenderStrip(){lbStrip.innerHTML='';
-lbPhotos.forEach((src,i)=>{const t=document.createElement('div');t.className='lb-strip-thumb'+(i===lbIdx?' active':'');t.innerHTML=`<img src="${src}" alt="Photo ${i+1}">`;t.onclick=()=>lbGoTo(i);lbStrip.appendChild(t)})}
+lbPhotos.forEach((src,i)=>{const t=document.createElement('div');t.className='lb-strip-thumb'+(i===lbIdx?' active':'');t.innerHTML=`<img src="${src}">`;t.onclick=()=>lbGoTo(i);lbStrip.appendChild(t)})}
 
 function lbGoTo(i){if(i===lbIdx)return;lbImg.classList.add('lb-fade');setTimeout(()=>{lbIdx=i;lbImg.src=lbPhotos[lbIdx];lbImg.onload=()=>{lbImg.classList.remove('lb-fade')};lbUpdateCounter();lbUpdateStrip()},150)}
 
@@ -423,16 +423,21 @@ el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;cons
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
+/* Navigate profile via nav rail – uses replaceState to avoid polluting history */
+function showProfileReplace(idx){
+const origPush=Router.push;
+Router.push=Router.replace;
+try{showProfile(idx)}finally{Router.push=origPush}}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
 const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
 const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
 const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
-const up=document.createElement('button');up.className='pnav-arrow';up.setAttribute('aria-label','Previous profile');up.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfile(prevIdx);rail.appendChild(up);
+const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfileReplace(prevIdx);rail.appendChild(up);
 const dots=document.createElement('div');dots.className='pnav-dots';
-for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.setAttribute('aria-label',g.name||'Profile');d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}" alt="${g.name}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfile(realIdx);dots.appendChild(d)}
+for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfileReplace(realIdx);dots.appendChild(d)}
 rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.setAttribute('aria-label','Next profile');dn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfile(nextIdx);rail.appendChild(dn);
+const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfileReplace(nextIdx);rail.appendChild(dn);
 /* scroll active dot into view */
 const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
 
@@ -443,14 +448,15 @@ function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M1
 
 function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
-/* Dynamic page title */
-document.title=g.name?'Ginza – '+g.name:'Ginza – Profile';
+/* Dynamic page title & URL routing */
+const profTitle=g.name?'Ginza – '+g.name:'Ginza – Profile';
+document.title=profTitle;
+Router.push(Router.pathForProfile(idx),profTitle);
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 let availHtml='';if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Rates 30 mins',v:g.val1||'\u2014'},{l:'Rates 45 mins',v:g.val2||'\u2014'},{l:'Rates 60 mins',v:g.val3||'\u2014'},{l:'Experience',v:g.exp||'\u2014'}];
-const imgAlt=g.name?g.name+' – Ginza profile photo':'Profile photo';
-const mainImg=g.photos.length?`<img src="${g.photos[0]}" alt="${imgAlt}">`:'<div class="silhouette" role="img" aria-label="No photo available"></div>';
+const mainImg=g.photos.length?`<img src="${g.photos[0]}">`:'<div class="silhouette"></div>';
 const hasMultiple=g.photos.length>1;
 const arrows=hasMultiple?`<button class="gallery-main-arrow prev" id="galPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><button class="gallery-main-arrow next" id="galNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>`:'';
 const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><span>1</span> / ${g.photos.length}</div>`:'';
@@ -460,14 +466,14 @@ const favBtn=g.name?`<button class="profile-fav-btn${isFav?' active':''}" id="pr
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
-<div class="profile-details"><h2 class="profile-name">${g.name}</h2><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div>${favBtn}<div class="profile-divider" style="margin-top:24px"></div>
-<div class="profile-stats" role="list">${stats.map(s=>`<div class="profile-stat" role="listitem"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
-<h3 class="profile-desc-title">Special Requests</h3><div class="profile-desc" style="margin-bottom:24px">${g.special||'\u2014'}</div>
-<h3 class="profile-desc-title">Language</h3><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
-<h3 class="profile-desc-title">Type</h3><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>
-<h3 class="profile-desc-title">Description</h3><div class="profile-desc">${g.desc}</div>
-${g.labels&&g.labels.length?`<h3 class="profile-desc-title" style="margin-top:24px">Labels</h3><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
-document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${g.location}</span><span class="dim">|</span><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div>${favBtn}<div class="profile-divider" style="margin-top:24px"></div>
+<div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
+<div class="profile-desc-title">Special Requests</div><div class="profile-desc" style="margin-bottom:24px">${g.special||'\u2014'}</div>
+<div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
+<div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>
+<div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>
+${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
+document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
@@ -495,7 +501,7 @@ if(prevBtn)prevBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx-1+g.photos.le
 if(nextBtn)nextBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx+1)%g.photos.length,g.photos)};
 /* Thumbnails */
 const c=document.getElementById('galThumbs');if(!c)return;c.innerHTML='';
-g.photos.forEach((src,i)=>{const t=document.createElement('div');t.className='gallery-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}" alt="${g.name} photo ${i+1}">`;
+g.photos.forEach((src,i)=>{const t=document.createElement('div');t.className='gallery-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}">`;
 t.onclick=()=>galGoTo(i,g.photos);
 if(loggedIn){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
 c.appendChild(t)})}
@@ -510,8 +516,8 @@ document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
 if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
-loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',userDropdown.classList.contains('open'))};
-document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
+loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
+document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
 renderDropdown();
 
 /* Particles */
@@ -539,7 +545,6 @@ const el=document.getElementById(fp);if(el)el.classList.remove('open')});
 renderFilterPane(_activeFilterPaneId);
 pane.classList.add('open');
 _filterToggle.classList.add('open');
-_filterToggle.setAttribute('aria-expanded','true');
 _filterBackdrop.classList.add('open');
 }
 
@@ -547,7 +552,6 @@ function closeFilterPanel(){
 ['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
 const el=document.getElementById(fp);if(el)el.classList.remove('open')});
 _filterToggle.classList.remove('open');
-_filterToggle.setAttribute('aria-expanded','false');
 _filterBackdrop.classList.remove('open');
 }
 

@@ -58,6 +58,19 @@ function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt 
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
+/* Route-aware render: after data is ready, resolve the URL to show the right page */
+function fullRenderAndRoute(){
+rosterDateFilter=fmtDate(getAEDTDate());
+renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();
+/* Resolve the current URL – this will call showPage/showProfile as needed */
+if(window.location.pathname!=='/'){
+Router.resolve();
+}else{
+/* We're on home – set initial state */
+history.replaceState({path:'/'},'Ginza – Sydney\'s Premier Experience','/');
+}
+}
+
 (async()=>{
 try{
 await loadConfig();
@@ -70,7 +83,7 @@ let renderedFromCache=false;
 if(cachedGirls&&cachedGirls.length){
 girls=cachedGirls;
 calData=normalizeCalData(cachedCal||{});
-fullRender();
+fullRenderAndRoute();
 removeSkeletons();
 renderedFromCache=true;
 }
@@ -105,7 +118,7 @@ updateCalCache();
 
 /* Phase 3: Re-render only if data actually changed */
 if(!renderedFromCache){
-fullRender();
+fullRenderAndRoute();
 removeSkeletons();
 }else if(girlsChanged||calChanged){
 fullRender();

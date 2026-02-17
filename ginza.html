@@ -3,81 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Ginza – Sydney's premier Asian experience. Browse our exclusive roster of stunning girls at our luxuriously appointed Surry Hills venue.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://sydneyginza.github.io/">
-<title>Ginza – Sydney's Premier Experience</title>
+<title>Ginza</title>
 <link rel="icon" type="image/png" href="fav-icon.png">
-<link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","name":"Ginza","description":"Sydney's Premier Asian Experience","address":{"@type":"PostalAddress","streetAddress":"310 Cleveland St","addressLocality":"Surry Hills","addressRegion":"NSW","postalCode":"2010","addressCountry":"AU"},"telephone":["02 8283 2130","0416 020 278"],"openingHours":"Mo-Su 10:30-01:00","url":"https://sydneyginza.github.io/"}
+<script>
+  // GitHub Pages SPA redirect resolver:
+  // If we arrived via 404.html redirect with ?p= param, restore the real URL
+  (function(){
+    var q = window.location.search;
+    if (q && q.indexOf('?p=') === 0) {
+      var decoded = decodeURIComponent(q.slice(3).split('#')[0]);
+      var hash = window.location.hash;
+      window.history.replaceState(null, '', decoded + hash);
+    }
+  })();
 </script>
+<link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
 </head>
 <body>
-<a href="#homePage" class="skip-link">Skip to main content</a>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-<div class="particles" id="particles" aria-hidden="true"></div>
-<nav aria-label="Main navigation">
+<div class="toast" id="toast"></div>
+<div class="particles" id="particles"></div>
+<nav>
 <div class="logo">GINZA</div>
 <div class="nav-right">
 <div class="nav-menu-wrap">
-<button class="nav-menu-btn" id="navMenuBtn" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navDropdown"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg><span>Menu</span></button>
-<div class="nav-dropdown" id="navDropdown" role="menu">
-<a href="#" id="navHome" class="active" role="menuitem">Home</a>
-<a href="#" id="navRoster" role="menuitem">Roster</a>
-<a href="#" id="navGirls" role="menuitem">Girls</a>
-<a href="#" id="navFavorites" role="menuitem"><span class="nav-fav-wrap">Favorites<span class="nav-fav-badge" id="navFavBadge" aria-label="Favorites count"></span></span></a>
-<a href="#" id="navValue" role="menuitem">Rates</a>
-<a href="#" id="navEmployment" role="menuitem">Employment</a>
-<a href="#" id="navCalendar" style="display:none" role="menuitem">Calendar</a>
+<button class="nav-menu-btn" id="navMenuBtn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg><span>Menu</span></button>
+<div class="nav-dropdown" id="navDropdown">
+<a href="/" id="navHome" class="active">Home</a>
+<a href="/roster" id="navRoster">Roster</a>
+<a href="/girls" id="navGirls">Girls</a>
+<a href="/favorites" id="navFavorites"><span class="nav-fav-wrap">Favorites<span class="nav-fav-badge" id="navFavBadge"></span></span></a>
+<a href="/rates" id="navValue">Rates</a>
+<a href="/employment" id="navEmployment">Employment</a>
+<a href="/calendar" id="navCalendar" style="display:none">Calendar</a>
 </div>
 </div>
 <div style="position:relative">
-<button class="login-icon-btn" id="loginIconBtn" aria-label="User account" aria-expanded="false" aria-controls="userDropdown"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
+<button class="login-icon-btn" id="loginIconBtn"><svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></button>
 <div class="user-dropdown" id="userDropdown"></div>
 </div></div></nav>
 
-<main class="page active" id="homePage" role="main"><article class="home-section">
-<h1 class="home-title">GINZA</h1>
-<p class="home-tagline">Sydney's Premier Experience</p>
+<div class="page active" id="homePage"><section class="home-section">
+<div class="home-title">GINZA</div>
+<div class="home-tagline">Sydney's Premier Experience</div>
 <div class="home-images" id="homeImages"><div class="skeleton-fade" id="homeSkeleton"><div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap"><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div><div class="skeleton-home-img skeleton-shimmer"></div></div></div></div>
 <div class="home-mid">
 <div class="home-mid-left">
 <div class="home-divider-sm"></div>
-<h2 class="logo" style="margin-bottom:20px">Announcement</h2>
-<p class="home-summary">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</p>
+<div class="logo" style="margin-bottom:20px">Announcement</div>
+<div class="home-summary">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</div>
 <div class="home-announce" id="homeAnnounce"></div>
 </div>
 <div class="home-mid-right">
-<h2 class="logo" style="margin-bottom:20px">New Girls</h2>
+<div class="logo" style="margin-bottom:20px">New Girls</div>
 <div class="home-newgirls" id="homeNewGirls">
-<div class="ng-nav" id="ngNav" role="tablist" aria-label="New girls navigation"></div>
+<div class="ng-nav" id="ngNav"></div>
 <div class="ng-display" id="ngDisplay"></div>
 </div>
 </div>
 </div>
 <div class="home-divider"></div>
-<h2 class="logo" style="margin-bottom:20px">Welcome to Sydney's premier Asian Bordello</h2>
-<p class="home-summary">Our approved venue has been renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or few. Each room has a shower, climate control system and audio visual setup, plus a theme of its own.</p>
-<p class="home-summary">You are invited to rule your empire from the Japanese Emperor's Palace. Perhaps the Regal French style suite conveys how you want to express yourself this time. Control the Dynasty from the ancient Chinese Palace, or re-live the era debauchery was taken to a new level in the Roman Empire style bedroom. Serenity and tranquillity ooze like lava in the room, is this where you will enlarge and enrich your Zen? No-one does passion or fashion the way the Italians do, so the Mediterranean room may be the place to let your creative juices flow.</p>
-<p class="home-summary">278 Club's main attraction are the gorgeous ladies whose sole aim is to please their man. At 278 Club you will comeacross beauties from all parts of Asia. Headlining the offering is Sydney's most desirable collection of genuine youthful Japanese girls. Gentlemen will experience the ultimate Japanese style GFE & PSE. It doesn't stop there, feel free to enjoy young seductresses from Thailand, China, Singapore, Malaysia and Korea. All of our supple sexual artists offer an exotic full service. Each erotic session is an experience unto itself because the girls are unique individuals who give with pleasure and pleasure with giving. There is no standard, regular, by the numbers encounter at 278 Club, in fact we can't even spell clynical.</p>
-<p class="home-summary">Nowhere in Sydney, probably Australia, or perhaps the world will you find luxurious comfortable and clean rooms wheregirls the calibre of those at 278 Club , will provide unforgettable service at such amazing competitive prices.</p>
-<p class="home-summary"></p>
-<h2 class="logo" style="margin-bottom:20px">Location</h2>
-<address class="home-summary">310 Cleveland St Surry Hills NSW 2010
-<p class="home-summary">(back entrance from goodlet lane)</p></address>
-<h2 class="logo" style="margin-bottom:20px">Hours</h2>
-<p class="home-summary">Monday to Sunday open from 10:30am till 1am.</p>
-<h2 class="logo" style="margin-bottom:20px">Contact Ginza Empire</h2>
-<p class="home-summary">02 8283 2130</p>
-<p class="home-summary">0416 020 278</p>
-<h2 class="logo" style="margin-bottom:20px">Contact Ginza Club</h2>
-<p class="home-summary">02 7901 3000</p>
-<p class="home-summary">0488 888 310</p>
-</article></main>
+<div class="logo" style="margin-bottom:20px">Welcome to Sydney's premier Asian Bordello</div>
+<div class="home-summary">Our approved venue has been renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or few. Each room has a shower, climate control system and audio visual setup, plus a theme of its own.</div>
+<div class="home-summary">You are invited to rule your empire from the Japanese Emperor's Palace. Perhaps the Regal French style suite conveys how you want to express yourself this time. Control the Dynasty from the ancient Chinese Palace, or re-live the era debauchery was taken to a new level in the Roman Empire style bedroom. Serenity and tranquillity ooze like lava in the room, is this where you will enlarge and enrich your Zen? No-one does passion or fashion the way the Italians do, so the Mediterranean room may be the place to let your creative juices flow.</div>
+<div class="home-summary">278 Club's main attraction are the gorgeous ladies whose sole aim is to please their man. At 278 Club you will comeacross beauties from all parts of Asia. Headlining the offering is Sydney's most desirable collection of genuine youthful Japanese girls. Gentlemen will experience the ultimate Japanese style GFE & PSE. It doesn't stop there, feel free to enjoy young seductresses from Thailand, China, Singapore, Malaysia and Korea. All of our supple sexual artists offer an exotic full service. Each erotic session is an experience unto itself because the girls are unique individuals who give with pleasure and pleasure with giving. There is no standard, regular, by the numbers encounter at 278 Club, in fact we can't even spell clynical.</div>
+<div class="home-summary">Nowhere in Sydney, probably Australia, or perhaps the world will you find luxurious comfortable and clean rooms wheregirls the calibre of those at 278 Club , will provide unforgettable service at such amazing competitive prices.</div>
+<div class="home-summary"></div>
+<div class="logo" style="margin-bottom:20px">Location</div>
+<div class="home-summary">310 Cleveland St Surry Hills NSW 2010
+<div class="home-summary">(back entrance from goodlet lane)</div>
+<div class="logo" style="margin-bottom:20px">Hours</div>
+<div class="home-summary">Monday to Sunday open from 10:30am till 1am.</div>
+<div class="logo" style="margin-bottom:20px">Contact Ginza Empire</div>
+<div class="home-summary">02 8283 2130
+<div class="home-summary">0416 020 278</div>
+<div class="logo" style="margin-bottom:20px">Contact Ginza Club</div>
+<div class="home-summary">02 7901 3000
+<div class="home-summary">0488 888 310</div>
+</section></div>
 
-<div class="page" id="rosterPage"><section class="section" aria-labelledby="roster-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><h2 class="section-title" id="roster-heading">Roster</h2></div><div class="filter-bar" id="rosterFilterBar" role="toolbar" aria-label="Roster filters"><div class="skeleton-fade" id="rosterFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
+<div class="page" id="rosterPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Roster</div></div><div class="filter-bar" id="rosterFilterBar"><div class="skeleton-fade" id="rosterFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
 <div class="girls-grid" id="rosterGrid"><div class="skeleton-fade" id="rosterSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
@@ -86,8 +91,8 @@
 </div>
 </section></div>
 
-<div class="page" id="listPage"><section class="section" aria-labelledby="girls-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><h2 class="section-title" id="girls-heading">Girls</h2></div><div class="filter-bar" id="filterBar" role="toolbar" aria-label="Girls filters"><div class="skeleton-fade" id="girlsFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
+<div class="page" id="listPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Girls</div></div><div class="filter-bar" id="filterBar"><div class="skeleton-fade" id="girlsFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
 <div class="girls-grid" id="girlsGrid"><div class="skeleton-fade" id="girlsSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
@@ -96,13 +101,13 @@
 </div>
 </section></div>
 
-<div class="page" id="favoritesPage"><section class="section" aria-labelledby="favorites-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><h2 class="section-title" id="favorites-heading">Favorites</h2></div></div>
+<div class="page" id="favoritesPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Favorites</div></div></div>
 <div class="girls-grid" id="favoritesGrid"></div>
 </section></div>
 
-<div class="page" id="valuePage"><section class="section" aria-labelledby="rates-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><h2 class="section-title" id="rates-heading">Rates</h2></div></div>
+<div class="page" id="valuePage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Rates</div></div></div>
 <div class="home-summary">Below are the indicative rates charged by the ladies for providing you with their full adult service (inclusive of our flat room hire rates charged by us to the ladies). However, you must negotiate the lady&#x2019;s payment directly with her. The guide below were provided by the ladies.</div>
 <div style="overflow-x:auto;max-width:400px;margin:0 auto"><table class="cal-table" id="valueTable"></table></div>
 <div style="margin-top:60px;text-align:center">
@@ -117,8 +122,8 @@
 </div>
 </section></div>
 
-<div class="page" id="employmentPage"><section class="section" aria-labelledby="employment-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><h2 class="section-title" id="employment-heading">Employment</h2></div></div>
+<div class="page" id="employmentPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Employment</div></div></div>
 <div style="margin-top:60px;text-align:center">
 <div class="home-divider"></div>
 <div class="logo" style="margin-bottom:60px">1ヶ月で日本円だと1500万円--2000万円以上ですね、もちろん未経験の方も大歓迎！</div>
@@ -182,8 +187,8 @@
 </div>
 </section></div>
 
-<div class="page" id="calendarPage"><section class="section" aria-labelledby="calendar-heading">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><h2 class="section-title" id="calendar-heading">Calendar</h2></div><div class="filter-bar" id="calFilterBar" role="toolbar" aria-label="Calendar filters"></div></div>
+<div class="page" id="calendarPage"><section class="section">
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Admin</div><div class="section-title">Calendar</div></div><div class="filter-bar" id="calFilterBar"></div></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
 <div style="overflow-x:auto"><table class="cal-table" id="calTable"></table><div class="skeleton-fade" id="calSkeleton"><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w50 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w40 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w60 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w30 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w40 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w50 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div><div class="skeleton-cal-row"><div class="skeleton-cal-avatar skeleton-shimmer"></div><div style="flex:1;display:flex;flex-direction:column;gap:4px"><div class="skeleton-text w70 skeleton-shimmer" style="height:12px;margin:0"></div><div class="skeleton-text w40 skeleton-shimmer" style="height:10px;margin:0;opacity:.5"></div></div><div class="skeleton-cal-cells"><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div><div class="skeleton-cal-cell skeleton-shimmer"></div></div></div></div></div>
@@ -197,20 +202,20 @@
 <aside class="filter-pane profile-filter-pane" id="profileFilterPane"></aside>
 </div>
 
-<div class="lightbox-overlay" id="lightbox" role="dialog" aria-label="Image viewer" aria-modal="true">
-<button class="lightbox-close" id="lbClose" aria-label="Close lightbox">&times;</button>
-<div class="lightbox-counter" id="lbCounter" aria-live="polite"></div>
+<div class="lightbox-overlay" id="lightbox">
+<button class="lightbox-close" id="lbClose">&times;</button>
+<div class="lightbox-counter" id="lbCounter"></div>
 <div class="lightbox-main">
-<button class="lightbox-nav lightbox-prev" id="lbPrev" aria-label="Previous image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button>
-<img id="lbImg" src="" alt="Gallery image">
-<button class="lightbox-nav lightbox-next" id="lbNext" aria-label="Next image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>
+<button class="lightbox-nav lightbox-prev" id="lbPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button>
+<img id="lbImg" src="">
+<button class="lightbox-nav lightbox-next" id="lbNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>
 </div>
 <div class="lightbox-strip" id="lbStrip"></div>
 </div>
 
-<div class="modal-overlay" id="formOverlay" role="dialog" aria-label="Profile form" aria-modal="true"><div class="form-modal">
-<button class="modal-close" id="formClose" aria-label="Close form">&times;</button>
-<h3 class="form-title" id="formTitle">Add New Girl</h3>
+<div class="modal-overlay" id="formOverlay"><div class="form-modal">
+<button class="modal-close" id="formClose">&times;</button>
+<div class="form-title" id="formTitle">Add New Girl</div>
 <input type="hidden" id="editIndex" value="-1">
 <div class="form-row"><div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fName" placeholder="Name..."></div>
 <div class="form-group"><label class="form-label">Location</label><select class="form-input" id="fLocation"><option value="">Select location</option><option value="Club">Club</option><option value="Empire">Empire</option></select></div></div>
@@ -234,8 +239,8 @@
 <div class="form-actions"><button class="btn btn-secondary" id="formCancel">Cancel</button><button class="btn btn-primary" id="formSave">Save</button></div>
 </div></div>
 
-<div class="modal-overlay" id="deleteOverlay" role="dialog" aria-label="Confirm deletion" aria-modal="true"><div class="form-modal" style="max-width:420px;text-align:center">
-<h3 class="form-title" style="margin-bottom:12px">Confirm Delete</h3>
+<div class="modal-overlay" id="deleteOverlay"><div class="form-modal" style="max-width:420px;text-align:center">
+<div class="form-title" style="margin-bottom:12px">Confirm Delete</div>
 <p style="color:var(--text-dim);margin-bottom:28px;font-size:15px" id="deleteMsg">Are you sure?</p>
 <div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel">Cancel</button><button class="btn btn-danger" id="deleteConfirm">Delete</button></div>
 </div></div>
@@ -299,10 +304,10 @@
 </div>
 </div>
 
-<div class="filter-backdrop" id="filterBackdrop" aria-hidden="true"></div>
-<button class="filter-toggle" id="filterToggle" aria-label="Toggle filters panel" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg><span class="filter-indicator"></span></button>
+<div class="filter-backdrop" id="filterBackdrop"></div>
+<button class="filter-toggle" id="filterToggle"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg><span class="filter-indicator"></span></button>
 
-<button class="back-to-top" id="backToTop" title="Back to top" aria-label="Scroll back to top"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" fill="currentColor"/></svg>Back to Top</button>
+<button class="back-to-top" id="backToTop" title="Back to top"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" fill="currentColor"/></svg>Back to Top</button>
 
 <footer><p>Ginza &copy; 2026 &mdash; All Rights Reserved</p></footer>
 
