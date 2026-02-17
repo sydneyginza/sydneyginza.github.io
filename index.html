@@ -6,6 +6,21 @@
 <title>Ginza</title>
 <link rel="icon" type="image/png" href="fav-icon.png">
 <link rel="stylesheet" href="https://sydneyginza.github.io/styles.css">
+<script>
+  // GitHub Pages SPA redirect handler:
+  // Capture the ?p= query param set by 404.html and clean the URL.
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var redirect = params.get('p');
+    if (redirect) {
+      // Store for later route resolution after app loads
+      window.__spaRoute = redirect;
+      // Clean URL using replaceState
+      var clean = window.location.origin + window.location.pathname.replace(/\/$/, '') + '/' + window.location.hash;
+      window.history.replaceState(null, '', clean);
+    }
+  })();
+</script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
