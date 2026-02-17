@@ -173,6 +173,7 @@ renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
 renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
+updateFilterToggle();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
 if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage)}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
@@ -181,15 +182,19 @@ const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','
 function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
-['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});
+closeFilterPanel();
+/* Determine which filter pane is active for this page */
+const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
+_activeFilterPaneId=paneMap[id]||null;
 document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
-if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');document.getElementById('rosterFilterPane').style.display='';renderFilterPane('rosterFilterPane');renderRoster()}
-if(id==='listPage'){document.getElementById('navGirls').classList.add('active');document.getElementById('girlsFilterPane').style.display='';renderFilterPane('girlsFilterPane');renderGrid()}
+if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
+if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
 if(id==='favoritesPage'){document.getElementById('navFavorites').classList.add('active');renderFavoritesGrid()}
 if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
 if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
-if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');document.getElementById('calFilterPane').style.display='';calPending={};renderFilterPane('calFilterPane');renderCalendar()}
+if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
+updateFilterToggle();
 window.scrollTo(0,0)}
 
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
@@ -450,7 +455,7 @@ document.getElementById('backBtn').onclick=()=>showPage(profileReturnPage);
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);['rosterFilterPane','girlsFilterPane','calFilterPane'].forEach(fp=>{const el=document.getElementById(fp);if(el)el.style.display='none'});document.getElementById('profileFilterPane').style.display='';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));window.scrollTo(0,0)})}
+renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
@@ -495,6 +500,44 @@ renderDropdown();
 
 /* Particles */
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}
+
+/* Filter Panel Toggle */
+let _activeFilterPaneId=null;
+const _filterToggle=document.getElementById('filterToggle');
+const _filterBackdrop=document.getElementById('filterBackdrop');
+const _pagesWithFilters=['rosterPage','listPage','calendarPage','profilePage'];
+
+function updateFilterToggle(){
+const hasPage=_pagesWithFilters.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});
+_filterToggle.classList.toggle('visible',hasPage);
+_filterToggle.classList.toggle('has-filters',hasActiveFilters());
+}
+
+function openFilterPanel(){
+if(!_activeFilterPaneId)return;
+const pane=document.getElementById(_activeFilterPaneId);if(!pane)return;
+/* Hide all panes first */
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
+const el=document.getElementById(fp);if(el)el.classList.remove('open')});
+pane.classList.add('open');
+_filterToggle.classList.add('open');
+_filterBackdrop.classList.add('open');
+}
+
+function closeFilterPanel(){
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
+const el=document.getElementById(fp);if(el)el.classList.remove('open')});
+_filterToggle.classList.remove('open');
+_filterBackdrop.classList.remove('open');
+}
+
+function toggleFilterPanel(){
+const isOpen=_filterToggle.classList.contains('open');
+if(isOpen)closeFilterPanel();else openFilterPanel();
+}
+
+_filterToggle.onclick=toggleFilterPanel;
+_filterBackdrop.onclick=closeFilterPanel;
 
 /* Back to Top */
 (function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','favoritesPage','calendarPage'];
