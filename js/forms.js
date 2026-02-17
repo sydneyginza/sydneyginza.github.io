@@ -58,16 +58,15 @@ function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt 
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
-/* Route-aware render: after data is ready, resolve the URL to show the right page */
+/* After data loads, resolve the current URL to show the right page */
 function fullRenderAndRoute(){
-rosterDateFilter=fmtDate(getAEDTDate());
-renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();
-/* Resolve the current URL – this will call showPage/showProfile as needed */
+fullRender();
+/* If URL is not root, resolve it (e.g. /girls/Akemi, /roster, etc.) */
 if(window.location.pathname!=='/'){
 Router.resolve();
 }else{
-/* We're on home – set initial state */
-history.replaceState({path:'/'},'Ginza – Sydney\'s Premier Experience','/');
+/* On home — just set the initial history state */
+history.replaceState({path:'/'},'Ginza','/');
 }
 }
 

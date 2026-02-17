@@ -183,8 +183,8 @@ function showPage(id){
 if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
-/* Dynamic page title & URL routing */
-const titleMap={homePage:'Ginza – Sydney\'s Premier Experience',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',profilePage:'Ginza – Profile'};
+/* URL routing & dynamic title */
+const titleMap={homePage:'Ginza',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar'};
 const pageTitle=titleMap[id]||'Ginza';
 document.title=pageTitle;
 Router.push(Router.pathForPage(id),pageTitle);
@@ -423,11 +423,8 @@ el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;cons
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
-/* Navigate profile via nav rail – uses replaceState to avoid polluting history */
-function showProfileReplace(idx){
-const origPush=Router.push;
-Router.push=Router.replace;
-try{showProfile(idx)}finally{Router.push=origPush}}
+/* Navigate via nav rail — replaceState to avoid history bloat */
+function showProfileReplace(idx){const origPush=Router.push;Router.push=Router.replace;try{showProfile(idx)}finally{Router.push=origPush}}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
 const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
@@ -448,7 +445,7 @@ function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M1
 
 function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
-/* Dynamic page title & URL routing */
+/* URL routing & dynamic title */
 const profTitle=g.name?'Ginza – '+g.name:'Ginza – Profile';
 document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
