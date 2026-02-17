@@ -12,7 +12,7 @@
   var repo = loc.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
   var path = loc.pathname.slice(repo.length);
   loc.replace(
-    loc.origin + repo + '/?p=' + encodeURIComponent(path + loc.search) + loc.hash
+    loc.origin + repo + '/?_sp=' + encodeURIComponent(path + loc.search) + loc.hash
   );
 </script>
 </head>
