@@ -130,8 +130,8 @@ const LOG_DIR='data/logs';
 let _queue=[];
 let _flushTimer=null;
 let _flushing=false;
-const FLUSH_INTERVAL=15000; /* batch-write every 15s if queue has entries */
-const FLUSH_ON_UNLOAD=true;
+let _flushPromise=null;
+const DEBOUNCE_MS=2000; /* flush 2s after last enqueue — batches rapid navigations */
 
 /* Generate or retrieve persistent anonymous UUID */
 function getUUID(){
@@ -216,12 +216,9 @@ function _makeProfileViewEntry(profileName){
 
 function enqueue(entry){
   _queue.push(entry);
-  /* Start periodic flush timer if not running */
-  if(!_flushTimer){
-    _flushTimer=setInterval(()=>{
-      if(_queue.length>0)flush();
-    },FLUSH_INTERVAL);
-  }
+  /* Debounce: reset timer on each enqueue, flush after DEBOUNCE_MS of quiet */
+  clearTimeout(_flushTimer);
+  _flushTimer=setTimeout(()=>flush(),DEBOUNCE_MS);
 }
 
 /* Track a page view (called from hooks) */
@@ -245,7 +242,13 @@ function _logFileName(){
 
 /* Flush queued entries to GitHub */
 async function flush(){
-  if(_flushing||_queue.length===0)return;
+  if(_queue.length===0)return;
+  /* If already flushing, wait for it then retry */
+  if(_flushing){
+    if(_flushPromise)await _flushPromise;
+    if(_queue.length>0)return flush();
+    return;
+  }
   _flushing=true;
 
   /* Grab current queue and reset */
@@ -254,6 +257,7 @@ async function flush(){
 
   const filePath=_logFileName();
 
+  _flushPromise=(async()=>{
   try{
     /* Read existing log file */
     let existing=[];
@@ -286,6 +290,7 @@ async function flush(){
     if(!putR.ok){
       /* Put entries back in queue for next attempt */
       _queue.unshift(...entries);
+      console.warn('Visitor log write failed:',putR.status);
     }
 
   }catch(e){
@@ -294,7 +299,10 @@ async function flush(){
     console.warn('Visitor log flush failed:',e.message);
   }finally{
     _flushing=false;
+    _flushPromise=null;
   }
+  })();
+  return _flushPromise;
 }
 
 /* Flush on page unload (best-effort) */
@@ -534,13 +542,17 @@ enqueue(_makeSessionEntry());
 /* Flush pending entries from previous session, then flush current queue */
 _flushPending().then(()=>flush());
 
-/* Set up periodic flush timer */
-setInterval(()=>{if(_queue.length>0)flush()},FLUSH_INTERVAL);
-
 /* On page unload, stash remaining queue to localStorage for next visit */
 window.addEventListener('beforeunload',()=>{
   if(_queue.length===0)return;
   _flushOnUnload();
+});
+
+/* Also try a synchronous flush attempt on visibilitychange (mobile browsers) */
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'&&_queue.length>0){
+    _flushOnUnload();
+  }
 });
 
 return{trackPageView,trackProfileView,flush,loadLogs,aggregateLogs,getUUID};
