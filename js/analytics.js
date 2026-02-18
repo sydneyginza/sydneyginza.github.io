@@ -382,11 +382,17 @@ async function loadLogs(startDate,endDate){
 function aggregateLogs(entries){
   const uuids=new Set();
   const browsers={};
+  const browsersUniques={}; /* browser -> Set of uuids */
   const oses={};
+  const osesUniques={};
   const devices={};
+  const devicesUniques={};
   const languages={};
+  const languagesUniques={};
   const timezones={};
+  const timezonesUniques={};
   const referrers={};
+  const referrersUniques={};
   const screens={};
   const hourly={};
   const daily={};
@@ -416,24 +422,36 @@ function aggregateLogs(entries){
 
       const br=e.browser||_parseUABrowser(e.userAgent);
       browsers[br]=(browsers[br]||0)+1;
+      if(!browsersUniques[br])browsersUniques[br]=new Set();
+      browsersUniques[br].add(uuid);
 
       const os=e.os||_parseUAOS(e.userAgent);
       oses[os]=(oses[os]||0)+1;
+      if(!osesUniques[os])osesUniques[os]=new Set();
+      osesUniques[os].add(uuid);
 
       const dev=e.device||'Unknown';
       devices[dev]=(devices[dev]||0)+1;
+      if(!devicesUniques[dev])devicesUniques[dev]=new Set();
+      devicesUniques[dev].add(uuid);
 
       const lang=(e.language||'unknown').split('-')[0];
       languages[lang]=(languages[lang]||0)+1;
+      if(!languagesUniques[lang])languagesUniques[lang]=new Set();
+      languagesUniques[lang].add(uuid);
 
       const tz=e.timezone||'unknown';
       timezones[tz]=(timezones[tz]||0)+1;
+      if(!timezonesUniques[tz])timezonesUniques[tz]=new Set();
+      timezonesUniques[tz].add(uuid);
 
       let ref='direct';
       if(e.referrer&&e.referrer!=='direct'){
         try{ref=new URL(e.referrer).hostname}catch(_){ref=e.referrer}
       }
       referrers[ref]=(referrers[ref]||0)+1;
+      if(!referrersUniques[ref])referrersUniques[ref]=new Set();
+      referrersUniques[ref].add(uuid);
 
       if(e.screen&&e.screen!=='unknown'){
         screens[e.screen]=(screens[e.screen]||0)+1;
@@ -503,12 +521,27 @@ function aggregateLogs(entries){
   const profileViewsUniqueCounts={};
   for(const p in profileViewsUniques)profileViewsUniqueCounts[p]=profileViewsUniques[p].size;
 
+  const browsersUniqueCounts={};
+  for(const k in browsersUniques)browsersUniqueCounts[k]=browsersUniques[k].size;
+  const osesUniqueCounts={};
+  for(const k in osesUniques)osesUniqueCounts[k]=osesUniques[k].size;
+  const devicesUniqueCounts={};
+  for(const k in devicesUniques)devicesUniqueCounts[k]=devicesUniques[k].size;
+  const languagesUniqueCounts={};
+  for(const k in languagesUniques)languagesUniqueCounts[k]=languagesUniques[k].size;
+  const timezonesUniqueCounts={};
+  for(const k in timezonesUniques)timezonesUniqueCounts[k]=timezonesUniques[k].size;
+  const referrersUniqueCounts={};
+  for(const k in referrersUniques)referrersUniqueCounts[k]=referrersUniques[k].size;
+
   return{
     totalHits,
     totalPageViews,
     totalProfileViews,
     uniqueVisitors:uuids.size,
     browsers,oses,devices,languages,timezones,referrers,screens,
+    browsersUniqueCounts,osesUniqueCounts,devicesUniqueCounts,
+    languagesUniqueCounts,timezonesUniqueCounts,referrersUniqueCounts,
     hourly,daily,dailyUniqueCounts,
     pageViewsTotal,pageViewsUniqueCounts,
     profileViewsTotal,profileViewsUniqueCounts
@@ -801,10 +834,11 @@ pfHtml+='</div></div>';
 /* ── Browsers ── */
 const sortedBrowsers=Object.entries(v.browsers).sort((a,b)=>b[1]-a[1]);
 const maxBr=sortedBrowsers.length?sortedBrowsers[0][1]:1;
-let browsersHtml='<div class="an-section"><div class="an-section-title">Browsers</div><div class="an-bars">';
+let browsersHtml='<div class="an-section"><div class="an-section-title">Browsers <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedBrowsers.forEach(([name,count])=>{
+  const unique=v.browsersUniqueCounts[name]||0;
   const pct=count/maxBr*100;
-  browsersHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-visitor" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  browsersHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-visitor" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedBrowsers.length)browsersHtml+='<div class="an-empty">No data</div>';
 browsersHtml+='</div></div>';
@@ -812,10 +846,11 @@ browsersHtml+='</div></div>';
 /* ── Operating Systems ── */
 const sortedOS=Object.entries(v.oses).sort((a,b)=>b[1]-a[1]);
 const maxOS=sortedOS.length?sortedOS[0][1]:1;
-let osHtml='<div class="an-section"><div class="an-section-title">Operating Systems</div><div class="an-bars">';
+let osHtml='<div class="an-section"><div class="an-section-title">Operating Systems <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedOS.forEach(([name,count])=>{
+  const unique=v.osesUniqueCounts[name]||0;
   const pct=count/maxOS*100;
-  osHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-os" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  osHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-os" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedOS.length)osHtml+='<div class="an-empty">No data</div>';
 osHtml+='</div></div>';
@@ -823,10 +858,11 @@ osHtml+='</div></div>';
 /* ── Devices ── */
 const sortedDev=Object.entries(v.devices).sort((a,b)=>b[1]-a[1]);
 const maxDev=sortedDev.length?sortedDev[0][1]:1;
-let devHtml='<div class="an-section"><div class="an-section-title">Devices</div><div class="an-bars">';
+let devHtml='<div class="an-section"><div class="an-section-title">Devices <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedDev.forEach(([name,count])=>{
+  const unique=v.devicesUniqueCounts[name]||0;
   const pct=count/maxDev*100;
-  devHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-device" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  devHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-device" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedDev.length)devHtml+='<div class="an-empty">No data</div>';
 devHtml+='</div></div>';
@@ -834,10 +870,11 @@ devHtml+='</div></div>';
 /* ── Languages ── */
 const sortedLangs=Object.entries(v.languages).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxLang=sortedLangs.length?sortedLangs[0][1]:1;
-let langHtml='<div class="an-section"><div class="an-section-title">Languages</div><div class="an-bars">';
+let langHtml='<div class="an-section"><div class="an-section-title">Languages <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedLangs.forEach(([name,count])=>{
+  const unique=v.languagesUniqueCounts[name]||0;
   const pct=count/maxLang*100;
-  langHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-lang" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  langHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-lang" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedLangs.length)langHtml+='<div class="an-empty">No data</div>';
 langHtml+='</div></div>';
@@ -845,11 +882,12 @@ langHtml+='</div></div>';
 /* ── Timezones ── */
 const sortedTZ=Object.entries(v.timezones).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxTZ=sortedTZ.length?sortedTZ[0][1]:1;
-let tzHtml='<div class="an-section"><div class="an-section-title">Timezones</div><div class="an-bars">';
+let tzHtml='<div class="an-section"><div class="an-section-title">Timezones <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedTZ.forEach(([name,count])=>{
+  const unique=v.timezonesUniqueCounts[name]||0;
   const pct=count/maxTZ*100;
   const shortName=name.replace('Australia/','AU/').replace('America/','US/').replace('Europe/','EU/').replace('Asia/','AS/');
-  tzHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${name}">${shortName}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-tz" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  tzHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${name}">${shortName}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-tz" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedTZ.length)tzHtml+='<div class="an-empty">No data</div>';
 tzHtml+='</div></div>';
@@ -857,10 +895,11 @@ tzHtml+='</div></div>';
 /* ── Referrers ── */
 const sortedRefs=Object.entries(v.referrers).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxRef=sortedRefs.length?sortedRefs[0][1]:1;
-let refsHtml='<div class="an-section"><div class="an-section-title">Referrers</div><div class="an-bars">';
+let refsHtml='<div class="an-section"><div class="an-section-title">Referrers <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
 sortedRefs.forEach(([name,count])=>{
+  const unique=v.referrersUniqueCounts[name]||0;
   const pct=count/maxRef*100;
-  refsHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-ref" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`;
+  refsHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-ref" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedRefs.length)refsHtml+='<div class="an-empty">No data</div>';
 refsHtml+='</div></div>';
