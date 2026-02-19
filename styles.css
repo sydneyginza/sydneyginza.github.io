@@ -675,3 +675,15 @@ body{padding-bottom:60px}
 .bottom-nav-item.active svg{filter:drop-shadow(0 0 6px rgba(180,74,255,0.6))}
 .bn-fav-badge{position:absolute;top:-5px;right:-8px;min-width:14px;height:14px;background:#ff4477;border-radius:7px;font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;pointer-events:none}
 .bn-fav-badge:empty{display:none}
+
+/* ── Analytics: profile bar with thumbnail ── */
+.an-bar-label-profile{display:flex!important;align-items:center;gap:6px;text-align:left;overflow:visible;white-space:normal}
+.an-bar-label-profile>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.an-bar-label-profile .avail-now-dot{flex-shrink:0}
+.an-profile-thumb{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.12)}
+.an-profile-thumb-empty{background:rgba(255,255,255,0.05)}
+
+/* ── Footer: privacy notice ── */
+.footer-privacy{font-size:10px;color:rgba(255,255,255,0.18);margin-top:6px;letter-spacing:0.5px}
+.footer-privacy-opt{background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-size:10px;text-decoration:underline;padding:0;letter-spacing:0.5px;transition:color .2s;font-family:inherit}
+.footer-privacy-opt:hover{color:rgba(255,255,255,0.6)}

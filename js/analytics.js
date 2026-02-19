@@ -13,6 +13,7 @@
 const VisitorLog=(function(){
 
 const UUID_KEY='ginza_visitor_uuid';
+const OPTOUT_KEY='ginza_analytics_optout';
 const LOG_DIR='data/logs';
 
 /* ── In-memory queue of entries to flush to GitHub ── */
@@ -35,6 +36,11 @@ function getUUID(){
     return 'v_anon_'+Math.random().toString(36).substr(2,8);
   }
 }
+
+/* Opt-out: user can stop all tracking and clear stored identifiers */
+function isOptedOut(){try{return localStorage.getItem(OPTOUT_KEY)==='1'}catch(e){return false}}
+function optOut(){try{localStorage.setItem(OPTOUT_KEY,'1');localStorage.removeItem(UUID_KEY);localStorage.removeItem('ginza_log_pending');_queue=[]}catch(e){}}
+function optIn(){try{localStorage.removeItem(OPTOUT_KEY)}catch(e){}}
 
 /* Parse UA once for the session */
 function _parseUA(){
@@ -112,13 +118,13 @@ function enqueue(entry){
 
 /* Track a page view (called from hooks) */
 function trackPageView(pageId){
-  if(!pageId)return;
+  if(!pageId||isOptedOut())return;
   enqueue(_makePageViewEntry(pageId));
 }
 
 /* Track a profile view (called from hooks) */
 function trackProfileView(profileName){
-  if(!profileName)return;
+  if(!profileName||isOptedOut())return;
   enqueue(_makeProfileViewEntry(profileName));
 }
 
@@ -458,11 +464,12 @@ function _parseUAOS(ua){
   return 'Other';
 }
 
-/* ── Init: queue session entry on load ── */
+/* ── Init: queue session entry on load (skip if opted out) ── */
+if(!isOptedOut()){
 enqueue(_makeSessionEntry());
-
 /* Flush pending entries from previous session, then flush current queue */
 _flushPending().then(()=>flush());
+}
 
 /* On page unload, stash remaining queue to localStorage for next visit */
 window.addEventListener('beforeunload',()=>{
@@ -477,7 +484,7 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-return{trackPageView,trackProfileView,flush,loadLogs,aggregateLogs,getUUID};
+return{trackPageView,trackProfileView,flush,loadLogs,aggregateLogs,getUUID,isOptedOut,optOut,optIn};
 })();
 
 
@@ -588,15 +595,19 @@ sortedPV.forEach(([page,total])=>{
 if(!sortedPV.length)pvHtml+='<div class="an-empty">No page views recorded yet</div>';
 pvHtml+='</div></div>';
 
-/* ── Most Viewed Profiles (unique + total) ── */
+/* ── Most Viewed Profiles (unique + total + thumbnail + availability) ── */
 const sortedPF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
 const maxPF=sortedPF.length?sortedPF[0][1]:1;
-let pfHtml='<div class="an-section"><div class="an-section-title">Most Viewed Profiles <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let pfHtml='<div class="an-section"><div class="an-section-title">Most Viewed Profiles <span class="an-hint">(total / unique)</span></div><div class="an-bars">';
 sortedPF.forEach(([name,total],i)=>{
   const unique=v.profileViewsUniqueCounts[name]||0;
   const pct=total/maxPF*100;
   const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-  pfHtml+=`<div class="an-bar-row"><div class="an-bar-label">${medal} ${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+  const girl=typeof girls!=='undefined'?girls.find(g=>g&&g.name===name):null;
+  const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-profile-thumb" src="${girl.photos[0]}" alt="">`:'<div class="an-profile-thumb an-profile-thumb-empty"></div>';
+  const liveNow=girl&&typeof isAvailableNow==='function'&&isAvailableNow(girl.name);
+  const availDot=liveNow?'<span class="avail-now-dot" title="Available now"></span>':'';
+  pfHtml+=`<div class="an-bar-row"><div class="an-bar-label an-bar-label-profile">${thumb}<span>${medal} ${name}</span>${availDot}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
 if(!sortedPF.length)pfHtml+='<div class="an-empty">No profile views recorded yet</div>';
 pfHtml+='</div></div>';
@@ -770,6 +781,18 @@ if(g&&g.name){
   VisitorLog.trackProfileView(g.name);
 }
 };
+})();
+
+/* ── Privacy opt-out button in footer ── */
+(function(){
+function _initOptBtn(){
+  const btn=document.getElementById('analyticsOptBtn');
+  if(!btn)return;
+  function update(){const out=VisitorLog.isOptedOut();btn.textContent=out?'Opted out (click to re-enable)':'Opt out of analytics';btn.style.opacity=out?'0.55':'1'}
+  update();
+  btn.onclick=function(){if(VisitorLog.isOptedOut()){VisitorLog.optIn()}else{VisitorLog.optOut()}update()};
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_initOptBtn)}else{_initOptBtn()}
 })();
 
 /* ── Nav link (injected after login/logout) ── */
