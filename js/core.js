@@ -64,6 +64,8 @@ const CACHE_KEY_GIRLS = 'ginza_cache_girls';
 const CACHE_KEY_CAL = 'ginza_cache_cal';
 const CACHE_KEY_GIRLS_SHA = 'ginza_cache_girls_sha';
 const CACHE_KEY_CAL_SHA = 'ginza_cache_cal_sha';
+const CACHE_KEY_CAL_TS = 'ginza_cache_cal_ts';
+const CAL_CACHE_TTL = 10 * 60 * 1000; // 10 min — availability can change hourly
 
 function cacheGet(key) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
@@ -76,7 +78,7 @@ function cacheSet(key, val) {
 }
 
 function cacheClear() {
-  try { [CACHE_KEY_GIRLS, CACHE_KEY_CAL, CACHE_KEY_GIRLS_SHA, CACHE_KEY_CAL_SHA].forEach(k => localStorage.removeItem(k)); }
+  try { [CACHE_KEY_GIRLS, CACHE_KEY_CAL, CACHE_KEY_GIRLS_SHA, CACHE_KEY_CAL_SHA, CACHE_KEY_CAL_TS].forEach(k => localStorage.removeItem(k)); }
   catch (e) {}
 }
 
