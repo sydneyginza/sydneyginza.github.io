@@ -74,6 +74,7 @@ else if(id==='profilePage'&&currentProfileIdx>=0){showProfile(currentProfileIdx)
 
 /* After data loads, resolve the current URL to show the right page */
 function fullRenderAndRoute(){
+if(typeof queryToFilters==='function')queryToFilters();
 fullRender();
 /* If URL is not root, resolve it (e.g. /girls/Akemi, /roster, etc.) */
 if(window.location.pathname!=='/'){

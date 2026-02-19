@@ -459,6 +459,7 @@ const Router = (function() {
 
   /* Parse current URL and navigate to the right view */
   function resolve() {
+    if(typeof queryToFilters==='function')queryToFilters();
     const path = window.location.pathname;
 
     /* Profile deep link: /girls/Some-Name */

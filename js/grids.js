@@ -10,7 +10,8 @@ sorts.forEach(s=>{const b=document.createElement('button');b.className='sort-btn
 /* Available Now quick-filter on girls page */
 const nowCount=getAvailableNowCount();
 if(nowCount>0){const sep2=document.createElement('div');sep2.className='filter-sep';fb.appendChild(sep2);
-const nb=document.createElement('button');nb.className='filter-btn avail-now-btn'+(sharedFilters.availableNow?' active':'');nb.innerHTML='<span class="avail-now-dot"></span>Now ('+nowCount+')';nb.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;renderFilters();renderGrid();renderRoster();renderFavoritesGrid()};fb.appendChild(nb)}
+const nb=document.createElement('button');nb.className='filter-btn avail-now-btn'+(sharedFilters.availableNow?' active':'');nb.innerHTML='<span class="avail-now-dot"></span>Now ('+nowCount+')';nb.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};fb.appendChild(nb)}
+if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 function applySortOrder(list){
