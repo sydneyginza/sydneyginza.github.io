@@ -461,6 +461,18 @@ const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML
 const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
 
 /* Profile Page */
+function renderAlsoAvailable(idx){
+const g=girls[idx];if(!g)return;
+const ts=fmtDate(getAEDTDate());
+const alsoList=girls.filter(o=>{if(!o.name||o.name===g.name)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8);
+if(!alsoList.length)return;
+const sec=document.createElement('div');sec.className='profile-also';
+const title=document.createElement('div');title.className='profile-desc-title';title.textContent='Also Available Today';sec.appendChild(title);
+const strip=document.createElement('div');strip.className='also-avail-strip';
+alsoList.forEach(o=>{const ri=girls.indexOf(o);const liveNow=isAvailableNow(o.name);const card=document.createElement('div');card.className='also-avail-card';const thumb=o.photos&&o.photos.length?`<img src="${o.photos[0]}">`:'<div class="silhouette"></div>';card.innerHTML=`${thumb}<div class="also-avail-name">${o.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}`;card.onclick=()=>showProfile(ri);strip.appendChild(card)});
+sec.appendChild(strip);
+document.getElementById('profileContent').appendChild(sec)}
+
 function updateFavBadge(){const b=document.getElementById('navFavBadge');if(!b)return;const c=getFavCount();b.textContent=c>0?c:''}
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
@@ -498,7 +510,7 @@ document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){wind
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?'Favorited':'Add to Favorites');updateFavBadge()}}
-renderGallery(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderAlsoAvailable(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
@@ -513,9 +525,16 @@ const thumbs=document.getElementById('galThumbs');if(thumbs){thumbs.querySelecto
 function renderGallery(idx){
 const g=girls[idx];if(!g||!g.photos)return;
 galIdx=0;
-/* Main image click opens lightbox */
 const main=document.getElementById('galMain');
-if(main&&g.photos.length){main.onclick=e=>{if(e.target.closest('.gallery-main-arrow'))return;openLightbox(g.photos,galIdx)}}
+let _galSwipe=false;
+/* Touch swipe for photo gallery on mobile */
+if(main&&g.photos.length>1){
+let sx=0,sy=0;
+main.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;_galSwipe=false},{passive:true});
+main.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientX-sx)>8)_galSwipe=true},{passive:true});
+main.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){if(dx<0)galGoTo((galIdx+1)%g.photos.length,g.photos);else galGoTo((galIdx-1+g.photos.length)%g.photos.length,g.photos)}},{passive:true})}
+/* Main image click opens lightbox */
+if(main&&g.photos.length){main.onclick=e=>{if(e.target.closest('.gallery-main-arrow'))return;if(_galSwipe){_galSwipe=false;return}openLightbox(g.photos,galIdx)}}
 /* Prev/next arrows on main image */
 const prevBtn=document.getElementById('galPrev'),nextBtn=document.getElementById('galNext');
 if(prevBtn)prevBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx-1+g.photos.length)%g.photos.length,g.photos)};

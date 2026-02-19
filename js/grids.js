@@ -14,6 +14,8 @@ const nb=document.createElement('button');nb.className='filter-btn avail-now-btn
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
+function getWeekDots(name){const dates=getWeekDates();const ts=fmtDate(getAEDTDate());const hasAny=dates.some(ds=>{const e=getCalEntry(name,ds);return e&&e.start&&e.end});if(!hasAny)return '';const html=dates.map(ds=>{const d=new Date(ds+'T00:00:00');const lbl=['S','M','T','W','T','F','S'][d.getDay()];const e=getCalEntry(name,ds);const has=e&&e.start&&e.end;const cls=ds===ts?(has?'card-week-dot today':'card-week-dot'):(has?'card-week-dot active':'card-week-dot');return `<span class="${cls}">${lbl}</span>`}).join('');return `<div class="card-week">${html}</div>`}
+
 function applySortOrder(list){
 const emptyLast=(a,b,cmp)=>{const an=(a.name||'').trim(),bn=(b.name||'').trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return cmp(a,b)};
 if(gridSort==='age')return list.sort((a,b)=>emptyLast(a,b,()=>{const aa=parseFloat(a.age)||999,ba=parseFloat(b.age)||999;return aa-ba}));
@@ -35,7 +37,7 @@ const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div cl
 const liveNow=g.name&&isAvailableNow(g.name);
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
 const fav=g.name?cardFavBtn(g.name):'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}${g.name?getWeekDots(g.name):''}<div class="card-hover-line"></div></div>`;
 el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};el.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
 return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid)})}
@@ -68,7 +70,7 @@ const liveNow=isToday&&g.name&&isAvailableNow(g.name);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now${timeStr}</div>`:(isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`);
 const fav=g.name?cardFavBtn(g.name):'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}${g.name?getWeekDots(g.name):''}<div class="card-hover-line"></div></div>`;
 el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);observeLazy(rg);observeEntrance(rg)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
@@ -84,7 +86,7 @@ const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
 const fav=cardFavBtn(g.name);
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}${g.name?getWeekDots(g.name):''}<div class="card-hover-line"></div></div>`;
 el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='favoritesPage';showProfile(ri)};return el});if(card)fg.appendChild(card)});
 fg.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;toggleFavorite(name);updateFavBadge();renderFavoritesGrid()}});
 observeLazy(fg);observeEntrance(fg)})}

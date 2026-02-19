@@ -482,6 +482,24 @@ footer{padding-bottom:100px}
 .profile-layout.swipe-exit-right{transition:transform .3s ease-in,opacity .3s;transform:translateX(100%);opacity:0}
 }
 
+/* ── Card: Weekly schedule dots ── */
+.card-week{display:flex;gap:3px;margin-top:6px;flex-wrap:nowrap}
+.card-week-dot{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;font-family:'Orbitron',sans-serif;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);flex-shrink:0}
+.card-week-dot.active{background:rgba(180,74,255,0.18);color:var(--accent)}
+.card-week-dot.today{background:rgba(180,74,255,0.32);color:var(--accent);box-shadow:0 0 6px rgba(180,74,255,0.3)}
+
+/* ── Profile: Also Available Today ── */
+.profile-also{margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.06)}
+.also-avail-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-behavior:smooth;margin-top:16px}
+.also-avail-strip::-webkit-scrollbar{height:3px}
+.also-avail-strip::-webkit-scrollbar-thumb{background:rgba(180,74,255,0.3);border-radius:2px}
+.also-avail-card{flex-shrink:0;width:90px;cursor:pointer;text-align:center;position:relative}
+.also-avail-card img{width:90px;height:120px;object-fit:cover;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));display:block;transition:filter .3s}
+.also-avail-card:hover img{filter:brightness(1.15)}
+.also-avail-card .silhouette{width:90px;height:120px;background:rgba(255,255,255,0.04);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.also-avail-name{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.also-avail-card .avail-now-dot{position:absolute;top:4px;right:4px}
+
 /* ── Filter Pane (overlay) ── */
 .page-with-sidebar{display:flex;gap:0;align-items:flex-start}
 .page-main-content{flex:1;min-width:0;margin-right:0}
