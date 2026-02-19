@@ -220,6 +220,7 @@ if(id==='employmentPage'){document.getElementById('navEmployment').classList.add
 if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
 if(id==='analyticsPage'){document.getElementById('navAnalytics').classList.add('active');if(typeof renderAnalytics==='function')renderAnalytics()}
 updateFilterToggle();
+if(_pagesWithFilters.includes(id))pushFiltersToURL();
 window.scrollTo(0,0)}
 
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
