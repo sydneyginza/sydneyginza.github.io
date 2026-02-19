@@ -50,10 +50,10 @@ if(loggedIn){el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(
 return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid);renderAvailNowBar()})}
 
 /* Roster */
-function hasGirlsOnDate(ds,loc){return girls.some(g=>{if(loc&&loc!=='All'&&g.location!==loc)return false;const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
+function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
-const availDates=dates.filter(ds=>hasGirlsOnDate(ds,rosterLocFilter));
+const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?'Today':f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
@@ -130,10 +130,9 @@ table.innerHTML=html;
 /* Calendar */
 function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(let h=0;h<24;h++)for(let m=0;m<60;m+=30){const v=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');const h12=h===0?12:h>12?h-12:h;o.push(`<option value="${v}">${h12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}</option>`)}return o.join('')}
 
-function renderCalendar(){safeRender('Calendar',()=>{const fb=document.getElementById('calFilterBar');fb.innerHTML='';const locs=["All",...new Set(girls.map(g=>g.location))];if(!calLocFilter)calLocFilter='All';
-locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(calLocFilter===loc?' active':'');b.textContent=loc;b.onclick=()=>{calLocFilter=loc;renderCalendar()};fb.appendChild(b)});
-if(loggedIn){const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
-const fg=applySharedFilters((calLocFilter==='All'?[...girls]:girls.filter(g=>g.location===calLocFilter)).filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
+function renderCalendar(){safeRender('Calendar',()=>{const fb=document.getElementById('calFilterBar');fb.innerHTML='';
+if(loggedIn){const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
+const fg=applySharedFilters([...girls].filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
 let html='<thead><tr><th>Profile</th>';dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}">${f.date}<span class="cal-day-name">${f.day}${i===0?' (Today)':''}</span></th>`});html+='</tr></thead><tbody>';
 fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0]):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
 const bulkActions=loggedIn?`<div class="cal-bulk-actions"><button class="cal-bulk-btn cal-bulk-all" data-bulk-name="${g.name}" title="Mark available all week">All Week</button><button class="cal-bulk-btn cal-bulk-clear" data-bulk-name="${g.name}" title="Clear entire week">Clear</button></div>`:'';
