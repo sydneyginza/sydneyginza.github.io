@@ -5,6 +5,15 @@ let gridSort='name';
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
+/* ── Compare Feature State ── */
+let compareSelected=[];
+const COMPARE_MAX=3;
+function isCompareSelected(name){return compareSelected.includes(name)}
+function toggleCompare(name){const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
+function clearCompare(){compareSelected=[];updateCompareBar();updateCompareButtons()}
+function updateCompareBar(){const bar=document.getElementById('compareBar');if(!bar)return;const count=compareSelected.length;document.getElementById('compareBarCount').textContent=count;bar.classList.toggle('visible',count>0);const openBtn=document.getElementById('compareOpen');if(openBtn){openBtn.disabled=count<2;openBtn.style.opacity=count<2?'.4':'1';openBtn.style.pointerEvents=count<2?'none':'auto'}}
+function updateCompareButtons(){document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare'})}
+
 /* ── Shared Filter State (resets on refresh) ── */
 let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false};
 
@@ -420,6 +429,9 @@ disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" styl
 disp.querySelector('.ng-photo').onclick=()=>{profileReturnPage='homePage';showProfile(ri)};
 disp.querySelector('.ng-name').onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
 
+/* Home Search Bar */
+(function(){const inp=document.getElementById('homeSearchInput'),btn=document.getElementById('homeSearchBtn');if(!inp||!btn)return;function doHomeSearch(){const q=inp.value.trim();if(!q)return;sharedFilters.nameSearch=q;showPage('listPage');inp.value=''}inp.addEventListener('keydown',e=>{if(e.key==='Enter')doHomeSearch()});btn.onclick=doHomeSearch})();
+
 /* Lightbox */
 let lbPhotos=[],lbIdx=0;
 const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg'),lbStrip=document.getElementById('lbStrip'),lbCounter=document.getElementById('lbCounter');
@@ -450,6 +462,38 @@ document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))
 (function(){let sx=0,sy=0;const el=document.getElementById('lightbox');
 el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
 el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if(dx<0)lbGoTo((lbIdx+1)%lbPhotos.length);else lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)}},{passive:true})})();
+
+/* ── Compare Modal ── */
+function openCompareModal(){
+if(compareSelected.length<2)return;
+const overlay=document.getElementById('compareOverlay'),grid=document.getElementById('compareGrid');
+if(!overlay||!grid)return;
+const sel=compareSelected.map(name=>girls.find(g=>g.name===name)).filter(Boolean);
+if(sel.length<2)return;
+const stats=[
+{label:'Country',fn:g=>Array.isArray(g.country)?g.country.join(', '):(g.country||'\u2014')},
+{label:'Age',fn:g=>g.age||'\u2014'},
+{label:'Height',fn:g=>g.height?(g.height+' cm'):'\u2014'},
+{label:'Body Size',fn:g=>g.body||'\u2014'},
+{label:'Cup',fn:g=>g.cup||'\u2014'},
+{label:'30 mins',fn:g=>g.val1?('$'+g.val1):'\u2014'},
+{label:'45 mins',fn:g=>g.val2?('$'+g.val2):'\u2014'},
+{label:'60 mins',fn:g=>g.val3?('$'+g.val3):'\u2014'},
+{label:'Experience',fn:g=>g.exp||'\u2014'},
+{label:'Labels',fn:g=>g.labels&&g.labels.length?g.labels.join(', '):'\u2014'}
+];
+let html='<table class="compare-stat-table"><thead><tr><th></th>';
+sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
+html+='</tr></thead><tbody>';
+stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`});html+='</tr>'});
+html+='</tbody></table>';
+grid.innerHTML=html;
+overlay.classList.add('open');document.body.style.overflow='hidden'}
+function closeCompareModal(){const overlay=document.getElementById('compareOverlay');if(overlay)overlay.classList.remove('open');document.body.style.overflow=''}
+(function(){const cl=document.getElementById('compareClear'),op=document.getElementById('compareOpen'),cs=document.getElementById('compareClose'),dn=document.getElementById('compareDone'),ov=document.getElementById('compareOverlay');
+if(cl)cl.onclick=clearCompare;if(op)op.onclick=openCompareModal;if(cs)cs.onclick=closeCompareModal;if(dn)dn.onclick=closeCompareModal;
+if(ov)ov.onclick=e=>{if(e.target===ov)closeCompareModal()};
+document.addEventListener('keydown',e=>{if(ov&&ov.classList.contains('open')&&e.key==='Escape')closeCompareModal()})})();
 
 /* Profile Nav Rail */
 function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}

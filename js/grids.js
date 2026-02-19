@@ -32,6 +32,8 @@ return list.sort((a,b)=>emptyLast(a,b,()=>(a.name||'').trim().toLowerCase().loca
 const grid=document.getElementById('girlsGrid');
 function cardFavBtn(name){const fav=name&&isFavorite(name);return `<button class="card-fav${fav?' active':''}" data-fav-name="${name||''}" title="${fav?'Remove from favorites':'Add to favorites'}">${favHeartSvg(fav)}</button>`}
 function bindCardFavs(container){container.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;const nowFav=toggleFavorite(name);btn.classList.toggle('active',nowFav);btn.innerHTML=favHeartSvg(nowFav);btn.title=nowFav?'Remove from favorites':'Add to favorites';btn.classList.remove('fav-pop');void btn.offsetWidth;btn.classList.add('fav-pop');updateFavBadge()}})}
+function cardCompareBtn(name){if(!name)return '';const sel=isCompareSelected(name);return `<button class="card-compare${sel?' active':''}" data-compare-name="${name}" title="${sel?'Remove from compare':'Add to compare'}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 3H3.5A1.5 1.5 0 002 4.5V9a1.5 1.5 0 001.5 1.5H9A1.5 1.5 0 0010.5 9V4.5A1.5 1.5 0 009 3zm11 0h-5.5A1.5 1.5 0 0013 4.5V9a1.5 1.5 0 001.5 1.5H20A1.5 1.5 0 0021.5 9V4.5A1.5 1.5 0 0020 3zM9 13.5H3.5A1.5 1.5 0 002 15v4.5A1.5 1.5 0 003.5 21H9a1.5 1.5 0 001.5-1.5V15A1.5 1.5 0 009 13.5zm11 0h-5.5A1.5 1.5 0 0013 15v4.5a1.5 1.5 0 001.5 1.5H20a1.5 1.5 0 001.5-1.5V15a1.5 1.5 0 00-1.5-1.5z"/></svg></button>`}
+function bindCardCompare(container){container.querySelectorAll('.card-compare').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.compareName;if(!name)return;toggleCompare(name)}})}
 function renderGrid(){safeRender('Girls Grid',()=>{
 let filtered=[...girls];
 filtered=applySharedFilters(filtered);
@@ -43,11 +45,11 @@ const act=loggedIn?`<div class="card-actions"><button class="card-action-btn edi
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
-const fav=g.name?cardFavBtn(g.name):'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav'))return;profileReturnPage='listPage';showProfile(ri)};
+const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};el.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
-return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid);renderAvailNowBar()})}
+return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid);renderAvailNowBar()})}
 
 /* Roster */
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
@@ -75,9 +77,9 @@ filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.ind
 const liveNow=isToday&&g.name&&isAvailableNow(g.name);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now${timeStr}</div>`:(isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`);
-const fav=g.name?cardFavBtn(g.name):'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);observeLazy(rg);observeEntrance(rg)})}
+const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg)})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
 /* Favorites Grid */
@@ -91,11 +93,11 @@ const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div cl
 const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
-const fav=cardFavBtn(g.name);
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-el.onclick=e=>{if(e.target.closest('.card-fav'))return;profileReturnPage='favoritesPage';showProfile(ri)};return el});if(card)fg.appendChild(card)});
+const fav=cardFavBtn(g.name);const cmp=cardCompareBtn(g.name);
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
+el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='favoritesPage';showProfile(ri)};return el});if(card)fg.appendChild(card)});
 fg.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;toggleFavorite(name);updateFavBadge();renderFavoritesGrid()}});
-observeLazy(fg);observeEntrance(fg)})}
+bindCardCompare(fg);observeLazy(fg);observeEntrance(fg)})}
 
 /* Value Table */
 function renderValueTable(){safeRender('Value Table',()=>{
