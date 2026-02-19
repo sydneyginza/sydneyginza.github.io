@@ -7,13 +7,22 @@ locs.forEach(c=>{const b=document.createElement('button');b.className='filter-bt
 const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
 const sorts=[{key:'name',label:'A–Z'},{key:'newest',label:'Newest'},{key:'age',label:'Age'}];
 sorts.forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(gridSort===s.key?' active':'');b.textContent=s.label;b.onclick=()=>{gridSort=s.key;renderFilters();renderGrid();renderRoster();renderFavoritesGrid()};fb.appendChild(b)});
-/* Available Now quick-filter on girls page */
-const nowCount=getAvailableNowCount();
-if(nowCount>0){const sep2=document.createElement('div');sep2.className='filter-sep';fb.appendChild(sep2);
-const nb=document.createElement('button');nb.className='filter-btn avail-now-btn'+(sharedFilters.availableNow?' active':'');nb.innerHTML='<span class="avail-now-dot"></span>Now ('+nowCount+')';nb.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};fb.appendChild(nb)}
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
+function renderAvailNowBar(){
+const bar=document.getElementById('availNowBar');
+if(!bar)return;
+const nowCount=getAvailableNowCount();
+bar.innerHTML='';
+if(!nowCount&&!sharedFilters.availableNow){bar.style.display='none';return}
+bar.style.display='';
+const btn=document.createElement('button');
+btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');
+const countLabel=nowCount===1?'1 girl available now':nowCount+' girls available now';
+btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;
+btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};
+bar.appendChild(btn)}
 
 function applySortOrder(list){
 const emptyLast=(a,b,cmp)=>{const an=(a.name||'').trim(),bn=(b.name||'').trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return cmp(a,b)};
@@ -39,7 +48,7 @@ const fav=g.name?cardFavBtn(g.name):'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
 el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav'))return;profileReturnPage='listPage';showProfile(ri)};
 if(loggedIn){el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};el.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
-return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid)})}
+return el});if(card)grid.appendChild(card)});bindCardFavs(grid);observeLazy(grid);observeEntrance(grid);renderAvailNowBar()})}
 
 /* Roster */
 function hasGirlsOnDate(ds,loc){return girls.some(g=>{if(loc&&loc!=='All'&&g.location!==loc)return false;const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}

@@ -653,3 +653,25 @@ footer{padding-bottom:100px}
 .an-table tr:hover td{background:rgba(180,74,255,0.04);color:rgba(255,255,255,0.75)}
 .an-table .an-mono{font-family:'Courier New',monospace;font-size:10px;color:rgba(56,189,248,0.7);letter-spacing:0.5px}
 @media(max-width:768px){.an-table{font-size:10px}.an-table th,.an-table td{padding:5px 6px}}
+
+/* ── Prominent Available Now bar (list page) ── */
+#availNowBar{margin-bottom:24px}
+.avail-now-pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(0,255,127,0.2);color:rgba(0,255,127,0.6);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));background:rgba(0,255,127,0.03)}
+.avail-now-pill:hover{border-color:rgba(0,255,127,0.4);color:rgba(0,255,127,0.85);background:rgba(0,255,127,0.07)}
+.avail-now-pill.active{background:rgba(0,255,127,0.1);border-color:rgba(0,255,127,0.5);color:#00ff7f}
+@media(max-width:768px){.avail-now-pill{width:100%;box-sizing:border-box;justify-content:center;padding:14px 20px;font-size:14px}}
+
+/* ── Bottom Navigation Bar (mobile only) ── */
+.bottom-nav{display:none}
+@media(max-width:768px){
+.bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:60px;background:rgba(8,8,14,0.97);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.07);z-index:100;justify-content:space-around;align-items:stretch}
+body{padding-bottom:60px}
+}
+.bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;padding:0;transition:color .2s;-webkit-tap-highlight-color:transparent}
+.bni-icon{position:relative;display:flex;align-items:center;justify-content:center}
+.bottom-nav-item svg{width:20px;height:20px;fill:currentColor;flex-shrink:0}
+.bottom-nav-item span:not(.bn-fav-badge){font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
+.bottom-nav-item.active{color:#fff}
+.bottom-nav-item.active svg{filter:drop-shadow(0 0 6px rgba(180,74,255,0.6))}
+.bn-fav-badge{position:absolute;top:-5px;right:-8px;min-width:14px;height:14px;background:#ff4477;border-radius:7px;font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;pointer-events:none}
+.bn-fav-badge:empty{display:none}
