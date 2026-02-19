@@ -1,8 +1,7 @@
 /* === GIRLS GRID, ROSTER, CALENDAR & VALUE === */
 
 /* Girls Grid */
-function renderFilters(){const locs=["All",...new Set(girls.map(g=>g.location))];const fb=document.getElementById('filterBar');fb.innerHTML='';
-locs.forEach(c=>{const b=document.createElement('button');b.className='filter-btn'+(c===activeLocation?' active':'');b.textContent=c;b.onclick=()=>{activeLocation=c;renderFilters();renderGrid()};fb.appendChild(b)});
+function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
 /* Sort buttons */
 const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
 const sorts=[{key:'name',label:'A–Z'},{key:'newest',label:'Newest'},{key:'age',label:'Age'}];
@@ -34,7 +33,7 @@ const grid=document.getElementById('girlsGrid');
 function cardFavBtn(name){const fav=name&&isFavorite(name);return `<button class="card-fav${fav?' active':''}" data-fav-name="${name||''}" title="${fav?'Remove from favorites':'Add to favorites'}">${favHeartSvg(fav)}</button>`}
 function bindCardFavs(container){container.querySelectorAll('.card-fav').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const name=btn.dataset.favName;if(!name)return;const nowFav=toggleFavorite(name);btn.classList.toggle('active',nowFav);btn.innerHTML=favHeartSvg(nowFav);btn.title=nowFav?'Remove from favorites':'Add to favorites';btn.classList.remove('fav-pop');void btn.offsetWidth;btn.classList.add('fav-pop');updateFavBadge()}})}
 function renderGrid(){safeRender('Girls Grid',()=>{
-let filtered=activeLocation==='All'?[...girls]:girls.filter(g=>g.location===activeLocation);
+let filtered=[...girls];
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 applySortOrder(filtered);
@@ -58,8 +57,7 @@ const availDates=dates.filter(ds=>hasGirlsOnDate(ds,rosterLocFilter));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?'Today':f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
-const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const locs=["All",...new Set(girls.map(g=>g.location))];if(!rosterLocFilter)rosterLocFilter='All';
-locs.forEach(loc=>{const b=document.createElement('button');b.className='filter-btn'+(rosterLocFilter===loc?' active':'');b.textContent=loc;b.onclick=()=>{rosterLocFilter=loc;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
+
 /* Available Now quick-filter */
 const nowCount=getAvailableNowCount();
 if(nowCount>0){const sep2=document.createElement('div');sep2.className='filter-sep';fb.appendChild(sep2);
@@ -70,7 +68,7 @@ const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
 let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
-if(rosterLocFilter&&rosterLocFilter!=='All')filtered=filtered.filter(g=>g.location===rosterLocFilter);
+
 applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb'):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
