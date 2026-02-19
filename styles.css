@@ -482,11 +482,6 @@ footer{padding-bottom:100px}
 .profile-layout.swipe-exit-right{transition:transform .3s ease-in,opacity .3s;transform:translateX(100%);opacity:0}
 }
 
-/* ── Card: Weekly schedule preview ── */
-.card-week{display:flex;align-items:center;gap:3px;margin-top:6px;flex-wrap:nowrap;overflow:hidden}
-.card-week-day{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(180,74,255,0.75);white-space:nowrap;flex-shrink:0}
-.card-week-day.today{color:var(--accent);text-shadow:0 0 8px rgba(180,74,255,0.5)}
-.card-week-sep{font-size:8px;color:rgba(255,255,255,0.2);flex-shrink:0;line-height:1}
 
 /* ── Profile: Also Available Today ── */
 .profile-also{margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.06)}

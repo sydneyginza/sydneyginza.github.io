@@ -58,8 +58,22 @@ function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt 
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
-/* Auto-refresh Available Now badges every 60s */
-setInterval(()=>{
+/* Auto-refresh Available Now badges every 60s; re-fetch calendar every 5 min */
+let _refreshTick=0;
+setInterval(async()=>{
+_refreshTick++;
+if(_refreshTick%5===0){
+  try{
+    const prevSha=calSha;
+    const freshCal=await loadCalData();
+    if(calSha&&calSha!==prevSha){
+      calData=normalizeCalData(freshCal);
+      updateCalCache();
+      const ap=document.querySelector('.page.active');
+      if(ap){const id=ap.id;if(id==='rosterPage')renderRoster();else if(id==='listPage')renderGrid();else if(id==='favoritesPage')renderFavoritesGrid();else if(id==='homePage')renderHome();else if(id==='profilePage'&&currentProfileIdx>=0)showProfile(currentProfileIdx)}
+    }
+  }catch(e){/* silent */}
+}
 try{
 const activePage=document.querySelector('.page.active');
 if(!activePage)return;
@@ -93,10 +107,14 @@ await loadConfig();
 const cachedGirls=getCachedGirls();
 const cachedCal=getCachedCal();
 let renderedFromCache=false;
+let _calWasStale=false;
 
 if(cachedGirls&&cachedGirls.length){
 girls=cachedGirls;
-calData=normalizeCalData(cachedCal||{});
+/* Skip stale cal: show empty availability rather than mislead returning visitors */
+const calFresh=!isCalCacheStale();
+calData=(calFresh&&cachedCal)?normalizeCalData(cachedCal):{};
+_calWasStale=!calFresh;
 fullRenderAndRoute();
 removeSkeletons();
 renderedFromCache=true;
@@ -123,7 +141,8 @@ let calChanged=false;
 if(freshCal){
 const cachedCalSha=getCachedCalSha();
 const normalizedCal=normalizeCalData(freshCal);
-if(!renderedFromCache||cachedCalSha!==calSha){
+/* Also force update if phase 1 used empty calData due to stale cache */
+if(!renderedFromCache||cachedCalSha!==calSha||_calWasStale){
 calData=normalizedCal;
 calChanged=true;
 updateCalCache();

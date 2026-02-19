@@ -95,6 +95,12 @@ function updateGirlsCache() {
 function updateCalCache() {
   cacheSet(CACHE_KEY_CAL, calData);
   if (calSha) try { localStorage.setItem(CACHE_KEY_CAL_SHA, calSha); } catch(e) {}
+  try { localStorage.setItem(CACHE_KEY_CAL_TS, Date.now().toString()); } catch(e) {}
+}
+
+function isCalCacheStale() {
+  try { const ts = localStorage.getItem(CACHE_KEY_CAL_TS); return !ts || (Date.now() - parseInt(ts)) > CAL_CACHE_TTL; }
+  catch(e) { return true; }
 }
 
 /* === Favorites === */
