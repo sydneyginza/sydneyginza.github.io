@@ -14,7 +14,7 @@ const nb=document.createElement('button');nb.className='filter-btn avail-now-btn
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
-function getWeekDots(name){const dates=getWeekDates();const ts=fmtDate(getAEDTDate());const DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const items=dates.filter(ds=>{const e=getCalEntry(name,ds);return e&&e.start&&e.end}).map(ds=>{const d=new Date(ds+'T00:00:00');return `<span class="card-week-day${ds===ts?' today':''}">${DAY[d.getDay()]}</span>`});return items.length?`<div class="card-week">${items.join('<span class="card-week-sep">-</span>')}</div>`:''}
+function getWeekDots(name){const dates=getWeekDates();const ts=fmtDate(getAEDTDate());const DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const items=dates.filter(ds=>{if(ds===ts)return false;const e=getCalEntry(name,ds);return e&&e.start&&e.end}).map(ds=>{const d=new Date(ds+'T00:00:00');return `<span class="card-week-day">${DAY[d.getDay()]}</span>`});return items.length?`<div class="card-week">${items.join('<span class="card-week-sep">-</span>')}</div>`:''}
 
 function applySortOrder(list){
 const emptyLast=(a,b,cmp)=>{const an=(a.name||'').trim(),bn=(b.name||'').trim();if(!an&&!bn)return 0;if(!an)return 1;if(!bn)return -1;return cmp(a,b)};
