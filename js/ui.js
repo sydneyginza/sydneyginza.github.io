@@ -88,17 +88,6 @@ let debounce;
 searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();renderFilters();renderGrid();renderRoster();if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();document.querySelectorAll('[data-role="name-search"]').forEach(inp=>{if(inp!==searchInp){inp.value=sharedFilters.nameSearch}})},300)});
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
-/* Available Now toggle */
-{const nowCount=getAvailableNowCount();
-const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Availability</div><div class="fp-options"></div>`;
-pane.appendChild(sec);
-const wrap=sec.querySelector('.fp-options');
-const btn=document.createElement('button');btn.className='fp-option fp-avail-now'+(sharedFilters.availableNow?' active':'');
-btn.innerHTML=`<span class="fp-check">${sharedFilters.availableNow?'✓':''}</span><span class="avail-now-dot"></span>Available Now<span class="fp-count">${nowCount}</span>`;
-btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};
-wrap.appendChild(btn);
-pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
 /* Country */
 if(countries.length){
