@@ -208,7 +208,7 @@ if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored)
 const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','analyticsPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
-if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
+resetOgMeta();if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
 /* URL routing & dynamic title */
@@ -512,6 +512,25 @@ const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML
 /* scroll active dot into view */
 const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
 
+/* OG / Twitter Meta Tag helpers */
+function updateOgMeta(g,idx){
+const set=(prop,val,attr)=>{attr=attr||'property';let el=document.querySelector('meta['+attr+'="'+prop+'"]');if(!el){el=document.createElement('meta');el.setAttribute(attr,prop);document.head.appendChild(el)}el.setAttribute('content',val)};
+const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
+const img=g.photos&&g.photos.length?g.photos[0]:'https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
+const country=Array.isArray(g.country)?g.country.join('/'):(g.country||'');
+const parts=[country,g.age?'Age '+g.age:'',g.exp||''].filter(Boolean);
+const desc=parts.length?parts.join(' · '):'View profile at Ginza Empire, Sydney.';
+const title=(g.name||'Profile')+' – Ginza Empire';
+set('og:title',title);set('og:description',desc);set('og:url',url);set('og:image',img);
+set('twitter:title',title,'name');set('twitter:description',desc,'name');set('twitter:image',img,'name')}
+function resetOgMeta(){
+const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
+const t='Ginza Empire – Sydney\'s Premier Asian Bordello';
+const d='Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates.';
+const i='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
+set('og:title',t);set('og:description',d);set('og:url','https://sydneyginza.github.io');set('og:image',i);
+set('twitter:title',t,'name');set('twitter:description',d,'name');set('twitter:image',i,'name')}
+
 /* Profile Page */
 function renderAlsoAvailable(idx){
 const g=girls[idx];if(!g)return;
@@ -530,7 +549,7 @@ function updateFavBadge(){const b=document.getElementById('navFavBadge');const b
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
 function showProfile(idx){safeRender('Profile',()=>{
-const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];
+const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];updateOgMeta(g,idx);
 /* URL routing & dynamic title */
 const profTitle=g.name?'Ginza – '+g.name:'Ginza – Profile';
 document.title=profTitle;
