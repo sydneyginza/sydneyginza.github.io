@@ -57,6 +57,17 @@ function getAvailableNowCount() {
   return girls.filter(g => g.name && isAvailableNow(g.name)).length;
 }
 
+/* Check if a girl has a shift scheduled today (regardless of current time) */
+function isAvailableToday(name) {
+  const entry = getCalEntry(name, fmtDate(getAEDTDate()));
+  return !!(entry && entry.start && entry.end);
+}
+
+/* Count how many girls are scheduled today */
+function getAvailableTodayCount() {
+  return girls.filter(g => g.name && isAvailableToday(g.name)).length;
+}
+
 function genFn() { return 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.jpg' }
 
 /* === Local Cache (stale-while-revalidate) === */
