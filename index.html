@@ -61,6 +61,13 @@
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div id="privacyBanner" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:#13131e;border-top:1px solid rgba(180,74,255,0.25);padding:10px 20px;z-index:9998;font-family:'Rajdhani',sans-serif;font-size:14px;color:rgba(255,255,255,0.6);align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<span>We collect anonymous visit data to understand visitor trends. No personal information is collected or shared.</span>
+<div style="display:flex;gap:8px;flex-shrink:0">
+<button id="privacyOptOutBtn" style="background:none;border:1px solid rgba(180,74,255,0.45);color:#b44aff;font-family:'Rajdhani',sans-serif;font-size:13px;padding:4px 14px;cursor:pointer;letter-spacing:1px">Opt Out</button>
+<button id="privacyDismissBtn" style="background:rgba(180,74,255,0.12);border:1px solid rgba(180,74,255,0.35);color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;padding:4px 14px;cursor:pointer;letter-spacing:1px">Got It</button>
+</div>
+</div>
 <div class="particles" id="particles"></div>
 <nav>
 <div class="logo">GINZA EMPIRE</div>
@@ -422,5 +429,6 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <script src="/js/grids.js"></script>
 <script src="/js/forms.js"></script>
 <script src="/js/analytics.js"></script>
+<script>(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;document.getElementById('privacyOptOutBtn').onclick=function(){const ob=document.getElementById('analyticsOptBtn');if(ob)ob.click();dismiss()};}catch(e){}})()</script>
 </body>
 </html>

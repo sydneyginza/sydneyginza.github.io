@@ -504,6 +504,7 @@ const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(tota
 const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
 const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
 const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
+[prevIdx,nextIdx].forEach(pi=>{const pg=girls[pi];if(!pg||!pg.photos||!pg.photos.length)return;const src=pg.photos[0];if(!src||src.startsWith('data:'))return;const eid='pfetch-'+pi;if(!document.getElementById(eid)){const lk=document.createElement('link');lk.rel='prefetch';lk.as='image';lk.href=src;lk.id=eid;document.head.appendChild(lk)}});
 const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfileReplace(prevIdx);rail.appendChild(up);
 const dots=document.createElement('div');dots.className='pnav-dots';
 for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfileReplace(realIdx);dots.appendChild(d)}
