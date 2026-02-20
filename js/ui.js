@@ -212,8 +212,8 @@ if(document.getElementById('calendarPage').classList.contains('active')&&id!=='c
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
 /* URL routing & dynamic title */
-const titleMap={homePage:'Ginza',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',analyticsPage:'Ginza – Analytics'};
-const pageTitle=titleMap[id]||'Ginza';
+const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',analyticsPage:'Ginza – Analytics'};
+const pageTitle=titleMap[id]||'Ginza Empire';
 document.title=pageTitle;
 Router.push(Router.pathForPage(id),pageTitle);
 /* Determine which filter pane is active for this page */

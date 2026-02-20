@@ -499,7 +499,7 @@ const Router = (function() {
 
   function push(path, title) {
     if (_suppressPush) return;
-    const t = title || 'Ginza';
+    const t = title || 'Ginza Empire';
     document.title = t;
     if (window.location.pathname !== path) {
       history.pushState({ path: path }, t, path);
@@ -508,7 +508,7 @@ const Router = (function() {
 
   function replace(path, title) {
     if (_suppressPush) return;
-    const t = title || 'Ginza';
+    const t = title || 'Ginza Empire';
     document.title = t;
     history.replaceState({ path: path }, t, path);
   }
@@ -545,14 +545,14 @@ const Router = (function() {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza');
+        replace('/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'analyticsPage' && !loggedIn) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza');
+        replace('/', 'Ginza Empire');
         return true;
       }
       _suppressPush = true;
@@ -566,7 +566,7 @@ const Router = (function() {
       _suppressPush = true;
       showPage('homePage');
       _suppressPush = false;
-      replace('/', 'Ginza');
+      replace('/', 'Ginza Empire');
     }
     return true;
   }
