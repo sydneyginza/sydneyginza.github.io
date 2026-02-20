@@ -550,7 +550,7 @@ const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primar
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
 let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>Available Now ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
-else if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#00c864;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
+else if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#ffcc44;font-weight:600">Available Today ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 const stats=[{l:'Age',v:g.age},{l:'Body Size',v:g.body},{l:'Height',v:g.height+' cm'},{l:'Cup Size',v:g.cup},{l:'Rates 30 mins',v:g.val1||'\u2014'},{l:'Rates 45 mins',v:g.val2||'\u2014'},{l:'Rates 60 mins',v:g.val3||'\u2014'},{l:'Experience',v:g.exp||'\u2014'}];
 const mainImg=g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';
 const hasMultiple=g.photos.length>1;
