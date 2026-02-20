@@ -7,7 +7,7 @@ let copyTimeResolve=null;
 
 /* ── Compare Feature State ── */
 let compareSelected=[];
-const COMPARE_MAX=3;
+const COMPARE_MAX=5;
 function isCompareSelected(name){return compareSelected.includes(name)}
 function toggleCompare(name){const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
 function clearCompare(){compareSelected=[];updateCompareBar();updateCompareButtons()}
