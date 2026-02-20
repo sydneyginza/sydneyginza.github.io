@@ -604,7 +604,7 @@ sortedPF.forEach(([name,total],i)=>{
   const pct=total/maxPF*100;
   const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
   const girl=typeof girls!=='undefined'?girls.find(g=>g&&g.name===name):null;
-  const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-profile-thumb" src="${girl.photos[0]}" alt="">`:'<div class="an-profile-thumb an-profile-thumb-empty"></div>';
+  const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-profile-thumb" src="${girl.photos[0]}" alt="${name.replace(/"/g,'&quot;')}">`:'<div class="an-profile-thumb an-profile-thumb-empty"></div>';
   const liveNow=girl&&typeof isAvailableNow==='function'&&isAvailableNow(girl.name);
   const availDot=liveNow?'<span class="avail-now-dot" title="Available now"></span>':'';
   pfHtml+=`<div class="an-bar-row"><div class="an-bar-label an-bar-label-profile">${thumb}<span>${medal} ${name}</span>${availDot}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;

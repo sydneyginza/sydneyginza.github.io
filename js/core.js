@@ -132,6 +132,17 @@ function getFavCount() {
   return girls.filter(g => g.name && favs.includes(g.name)).length;
 }
 
+/* === Roster Notifications === */
+const NOTIF_OPTIN_KEY='ginza_notif_optin';
+const NOTIF_LAST_KEY='ginza_notif_last';
+function isNotifOptedIn(){try{return localStorage.getItem(NOTIF_OPTIN_KEY)==='true'}catch(e){return false}}
+function setNotifOptIn(val){try{localStorage.setItem(NOTIF_OPTIN_KEY,val?'true':'false')}catch(e){}}
+function getNotifLastDate(){try{return localStorage.getItem(NOTIF_LAST_KEY)||''}catch(e){return''}}
+function setNotifLastDate(ds){try{localStorage.setItem(NOTIF_LAST_KEY,ds)}catch(e){}}
+function notifSupported(){return 'Notification' in window}
+async function requestNotifPermission(){if(!notifSupported())return false;if(Notification.permission==='granted')return true;if(Notification.permission==='denied')return false;const result=await Notification.requestPermission();return result==='granted'}
+function checkFavoritesOnRoster(){const today=fmtDate(getAEDTDate());if(getNotifLastDate()===today)return;if(!isNotifOptedIn())return;if(Notification.permission!=='granted')return;const favs=getFavorites();if(!favs.length)return;const onRoster=girls.filter(g=>{if(!g.name||!favs.includes(g.name))return false;const entry=getCalEntry(g.name,today);return entry&&entry.start&&entry.end});if(!onRoster.length)return;setNotifLastDate(today);const names=onRoster.map(g=>g.name);const body=names.length===1?names[0]+' is available today!':names.slice(0,3).join(', ')+(names.length>3?' and '+(names.length-3)+' more':'')+' are available today!';new Notification('Ginza - Favorites Available',{body,tag:'ginza-roster-'+today})}
+
 /* === API Functions (with retry) === */
 
 async function fetchWithRetry(url, opts = {}, { retries = 3, baseDelay = 600 } = {}) {

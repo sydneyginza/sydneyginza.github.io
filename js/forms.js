@@ -167,5 +167,8 @@ fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 }
 
+/* Check roster notifications after data is ready */
+if(typeof checkFavoritesOnRoster==='function'){try{checkFavoritesOnRoster()}catch(e){}}
+
 }catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}
 })();
