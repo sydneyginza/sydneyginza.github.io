@@ -475,17 +475,17 @@ const stats=[
 {label:'Age',fn:g=>g.age||'\u2014',raw:g=>parseFloat(g.age)},
 {label:'Height',fn:g=>g.height?(g.height+' cm'):'\u2014',raw:g=>parseFloat(g.height)},
 {label:'Body Size',fn:g=>g.body||'\u2014',raw:g=>parseFloat(g.body)},
-{label:'Cup',fn:g=>g.cup||'\u2014'},
+{label:'Cup',fn:g=>g.cup||'\u2014',alpha:g=>g.cup?g.cup.trim().charAt(0).toUpperCase():null},
 {label:'30 mins',fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
 {label:'45 mins',fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
 {label:'60 mins',fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
-{label:'Experience',fn:g=>g.exp||'\u2014'},
+{label:'Experience',fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null},
 {label:'Labels',fn:g=>g.labels&&g.labels.length?g.labels.slice().sort().join(', '):'\u2014'}
 ];
 let html='<table class="compare-stat-table"><thead><tr><th></th>';
 sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo" alt="${g.name.replace(/"/g,'&quot;')}">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
 html+='</tr></thead><tbody>';
-stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
+stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.alpha){const vals=sel.map(g=>s.alpha(g));const valid=[...new Set(vals.filter(Boolean))].sort();const hi=valid.length?valid[valid.length-1]:null;const lo=valid.length?valid[0]:null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(v&&hi&&lo&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.fixedColor){sel.forEach(g=>{const c=s.fixedColor(g);html+=`<td${c?` style="color:${c};font-weight:600"`:''}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
 html+='</tbody></table>';
 grid.innerHTML=html;
 overlay.classList.add('open');document.body.style.overflow='hidden'}
