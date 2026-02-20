@@ -212,7 +212,7 @@ resetOgMeta();if(document.getElementById('calendarPage').classList.contains('act
 allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
 closeFilterPanel();
 /* URL routing & dynamic title */
-const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza – Roster',listPage:'Ginza – Girls',favoritesPage:'Ginza – Favorites',valuePage:'Ginza – Rates',employmentPage:'Ginza – Employment',calendarPage:'Ginza – Calendar',analyticsPage:'Ginza – Analytics'};
+const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics'};
 const pageTitle=titleMap[id]||'Ginza Empire';
 document.title=pageTitle;
 Router.push(Router.pathForPage(id),pageTitle);
@@ -552,7 +552,7 @@ function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M1
 function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];updateOgMeta(g,idx);
 /* URL routing & dynamic title */
-const profTitle=g.name?'Ginza – '+g.name:'Ginza – Profile';
+const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
 const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">Edit Profile</button><button class="btn btn-danger" id="profDelete">Delete</button></div>`:'';
