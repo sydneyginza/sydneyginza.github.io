@@ -472,20 +472,20 @@ const sel=compareSelected.map(name=>girls.find(g=>g.name===name)).filter(Boolean
 if(sel.length<2)return;
 const stats=[
 {label:'Country',fn:g=>Array.isArray(g.country)?g.country.join(', '):(g.country||'\u2014')},
-{label:'Age',fn:g=>g.age||'\u2014'},
-{label:'Height',fn:g=>g.height?(g.height+' cm'):'\u2014'},
-{label:'Body Size',fn:g=>g.body||'\u2014'},
+{label:'Age',fn:g=>g.age||'\u2014',raw:g=>parseFloat(g.age)},
+{label:'Height',fn:g=>g.height?(g.height+' cm'):'\u2014',raw:g=>parseFloat(g.height)},
+{label:'Body Size',fn:g=>g.body||'\u2014',raw:g=>parseFloat(g.body)},
 {label:'Cup',fn:g=>g.cup||'\u2014'},
-{label:'30 mins',fn:g=>g.val1?('$'+g.val1):'\u2014'},
-{label:'45 mins',fn:g=>g.val2?('$'+g.val2):'\u2014'},
-{label:'60 mins',fn:g=>g.val3?('$'+g.val3):'\u2014'},
+{label:'30 mins',fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
+{label:'45 mins',fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
+{label:'60 mins',fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
 {label:'Experience',fn:g=>g.exp||'\u2014'},
-{label:'Labels',fn:g=>g.labels&&g.labels.length?g.labels.join(', '):'\u2014'}
+{label:'Labels',fn:g=>g.labels&&g.labels.length?g.labels.slice().sort().join(', '):'\u2014'}
 ];
 let html='<table class="compare-stat-table"><thead><tr><th></th>';
 sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo" alt="${g.name.replace(/"/g,'&quot;')}">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
 html+='</tr></thead><tbody>';
-stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`});html+='</tr>'});
+stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
 html+='</tbody></table>';
 grid.innerHTML=html;
 overlay.classList.add('open');document.body.style.overflow='hidden'}
@@ -558,7 +558,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">Language</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
 <div class="profile-desc-title">Type</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">Description</div><div class="profile-desc">${g.desc}</div>
-${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
+${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">Labels</div><div class="profile-labels">${g.labels.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
