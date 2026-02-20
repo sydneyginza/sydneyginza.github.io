@@ -44,19 +44,6 @@
         "opens": "10:30",
         "closes": "25:00"
       }
-    },
-    {
-      "@type": "LocalBusiness",
-      "@id": "https://sydneyginza.github.io/#club",
-      "name": "Ginza Club",
-      "url": "https://sydneyginza.github.io",
-      "telephone": ["+61279013000", "+61488888310"],
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
-        "opens": "10:30",
-        "closes": "25:00"
-      }
     }
   ]
 }
@@ -100,8 +87,9 @@
 <div class="home-mid">
 <div class="home-mid-left">
 <div class="home-divider-sm"></div>
+<button class="page-edit-btn" data-page="home" style="display:none"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Edit Page</button>
 <h2 class="logo" style="margin-bottom:20px">Announcement</h2>
-<p class="home-summary">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</p>
+<p class="home-summary" id="homeAnnounceText">Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.</p>
 <div class="home-announce" id="homeAnnounce"></div>
 </div>
 <div class="home-mid-right">
@@ -113,7 +101,7 @@
 </div>
 </div>
 <div class="home-divider"></div>
-<article>
+<article id="homeWelcome">
 <h2 class="logo" style="margin-bottom:20px">Welcome to Sydney's premier Asian Bordello</h2>
 <p class="home-summary">Our approved venue has been renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or few. Each room has a shower, climate control system and audio visual setup, plus a theme of its own.</p>
 <p class="home-summary">You are invited to rule your empire from the Japanese Emperor's Palace. Perhaps the Regal French style suite conveys how you want to express yourself this time. Control the Dynasty from the ancient Chinese Palace, or re-live the era debauchery was taken to a new level in the Roman Empire style bedroom. Serenity and tranquillity ooze like lava in the room, is this where you will enlarge and enrich your Zen? No-one does passion or fashion the way the Italians do, so the Mediterranean room may be the place to let your creative juices flow.</p>
@@ -148,9 +136,9 @@
 <div class="testimonial-dots" id="testimonialDots"></div>
 </div>
 <h2 class="logo" style="margin-bottom:20px">Location</h2>
-<address class="home-summary">310 Cleveland St Surry Hills NSW 2010<br>(back entrance from goodlet lane)</address>
+<address class="home-summary" id="homeLocation">310 Cleveland St Surry Hills NSW 2010<br>(back entrance from goodlet lane)</address>
 <h2 class="logo" style="margin-bottom:20px">Hours</h2>
-<p class="home-summary">Monday to Sunday open from 10:30am till 1am.</p>
+<p class="home-summary" id="homeHours">Monday to Sunday open from 10:30am till 1am.</p>
 <h2 class="logo" style="margin-bottom:20px">Contact Ginza Empire</h2>
 <address class="home-summary"><a href="tel:+61282832130">02 8283 2130</a><br><a href="tel:+61416020278">0416 020 278</a></address>
 <div class="contact-btns"><a href="https://wa.me/61416020278" target="_blank" rel="noopener" class="contact-btn contact-btn-wa"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</a></div>
@@ -186,12 +174,13 @@
 </section></div>
 
 <div class="page" id="valuePage"><section class="section">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Rates</div></div></div>
-<p class="home-summary">Below are the indicative rates charged by the ladies for providing you with their full adult service (inclusive of our flat room hire rates charged by us to the ladies). However, you must negotiate the lady&#x2019;s payment directly with her. The guide below were provided by the ladies.</p>
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Rates</div></div><button class="page-edit-btn" data-page="rates" style="display:none"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Edit</button></div>
+<p class="home-summary" id="ratesIntro">Below are the indicative rates charged by the ladies for providing you with their full adult service (inclusive of our flat room hire rates charged by us to the ladies). However, you must negotiate the lady&#x2019;s payment directly with her. The guide below were provided by the ladies.</p>
 <div style="overflow-x:auto;max-width:400px;margin:0 auto"><table class="cal-table" id="valueTable"></table></div>
 <div style="margin-top:60px;text-align:center">
 <div class="home-divider"></div>
-<p class="home-summary">We are a legal Sydney Brothel and safe sex practices must be adhered to. For our service of providing superior private rooms and facilities, we charge the ladies (service providers) a flat room hiring rate as below:</p>
+<p class="home-summary" id="ratesLegal">We are a legal Sydney Brothel and safe sex practices must be adhered to. For our service of providing superior private rooms and facilities, we charge the ladies (service providers) a flat room hiring rate as below:</p>
+<div id="ratesRoomSection">
 <h2 class="logo" style="margin-bottom:20px">Room Hire Rates</h2>
 <p class="home-summary">30 Minutes $30</p>
 <p class="home-summary">45 Minutes $45</p>
@@ -199,12 +188,14 @@
 <p class="home-summary">Over 60 Minutes Negotiable</p>
 <p class="home-summary">All our ladies are INDEPENDENT service providers, they will charge you according to the level of services they provide to you. All services that you would like should be discussed directly with them.</p>
 </div>
+</div>
 </section></div>
 
 <div class="page" id="employmentPage"><section class="section">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Employment</div></div></div>
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza</div><div class="section-title">Employment</div></div><button class="page-edit-btn" data-page="employment" style="display:none"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Edit</button></div>
 <div style="margin-top:60px;text-align:center">
 <div class="home-divider"></div>
+<div id="employContent">
 <h2 class="logo" style="margin-bottom:60px">1ヶ月で日本円だと1500万円--2000万円以上ですね、もちろん未経験の方も大歓迎！</h2>
 <p class="home-summary">注目~~~注目！！！</p>
 <p class="home-summary">高収入チャンスです！！ぜひ今すぐ連絡を！！</p>
@@ -252,6 +243,7 @@
 <p class="home-summary">１００％働いてることがばれないので、安心して働けます。会社が、ランクの高いお客様だけを予約するので、とても働きやすい環境です。見ず知らずのお客様は、一切いませんので、会社がお客様を選び、会社が女性社員をお守りします。</p>
 <p class="home-summary">シドニーで贅沢な仕事がしたい方、短期でがっつり稼ぎたい方など是非とも連絡下さい</p>
 <p class="home-summary">仕事時間につきましては、相談して好きな時間に働けるので短期間で沢山稼ぎたい方や、副業をお探しの方にはもってこいです。初心者の方でも大歓迎なので、少しでも興味がありましたらお気軽にご連絡ください。</p>
+</div>
 <h2 class="logo" style="margin-bottom:60px">Contacts</h2>
 <address class="home-summary">
 Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>
@@ -301,7 +293,7 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <div class="form-title" id="formTitle">Add New Girl</div>
 <input type="hidden" id="editIndex" value="-1">
 <div class="form-row"><div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fName" placeholder="Name..."></div>
-<div class="form-group"><label class="form-label">Location</label><select class="form-input" id="fLocation"><option value="">Select location</option><option value="Club">Club</option><option value="Empire">Empire</option></select></div></div>
+<div class="form-group"><label class="form-label">Location</label><select class="form-input" id="fLocation"><option value="">Select location</option><option value="Empire">Empire</option></select></div></div>
 <div class="form-row country-stats-row"><div class="form-group"><label class="form-label">Country <span style="color:var(--text-dim);font-weight:400">(select one or more)</span></label><div id="fCountryOptions" class="country-multi-wrap"></div><div id="fCountryTags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div></div>
 <div class="form-group form-stack-right"><div class="form-group"><label class="form-label">Age</label><input class="form-input" id="fAge" type="number" min="0" placeholder="e.g. 23"></div><div class="form-group"><label class="form-label">Body Size</label><input class="form-input" id="fBody" type="number" min="0" placeholder="e.g. 6"></div><div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div></div></div>
 <div class="form-row"><div class="form-group"><label class="form-label">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
@@ -425,6 +417,18 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <div class="compare-grid" id="compareGrid"></div>
 <div class="compare-actions"><button class="btn btn-secondary" id="compareDone">Close</button></div>
 </div></div>
+
+<div class="modal-overlay" id="pageEditOverlay">
+<div class="form-modal" style="max-width:700px">
+<button class="modal-close" id="pageEditClose">&times;</button>
+<div class="form-title" id="pageEditTitle">Edit Page</div>
+<div id="pageEditFields"></div>
+<div class="form-actions">
+<button class="btn btn-secondary" id="pageEditCancel">Cancel</button>
+<button class="btn btn-primary" id="pageEditSave">Save</button>
+</div>
+</div>
+</div>
 
 <div class="fab-container" id="fabContainer">
 <button class="fab-toggle" id="fabToggle"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg></button>

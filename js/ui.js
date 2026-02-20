@@ -605,11 +605,11 @@ c.appendChild(t)})}
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
+document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
 document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase());document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
@@ -673,3 +673,124 @@ let timer=setInterval(()=>goTo((tIdx+1)%total),6000);const section=document.getE
 
 /* ── Notification Bell ── */
 (function(){const bell=document.getElementById('notifBellBtn');if(!bell||!notifSupported())return;bell.style.display='';bell.classList.toggle('active',isNotifOptedIn());bell.onclick=async()=>{if(isNotifOptedIn()){setNotifOptIn(false);bell.classList.remove('active');showToast('Notifications disabled')}else{const granted=await requestNotifPermission();if(granted){setNotifOptIn(true);bell.classList.add('active');showToast('Notifications enabled! We\'ll notify you when favorites are on the roster.')}else{showToast('Notification permission denied by browser','error')}}}})()
+
+/* ── Page Content Editor ── */
+const peOverlay=document.getElementById('pageEditOverlay'),peFields=document.getElementById('pageEditFields'),peTitle=document.getElementById('pageEditTitle');
+let peCurrentPage=null;
+
+/* Field definitions per page */
+const PAGE_FIELDS={
+home:[
+{key:'announcement',label:'Announcement',type:'textarea',rows:2},
+{key:'welcomeTitle',label:'Welcome Heading',type:'text'},
+{key:'welcomeBody',label:'Welcome Body',type:'textarea',rows:8,help:'Separate paragraphs with blank lines.'},
+{key:'location',label:'Location',type:'textarea',rows:2,help:'Use line breaks for multiple lines.'},
+{key:'hours',label:'Hours',type:'text'}
+],
+rates:[
+{key:'intro',label:'Intro',type:'textarea',rows:4},
+{key:'legal',label:'Legal Notice',type:'textarea',rows:3},
+{key:'roomTitle',label:'Room Hire Heading',type:'text'},
+{key:'roomRates',label:'Room Rates',type:'textarea',rows:4,help:'One rate per line, e.g. "30 Minutes $30"'},
+{key:'disclaimer',label:'Disclaimer',type:'textarea',rows:3}
+],
+employment:[
+{key:'content',label:'Content',type:'textarea',rows:20,help:'Use ## at the start of a line for section headings. Separate paragraphs with blank lines.'}
+]
+};
+
+/* Extract current text from DOM as defaults */
+function extractPageDefaults(pageId){
+const d={};
+if(pageId==='home'){
+const at=document.getElementById('homeAnnounceText');d.announcement=at?at.textContent:'';
+const wel=document.getElementById('homeWelcome');
+if(wel){const h=wel.querySelector('h2');d.welcomeTitle=h?h.textContent:'';const ps=wel.querySelectorAll('p.home-summary');d.welcomeBody=Array.from(ps).map(p=>p.textContent).join('\n\n');}
+const loc=document.getElementById('homeLocation');d.location=loc?loc.textContent.replace(/\n/g,'\n').trim():'';
+const hrs=document.getElementById('homeHours');d.hours=hrs?hrs.textContent:'';
+}else if(pageId==='rates'){
+const ri=document.getElementById('ratesIntro');d.intro=ri?ri.textContent:'';
+const rl=document.getElementById('ratesLegal');d.legal=rl?rl.textContent:'';
+const rs=document.getElementById('ratesRoomSection');
+if(rs){const h=rs.querySelector('h2');d.roomTitle=h?h.textContent:'';const ps=rs.querySelectorAll('p.home-summary');d.roomRates=Array.from(ps).slice(0,-1).map(p=>p.textContent).join('\n');d.disclaimer=ps.length?ps[ps.length-1].textContent:'';}
+}else if(pageId==='employment'){
+const ec=document.getElementById('employContent');
+if(ec){const els=ec.querySelectorAll('h2,p.home-summary');d.content=Array.from(els).map(el=>el.tagName==='H2'?'## '+el.textContent:el.textContent).join('\n\n');}
+}
+return d;
+}
+
+function renderPageContent(pageId){
+const pd=pageData[pageId];if(!pd)return;
+if(pageId==='home'){
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el)el.textContent=pd.announcement;}
+const wel=document.getElementById('homeWelcome');
+if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
+let h='';
+if(pd.welcomeTitle)h+='<h2 class="logo" style="margin-bottom:20px">'+pd.welcomeTitle.replace(/</g,'&lt;')+'</h2>';
+if(pd.welcomeBody)h+=pd.welcomeBody.split('\n\n').map(p=>'<p class="home-summary">'+p.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>').join('');
+wel.innerHTML=h;
+}
+if(pd.location){const el=document.getElementById('homeLocation');if(el)el.innerHTML=pd.location.replace(/</g,'&lt;').replace(/\n/g,'<br>');}
+if(pd.hours){const el=document.getElementById('homeHours');if(el)el.textContent=pd.hours;}
+}else if(pageId==='rates'){
+if(pd.intro){const el=document.getElementById('ratesIntro');if(el)el.textContent=pd.intro;}
+if(pd.legal){const el=document.getElementById('ratesLegal');if(el)el.textContent=pd.legal;}
+const rs=document.getElementById('ratesRoomSection');
+if(rs&&(pd.roomTitle||pd.roomRates||pd.disclaimer)){
+let h='';
+if(pd.roomTitle)h+='<h2 class="logo" style="margin-bottom:20px">'+pd.roomTitle.replace(/</g,'&lt;')+'</h2>';
+if(pd.roomRates)h+=pd.roomRates.split('\n').map(l=>'<p class="home-summary">'+l.replace(/</g,'&lt;')+'</p>').join('');
+if(pd.disclaimer)h+='<p class="home-summary">'+pd.disclaimer.replace(/</g,'&lt;')+'</p>';
+rs.innerHTML=h;
+}
+}else if(pageId==='employment'){
+const ec=document.getElementById('employContent');
+if(ec&&pd.content){
+const lines=pd.content.split('\n\n');
+ec.innerHTML=lines.map(l=>{
+if(l.startsWith('## '))return '<h2 class="logo" style="margin-bottom:60px">'+l.slice(3).replace(/</g,'&lt;')+'</h2>';
+return '<p class="home-summary">'+l.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>';
+}).join('');
+}
+}
+}
+
+function openPageEditor(pageId){
+peCurrentPage=pageId;
+const fields=PAGE_FIELDS[pageId];if(!fields)return;
+const defaults=pageData[pageId]||extractPageDefaults(pageId);
+peTitle.textContent='Edit '+pageId.charAt(0).toUpperCase()+pageId.slice(1);
+peFields.innerHTML=fields.map(f=>{
+const val=(defaults[f.key]||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+let inp;
+if(f.type==='textarea')inp='<textarea class="pe-textarea" id="pe_'+f.key+'" rows="'+f.rows+'">'+val+'</textarea>';
+else inp='<input class="pe-input" id="pe_'+f.key+'" value="'+val+'">';
+return '<div class="pe-field"><label class="pe-label">'+f.label+'</label>'+inp+(f.help?'<div class="pe-help">'+f.help+'</div>':'')+'</div>';
+}).join('');
+peOverlay.classList.add('open');
+}
+
+async function savePageEditor(){
+if(!peCurrentPage)return;
+const fields=PAGE_FIELDS[peCurrentPage];
+if(!pageData[peCurrentPage])pageData[peCurrentPage]={};
+fields.forEach(f=>{const el=document.getElementById('pe_'+f.key);if(el)pageData[peCurrentPage][f.key]=el.value;});
+document.getElementById('pageEditSave').disabled=true;
+document.getElementById('pageEditSave').textContent='Saving...';
+const ok=await savePageData();
+document.getElementById('pageEditSave').disabled=false;
+document.getElementById('pageEditSave').textContent='Save';
+if(ok){renderPageContent(peCurrentPage);peOverlay.classList.remove('open');showToast('Page updated');}
+}
+
+/* Wire up page editor modal */
+document.getElementById('pageEditClose').onclick=()=>peOverlay.classList.remove('open');
+document.getElementById('pageEditCancel').onclick=()=>peOverlay.classList.remove('open');
+document.getElementById('pageEditSave').onclick=savePageEditor;
+peOverlay.addEventListener('click',e=>{if(e.target===peOverlay)peOverlay.classList.remove('open')});
+
+/* Wire up edit buttons */
+document.querySelectorAll('.page-edit-btn').forEach(btn=>{
+btn.addEventListener('click',()=>openPageEditor(btn.dataset.page));
+});

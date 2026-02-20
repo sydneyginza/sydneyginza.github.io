@@ -256,6 +256,43 @@ async function saveCalData(retryOnConflict = true) {
   } catch (e) { showToast('Calendar save failed', 'error'); return false; }
 }
 
+/* === Page Content Data === */
+const PP = 'data/pages.json';
+let pageData = {}, pageSha = null;
+
+async function loadPageData() {
+  try {
+    const r = await fetchWithRetry(`${DATA_API}/${PP}`, { headers: proxyHeaders() });
+    if (r.ok) { const d = await r.json(); pageSha = d.sha; pageData = dec(d.content) || {}; return pageData; }
+    if (r.status === 404) { pageSha = null; pageData = {}; return pageData; }
+  } catch (e) { console.error('loadPageData error:', e); }
+  return pageData;
+}
+
+async function savePageData(retryOnConflict = true) {
+  try {
+    const body = { message: 'Update pages', content: enc(pageData) };
+    if (pageSha) body.sha = pageSha;
+    const r = await fetchWithRetry(`${DATA_API}/${PP}`, {
+      method: 'PUT',
+      headers: proxyHeaders(),
+      body: JSON.stringify(body)
+    }, { retries: 2 });
+    if (!r.ok) {
+      if (r.status === 409 && retryOnConflict) {
+        console.warn('Page save conflict — refetching SHA and retrying');
+        const fresh = await fetchWithRetry(`${DATA_API}/${PP}`, { headers: proxyHeaders() });
+        if (fresh.ok) { pageSha = (await fresh.json()).sha; return savePageData(false); }
+      }
+      throw new Error(r.status);
+    }
+    pageSha = (await r.json()).content.sha;
+    return true;
+  } catch (e) { showToast('Page save failed', 'error'); return false; }
+}
+
+function getPageField(page, key) { return pageData[page] && pageData[page][key] || null; }
+
 async function uploadToGithub(b64, name, fn) {
   const safe = name.replace(/[^a-zA-Z0-9_-]/g, '_');
   const path = `Images/${safe}/${fn}`;

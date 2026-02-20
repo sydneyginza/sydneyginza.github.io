@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded',()=>{const inp=document.getElementB
 
 function openForm(idx=-1){document.getElementById('editIndex').value=idx;formPhotosToDelete=[];formNewPhotos=[];formNewFiles=[];
 if(idx>=0){document.getElementById('formTitle').textContent='Edit Profile';const g=girls[idx];document.getElementById('fName').value=g.name;document.getElementById('fLocation').value=g.location;const gc=g.country||'';formCountries=Array.isArray(gc)?[...gc]:(gc?[gc]:[]);document.getElementById('fAge').value=g.age;document.getElementById('fBody').value=g.body;document.getElementById('fHeight').value=g.height;document.getElementById('fCup').value=g.cup;document.getElementById('fVal1').value=g.val1||'';document.getElementById('fVal2').value=g.val2||'';document.getElementById('fVal3').value=g.val3||'';document.getElementById('fSpecial').value=g.special||'';document.getElementById('fExp').value=g.exp||'';document.getElementById('fStartDate').value=g.startDate||fmtDate(getAEDTDate());document.getElementById('fLang').value=g.lang||'';document.getElementById('fOldUrl').value=g.oldUrl||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;formPhotos=[...(g.photos||[])];formLabels=[...(g.labels||[])]}
-else{document.getElementById('formTitle').textContent='Add New Girl';formFields.forEach(id=>document.getElementById(id).value='');document.getElementById('fStartDate').value=fmtDate(getAEDTDate());formPhotos=[];formLabels=[];formCountries=[]}updateOldUrlPreview();renderFormPhotos();renderFormLabels();renderFormCountries();formOverlay.classList.add('open')}
+else{document.getElementById('formTitle').textContent='Add New Girl';formFields.forEach(id=>document.getElementById(id).value='');document.getElementById('fStartDate').value=fmtDate(getAEDTDate());document.getElementById('fLocation').value='Empire';formPhotos=[];formLabels=[];formCountries=[]}updateOldUrlPreview();renderFormPhotos();renderFormLabels();renderFormCountries();formOverlay.classList.add('open')}
 
 document.getElementById('formSave').onclick=async()=>{
 const req=[{id:'fName',label:'Name'},{id:'fLocation',label:'Location'},{id:'fAge',label:'Age'},{id:'fBody',label:'Body Size'},{id:'fHeight',label:'Height'},{id:'fCup',label:'Cup Size'},{id:'fExp',label:'Experience'},{id:'fVal3',label:'Value 3'},{id:'fStartDate',label:'Start Date'},{id:'fLang',label:'Language'},{id:'fType',label:'Type'},{id:'fDesc',label:'Description'}];
@@ -166,6 +166,9 @@ removeSkeletons();
 fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 }
+
+/* Load page content data and render */
+if(typeof loadPageData==='function'){try{await loadPageData();renderPageContent('home');renderPageContent('rates');renderPageContent('employment')}catch(e){console.error('Page data load error:',e)}}
 
 /* Check roster notifications after data is ready */
 if(typeof checkFavoritesOnRoster==='function'){try{checkFavoritesOnRoster()}catch(e){}}

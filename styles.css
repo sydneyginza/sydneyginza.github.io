@@ -29,6 +29,15 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .notif-bell-btn.active{border-color:var(--accent);color:var(--accent)}
 .notif-bell-btn.active::after{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;background:#00ff7f;border-radius:50%;border:2px solid var(--bg-dark)}
 .notif-bell-btn svg{fill:currentColor}
+.page-edit-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.3);color:var(--accent);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));margin-left:auto}
+.page-edit-btn:hover{background:rgba(180,74,255,0.15);border-color:var(--accent)}
+.page-edit-btn svg{flex-shrink:0}
+.pe-field{margin-bottom:16px}
+.pe-label{display:block;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px}
+.pe-input,.pe-textarea{width:100%;background:var(--bg-dark);border:1px solid rgba(255,255,255,0.1);color:var(--text-light);font-family:'Rajdhani',sans-serif;font-size:14px;padding:10px 14px;transition:border-color .3s;box-sizing:border-box;outline:none}
+.pe-input:focus,.pe-textarea:focus{border-color:var(--accent)}
+.pe-textarea{resize:vertical;line-height:1.6}
+.pe-help{font-size:11px;color:var(--text-dim);margin-top:4px;font-style:italic}
 .user-dropdown{position:absolute;top:calc(100% + 10px);right:0;background:#16161e;border:1px solid rgba(255,255,255,0.1);min-width:200px;opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .25s;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));z-index:110}
 .user-dropdown.open{opacity:1;pointer-events:all;transform:translateY(0)}
 .dropdown-header{padding:16px 18px 12px;border-bottom:1px solid rgba(255,255,255,0.06)}
