@@ -11,18 +11,24 @@ if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='
 if(loggedIn){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ Add Girl';ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 function renderAvailNowBar(){
-const bar=document.getElementById('availNowBar');
+['availNowBar','rosterAvailBar'].forEach(id=>{
+const bar=document.getElementById(id);
 if(!bar)return;
+_renderAvailBar(bar)});
+}
+function _renderAvailBar(bar){
 const nowCount=getAvailableNowCount();
+const todayCount=getAvailableTodayCount();
+const weekDates=getWeekDates();
+const ts=weekDates[0];
+const futureDates=weekDates.slice(1).filter(ds=>girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end}));
+const anyVisible=nowCount||sharedFilters.availableNow||todayCount||sharedFilters.availableToday||futureDates.length||sharedFilters.availableDate;
 bar.innerHTML='';
-if(!nowCount&&!sharedFilters.availableNow){bar.style.display='none';return}
+if(!anyVisible){bar.style.display='none';return}
 bar.style.display='';
-const btn=document.createElement('button');
-btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');
-const countLabel=nowCount===1?'1 girl available now':nowCount+' girls available now';
-btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;
-btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;onFiltersChanged()};
-bar.appendChild(btn)}
+if(nowCount>0||sharedFilters.availableNow){const btn=document.createElement('button');btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');const countLabel=nowCount===1?'1 girl available now':nowCount+' girls available now';btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;if(sharedFilters.availableNow){sharedFilters.availableToday=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn)}
+if(todayCount>0||sharedFilters.availableToday){const btn2=document.createElement('button');btn2.className='avail-today-pill'+(sharedFilters.availableToday?' active':'');const countLabel2=todayCount===1?'1 girl available today':todayCount+' girls available today';btn2.innerHTML=`<span class="avail-today-dot"></span>${countLabel2}`;btn2.onclick=()=>{sharedFilters.availableToday=!sharedFilters.availableToday;if(sharedFilters.availableToday){sharedFilters.availableNow=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn2)}
+futureDates.forEach(ds=>{const f=dispDate(ds);const label=f.day+' '+f.date;const isActive=sharedFilters.availableDate===ds;const btn3=document.createElement('button');btn3.className='avail-date-pill'+(isActive?' active':'');btn3.textContent=label;btn3.onclick=()=>{sharedFilters.availableDate=isActive?null:ds;if(sharedFilters.availableDate){sharedFilters.availableNow=false;sharedFilters.availableToday=false}onFiltersChanged()};bar.appendChild(btn3)})}
 
 function applySortOrder(list){
 const dir=gridSortDir==='desc'?-1:1;
@@ -66,10 +72,8 @@ if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=av
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?'Today':f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
 
-/* Available Now quick-filter */
-const nowCount=getAvailableNowCount();
-if(nowCount>0){const sep2=document.createElement('div');sep2.className='filter-sep';fb.appendChild(sep2);
-const nb=document.createElement('button');nb.className='filter-btn avail-now-btn'+(sharedFilters.availableNow?' active':'');nb.innerHTML='<span class="avail-now-dot"></span>Now ('+nowCount+')';nb.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;renderRosterFilters();renderRosterGrid();renderGrid();renderFavoritesGrid();onFiltersChanged()};fb.appendChild(nb)}}
+/* Available Now / Today quick-filters */
+renderAvailNowBar()}
 function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';
 if(!rosterDateFilter){rg.innerHTML='<div class="empty-msg">No girls available this week</div>';return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
@@ -85,7 +89,7 @@ const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fm
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now${timeStr}</div>`:(isToday?`<div class="card-avail">Available Today${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`);
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
-el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg)})}
+el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='rosterPage';showProfile(ri)};return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg);renderAvailNowBar()})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
 /* Favorites Grid */
