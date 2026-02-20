@@ -783,17 +783,6 @@ if(g&&g.name){
 };
 })();
 
-/* ── Privacy opt-out button in footer ── */
-(function(){
-function _initOptBtn(){
-  const btn=document.getElementById('analyticsOptBtn');
-  if(!btn)return;
-  function update(){const out=VisitorLog.isOptedOut();btn.textContent=out?'Opted out (click to re-enable)':'Opt out of analytics';btn.style.opacity=out?'0.55':'1'}
-  update();
-  btn.onclick=function(){if(VisitorLog.isOptedOut()){VisitorLog.optIn()}else{VisitorLog.optOut()}update()};
-}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_initOptBtn)}else{_initOptBtn()}
-})();
 
 /* ── Nav link (injected after login/logout) ── */
 (function(){
