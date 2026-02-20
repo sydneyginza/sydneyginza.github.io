@@ -72,6 +72,8 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .sort-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 .sort-btn:hover{border-color:rgba(255,255,255,0.2);color:#fff}
 .sort-btn.active{background:rgba(180,74,255,0.08);border-color:rgba(180,74,255,0.3);color:var(--accent)}
+.sort-dir-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:var(--text-dim);width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));padding:0}
+.sort-dir-btn:hover{border-color:rgba(255,255,255,0.2);color:#fff}
 .girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
 .girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;transition:border-color .4s,box-shadow .4s;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));opacity:0;transform:translateY(20px);animation:none}
 .girl-card.card-enter{animation:cardEnter .5s cubic-bezier(0.23,1,0.32,1) forwards;animation-delay:calc(var(--card-index,0) * 60ms)}
@@ -418,19 +420,6 @@ address.home-summary a:hover{color:var(--accent)}
 .fab-wa:hover{background:#20bd5a;transform:scale(1.1)}
 .fab-line{background:#06c755;color:#fff;border:none}
 .fab-line:hover{background:#05b34c;transform:scale(1.1)}
-.testimonials-section{margin-bottom:60px;position:relative;overflow:hidden}
-.testimonial-carousel{position:relative;min-height:200px}
-.testimonial-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;opacity:0;transform:translateX(30px);transition:all .5s ease;pointer-events:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));max-width:640px;margin:0 auto}
-.testimonial-card.active{position:relative;opacity:1;transform:translateX(0);pointer-events:auto}
-.testimonial-card.exit-left{opacity:0;transform:translateX(-30px)}
-.testimonial-quote{color:var(--text-dim);font-size:17px;line-height:1.9;text-align:center;font-style:italic;margin-bottom:20px;max-width:560px;letter-spacing:.5px}
-.testimonial-quote::before{content:'\201C';font-family:'Orbitron',sans-serif;font-size:32px;color:var(--accent);display:block;margin-bottom:8px;line-height:1;opacity:.5}
-.testimonial-author{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#fff}
-.testimonial-meta{font-size:12px;color:var(--text-dim);letter-spacing:1.5px;margin-top:4px}
-.testimonial-dots{display:flex;justify-content:center;gap:8px;margin-top:20px}
-.testimonial-dot{width:8px;height:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 2px) 0,100% 2px,100% 100%,2px 100%,0 calc(100% - 2px));padding:0}
-.testimonial-dot.active{background:var(--accent);border-color:var(--accent)}
-.testimonial-dot:hover{border-color:var(--accent)}
 .home-cta{display:inline-block;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;padding:14px 40px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .home-cta:hover{background:rgba(180,74,255,0.25)}
 

@@ -1,7 +1,7 @@
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
 let deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,calPending={};
-let gridSort='name';
+let gridSort='name',gridSortDir='asc';
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 
@@ -496,7 +496,7 @@ if(ov)ov.onclick=e=>{if(e.target===ov)closeCompareModal()};
 document.addEventListener('keydown',e=>{if(ov&&ov.classList.contains('open')&&e.key==='Escape')closeCompareModal()})})();
 
 /* Profile Nav Rail */
-function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));return named.filter(x=>filtered.includes(x.g)).sort((a,b)=>a.g.name.trim().toLowerCase().localeCompare(b.g.name.trim().toLowerCase())).map(x=>x.i)}
+function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));const result=named.filter(x=>filtered.includes(x.g));const sorted=applySortOrder(result.map(x=>x.g));return sorted.map(g=>result.find(x=>x.g===g).i)}
 /* Navigate via nav rail — replaceState to avoid history bloat */
 function showProfileReplace(idx){const origPush=Router.push;Router.push=Router.replace;try{showProfile(idx)}finally{Router.push=origPush}}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
@@ -662,11 +662,6 @@ _filterBackdrop.onclick=closeFilterPanel;
 (function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','favoritesPage','calendarPage'];
 window.addEventListener('scroll',()=>{const active=targetPages.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});if(active&&window.scrollY>300)btn.classList.add('visible');else btn.classList.remove('visible')});
 btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
-
-/* ── Testimonials Carousel ── */
-(function(){let tIdx=0;const cards=document.querySelectorAll('#testimonialCarousel .testimonial-card');const dotsC=document.getElementById('testimonialDots');if(!cards.length||!dotsC)return;const total=cards.length;for(let i=0;i<total;i++){const dot=document.createElement('button');dot.className='testimonial-dot'+(i===0?' active':'');dot.onclick=()=>goTo(i);dotsC.appendChild(dot)}
-function goTo(idx){if(idx===tIdx)return;const prev=tIdx;cards[prev].classList.remove('active');cards[prev].classList.add('exit-left');setTimeout(()=>cards[prev].classList.remove('exit-left'),500);tIdx=idx;cards[tIdx].classList.add('active');dotsC.querySelectorAll('.testimonial-dot').forEach((d,i)=>d.classList.toggle('active',i===tIdx))}
-let timer=setInterval(()=>goTo((tIdx+1)%total),6000);const section=document.getElementById('testimonialsSection');if(section){section.addEventListener('mouseenter',()=>clearInterval(timer));section.addEventListener('mouseleave',()=>{timer=setInterval(()=>goTo((tIdx+1)%total),6000)})}})();
 
 /* ── FAB (Floating Contact Buttons) ── */
 (function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{toggle.classList.toggle('open');menu.classList.toggle('open')};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open')}})})();
