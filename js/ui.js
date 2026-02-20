@@ -15,7 +15,7 @@ function updateCompareBar(){const bar=document.getElementById('compareBar');if(!
 function updateCompareButtons(){document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare'})}
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false,availableToday:false};
+let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false,availableToday:false,availableDate:null};
 
 function applySharedFilters(list){
 let f=list;
@@ -38,6 +38,7 @@ if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.ever
 if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
 if(sharedFilters.availableNow)f=f.filter(g=>g.name&&isAvailableNow(g.name));
 if(sharedFilters.availableToday)f=f.filter(g=>g.name&&isAvailableToday(g.name));
+if(sharedFilters.availableDate){const ds=sharedFilters.availableDate;f=f.filter(g=>{const e=getCalEntry(g.name,ds);return !!(e&&e.start&&e.end)})}
 return f}
 
 function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length||sharedFilters.availableNow||sharedFilters.availableToday)}
