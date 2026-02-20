@@ -690,7 +690,8 @@ rates:[
 {key:'disclaimer',label:'Disclaimer',type:'textarea',rows:3}
 ],
 employment:[
-{key:'content',label:'Content',type:'textarea',rows:20,help:'Use ## at the start of a line for section headings. Separate paragraphs with blank lines.'}
+{key:'content',label:'Content',type:'textarea',rows:20,help:'Use ## at the start of a line for section headings. Separate paragraphs with blank lines.'},
+{key:'contacts',label:'Contacts',type:'textarea',rows:6,help:'One contact per line. Phone numbers (04xx or 02xx) and emails auto-link.'}
 ]
 };
 
@@ -711,6 +712,8 @@ if(rs){const h=rs.querySelector('h2');d.roomTitle=h?h.textContent:'';const ps=rs
 }else if(pageId==='employment'){
 const ec=document.getElementById('employContent');
 if(ec){const els=ec.querySelectorAll('h2,p.home-summary');d.content=Array.from(els).map(el=>el.tagName==='H2'?'## '+el.textContent:el.textContent).join('\n\n');}
+const ct=document.getElementById('employContacts');
+if(ct)d.contacts=ct.textContent.replace(/\s*\n\s*/g,'\n').trim();
 }
 return d;
 }
@@ -748,6 +751,12 @@ if(l.startsWith('## '))return '<h2 class="logo" style="margin-bottom:60px">'+l.s
 return '<p class="home-summary">'+l.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>';
 }).join('');
 }
+if(pd.contacts){const ct=document.getElementById('employContacts');if(ct){
+let h=pd.contacts.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>';});
+h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');
+ct.innerHTML=h.replace(/\n/g,'<br>');
+}}
 }
 }
 
