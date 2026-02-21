@@ -65,7 +65,7 @@ const minVal=sharedFilters[minKey]!=null?sharedFilters[minKey]:(r.rawMin!=null?r
 const maxVal=sharedFilters[maxKey]!=null?sharedFilters[maxKey]:(r.rawMax!=null?r.rawMax:'');
 const minAttr=r.rawMin!=null?` min="${r.rawMin}"`:'';
 const maxAttr=r.rawMax!=null?` max="${r.rawMax}"`:'';
-sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}"${minAttr}${maxAttr} value="${minVal}"><span class="fp-range-sep">to</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}"${minAttr}${maxAttr} value="${maxVal}"></div></div>`;
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}"${minAttr}${maxAttr} value="${minVal}"><span class="fp-range-sep">${t('fp.rangeSep')}</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}"${minAttr}${maxAttr} value="${maxVal}"></div></div>`;
 return sec}
 
 function renderFilterPane(containerId){
@@ -112,13 +112,13 @@ pane.appendChild(makeRangeSection(t('fp.bodySize'),'bodyMin','bodyMax','body'));
 
 /* Height */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Height (cm)','heightMin','heightMax','height'));
+pane.appendChild(makeRangeSection(t('fp.height'),'heightMin','heightMax','height'));
 
 /* Cup Size */
 if(cups.length){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Cup Size</div><div class="fp-options"></div>`;
+sec.innerHTML=`<div class="fp-title">${t('fp.cupSize')}</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 cups.forEach(c=>{
@@ -130,21 +130,21 @@ wrap.appendChild(btn)})}
 
 /* Rates 30 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 30 mins','val1Min','val1Max','val1','$'));
+pane.appendChild(makeRangeSection(t('fp.rates30'),'val1Min','val1Max','val1','$'));
 
 /* Rates 45 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 45 mins','val2Min','val2Max','val2','$'));
+pane.appendChild(makeRangeSection(t('fp.rates45'),'val2Min','val2Max','val2','$'));
 
 /* Rates 60 mins */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Rates 60 mins','val3Min','val3Max','val3','$'));
+pane.appendChild(makeRangeSection(t('fp.rates60'),'val3Min','val3Max','val3','$'));
 
 /* Experience */
 if(exps.length){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Experience</div><div class="fp-options"></div>`;
+sec.innerHTML=`<div class="fp-title">${t('fp.experience')}</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 exps.forEach(e=>{
@@ -158,7 +158,7 @@ wrap.appendChild(btn)})}
 if(labels.length){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Labels</div><div class="fp-options"></div>`;
+sec.innerHTML=`<div class="fp-title">${t('fp.labels')}</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 labels.forEach(l=>{
@@ -172,7 +172,7 @@ wrap.appendChild(btn)})}
 /* Clear */
 if(hasActiveFilters()){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-const clr=document.createElement('button');clr.className='fp-clear';clr.textContent='Clear All Filters';
+const clr=document.createElement('button');clr.className='fp-clear';clr.textContent=t('fp.clearAll');
 clr.onclick=()=>{clearAllFilters();onFiltersChanged()};
 pane.appendChild(clr)}
 
@@ -203,7 +203,7 @@ bar.innerHTML='';
 if(!chips.length){bar.style.display='none';return}
 bar.style.display='flex';
 chips.forEach(c=>{const ch=document.createElement('button');ch.className='active-filter-chip';ch.innerHTML=c.label+' <span class="chip-x">×</span>';ch.onclick=c.rm;bar.appendChild(ch)});
-const clr=document.createElement('button');clr.className='active-filter-chip chip-clear-all';clr.textContent='Clear all';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};bar.appendChild(clr);
+const clr=document.createElement('button');clr.className='active-filter-chip chip-clear-all';clr.textContent=t('fp.clearAll');clr.onclick=()=>{clearAllFilters();onFiltersChanged()};bar.appendChild(clr);
 }
 function onFiltersChanged(){
 const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
@@ -589,11 +589,11 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
-<div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" style="margin-bottom:24px">${g.special||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" style="margin-bottom:24px">${g.type||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc">${g.desc}</div>
-${g.labels&&g.labels.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${g.labels.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''}${admin}</div></div>`;
+<div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.specialJa)||g.special||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.langJa)||g.lang||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.typeJa)||g.type||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc">${(siteLanguage==='ja'&&g.descJa)||g.desc}</div>
+${(()=>{const lbls=siteLanguage==='ja'?(g.labelsJa&&g.labelsJa.length?g.labelsJa:g.labels||[]):(g.labels||[]);return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
@@ -756,7 +756,7 @@ return d;
 function renderPageContent(pageId){
 const pd=pageData[pageId];if(!pd)return;
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;}}
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=(siteLanguage==='ja'&&pd.announcementJa)?pd.announcementJa:pd.announcement;}}
 const wel=document.getElementById('homeWelcomeEn');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';
@@ -778,7 +778,7 @@ if(pd.disclaimer)h+='<p class="home-summary">'+pd.disclaimer.replace(/</g,'&lt;'
 rs.innerHTML=h;
 }
 }else if(pageId==='employment'){
-const ec=document.getElementById('employContent');
+const ec=document.getElementById('employContentEn');
 if(ec&&pd.content){
 const lines=pd.content.split('\n\n');
 ec.innerHTML=lines.map(l=>{
