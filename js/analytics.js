@@ -516,13 +516,13 @@ function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getM
 
 async function renderVisitorAnalytics(container){
 /* ── Period selector ── */
-const periods=[{d:1,l:'Today'},{d:7,l:'7 Days'},{d:14,l:'14 Days'},{d:30,l:'30 Days'},{d:90,l:'90 Days'}];
+const periods=[{d:1,l:t('ui.today')},{d:7,l:'7'+t('an.days')},{d:14,l:'14'+t('an.days')},{d:30,l:'30'+t('an.days')},{d:90,l:'90'+t('an.days')}];
 let periodHtml='<div class="an-period">';
 periods.forEach(p=>{periodHtml+=`<button class="an-period-btn${analyticsPeriod===p.d?' active':''}" data-days="${p.d}">${p.l}</button>`});
 periodHtml+='</div>';
 
 /* Show loading state first */
-container.innerHTML=periodHtml+'<div class="an-loading"><div class="an-loading-spinner"></div><div class="an-loading-text">Loading visitor logs from GitHub...</div></div>';
+container.innerHTML=periodHtml+'<div class="an-loading"><div class="an-loading-spinner"></div><div class="an-loading-text">'+t('an.loading')+'</div></div>';
 container.querySelectorAll('.an-period-btn').forEach(btn=>{
 btn.onclick=()=>{analyticsPeriod=parseInt(btn.dataset.days);cachedVisitorData=null;renderAnalytics()}
 });
@@ -553,16 +553,16 @@ const activeDays=Object.keys(v.daily).length;
 const avgDaily=activeDays>0?Math.round(v.totalHits/activeDays):0;
 const avgUniqueDaily=activeDays>0?Math.round(v.uniqueVisitors/activeDays):0;
 const summaryHtml=`<div class="an-summary">
-<div class="an-card"><div class="an-card-val">${v.uniqueVisitors}</div><div class="an-card-label">Unique Visitors</div></div>
-<div class="an-card"><div class="an-card-val">${v.totalHits}</div><div class="an-card-label">Sessions</div></div>
-<div class="an-card"><div class="an-card-val">${v.totalPageViews}</div><div class="an-card-label">Total Page Views</div></div>
-<div class="an-card"><div class="an-card-val">${v.totalProfileViews}</div><div class="an-card-label">Total Profile Views</div></div>
+<div class="an-card"><div class="an-card-val">${v.uniqueVisitors}</div><div class="an-card-label">${t('an.uniqueVisitors')}</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalHits}</div><div class="an-card-label">${t('an.sessions')}</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalPageViews}</div><div class="an-card-label">${t('an.totalPageViews')}</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalProfileViews}</div><div class="an-card-label">${t('an.totalProfileViews')}</div></div>
 </div>`;
 
 /* ── Top 5 Profiles ── */
 const top5PF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,5);
 const rankLabels=['#1','#2','#3','#4','#5'];
-let top5Html='<div class="an-section"><div class="an-section-title">Top Profiles <span class="an-hint">(most viewed this period)</span></div><div class="an-top5">';
+let top5Html=`<div class="an-section"><div class="an-section-title">${t('an.topProfiles')} <span class="an-hint">${t('an.topHint')}</span></div><div class="an-top5">`;
 for(let ri=0;ri<5;ri++){
   const rankClass='an-rank-'+(ri+1);
   if(ri<top5PF.length){
@@ -572,7 +572,7 @@ for(let ri=0;ri<5;ri++){
     const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-top5-photo" src="${girl.photos[0]}" alt="${name.replace(/"/g,'&quot;')}">`:'<div class="an-top5-photo-empty"></div>';
     const liveNow=girl&&typeof isAvailableNow==='function'&&isAvailableNow(girl.name);
     const availDot=liveNow?'<span class="avail-now-dot" title="Available now" style="display:inline-block;margin-left:4px"></span>':'';
-    top5Html+=`<div class="an-top5-card"><div class="an-top5-rank ${rankClass}">${rankLabels[ri]}</div>${thumb}<div class="an-top5-name">${name}${availDot}</div><span class="an-top5-total">${total}</span><div class="an-top5-unique">${unique} unique</div></div>`;
+    top5Html+=`<div class="an-top5-card"><div class="an-top5-rank ${rankClass}">${rankLabels[ri]}</div>${thumb}<div class="an-top5-name">${name}${availDot}</div><span class="an-top5-total">${total}</span><div class="an-top5-unique">${t('an.uniqueCount').replace('{n}',unique)}</div></div>`;
   }else{
     top5Html+=`<div class="an-top5-card"><div class="an-top5-rank ${rankClass}">${rankLabels[ri]}</div><div class="an-top5-photo-empty"></div><div class="an-top5-empty">—</div></div>`;
   }
@@ -582,7 +582,7 @@ top5Html+='</div></div>';
 /* ── Daily Visitors Trend (hits + uniques) ── */
 const sortedDays=Object.entries(v.daily).sort((a,b)=>a[0].localeCompare(b[0]));
 const maxDayVal=Math.max(...sortedDays.map(d=>d[1]),1);
-let trendHtml='<div class="an-section"><div class="an-section-title">Daily Visitors <span class="an-hint">(hits vs uniques)</span></div><div class="an-trend an-trend-dual">';
+let trendHtml=`<div class="an-section"><div class="an-section-title">${t('an.dailyVisitors')} <span class="an-hint">${t('an.dailyHint')}</span></div><div class="an-trend an-trend-dual">`;
 sortedDays.forEach(([date,count])=>{
   const uniques=v.dailyUniqueCounts[date]||0;
   const pctH=count/maxDayVal*100;
@@ -594,41 +594,41 @@ sortedDays.forEach(([date,count])=>{
     <div class="an-trend-label">${dd}</div>
   </div>`;
 });
-if(!sortedDays.length)trendHtml+='<div class="an-empty">No visitor logs found for this period</div>';
+if(!sortedDays.length)trendHtml+='<div class="an-empty">'+t('an.noLogs')+'</div>';
 trendHtml+='</div>';
-if(sortedDays.length)trendHtml+='<div class="an-legend"><span class="an-legend-dot an-legend-hits"></span> Hits <span class="an-legend-dot an-legend-uniques"></span> Uniques</div>';
+if(sortedDays.length)trendHtml+=`<div class="an-legend"><span class="an-legend-dot an-legend-hits"></span> ${t('an.legendHits')} <span class="an-legend-dot an-legend-uniques"></span> ${t('an.legendUniques')}</div>`;
 trendHtml+='</div>';
 
 /* ── Peak Hours Heatmap (day-of-week × hour) ── */
-const _dowLabels=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const _dowLabels=[t('date.sun'),t('date.mon'),t('date.tue'),t('date.wed'),t('date.thu'),t('date.fri'),t('date.sat')];
 const _h12=h=>h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
 const _hmMax=Math.max(...byDOWHour.flat(),1);
-let hoursHtml='<div class="an-section"><div class="an-section-title">Peak Hours Heatmap <span class="an-hint">(AEDT, day × hour)</span></div><div class="an-heatmap-wrap"><div class="an-heatmap-inner">';
+let hoursHtml=`<div class="an-section"><div class="an-section-title">${t('an.peakHours')} <span class="an-hint">${t('an.peakHint')}</span></div><div class="an-heatmap-wrap"><div class="an-heatmap-inner">`;
 hoursHtml+='<div class="an-heatmap-dow"></div>';
 for(let h=0;h<24;h++)hoursHtml+=`<div class="an-heatmap-hr">${h%3===0?_h12(h):''}</div>`;
 for(let dow=0;dow<7;dow++){
   hoursHtml+=`<div class="an-heatmap-dow">${_dowLabels[dow]}</div>`;
-  for(let h=0;h<24;h++){const val=byDOWHour[dow][h];const op=val===0?0.05:Math.max(0.12,val/_hmMax);hoursHtml+=`<div class="an-heatmap-cell" style="opacity:${op.toFixed(2)}" title="${_dowLabels[dow]} ${_h12(h)}: ${val} visit${val!==1?'s':''}"></div>`}
+  for(let h=0;h<24;h++){const val=byDOWHour[dow][h];const op=val===0?0.05:Math.max(0.12,val/_hmMax);hoursHtml+=`<div class="an-heatmap-cell" style="opacity:${op.toFixed(2)}" title="${_dowLabels[dow]} ${_h12(h)}: ${t('an.visitCount').replace('{n}',val)}"></div>`}
 }
 hoursHtml+='</div></div></div>';
 
 /* ── Page Views (unique + total) ── */
 const sortedPV=Object.entries(v.pageViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
 const maxPV=sortedPV.length?sortedPV[0][1]:1;
-let pvHtml='<div class="an-section"><div class="an-section-title">Page Views <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let pvHtml=`<div class="an-section"><div class="an-section-title">${t('an.pageViews')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedPV.forEach(([page,total])=>{
   const unique=v.pageViewsUniqueCounts[page]||0;
   const pct=total/maxPV*100;
   const label=page==='/'?'Home':page.replace(/^\//,'').replace(/\//g,' › ');
   pvHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${page}">${label}</div><div class="an-bar-track"><div class="an-bar-fill" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedPV.length)pvHtml+='<div class="an-empty">No page views recorded yet</div>';
+if(!sortedPV.length)pvHtml+='<div class="an-empty">'+t('an.noPV')+'</div>';
 pvHtml+='</div></div>';
 
 /* ── Most Viewed Profiles (unique + total + thumbnail + availability) ── */
 const sortedPF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
 const maxPF=sortedPF.length?sortedPF[0][1]:1;
-let pfHtml='<div class="an-section"><div class="an-section-title">Most Viewed Profiles <span class="an-hint">(total / unique)</span></div><div class="an-bars">';
+let pfHtml=`<div class="an-section"><div class="an-section-title">${t('an.mostProfiles')} <span class="an-hint">${t('an.pfHint')}</span></div><div class="an-bars">`;
 sortedPF.forEach(([name,total],i)=>{
   const unique=v.profileViewsUniqueCounts[name]||0;
   const pct=total/maxPF*100;
@@ -639,80 +639,80 @@ sortedPF.forEach(([name,total],i)=>{
   const availDot=liveNow?'<span class="avail-now-dot" title="Available now"></span>':'';
   pfHtml+=`<div class="an-bar-row"><div class="an-bar-label an-bar-label-profile">${thumb}<span>${medal} ${name}</span>${availDot}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedPF.length)pfHtml+='<div class="an-empty">No profile views recorded yet</div>';
+if(!sortedPF.length)pfHtml+='<div class="an-empty">'+t('an.noPF')+'</div>';
 pfHtml+='</div></div>';
 
 /* ── Browsers ── */
 const sortedBrowsers=Object.entries(v.browsers).sort((a,b)=>b[1]-a[1]);
 const maxBr=sortedBrowsers.length?sortedBrowsers[0][1]:1;
-let browsersHtml='<div class="an-section"><div class="an-section-title">Browsers <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let browsersHtml=`<div class="an-section"><div class="an-section-title">${t('an.browsers')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedBrowsers.forEach(([name,count])=>{
   const unique=v.browsersUniqueCounts[name]||0;
   const pct=count/maxBr*100;
   browsersHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-visitor" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedBrowsers.length)browsersHtml+='<div class="an-empty">No data</div>';
+if(!sortedBrowsers.length)browsersHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 browsersHtml+='</div></div>';
 
 /* ── Operating Systems ── */
 const sortedOS=Object.entries(v.oses).sort((a,b)=>b[1]-a[1]);
 const maxOS=sortedOS.length?sortedOS[0][1]:1;
-let osHtml='<div class="an-section"><div class="an-section-title">Operating Systems <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let osHtml=`<div class="an-section"><div class="an-section-title">${t('an.os')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedOS.forEach(([name,count])=>{
   const unique=v.osesUniqueCounts[name]||0;
   const pct=count/maxOS*100;
   osHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-os" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedOS.length)osHtml+='<div class="an-empty">No data</div>';
+if(!sortedOS.length)osHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 osHtml+='</div></div>';
 
 /* ── Devices ── */
 const sortedDev=Object.entries(v.devices).sort((a,b)=>b[1]-a[1]);
 const maxDev=sortedDev.length?sortedDev[0][1]:1;
-let devHtml='<div class="an-section"><div class="an-section-title">Devices <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let devHtml=`<div class="an-section"><div class="an-section-title">${t('an.devices')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedDev.forEach(([name,count])=>{
   const unique=v.devicesUniqueCounts[name]||0;
   const pct=count/maxDev*100;
   devHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-device" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedDev.length)devHtml+='<div class="an-empty">No data</div>';
+if(!sortedDev.length)devHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 devHtml+='</div></div>';
 
 /* ── Languages ── */
 const sortedLangs=Object.entries(v.languages).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxLang=sortedLangs.length?sortedLangs[0][1]:1;
-let langHtml='<div class="an-section"><div class="an-section-title">Languages <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let langHtml=`<div class="an-section"><div class="an-section-title">${t('an.languages')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedLangs.forEach(([name,count])=>{
   const unique=v.languagesUniqueCounts[name]||0;
   const pct=count/maxLang*100;
   langHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-lang" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedLangs.length)langHtml+='<div class="an-empty">No data</div>';
+if(!sortedLangs.length)langHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 langHtml+='</div></div>';
 
 /* ── Timezones ── */
 const sortedTZ=Object.entries(v.timezones).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxTZ=sortedTZ.length?sortedTZ[0][1]:1;
-let tzHtml='<div class="an-section"><div class="an-section-title">Timezones <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let tzHtml=`<div class="an-section"><div class="an-section-title">${t('an.timezones')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedTZ.forEach(([name,count])=>{
   const unique=v.timezonesUniqueCounts[name]||0;
   const pct=count/maxTZ*100;
   const shortName=name.replace('Australia/','AU/').replace('America/','US/').replace('Europe/','EU/').replace('Asia/','AS/');
   tzHtml+=`<div class="an-bar-row"><div class="an-bar-label" title="${name}">${shortName}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-tz" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedTZ.length)tzHtml+='<div class="an-empty">No data</div>';
+if(!sortedTZ.length)tzHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 tzHtml+='</div></div>';
 
 /* ── Referrers ── */
 const sortedRefs=Object.entries(v.referrers).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxRef=sortedRefs.length?sortedRefs[0][1]:1;
-let refsHtml='<div class="an-section"><div class="an-section-title">Referrers <span class="an-hint">(total / unique visitors)</span></div><div class="an-bars">';
+let refsHtml=`<div class="an-section"><div class="an-section-title">${t('an.referrers')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
 sortedRefs.forEach(([name,count])=>{
   const unique=v.referrersUniqueCounts[name]||0;
   const pct=count/maxRef*100;
   refsHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-ref" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedRefs.length)refsHtml+='<div class="an-empty">No data</div>';
+if(!sortedRefs.length)refsHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 refsHtml+='</div></div>';
 
 /* ── Recent Unique Visitors Table (one row per UUID per day) ── */
@@ -735,11 +735,12 @@ for(let i=allSessions.length-1;i>=0;i--){
   }
   if(uniqueDayVisitors.length>=20)break;
 }
-let tableHtml='<div class="an-section"><div class="an-section-title">Recent Unique Visitors <span class="an-hint">(last 20, per day)</span></div>';
+let tableHtml=`<div class="an-section"><div class="an-section-title">${t('an.recentVisitors')} <span class="an-hint">${t('an.recentHint')}</span></div>`;
 if(uniqueDayVisitors.length){
-  tableHtml+='<div class="an-table-wrap"><table class="an-table"><thead><tr><th>Date</th><th>UUID</th><th>Browser</th><th>OS</th><th>Device</th><th>Lang</th><th>Timezone</th></tr></thead><tbody>';
+  tableHtml+=`<div class="an-table-wrap"><table class="an-table"><thead><tr><th>${t('an.tableDate')}</th><th>UUID</th><th>${t('an.tableBrowser')}</th><th>${t('an.tableOS')}</th><th>${t('an.tableDevice')}</th><th>${t('an.tableLang')}</th><th>${t('an.tableTZ')}</th></tr></thead><tbody>`;
   uniqueDayVisitors.forEach(e=>{
-    const dateStr=e._day!=='unknown'?(function(d){const dt=new Date(d+'T00:00:00');return dt.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()]})(e._day):'—';
+    const _mths=[t('date.jan'),t('date.feb'),t('date.mar'),t('date.apr'),t('date.may'),t('date.jun'),t('date.jul'),t('date.aug'),t('date.sep'),t('date.oct'),t('date.nov'),t('date.dec')];
+    const dateStr=e._day!=='unknown'?(function(d){const dt=new Date(d+'T00:00:00');return dt.getDate()+' '+_mths[dt.getMonth()]})(e._day):'—';
     const uuid=(e.uuid||'—').slice(0,12);
     const br=e.browser||'—';
     const os=e.os||'—';
@@ -750,14 +751,14 @@ if(uniqueDayVisitors.length){
   });
   tableHtml+='</tbody></table></div>';
 }else{
-  tableHtml+='<div class="an-empty">No visitor logs found for this period</div>';
+  tableHtml+='<div class="an-empty">'+t('an.noLogs')+'</div>';
 }
 tableHtml+='</div>';
 
 /* ── Actions ── */
 const actionsHtml=`<div class="an-actions">
-<button class="an-action-btn" id="anExportVisitors">Export Visitor Logs</button>
-<button class="an-action-btn" id="anRefreshVisitors">Refresh</button>
+<button class="an-action-btn" id="anExportVisitors">${t('an.export')}</button>
+<button class="an-action-btn" id="anRefreshVisitors">${t('an.refresh')}</button>
 </div>`;
 
 container.innerHTML=periodHtml+summaryHtml+top5Html+trendHtml+hoursHtml
@@ -777,7 +778,7 @@ document.getElementById('anExportVisitors').onclick=()=>{
   const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='ginza-visitors-'+_todayStr()+'.json';a.click();URL.revokeObjectURL(url);
-  showToast('Visitor logs exported');
+  showToast(t('an.exported'));
 };
 document.getElementById('anRefreshVisitors').onclick=()=>{
   cachedVisitorData=null;renderAnalytics();

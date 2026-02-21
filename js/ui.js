@@ -712,6 +712,7 @@ let peCurrentPage=null;
 const PAGE_FIELDS={
 home:[
 {key:'announcement',label:'Announcement',type:'textarea',rows:2},
+{key:'announcementJa',label:'Announcement (JP)',type:'textarea',rows:2},
 {key:'welcomeTitle',label:'Welcome Heading',type:'text'},
 {key:'welcomeBody',label:'Welcome Body',type:'textarea',rows:8,help:'Separate paragraphs with blank lines.'},
 {key:'location',label:'Location',type:'textarea',rows:2,help:'Use line breaks for multiple lines.'},
@@ -726,7 +727,8 @@ rates:[
 ],
 employment:[
 {key:'content',label:'Content',type:'textarea',rows:20,help:'Use ## at the start of a line for section headings. Separate paragraphs with blank lines.'},
-{key:'contacts',label:'Contacts',type:'textarea',rows:6,help:'One contact per line. Phone numbers (04xx or 02xx) and emails auto-link.'}
+{key:'contacts',label:'Contacts',type:'textarea',rows:6,help:'One contact per line. Phone numbers (04xx or 02xx) and emails auto-link.'},
+{key:'contactsJa',label:'Contacts (JP)',type:'textarea',rows:6,help:'Optional Japanese version. One contact per line. Phone numbers and emails auto-link.'}
 ]
 };
 
@@ -786,8 +788,9 @@ if(l.startsWith('## '))return '<h2 class="logo" style="margin-bottom:60px">'+l.s
 return '<p class="home-summary">'+l.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>';
 }).join('');
 }
-if(pd.contacts){const ct=document.getElementById('employContacts');if(ct){
-let h=pd.contacts.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const _contactsSrc=(siteLanguage==='ja'&&pd.contactsJa)||pd.contacts;
+if(_contactsSrc){const ct=document.getElementById('employContacts');if(ct){
+let h=_contactsSrc.replace(/&/g,'&amp;').replace(/</g,'&lt;');
 h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>';});
 h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');
 ct.innerHTML=h.replace(/\n/g,'<br>');

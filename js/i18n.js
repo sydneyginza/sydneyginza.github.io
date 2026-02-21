@@ -69,6 +69,19 @@ const LANG_DICT = {
     'fp.experience':'Experience','fp.labels':'Labels','fp.clearAll':'Clear All Filters','fp.rangeSep':'to',
     /* Calendar */
     'cal.profile':'Profile','cal.allWeek':'All Week','cal.clear':'Clear',
+    /* Analytics */
+    'an.days':' Days','an.loading':'Loading visitor data...','an.uniqueVisitors':'Unique Visitors','an.sessions':'Sessions','an.totalPageViews':'Total Page Views','an.totalProfileViews':'Total Profile Views',
+    'an.topProfiles':'Top Profiles','an.topHint':'(most viewed this period)','an.uniqueCount':'{n} unique',
+    'an.dailyVisitors':'Daily Visitors','an.dailyHint':'(hits vs uniques)','an.noLogs':'No visitor logs found for this period',
+    'an.legendHits':'Hits','an.legendUniques':'Uniques',
+    'an.peakHours':'Peak Hours Heatmap','an.peakHint':'(AEDT, day × hour)','an.visitCount':'{n} visits',
+    'an.pageViews':'Page Views','an.pvHint':'(total / unique visitors)','an.noPV':'No page views recorded yet',
+    'an.mostProfiles':'Most Viewed Profiles','an.pfHint':'(total / unique)','an.noPF':'No profile views recorded yet',
+    'an.browsers':'Browsers','an.os':'Operating Systems','an.devices':'Devices',
+    'an.languages':'Languages','an.timezones':'Timezones','an.referrers':'Referrers','an.noData':'No data',
+    'an.recentVisitors':'Recent Unique Visitors','an.recentHint':'(last 20, per day)',
+    'an.tableDate':'Date','an.tableBrowser':'Browser','an.tableOS':'OS','an.tableDevice':'Device','an.tableLang':'Lang','an.tableTZ':'Timezone',
+    'an.export':'Export Visitor Logs','an.refresh':'Refresh','an.exported':'Visitor logs exported',
   },
   ja: {
     /* Navigation */
@@ -138,6 +151,19 @@ const LANG_DICT = {
     'fp.experience':'経験','fp.labels':'ラベル','fp.clearAll':'フィルターをすべて解除','fp.rangeSep':'〜',
     /* Calendar */
     'cal.profile':'女の子','cal.allWeek':'全日','cal.clear':'クリア',
+    /* Analytics */
+    'an.days':'日間','an.loading':'訪問者データを読み込み中...','an.uniqueVisitors':'ユニーク訪問者','an.sessions':'セッション','an.totalPageViews':'総ページビュー','an.totalProfileViews':'総プロフィールビュー',
+    'an.topProfiles':'人気プロフィール','an.topHint':'（期間内最多閲覧）','an.uniqueCount':'{n}件ユニーク',
+    'an.dailyVisitors':'日別訪問者','an.dailyHint':'（ヒット数 vs ユニーク数）','an.noLogs':'この期間の訪問者ログがありません',
+    'an.legendHits':'ヒット数','an.legendUniques':'ユニーク数',
+    'an.peakHours':'ピーク時間帯ヒートマップ','an.peakHint':'（AEDT、曜日×時間）','an.visitCount':'{n}回',
+    'an.pageViews':'ページビュー','an.pvHint':'（合計 / ユニーク）','an.noPV':'ページビューの記録がありません',
+    'an.mostProfiles':'最多閲覧プロフィール','an.pfHint':'（合計 / ユニーク）','an.noPF':'プロフィールビューの記録がありません',
+    'an.browsers':'ブラウザ','an.os':'OS','an.devices':'デバイス',
+    'an.languages':'言語','an.timezones':'タイムゾーン','an.referrers':'リファラー','an.noData':'データなし',
+    'an.recentVisitors':'最近のユニーク訪問者','an.recentHint':'（直近20件、日別）',
+    'an.tableDate':'日付','an.tableBrowser':'ブラウザ','an.tableOS':'OS','an.tableDevice':'デバイス','an.tableLang':'言語','an.tableTZ':'タイムゾーン',
+    'an.export':'訪問者ログをエクスポート','an.refresh':'更新','an.exported':'ログをエクスポートしました',
   }
 };
 
@@ -162,7 +188,7 @@ function setLang(lang) {
   if (profPage && profPage.classList.contains('active') && typeof currentProfileIdx !== 'undefined' && currentProfileIdx >= 0) {
     if (typeof showProfile === 'function') showProfile(currentProfileIdx);
   }
-  if (typeof renderPageContent === 'function') { renderPageContent('home'); renderPageContent('rates'); }
+  if (typeof renderPageContent === 'function') { renderPageContent('home'); renderPageContent('rates'); renderPageContent('employment'); }
   if (typeof renderValueTable === 'function') renderValueTable();
   if (typeof renderFilterPane === 'function') {
     renderFilterPane('girlsFilterPane');renderFilterPane('rosterFilterPane');
@@ -170,6 +196,8 @@ function setLang(lang) {
   }
   const _calP=document.getElementById('calendarPage');
   if (_calP&&_calP.classList.contains('active')&&typeof renderCalendar==='function') renderCalendar();
+  const _anP=document.getElementById('analyticsPage');
+  if (_anP&&_anP.classList.contains('active')&&typeof renderAnalytics==='function') renderAnalytics();
 }
 
 function applyLang() {
