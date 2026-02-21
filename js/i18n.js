@@ -93,6 +93,37 @@ const LANG_DICT = {
     'an.recentVisitors':'Recent Unique Visitors','an.recentHint':'(last 20, per day)',
     'an.tableDate':'Date','an.tableBrowser':'Browser','an.tableOS':'OS','an.tableDevice':'Device','an.tableLang':'Lang','an.tableTZ':'Timezone',
     'an.export':'Export Visitor Logs','an.refresh':'Refresh','an.exported':'Visitor logs exported',
+    /* Home welcome article */
+    'home.welcomeTitle':"Welcome to Sydney's Premier Asian Bordello",
+    'home.welcomeP1':'Our approved venue has been fully renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or more. Each room has a private shower, climate control, and audio-visual setup, plus its own unique theme.',
+    'home.welcomeP2':"Ginza Empire's main attraction are the gorgeous ladies whose sole aim is to please. We feature beauties from Japan, Korea, Thailand, China, Singapore, and Malaysia. Headlining our offering is Sydney's most desirable collection of genuine Japanese girls, providing the ultimate GFE and PSE experience.",
+    'home.welcomeP3':'Nowhere in Sydney \u2014 or perhaps the world \u2014 will you find such luxurious, comfortable, and spotlessly clean rooms, staffed by ladies of this calibre, at such competitive prices.',
+    /* Home location & hours */
+    'home.locationHtml':'310 Cleveland St Surry Hills NSW 2010<br>(back entrance from goodlet lane)',
+    'home.hoursText':'Monday to Sunday open from 10:30am till 1am.',
+    /* Rates page */
+    'rates.intro':'Below are the indicative rates charged by the ladies for providing you with their full adult service (inclusive of our flat room hire rates charged by us to the ladies). However, you must negotiate the lady\u2019s payment directly with her. The guide below were provided by the ladies.',
+    'rates.legal':'We are a legal Sydney Brothel and safe sex practices must be adhered to. For our service of providing superior private rooms and facilities, we charge the ladies (service providers) a flat room hiring rate as below:',
+    'rates.roomTitle':'Room Hire Rates',
+    'rates.room30':'30 Minutes $30','rates.room45':'45 Minutes $45','rates.room60':'60 Minutes $60',
+    'rates.roomOver':'Over 60 Minutes Negotiable',
+    'rates.disclaimer':'All our ladies are INDEPENDENT service providers, they will charge you according to the level of services they provide to you. All services that you would like should be discussed directly with them.',
+    /* Employment page */
+    'emp.jobTitle':'GINZA EMPIRE \u2014 JOB OPPORTUNITIES',
+    'emp.tagline':'Earn $1,500\u20133,000+ per shift in a safe, clean, and professional environment. All nationalities welcome \u2014 no experience necessary.',
+    'emp.h2Env':'\u2460 Store Environment & Clientele',
+    'emp.p1Env':'Our venue is fully licensed and recently renovated to the highest standard. Each room has its own private en-suite, climate control, and AV system. A professional cleaning team attends weekly \u2014 our environment is always spotless.',
+    'emp.p2Env':'Our clients are well-mannered, affluent professionals \u2014 primarily Asian businessmen and corporate guests. We are selective about who we accept; your safety and comfort come first. No rough clients, ever.',
+    'emp.p3Env':'No English required. No prior experience required. Your privacy is 100% guaranteed.',
+    'emp.h2Work':'\u2461 Work Conditions',
+    'emp.p1Work':'Choose your own hours \u2014 work as many or as few days as you like. Short-term and long-term arrangements both welcome. Shifts can be as short as 5\u20136 hours.',
+    'emp.p2Work':'Each girl has her own private room. You will not cross paths with other girls. Your work is completely confidential \u2014 no one will find out.',
+    'emp.p3Work':'Pay is cash in hand after every shift. AV/talent/model experience earns premium rates: $300\u20131,000+ per hour. With 5\u20136 hours a day, 4 days a week, top earners take home $16,000+ per week.',
+    'emp.h2Health':'\u2462 Health & Safety',
+    'emp.p1Health':'Safe sex practices are mandatory. Regular free health checks are available at a nearby clinic \u2014 all girls attend routinely. Days off for personal reasons are always accommodated. Your wellbeing is our priority.',
+    'emp.p2Health':"A trial shift is available \u2014 same pay, no obligations. If it's not for you, you can walk away at any time.",
+    'emp.h2Contact':'Contact Us',
+    'emp.p1Contact':'Reach out on any of the platforms below. All enquiries are 100% confidential.',
   }
 };
 
@@ -110,6 +141,10 @@ function applyLang() {
   /* Placeholder text via data-i18n-ph */
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
     var k = el.dataset.i18nPh; if (k) el.placeholder = t(k);
+  });
+  /* HTML content via data-i18n-html (for elements containing markup like <br>) */
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+    var k = el.dataset.i18nHtml; if (k) el.innerHTML = t(k);
   });
   document.documentElement.lang = 'en';
 }
