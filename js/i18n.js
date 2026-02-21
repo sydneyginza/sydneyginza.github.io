@@ -2,6 +2,9 @@
 
 const LANG_DICT = {
   en: {
+    /* Section titles */
+    'page.roster':'Roster','page.girls':'Girls','page.rates':'Rates',
+    'page.employment':'Employment','page.favorites':'Favorites',
     /* Navigation */
     'nav.home':'Home','nav.roster':'Roster','nav.girls':'Girls','nav.favorites':'Favorites',
     'nav.rates':'Rates','nav.employment':'Employment',
@@ -12,9 +15,12 @@ const LANG_DICT = {
     'home.announcement':'Announcement','home.newGirls':'New Girls',
     'home.location':'Location','home.hours':'Hours',
     'home.announceDefault':"Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.",
-    /* Section titles */
-    'page.roster':'Roster','page.girls':'Girls','page.rates':'Rates',
-    'page.employment':'Employment','page.favorites':'Favorites',
+    'home.welcomeTitle':"Welcome to Sydney's Premier Asian Bordello",
+    'home.welcomeP1':'Our approved venue has been fully renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or more. Each room has a private shower, climate control, and audio-visual setup, plus its own unique theme.',
+    'home.welcomeP2':"Ginza Empire's main attraction are the gorgeous ladies whose sole aim is to please. We feature beauties from Japan, Korea, Thailand, China, Singapore, and Malaysia. Headlining our offering is Sydney's most desirable collection of genuine Japanese girls, providing the ultimate GFE and PSE experience.",
+    'home.welcomeP3':'Nowhere in Sydney \u2014 or perhaps the world \u2014 will you find such luxurious, comfortable, and spotlessly clean rooms, staffed by ladies of this calibre, at such competitive prices.',
+    'home.locationHtml':'310 Cleveland St Surry Hills NSW 2010<br>(back entrance from goodlet lane)',
+    'home.hoursText':'Monday to Sunday open from 10:30am till 1am.',
     /* Profile field labels */
     'field.age':'Age','field.body':'Body Size','field.height':'Height','field.cup':'Cup Size',
     'field.rates30':'Rates 30 mins','field.rates45':'Rates 45 mins','field.rates60':'Rates 60 mins',
@@ -93,14 +99,6 @@ const LANG_DICT = {
     'an.recentVisitors':'Recent Unique Visitors','an.recentHint':'(last 20, per day)',
     'an.tableDate':'Date','an.tableBrowser':'Browser','an.tableOS':'OS','an.tableDevice':'Device','an.tableLang':'Lang','an.tableTZ':'Timezone',
     'an.export':'Export Visitor Logs','an.refresh':'Refresh','an.exported':'Visitor logs exported',
-    /* Home welcome article */
-    'home.welcomeTitle':"Welcome to Sydney's Premier Asian Bordello",
-    'home.welcomeP1':'Our approved venue has been fully renovated with your comfort and pleasure in mind. The luxuriously appointed themed rooms are the perfect place for gentlemen to lose themselves for an hour or more. Each room has a private shower, climate control, and audio-visual setup, plus its own unique theme.',
-    'home.welcomeP2':"Ginza Empire's main attraction are the gorgeous ladies whose sole aim is to please. We feature beauties from Japan, Korea, Thailand, China, Singapore, and Malaysia. Headlining our offering is Sydney's most desirable collection of genuine Japanese girls, providing the ultimate GFE and PSE experience.",
-    'home.welcomeP3':'Nowhere in Sydney \u2014 or perhaps the world \u2014 will you find such luxurious, comfortable, and spotlessly clean rooms, staffed by ladies of this calibre, at such competitive prices.',
-    /* Home location & hours */
-    'home.locationHtml':'310 Cleveland St Surry Hills NSW 2010<br>(back entrance from goodlet lane)',
-    'home.hoursText':'Monday to Sunday open from 10:30am till 1am.',
     /* Rates page */
     'rates.intro':'Below are the indicative rates charged by the ladies for providing you with their full adult service (inclusive of our flat room hire rates charged by us to the ladies). However, you must negotiate the lady\u2019s payment directly with her. The guide below were provided by the ladies.',
     'rates.legal':'We are a legal Sydney Brothel and safe sex practices must be adhered to. For our service of providing superior private rooms and facilities, we charge the ladies (service providers) a flat room hiring rate as below:',
