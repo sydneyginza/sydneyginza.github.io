@@ -323,7 +323,7 @@ b.onclick=()=>{const idx=copyDayTargets.indexOf(ds);if(idx>=0)copyDayTargets.spl
 /* Select all targets shortcut */
 const allTargets=dates.filter(ds=>ds!==copyDaySource);
 if(allTargets.length>1){const ab=document.createElement('button');ab.className='copy-day-btn'+(copyDayTargets.length===allTargets.length?' target-active':'');
-ab.style.fontStyle='italic';ab.textContent='All';ab.onclick=()=>{if(copyDayTargets.length===allTargets.length)copyDayTargets=[];else copyDayTargets=[...allTargets];renderCopyDayModal()};tc.appendChild(ab)}
+ab.style.fontStyle='italic';ab.textContent=t('cal.all');ab.onclick=()=>{if(copyDayTargets.length===allTargets.length)copyDayTargets=[];else copyDayTargets=[...allTargets];renderCopyDayModal()};tc.appendChild(ab)}
 /* Apply button state */
 const applyBtn=document.getElementById('copyDayApply');
 applyBtn.disabled=scheduled.length===0||copyDayTargets.length===0;
@@ -354,7 +354,7 @@ copied++;
 if(copied>0){
 this.textContent='Saving...';this.style.pointerEvents='none';
 await saveCalData();
-this.textContent='Copy Schedule';this.style.pointerEvents='auto';
+this.textContent=t('cal.copyDayBtn');this.style.pointerEvents='auto';
 renderCalendar();renderRoster();renderGrid();renderHome();
 showToast('Copied '+scheduled.length+' schedule'+(scheduled.length>1?'s':'')+' to '+copyDayTargets.length+' day'+(copyDayTargets.length>1?'s':''));
 }else{showToast('Nothing to copy (all targets already have entries)','error')}
@@ -392,7 +392,7 @@ b.innerHTML=(ds===ts?t('ui.today'):f.day)+(has&&has.start?' <span style="opacity
 b.onclick=()=>{const idx=bulkTimeDays.indexOf(ds);if(idx>=0)bulkTimeDays.splice(idx,1);else bulkTimeDays.push(ds);renderBulkTimeDays()};tc.appendChild(b)});
 /* All button */
 const ab=document.createElement('button');ab.className='copy-day-btn'+(bulkTimeDays.length===dates.length?' target-active':'');
-ab.style.fontStyle='italic';ab.textContent='All';
+ab.style.fontStyle='italic';ab.textContent=t('cal.all');
 ab.onclick=()=>{if(bulkTimeDays.length===dates.length)bulkTimeDays=[];else bulkTimeDays=[...dates];renderBulkTimeDays()};tc.appendChild(ab);
 /* Update apply state */
 const applyBtn=document.getElementById('bulkTimeApply');
@@ -414,7 +414,7 @@ if(!calData[name])calData[name]={};
 bulkTimeDays.forEach(ds=>{calData[name][ds]={start,end};if(calPending[name])delete calPending[name][ds]});
 this.textContent='Saving...';this.style.pointerEvents='none';
 await saveCalData();
-this.textContent='Apply';this.style.pointerEvents='auto';
+this.textContent=t('cal.apply');this.style.pointerEvents='auto';
 renderCalendar();renderRoster();renderGrid();renderHome();
 showToast(name+' marked available for '+bulkTimeDays.length+' day'+(bulkTimeDays.length>1?'s':''));
 closeBulkTimeModal();
