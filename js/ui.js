@@ -713,7 +713,6 @@ let peCurrentPage=null;
 const PAGE_FIELDS={
 home:[
 {key:'announcement',label:'Announcement',type:'textarea',rows:2},
-{key:'announcementJa',label:'Announcement (JP)',type:'textarea',rows:2},
 {key:'welcomeTitle',label:'Welcome Heading',type:'text'},
 {key:'welcomeBody',label:'Welcome Body',type:'textarea',rows:8,help:'Separate paragraphs with blank lines.'},
 {key:'location',label:'Location',type:'textarea',rows:2,help:'Use line breaks for multiple lines.'},
@@ -728,8 +727,7 @@ rates:[
 ],
 employment:[
 {key:'content',label:'Content',type:'textarea',rows:20,help:'Use ## at the start of a line for section headings. Separate paragraphs with blank lines.'},
-{key:'contacts',label:'Contacts',type:'textarea',rows:6,help:'One contact per line. Phone numbers (04xx or 02xx) and emails auto-link.'},
-{key:'contactsJa',label:'Contacts (JP)',type:'textarea',rows:6,help:'Optional Japanese version. One contact per line. Phone numbers and emails auto-link.'}
+{key:'contacts',label:'Contacts',type:'textarea',rows:6,help:'One contact per line. Phone numbers (04xx or 02xx) and emails auto-link.'}
 ]
 };
 
@@ -819,6 +817,9 @@ if(!peCurrentPage)return;
 const fields=PAGE_FIELDS[peCurrentPage];
 if(!pageData[peCurrentPage])pageData[peCurrentPage]={};
 fields.forEach(f=>{const el=document.getElementById('pe_'+f.key);if(el)pageData[peCurrentPage][f.key]=el.value;});
+/* Mirror single-input fields to their JP counterparts */
+if(peCurrentPage==='home')pageData.home.announcementJa=pageData.home.announcement||'';
+if(peCurrentPage==='employment')pageData.employment.contactsJa=pageData.employment.contacts||'';
 document.getElementById('pageEditSave').disabled=true;
 document.getElementById('pageEditSave').textContent='Saving...';
 const ok=await savePageData();
