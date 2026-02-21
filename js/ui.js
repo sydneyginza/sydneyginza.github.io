@@ -596,8 +596,8 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=siteLanguage==='ja'?(g.labelsJa&&g.labelsJa.length?g.labelsJa:g.labels||[]):(g.labels||[]);return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
-/* Auto-translate content fields in JP mode */
-if(siteLanguage==='ja'){[['profSpecialText',g.special],['profLangText',g.lang],['profTypeText',g.type],['profDescText',g.desc]].forEach(([id,src])=>{if(!src||src==='—')return;autoTranslate(src).then(tx=>{const el=document.getElementById(id);if(el)el.textContent=tx})});}
+/* Auto-translate content fields for any non-EN language */
+if(siteLanguage!=='en'){[['profSpecialText',g.special],['profLangText',g.lang],['profTypeText',g.type],['profDescText',g.desc]].forEach(([id,src])=>{if(!src||src==='—')return;autoTranslate(src).then(tx=>{const el=document.getElementById(id);if(el)el.textContent=tx})});}
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
@@ -758,27 +758,31 @@ return d;
 
 function renderPageContent(pageId){
 const pd=pageData[pageId];if(!pd)return;
+const _tx=siteLanguage!=='en';
+/* Helper: translate text of all h2/p/address children */
+const _txKids=el=>{if(!_tx||!el)return;el.querySelectorAll('h2,p,address').forEach(c=>{const s=c.textContent.trim();if(s)autoTranslate(s).then(tx=>{if(c)c.textContent=tx})})};
+const _txEl=(el,src)=>{if(!_tx||!el||!src)return;autoTranslate(src).then(tx=>{if(el)el.textContent=tx})};
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;if(siteLanguage==='ja')autoTranslate(pd.announcement).then(tx=>{if(el)el.textContent=tx});}}
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;_txEl(el,pd.announcement);}}
 const wel=document.getElementById('homeWelcomeEn');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';
 if(pd.welcomeTitle)h+='<h2 class="logo" style="margin-bottom:20px">'+pd.welcomeTitle.replace(/</g,'&lt;')+'</h2>';
 if(pd.welcomeBody)h+=pd.welcomeBody.split('\n\n').map(p=>'<p class="home-summary">'+p.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>').join('');
-wel.innerHTML=h;
+wel.innerHTML=h;_txKids(wel);
 }
-if(pd.location){const el=document.getElementById('homeLocation');if(el)el.innerHTML=pd.location.replace(/</g,'&lt;').replace(/\n/g,'<br>');}
-if(pd.hours){const el=document.getElementById('homeHours');if(el)el.textContent=pd.hours;}
+if(pd.location){const el=document.getElementById('homeLocation');if(el){el.innerHTML=pd.location.replace(/</g,'&lt;').replace(/\n/g,'<br>');if(_tx)autoTranslate(pd.location).then(tx=>{if(el)el.innerHTML=tx.replace(/</g,'&lt;').replace(/\n/g,'<br>')});}}
+if(pd.hours){const el=document.getElementById('homeHours');if(el){el.textContent=pd.hours;_txEl(el,pd.hours);}}
 }else if(pageId==='rates'){
-if(pd.intro){const el=document.getElementById('ratesIntro');if(el)el.textContent=pd.intro;}
-if(pd.legal){const el=document.getElementById('ratesLegal');if(el)el.textContent=pd.legal;}
+if(pd.intro){const el=document.getElementById('ratesIntro');if(el){el.textContent=pd.intro;_txEl(el,pd.intro);}}
+if(pd.legal){const el=document.getElementById('ratesLegal');if(el){el.textContent=pd.legal;_txEl(el,pd.legal);}}
 const rs=document.getElementById('ratesRoomSection');
 if(rs&&(pd.roomTitle||pd.roomRates||pd.disclaimer)){
 let h='';
 if(pd.roomTitle)h+='<h2 class="logo" style="margin-bottom:20px">'+pd.roomTitle.replace(/</g,'&lt;')+'</h2>';
 if(pd.roomRates)h+=pd.roomRates.split('\n').map(l=>'<p class="home-summary">'+l.replace(/</g,'&lt;')+'</p>').join('');
 if(pd.disclaimer)h+='<p class="home-summary">'+pd.disclaimer.replace(/</g,'&lt;')+'</p>';
-rs.innerHTML=h;
+rs.innerHTML=h;_txKids(rs);
 }
 }else if(pageId==='employment'){
 const ec=document.getElementById('employContentEn');
@@ -788,11 +792,11 @@ ec.innerHTML=lines.map(l=>{
 if(l.startsWith('## '))return '<h2 class="logo" style="margin-bottom:60px">'+l.slice(3).replace(/</g,'&lt;')+'</h2>';
 return '<p class="home-summary">'+l.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>';
 }).join('');
+_txKids(ec);
 }
 if(pd.contacts){const ct=document.getElementById('employContacts');if(ct){
-const _renderContacts=txt=>{let h=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;');h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>'});h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');ct.innerHTML=h.replace(/\n/g,'<br>')};
-_renderContacts(pd.contacts);
-if(siteLanguage==='ja')autoTranslate(pd.contacts).then(tx=>{if(ct)_renderContacts(tx)});
+const _rc=txt=>{let h=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;');h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>'});h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');ct.innerHTML=h.replace(/\n/g,'<br>')};
+_rc(pd.contacts);if(_tx)autoTranslate(pd.contacts).then(tx=>{if(ct)_rc(tx)});
 }}
 }
 }

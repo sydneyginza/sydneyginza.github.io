@@ -394,6 +394,16 @@ function applyLang() {
     var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
     el.style.display = (match || fallback) ? '' : 'none';
   });
+  /* Auto-translate static lang-en section text nodes for KO/ZH */
+  if (!knownLangs.includes(siteLanguage)) {
+    document.querySelectorAll('.lang-section.lang-en').forEach(function(section) {
+      if (section.style.display === 'none') return;
+      section.querySelectorAll('h2, p, address').forEach(function(c) {
+        var src = c.textContent.trim();
+        if (src) autoTranslate(src).then(function(tx) { if (c) c.textContent = tx; });
+      });
+    });
+  }
   /* Lang selector button label + active state */
   var labels = {en:'EN', ja:'JP', ko:'KO', zh:'ZH'};
   var btn = document.getElementById('langToggleBtn');
