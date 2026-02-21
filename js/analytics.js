@@ -539,6 +539,10 @@ if(cachedVisitorData&&cachedVisitorPeriod===analyticsPeriod){
 
 const v=VisitorLog.aggregateLogs(entries);
 
+/* ── Day-of-week × Hour heatmap data ── */
+const byDOWHour=Array.from({length:7},()=>Array(24).fill(0));
+entries.forEach(e=>{if(!e.timestamp)return;try{const dt=new Date(e.timestamp);const aedtHr=parseInt(dt.toLocaleString('en-US',{timeZone:'Australia/Sydney',hour:'2-digit',hour12:false}));const aedtDateStr=dt.toLocaleString('en-US',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'});const[mm,dd,yyyy]=aedtDateStr.split('/');const dow=new Date(yyyy+'-'+mm+'-'+dd+'T00:00:00').getDay();if(aedtHr>=0&&aedtHr<24&&dow>=0&&dow<7)byDOWHour[dow][aedtHr]++}catch(_){}});
+
 /* ── Summary cards ── */
 const activeDays=Object.keys(v.daily).length;
 const avgDaily=activeDays>0?Math.round(v.totalHits/activeDays):0;
@@ -549,6 +553,26 @@ const summaryHtml=`<div class="an-summary">
 <div class="an-card"><div class="an-card-val">${v.totalPageViews}</div><div class="an-card-label">Total Page Views</div></div>
 <div class="an-card"><div class="an-card-val">${v.totalProfileViews}</div><div class="an-card-label">Total Profile Views</div></div>
 </div>`;
+
+/* ── Top 5 Profiles ── */
+const top5PF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,5);
+const rankLabels=['#1','#2','#3','#4','#5'];
+let top5Html='<div class="an-section"><div class="an-section-title">Top Profiles <span class="an-hint">(most viewed this period)</span></div><div class="an-top5">';
+for(let ri=0;ri<5;ri++){
+  const rankClass='an-rank-'+(ri+1);
+  if(ri<top5PF.length){
+    const[name,total]=top5PF[ri];
+    const unique=v.profileViewsUniqueCounts[name]||0;
+    const girl=typeof girls!=='undefined'?girls.find(g=>g&&g.name===name):null;
+    const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-top5-photo" src="${girl.photos[0]}" alt="${name.replace(/"/g,'&quot;')}">`:'<div class="an-top5-photo-empty"></div>';
+    const liveNow=girl&&typeof isAvailableNow==='function'&&isAvailableNow(girl.name);
+    const availDot=liveNow?'<span class="avail-now-dot" title="Available now" style="display:inline-block;margin-left:4px"></span>':'';
+    top5Html+=`<div class="an-top5-card"><div class="an-top5-rank ${rankClass}">${rankLabels[ri]}</div>${thumb}<div class="an-top5-name">${name}${availDot}</div><span class="an-top5-total">${total}</span><div class="an-top5-unique">${unique} unique</div></div>`;
+  }else{
+    top5Html+=`<div class="an-top5-card"><div class="an-top5-rank ${rankClass}">${rankLabels[ri]}</div><div class="an-top5-photo-empty"></div><div class="an-top5-empty">—</div></div>`;
+  }
+}
+top5Html+='</div></div>';
 
 /* ── Daily Visitors Trend (hits + uniques) ── */
 const sortedDays=Object.entries(v.daily).sort((a,b)=>a[0].localeCompare(b[0]));
@@ -570,17 +594,18 @@ trendHtml+='</div>';
 if(sortedDays.length)trendHtml+='<div class="an-legend"><span class="an-legend-dot an-legend-hits"></span> Hits <span class="an-legend-dot an-legend-uniques"></span> Uniques</div>';
 trendHtml+='</div>';
 
-/* ── Peak Hours ── */
-const maxH=Math.max(...Object.values(v.hourly),1);
-let hoursHtml='<div class="an-section"><div class="an-section-title">Peak Visit Hours <span class="an-hint">(AEDT)</span></div><div class="an-hours">';
-for(let h=0;h<24;h++){
-  const key=String(h).padStart(2,'0');
-  const val=v.hourly[key]||0;
-  const pct=val/maxH;
-  const h12=h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
-  hoursHtml+=`<div class="an-hour" title="${h12}: ${val} visits"><div class="an-hour-bar an-hour-visitor" style="height:${Math.max(pct*100,2)}%;opacity:${0.25+pct*0.75}"></div><div class="an-hour-label">${h%3===0?h12:''}</div></div>`;
+/* ── Peak Hours Heatmap (day-of-week × hour) ── */
+const _dowLabels=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const _h12=h=>h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
+const _hmMax=Math.max(...byDOWHour.flat(),1);
+let hoursHtml='<div class="an-section"><div class="an-section-title">Peak Hours Heatmap <span class="an-hint">(AEDT, day × hour)</span></div><div class="an-heatmap-wrap"><div class="an-heatmap-inner">';
+hoursHtml+='<div class="an-heatmap-dow"></div>';
+for(let h=0;h<24;h++)hoursHtml+=`<div class="an-heatmap-hr">${h%3===0?_h12(h):''}</div>`;
+for(let dow=0;dow<7;dow++){
+  hoursHtml+=`<div class="an-heatmap-dow">${_dowLabels[dow]}</div>`;
+  for(let h=0;h<24;h++){const val=byDOWHour[dow][h];const op=val===0?0.05:Math.max(0.12,val/_hmMax);hoursHtml+=`<div class="an-heatmap-cell" style="opacity:${op.toFixed(2)}" title="${_dowLabels[dow]} ${_h12(h)}: ${val} visit${val!==1?'s':''}"></div>`}
 }
-hoursHtml+='</div></div>';
+hoursHtml+='</div></div></div>';
 
 /* ── Page Views (unique + total) ── */
 const sortedPV=Object.entries(v.pageViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
@@ -730,7 +755,7 @@ const actionsHtml=`<div class="an-actions">
 <button class="an-action-btn" id="anRefreshVisitors">Refresh</button>
 </div>`;
 
-container.innerHTML=periodHtml+summaryHtml+trendHtml+hoursHtml
+container.innerHTML=periodHtml+summaryHtml+top5Html+trendHtml+hoursHtml
   +'<div class="an-two-col">'+pvHtml+pfHtml+'</div>'
   +'<div class="an-two-col">'+browsersHtml+osHtml+'</div>'
   +'<div class="an-two-col">'+devHtml+langHtml+'</div>'

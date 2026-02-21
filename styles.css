@@ -770,6 +770,42 @@ body{padding-bottom:60px}
 .an-profile-thumb{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.12)}
 .an-profile-thumb-empty{background:rgba(255,255,255,0.05)}
 
+/* ── Analytics: Top 5 profiles widget ── */
+.an-top5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:8px}
+@media(max-width:600px){.an-top5{grid-template-columns:repeat(3,1fr)}}
+.an-top5-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);padding:14px 8px 10px;text-align:center;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
+.an-top5-rank{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;margin-bottom:6px}
+.an-rank-1{color:#FFD700}.an-rank-2{color:#C0C0C0}.an-rank-3{color:#CD7F32}.an-rank-4,.an-rank-5{color:rgba(255,255,255,0.3)}
+.an-top5-photo{width:56px;height:56px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;border:2px solid rgba(180,74,255,0.35)}
+.an-top5-photo-empty{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.05);display:block;margin:0 auto 8px}
+.an-top5-name{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.an-top5-total{font-family:'Orbitron',sans-serif;font-size:16px;color:var(--accent);display:block;margin-top:6px}
+.an-top5-unique{font-size:9px;color:rgba(56,189,248,0.6);margin-top:2px}
+.an-top5-empty{color:rgba(255,255,255,0.15);font-size:10px}
+
+/* ── Analytics: Peak hours heatmap ── */
+.an-heatmap-wrap{overflow-x:auto}
+.an-heatmap-inner{display:grid;grid-template-columns:28px repeat(24,1fr);gap:2px;min-width:360px}
+.an-heatmap-cell{height:22px;background:var(--accent);border-radius:2px;cursor:default;transition:opacity 0.3s}
+.an-heatmap-cell:hover{outline:1px solid rgba(255,255,255,0.3)}
+.an-heatmap-dow{font-size:9px;color:rgba(255,255,255,0.4);font-family:'Orbitron',sans-serif;display:flex;align-items:center}
+.an-heatmap-hr{font-size:7px;color:rgba(255,255,255,0.3);text-align:center;font-family:'Orbitron',sans-serif}
+
+/* ── Calendar: mobile day navigation ── */
+.cal-mobile-nav{display:none;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);gap:12px}
+.cal-mobile-btn{background:rgba(180,74,255,0.15);border:1px solid rgba(180,74,255,0.3);color:#fff;font-size:22px;width:40px;height:40px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cal-mobile-label{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.8);text-align:center;flex:1}
+@media(max-width:768px){
+  .cal-mobile-nav{display:flex}
+  .cal-table [data-cal-col]{display:none}
+  .cal-table [data-cal-col].cal-col-active{display:table-cell;min-width:160px}
+  .cal-time-input{width:100%;font-size:14px;padding:8px 6px}
+  .cal-check{width:26px;height:26px}
+  .cal-bulk-actions{opacity:1;pointer-events:auto}
+  .cal-time-wrap{align-items:stretch}
+  .cal-time-row{flex-direction:column;align-items:flex-start;gap:2px}
+}
+
 /* ── Footer: privacy notice ── */
 .footer-privacy{font-size:10px;color:rgba(255,255,255,0.18);margin-top:6px;letter-spacing:0.5px}
 .footer-privacy-opt{background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-size:10px;text-decoration:underline;padding:0;letter-spacing:0.5px;transition:color .2s;font-family:inherit}
