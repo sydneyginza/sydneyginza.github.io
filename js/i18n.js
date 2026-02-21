@@ -993,7 +993,9 @@ const LANG_DICT = {
   },
 };
 
-const siteLanguage = 'en';
+var siteLanguage = (function() {
+  try { return localStorage.getItem('ginza_lang') || 'en'; } catch(e) { return 'en'; }
+})();
 
 function t(key) {
   var dict = LANG_DICT[siteLanguage] || LANG_DICT.en;
@@ -1014,4 +1016,36 @@ function applyLang() {
     var k = el.dataset.i18nHtml; if (k) el.innerHTML = t(k);
   });
   document.documentElement.lang = siteLanguage;
+  /* Mark active language option */
+  document.querySelectorAll('.lang-option').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.lang === siteLanguage);
+  });
 }
+
+function setLanguage(lang) {
+  if (!LANG_DICT[lang]) return;
+  siteLanguage = lang;
+  try { localStorage.setItem('ginza_lang', lang); } catch(e) {}
+  applyLang();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var langBtn = document.getElementById('langBtn');
+  var langDropdown = document.getElementById('langDropdown');
+  if (!langBtn || !langDropdown) return;
+  langBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    langDropdown.classList.toggle('open');
+  });
+  langDropdown.querySelectorAll('.lang-option').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setLanguage(btn.dataset.lang);
+      langDropdown.classList.remove('open');
+    });
+  });
+  document.addEventListener('click', function(e) {
+    if (!langDropdown.contains(e.target) && e.target !== langBtn) {
+      langDropdown.classList.remove('open');
+    }
+  });
+});
