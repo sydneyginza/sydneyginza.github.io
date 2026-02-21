@@ -91,6 +91,7 @@ const LANG_DICT = {
     'compare.done':'Close',
     /* Employment contacts */
     'emp.contacts':'Contacts',
+    'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
     /* Admin nav */
     'nav.calendar':'Calendar',
     'nav.analytics':'Analytics',
