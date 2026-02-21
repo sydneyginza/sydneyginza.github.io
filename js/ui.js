@@ -80,7 +80,7 @@ const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].s
 /* Profiles search */
 if(namedGirls.length){
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Search</div><input class="fp-range-input" type="text" data-role="name-search" placeholder="Search by name..." style="text-align:left;padding:6px 10px;width:100%">`;
+sec.innerHTML=`<div class="fp-title">${t('fp.search')}</div><input class="fp-range-input" type="text" data-role="name-search" placeholder="${t('ui.search')}" style="text-align:left;padding:6px 10px;width:100%">`;
 pane.appendChild(sec);
 const searchInp=sec.querySelector('[data-role="name-search"]');
 searchInp.value=sharedFilters.nameSearch||'';
@@ -92,7 +92,7 @@ pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divi
 /* Country */
 if(countries.length){
 const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">Country</div><div class="fp-options"></div>`;
+sec.innerHTML=`<div class="fp-title">${t('fp.country')}</div><div class="fp-options"></div>`;
 pane.appendChild(sec);
 const wrap=sec.querySelector('.fp-options');
 countries.forEach(c=>{
@@ -104,7 +104,7 @@ wrap.appendChild(btn)})}
 
 /* Age */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Age','ageMin','ageMax','age'));
+pane.appendChild(makeRangeSection(t('fp.age'),'ageMin','ageMax','age'));
 
 /* Body Size */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
