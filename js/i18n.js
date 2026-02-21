@@ -184,6 +184,144 @@ const LANG_DICT = {
     'an.recentVisitors':'最近のユニーク訪問者','an.recentHint':'（直近20件、日別）',
     'an.tableDate':'日付','an.tableBrowser':'ブラウザ','an.tableOS':'OS','an.tableDevice':'デバイス','an.tableLang':'言語','an.tableTZ':'タイムゾーン',
     'an.export':'訪問者ログをエクスポート','an.refresh':'更新','an.exported':'ログをエクスポートしました',
+  },
+  ko: {
+    'nav.home':'홈','nav.roster':'스케줄','nav.girls':'여자들','nav.favorites':'즐겨찾기',
+    'nav.rates':'요금','nav.employment':'채용',
+    'bnav.home':'홈','bnav.roster':'스케줄','bnav.girls':'탐색','bnav.favs':'즐겨찾기',
+    'home.tagline':'시드니 최고의 경험',
+    'home.announcement':'공지사항','home.newGirls':'신규',
+    'home.location':'위치','home.hours':'영업시간',
+    'page.roster':'스케줄','page.girls':'여자들','page.rates':'요금표',
+    'page.employment':'채용정보','page.favorites':'즐겨찾기',
+    'field.age':'나이','field.body':'체형','field.height':'키','field.cup':'컵',
+    'field.rates30':'30분 요금','field.rates45':'45분 요금','field.rates60':'60분 요금',
+    'field.experience':'경력','field.language':'언어','field.type':'타입',
+    'field.description':'프로필','field.special':'특별 요청','field.labels':'태그',
+    'avail.now':'출근 중','avail.today':'오늘 출근',
+    'avail.coming':'출근 예정','avail.lastSeen':'마지막 출근',
+    'ui.back':'뒤로','ui.share':'공유',
+    'ui.addFav':'즐겨찾기 추가','ui.favorited':'즐겨찾기됨',
+    'ui.edit':'편집','ui.delete':'삭제','ui.compare':'비교',
+    'ui.linkCopied':'링크 복사됨!',
+    'ui.alsoAvail':'오늘 출근 중',
+    'ui.favEmpty':'즐겨찾기가 없습니다. 프로필의 하트를 탭하여 저장하세요.',
+    'ui.noResults':'조건에 맞는 여자가 없습니다.',
+    'ui.search':'이름으로 검색...',
+    'filter.availNow':'출근 중','filter.availToday':'오늘 출근',
+    'privacy.title':'개인정보 공지',
+    'privacy.body':'방문자 추세 파악을 위해 익명 방문 데이터를 수집합니다. 개인정보는 수집하지 않으며 제3자에게 공유하지 않습니다.',
+    'privacy.btn':'확인',
+    'footer.rights':'긴자 엠파이어 \u00a9 2026 \u2014 모든 권리 보호',
+    'footer.privacy':'이 사이트는 익명 분석을 사용하여 방문자 추세를 파악합니다. 개인정보는 수집하지 않으며 제3자에게 공유하지 않습니다.',
+    'ui.backToTop':'맨 위로',
+    'compare.selected':'개 선택됨',
+    'compare.clear':'초기화','compare.open':'비교','compare.done':'닫기',
+    'emp.contacts':'연락처',
+    'nav.calendar':'캘린더','nav.analytics':'분석','nav.menu':'메뉴','ui.admin':'관리자',
+    'sort.name':'이름','sort.dateAdded':'등록일','sort.age':'나이','sort.size':'사이즈','sort.height':'키','sort.cup':'컵',
+    'ui.today':'오늘',
+    'date.sun':'일','date.mon':'월','date.tue':'화','date.wed':'수','date.thu':'목','date.fri':'금','date.sat':'토',
+    'date.jan':'1월','date.feb':'2월','date.mar':'3월','date.apr':'4월','date.may':'5월','date.jun':'6월',
+    'date.jul':'7월','date.aug':'8월','date.sep':'9월','date.oct':'10월','date.nov':'11월','date.dec':'12월',
+    'ui.girlsAvailNow':'현재 {n}명 출근 중','ui.girlsAvailToday':'오늘 {n}명 출근',
+    'ui.noGirlsWeek':'이번 주 출근 예정이 없습니다','ui.noGirlsDate':'해당 날짜 출근 예정이 없습니다',
+    'table.rates':'요금','table.priceRange':'요금 범위',
+    'fp.search':'검색','fp.country':'국적','fp.age':'나이','fp.bodySize':'체형',
+    'fp.height':'키 (cm)','fp.cupSize':'컵 사이즈',
+    'fp.rates30':'30분 요금','fp.rates45':'45분 요금','fp.rates60':'60분 요금',
+    'fp.experience':'경력','fp.labels':'태그','fp.clearAll':'모든 필터 초기화','fp.rangeSep':'~',
+    'cal.profile':'여자들','cal.allWeek':'전체 주','cal.clear':'초기화',
+    'cal.copyTimesTitle':'시간 복사?','cal.setNewTime':'새 시간 설정','cal.copyTimesBtn':'시간 복사',
+    'cal.copyDayTitle':'일정 복사','cal.copyDaySub':'하루의 스케줄을 다른 날에 복사',
+    'cal.sourceDay':'원본 날짜','cal.copyTo':'복사 대상','cal.overwrite':'대상 날짜의 기존 항목 덮어쓰기',
+    'cal.copyDayBtn':'스케줄 복사','cal.bulkTimeSub':'여러 날의 출근 시간 설정',
+    'cal.days':'날짜','cal.startTime':'시작 시간','cal.endTime':'종료 시간','cal.apply':'적용','cal.all':'전체','cal.noScheduled':'오늘 스케줄 없음',
+    'ui.addGirl':'여자 추가','form.addGirl':'새 프로필 추가','form.editGirl':'프로필 편집',
+    'form.name':'이름','form.startDate':'시작일','form.photos':'사진',
+    'form.cancel':'취소','form.save':'저장','form.delete':'삭제','form.confirmDelete':'삭제 확인',
+    'form.expSelect':'경력 선택','exp.experienced':'경력 있음','exp.inexperienced':'경력 없음',
+    'an.days':'일','an.loading':'방문자 데이터 로딩 중...','an.uniqueVisitors':'고유 방문자','an.sessions':'세션','an.totalPageViews':'총 페이지뷰','an.totalProfileViews':'총 프로필 뷰',
+    'an.topProfiles':'인기 프로필','an.topHint':'(이번 기간 최다 조회)','an.uniqueCount':'{n}건 고유',
+    'an.dailyVisitors':'일별 방문자','an.dailyHint':'(조회수 vs 고유 방문자)','an.noLogs':'이 기간의 방문자 로그가 없습니다',
+    'an.legendHits':'조회수','an.legendUniques':'고유 방문자',
+    'an.peakHours':'피크 시간대 히트맵','an.peakHint':'(AEDT, 요일×시간)','an.visitCount':'{n}회',
+    'an.pageViews':'페이지뷰','an.pvHint':'(합계 / 고유 방문자)','an.noPV':'페이지뷰 기록이 없습니다',
+    'an.mostProfiles':'최다 조회 프로필','an.pfHint':'(합계 / 고유)','an.noPF':'프로필 뷰 기록이 없습니다',
+    'an.browsers':'브라우저','an.os':'운영체제','an.devices':'기기',
+    'an.languages':'언어','an.timezones':'시간대','an.referrers':'리퍼러','an.noData':'데이터 없음',
+    'an.recentVisitors':'최근 고유 방문자','an.recentHint':'(최근 20건, 일별)',
+    'an.tableDate':'날짜','an.tableBrowser':'브라우저','an.tableOS':'OS','an.tableDevice':'기기','an.tableLang':'언어','an.tableTZ':'시간대',
+    'an.export':'방문자 로그 내보내기','an.refresh':'새로고침','an.exported':'로그 내보내기 완료',
+  },
+  zh: {
+    'nav.home':'首页','nav.roster':'排班','nav.girls':'女孩','nav.favorites':'收藏',
+    'nav.rates':'价格','nav.employment':'招聘',
+    'bnav.home':'首页','bnav.roster':'排班','bnav.girls':'浏览','bnav.favs':'收藏',
+    'home.tagline':'悉尼最高端的体验',
+    'home.announcement':'公告','home.newGirls':'新人',
+    'home.location':'地址','home.hours':'营业时间',
+    'page.roster':'排班','page.girls':'女孩','page.rates':'价格表',
+    'page.employment':'招聘信息','page.favorites':'收藏夹',
+    'field.age':'年龄','field.body':'身材','field.height':'身高','field.cup':'罩杯',
+    'field.rates30':'30分钟价格','field.rates45':'45分钟价格','field.rates60':'60分钟价格',
+    'field.experience':'经验','field.language':'语言','field.type':'类型',
+    'field.description':'简介','field.special':'特殊要求','field.labels':'标签',
+    'avail.now':'出勤中','avail.today':'今日出勤',
+    'avail.coming':'即将出勤','avail.lastSeen':'上次出勤',
+    'ui.back':'返回','ui.share':'分享',
+    'ui.addFav':'添加收藏','ui.favorited':'已收藏',
+    'ui.edit':'编辑','ui.delete':'删除','ui.compare':'对比',
+    'ui.linkCopied':'链接已复制！',
+    'ui.alsoAvail':'今日出勤中',
+    'ui.favEmpty':'暂无收藏。点击任意档案的心形图标保存。',
+    'ui.noResults':'没有符合条件的女孩。',
+    'ui.search':'按名字搜索...',
+    'filter.availNow':'出勤中','filter.availToday':'今日出勤',
+    'privacy.title':'隐私声明',
+    'privacy.body':'我们收集匿名访问数据以了解访客趋势。不收集任何个人信息，也不与第三方共享。',
+    'privacy.btn':'知道了',
+    'footer.rights':'银座帝国 \u00a9 2026 \u2014 版权所有',
+    'footer.privacy':'本网站使用匿名分析来了解访客趋势。不收集个人信息，也不与第三方共享。',
+    'ui.backToTop':'返回顶部',
+    'compare.selected':'个已选择',
+    'compare.clear':'清除','compare.open':'对比','compare.done':'关闭',
+    'emp.contacts':'联系方式',
+    'nav.calendar':'日历','nav.analytics':'分析','nav.menu':'菜单','ui.admin':'管理员',
+    'sort.name':'姓名','sort.dateAdded':'添加日期','sort.age':'年龄','sort.size':'尺码','sort.height':'身高','sort.cup':'罩杯',
+    'ui.today':'今天',
+    'date.sun':'日','date.mon':'一','date.tue':'二','date.wed':'三','date.thu':'四','date.fri':'五','date.sat':'六',
+    'date.jan':'1月','date.feb':'2月','date.mar':'3月','date.apr':'4月','date.may':'5月','date.jun':'6月',
+    'date.jul':'7月','date.aug':'8月','date.sep':'9月','date.oct':'10月','date.nov':'11月','date.dec':'12月',
+    'ui.girlsAvailNow':'现有{n}位出勤中','ui.girlsAvailToday':'今日{n}位出勤',
+    'ui.noGirlsWeek':'本周无出勤安排','ui.noGirlsDate':'该日期无出勤安排',
+    'table.rates':'价格','table.priceRange':'价格范围',
+    'fp.search':'搜索','fp.country':'国籍','fp.age':'年龄','fp.bodySize':'身材',
+    'fp.height':'身高(cm)','fp.cupSize':'罩杯尺码',
+    'fp.rates30':'30分钟价格','fp.rates45':'45分钟价格','fp.rates60':'60分钟价格',
+    'fp.experience':'经验','fp.labels':'标签','fp.clearAll':'清除所有筛选','fp.rangeSep':'至',
+    'cal.profile':'女孩','cal.allWeek':'全周','cal.clear':'清除',
+    'cal.copyTimesTitle':'复制时间？','cal.setNewTime':'设置新时间','cal.copyTimesBtn':'复制时间',
+    'cal.copyDayTitle':'复制日程','cal.copyDaySub':'将某天的排班复制到其他天',
+    'cal.sourceDay':'源日期','cal.copyTo':'复制到','cal.overwrite':'覆盖目标日期现有记录',
+    'cal.copyDayBtn':'复制日程','cal.bulkTimeSub':'设置多天出勤时间',
+    'cal.days':'日期','cal.startTime':'开始时间','cal.endTime':'结束时间','cal.apply':'应用','cal.all':'全部','cal.noScheduled':'今日无排班',
+    'ui.addGirl':'添加女孩','form.addGirl':'添加新档案','form.editGirl':'编辑档案',
+    'form.name':'姓名','form.startDate':'开始日期','form.photos':'照片',
+    'form.cancel':'取消','form.save':'保存','form.delete':'删除','form.confirmDelete':'确认删除',
+    'form.expSelect':'选择经验','exp.experienced':'有经验','exp.inexperienced':'无经验',
+    'an.days':'天','an.loading':'正在加载访客数据...','an.uniqueVisitors':'独立访客','an.sessions':'会话','an.totalPageViews':'总页面浏览量','an.totalProfileViews':'总档案浏览量',
+    'an.topProfiles':'热门档案','an.topHint':'（本期最多浏览）','an.uniqueCount':'{n}个独立',
+    'an.dailyVisitors':'每日访客','an.dailyHint':'（点击数 vs 独立访客）','an.noLogs':'本期无访客日志',
+    'an.legendHits':'点击数','an.legendUniques':'独立数',
+    'an.peakHours':'高峰时段热力图','an.peakHint':'（AEDT，星期×小时）','an.visitCount':'{n}次访问',
+    'an.pageViews':'页面浏览量','an.pvHint':'（合计 / 独立访客）','an.noPV':'暂无页面浏览记录',
+    'an.mostProfiles':'最多浏览档案','an.pfHint':'（合计 / 独立）','an.noPF':'暂无档案浏览记录',
+    'an.browsers':'浏览器','an.os':'操作系统','an.devices':'设备',
+    'an.languages':'语言','an.timezones':'时区','an.referrers':'来源','an.noData':'暂无数据',
+    'an.recentVisitors':'近期独立访客','an.recentHint':'（最近20条，按日）',
+    'an.tableDate':'日期','an.tableBrowser':'浏览器','an.tableOS':'操作系统','an.tableDevice':'设备','an.tableLang':'语言','an.tableTZ':'时区',
+    'an.export':'导出访客日志','an.refresh':'刷新','an.exported':'访客日志已导出',
   }
 };
 
@@ -198,6 +336,8 @@ function t(key) {
 function setLang(lang) {
   siteLanguage = lang;
   localStorage.setItem('ginza_lang', lang);
+  var wrap = document.getElementById('langSelectWrap');
+  if (wrap) wrap.classList.remove('open');
   applyLang();
   /* Re-render dynamic sections */
   if (typeof renderGrid === 'function') renderGrid();
@@ -222,17 +362,20 @@ function setLang(lang) {
 
 /* Auto-translate EN content via MyMemory (free, no key) */
 const _atCache = new Map();
+const _atLangPairs = {ja:'en|ja', ko:'en|ko', zh:'en|zh-CN'};
 async function autoTranslate(text) {
-  if (!text || !text.trim()) return '';
-  const k = text.trim();
+  const tl = siteLanguage;
+  const pair = _atLangPairs[tl];
+  if (!text || !text.trim() || !pair) return text || '';
+  const k = tl + ':' + text.trim();
   if (_atCache.has(k)) return _atCache.get(k);
   try {
-    const r = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(k.slice(0, 500)) + '&langpair=en|ja');
+    const r = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.trim().slice(0, 500)) + '&langpair=' + pair);
     const d = await r.json();
-    const result = (d.responseStatus === 200 && d.responseData && d.responseData.translatedText) ? d.responseData.translatedText : k;
+    const result = (d.responseStatus === 200 && d.responseData && d.responseData.translatedText) ? d.responseData.translatedText : text;
     _atCache.set(k, result);
     return result;
-  } catch (e) { _atCache.set(k, k); return k; }
+  } catch (e) { _atCache.set(k, text); return text; }
 }
 
 function applyLang() {
@@ -244,13 +387,30 @@ function applyLang() {
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
     var k = el.dataset.i18nPh; if (k) el.placeholder = t(k);
   });
-  /* Employment page bilingual sections */
+  /* Bilingual lang-section elements — KO/ZH fall back to lang-en */
+  var knownLangs = ['en', 'ja'];
   document.querySelectorAll('.lang-section').forEach(function(el) {
-    el.style.display = el.classList.contains('lang-' + siteLanguage) ? '' : 'none';
+    var match = el.classList.contains('lang-' + siteLanguage);
+    var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
+    el.style.display = (match || fallback) ? '' : 'none';
   });
-  /* Lang toggle button label */
+  /* Lang selector button label + active state */
+  var labels = {en:'EN', ja:'JP', ko:'KO', zh:'ZH'};
   var btn = document.getElementById('langToggleBtn');
-  if (btn) btn.textContent = siteLanguage === 'en' ? 'JP' : 'EN';
+  if (btn) btn.textContent = labels[siteLanguage] || 'EN';
+  document.querySelectorAll('.lang-select-drop button[data-lang]').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === siteLanguage);
+  });
   /* HTML lang attribute */
-  document.documentElement.lang = siteLanguage === 'ja' ? 'ja' : 'en';
+  var htmlLangs = {en:'en', ja:'ja', ko:'ko', zh:'zh-CN'};
+  document.documentElement.lang = htmlLangs[siteLanguage] || 'en';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  var wrap = document.getElementById('langSelectWrap');
+  var btn = document.getElementById('langToggleBtn');
+  if (btn && wrap) {
+    btn.addEventListener('click', function(e) { e.stopPropagation(); wrap.classList.toggle('open'); });
+    document.addEventListener('click', function() { wrap.classList.remove('open'); });
+  }
+});
