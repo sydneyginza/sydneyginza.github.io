@@ -34,6 +34,19 @@ const LANG_DICT = {
     'ui.search':'Search by name...',
     /* Filters */
     'filter.availNow':'Available Now','filter.availToday':'Available Today',
+    /* Privacy notice */
+    'privacy.title':'Privacy Notice',
+    'privacy.body':'We collect anonymous visit data to understand visitor trends. No personal information is collected or shared.',
+    'privacy.btn':'Got It',
+    /* Footer */
+    'footer.rights':'Ginza Empire \u00a9 2026 \u2014 All Rights Reserved',
+    'footer.privacy':'This site uses anonymous analytics to understand visitor trends. No personal information is collected or shared with third parties.',
+    /* Back to top / compare */
+    'ui.backToTop':'Back to Top',
+    'compare.selected':'selected',
+    'compare.clear':'Clear','compare.open':'Compare','compare.done':'Close',
+    /* Employment contacts */
+    'emp.contacts':'Contacts',
   },
   ja: {
     /* Navigation */
@@ -68,6 +81,19 @@ const LANG_DICT = {
     'ui.search':'名前で検索...',
     /* Filters */
     'filter.availNow':'出勤中','filter.availToday':'本日出勤',
+    /* Privacy notice */
+    'privacy.title':'プライバシー通知',
+    'privacy.body':'当サイトでは、訪問者の傾向を把握するために匿名の訪問データを収集しています。個人情報の収集・第三者への提供は一切行いません。',
+    'privacy.btn':'了解',
+    /* Footer */
+    'footer.rights':'銀座帝国 \u00a9 2026 \u2014 無断転載禁止',
+    'footer.privacy':'当サイトでは、訪問傾向を把握するために匿名のアナリティクスを使用しています。個人情報の収集・第三者への提供は一切行いません。',
+    /* Back to top / compare */
+    'ui.backToTop':'トップへ',
+    'compare.selected':'件選択中',
+    'compare.clear':'クリア','compare.open':'比較','compare.done':'閉じる',
+    /* Employment contacts */
+    'emp.contacts':'お問い合わせ',
   }
 };
 
@@ -92,6 +118,7 @@ function setLang(lang) {
   if (profPage && profPage.classList.contains('active') && typeof currentProfileIdx !== 'undefined' && currentProfileIdx >= 0) {
     if (typeof showProfile === 'function') showProfile(currentProfileIdx);
   }
+  if (typeof renderPageContent === 'function') { renderPageContent('home'); renderPageContent('rates'); }
 }
 
 function applyLang() {

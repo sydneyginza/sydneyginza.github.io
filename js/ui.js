@@ -734,8 +734,8 @@ employment:[
 function extractPageDefaults(pageId){
 const d={};
 if(pageId==='home'){
-const at=document.getElementById('homeAnnounceText');d.announcement=at?(at.dataset.raw||at.textContent):'';
-const wel=document.getElementById('homeWelcome');
+const at=document.getElementById('homeAnnounceText');d.announcement=at?at.textContent:'';
+const wel=document.getElementById('homeWelcomeEn');
 if(wel){const h=wel.querySelector('h2');d.welcomeTitle=h?h.textContent:'';const ps=wel.querySelectorAll('p.home-summary');d.welcomeBody=Array.from(ps).map(p=>p.textContent).join('\n\n');}
 const loc=document.getElementById('homeLocation');d.location=loc?loc.textContent.replace(/\n/g,'\n').trim():'';
 const hrs=document.getElementById('homeHours');d.hours=hrs?hrs.textContent:'';
@@ -756,8 +756,8 @@ return d;
 function renderPageContent(pageId){
 const pd=pageData[pageId];if(!pd)return;
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){const safe=pd.announcement.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const dur=Math.max(10,pd.announcement.length*0.12);el.dataset.raw=pd.announcement;el.innerHTML=`<div class="announce-ticker-wrap"><span class="announce-ticker-track" style="animation-duration:${dur}s">${safe}&emsp;&#9670;&emsp;${safe}&emsp;&#9670;&emsp;</span></div>`;}}
-const wel=document.getElementById('homeWelcome');
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;}}
+const wel=document.getElementById('homeWelcomeEn');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';
 if(pd.welcomeTitle)h+='<h2 class="logo" style="margin-bottom:20px">'+pd.welcomeTitle.replace(/</g,'&lt;')+'</h2>';

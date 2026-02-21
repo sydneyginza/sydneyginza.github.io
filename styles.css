@@ -570,12 +570,12 @@ footer{padding-bottom:100px}
 /* ── Filter Pane (overlay) ── */
 .page-with-sidebar{display:flex;gap:0;align-items:flex-start}
 .page-main-content{flex:1;min-width:0;margin-right:0}
-.filter-pane{width:260px;flex-shrink:0;position:fixed;right:0;top:70px;bottom:0;background:rgba(12,10,18,0.97);border-left:1px solid rgba(255,255,255,0.06);padding:24px 16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;z-index:90;transform:translateX(100%);transition:transform .35s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(20px)}
+.filter-pane{width:260px;flex-shrink:0;position:fixed;right:0;top:70px;bottom:0;background:rgba(12,10,18,0.97);border-left:1px solid rgba(255,255,255,0.06);padding:24px 16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;z-index:100;transform:translateX(100%);transition:transform .35s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(20px)}
 .filter-pane.open{transform:translateX(0)}
 .filter-pane::-webkit-scrollbar{width:4px}.filter-pane::-webkit-scrollbar-thumb{background:rgba(180,74,255,0.2);border-radius:2px}
 
 /* Filter toggle tab */
-.filter-toggle{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:91;width:32px;height:72px;background:rgba(12,10,18,0.9);border:1px solid rgba(180,74,255,0.25);border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .35s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(10px);clip-path:polygon(0 8px,0 0,100% 0,100% 100%,0 100%,0 calc(100% - 8px));opacity:0;pointer-events:none}
+.filter-toggle{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:101;width:32px;height:72px;background:rgba(12,10,18,0.9);border:1px solid rgba(180,74,255,0.25);border-right:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .35s cubic-bezier(0.4,0,0.2,1);backdrop-filter:blur(10px);clip-path:polygon(0 8px,0 0,100% 0,100% 100%,0 100%,0 calc(100% - 8px));opacity:0;pointer-events:none}
 .filter-toggle.visible{opacity:1;pointer-events:all}
 .filter-toggle:hover{background:rgba(180,74,255,0.12);border-color:var(--accent);width:36px}
 .filter-toggle.open{right:260px}
@@ -585,7 +585,7 @@ footer{padding-bottom:100px}
 .filter-toggle.has-filters .filter-indicator{display:block}
 
 /* Filter overlay backdrop */
-.filter-backdrop{display:none;position:fixed;inset:0;z-index:89;background:rgba(0,0,0,0.3)}
+.filter-backdrop{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.3)}
 .filter-backdrop.open{display:block}
 .fp-section{display:flex;flex-direction:column;gap:6px}
 .fp-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);padding-bottom:4px}
@@ -841,8 +841,3 @@ body{padding-bottom:60px}
 .chip-clear-all{background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.35);font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.5px;padding:3px 10px;cursor:pointer;transition:all .2s}
 .chip-clear-all:hover{border-color:rgba(255,68,68,0.4);color:rgba(255,68,68,0.7)}
 
-/* ── Announcement Ticker ── */
-.announce-ticker-wrap{overflow:hidden;border-left:3px solid var(--accent);padding:8px 12px;background:rgba(180,74,255,0.04);border-radius:0 4px 4px 0;cursor:default}
-.announce-ticker-track{display:inline-block;white-space:nowrap;animation:ginza-ticker 20s linear infinite;color:var(--text-dim);font-size:14px}
-.announce-ticker-wrap:hover .announce-ticker-track{animation-play-state:paused}
-@keyframes ginza-ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
