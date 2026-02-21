@@ -303,7 +303,7 @@ const dates=getWeekDates();const ts=dates[0];
 const sc=document.getElementById('copyDaySources');sc.innerHTML='';
 dates.forEach(ds=>{const f=dispDate(ds);const count=getScheduledForDay(ds).length;
 const b=document.createElement('button');b.className='copy-day-btn'+(ds===copyDaySource?' active':'')+(count===0?' disabled':'');
-b.innerHTML=(ds===ts?'Today':f.day)+' <span style="opacity:.5;font-size:11px">('+count+')</span>';
+b.innerHTML=(ds===ts?t('ui.today'):f.day)+' <span style="opacity:.5;font-size:11px">('+count+')</span>';
 b.onclick=()=>{copyDaySource=ds;copyDayTargets=copyDayTargets.filter(t=>t!==ds);renderCopyDayModal()};sc.appendChild(b)});
 /* Preview */
 const prev=document.getElementById('copyDayPreview');
@@ -312,13 +312,13 @@ if(scheduled.length){
 const f=dispDate(copyDaySource);
 prev.innerHTML='<div class="copy-day-preview-title">'+f.day+' '+f.date+' — '+scheduled.length+' girl'+(scheduled.length>1?'s':'')+'</div><div class="copy-day-preview-list">'+
 scheduled.map(g=>{const e=getCalEntry(g.name,copyDaySource);return '<div class="copy-day-preview-item"><span class="cdp-name">'+g.name+'</span><span class="cdp-time">'+fmtTime12(e.start)+' — '+fmtTime12(e.end)+'</span></div>'}).join('')+'</div>';
-}else{prev.innerHTML='<div class="copy-day-preview-empty">No girls scheduled on this day</div>'}
+}else{prev.innerHTML='<div class="copy-day-preview-empty">'+t('cal.noScheduled')+'</div>'}
 /* Target buttons */
 const tc=document.getElementById('copyDayTargets');tc.innerHTML='';
 dates.forEach(ds=>{if(ds===copyDaySource)return;
 const f=dispDate(ds);const existing=getScheduledForDay(ds).length;
 const b=document.createElement('button');b.className='copy-day-btn'+(copyDayTargets.includes(ds)?' target-active':'');
-b.innerHTML=(ds===ts?'Today':f.day)+(existing>0?' <span style="opacity:.5;font-size:11px">('+existing+')</span>':'');
+b.innerHTML=(ds===ts?t('ui.today'):f.day)+(existing>0?' <span style="opacity:.5;font-size:11px">('+existing+')</span>':'');
 b.onclick=()=>{const idx=copyDayTargets.indexOf(ds);if(idx>=0)copyDayTargets.splice(idx,1);else copyDayTargets.push(ds);renderCopyDayModal()};tc.appendChild(b)});
 /* Select all targets shortcut */
 const allTargets=dates.filter(ds=>ds!==copyDaySource);
@@ -486,16 +486,16 @@ if(!overlay||!grid)return;
 const sel=compareSelected.map(name=>girls.find(g=>g.name===name)).filter(Boolean);
 if(sel.length<2)return;
 const stats=[
-{label:'Country',fn:g=>Array.isArray(g.country)?g.country.join(', '):(g.country||'\u2014')},
-{label:'Age',fn:g=>g.age||'\u2014',raw:g=>parseFloat(g.age)},
-{label:'Height',fn:g=>g.height?(g.height+' cm'):'\u2014',raw:g=>parseFloat(g.height)},
-{label:'Body Size',fn:g=>g.body||'\u2014',raw:g=>parseFloat(g.body)},
-{label:'Cup',fn:g=>g.cup||'\u2014',alpha:g=>g.cup?g.cup.trim().charAt(0).toUpperCase():null},
-{label:'30 mins',fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
-{label:'45 mins',fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
-{label:'60 mins',fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
-{label:'Experience',fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null},
-{label:'Labels',fn:g=>g.labels&&g.labels.length?g.labels.slice().sort().join(', '):'\u2014'}
+{label:t('fp.country'),fn:g=>Array.isArray(g.country)?g.country.join(', '):(g.country||'\u2014')},
+{label:t('field.age'),fn:g=>g.age||'\u2014',raw:g=>parseFloat(g.age)},
+{label:t('fp.height'),fn:g=>g.height?(g.height+' cm'):'\u2014',raw:g=>parseFloat(g.height)},
+{label:t('field.body'),fn:g=>g.body||'\u2014',raw:g=>parseFloat(g.body)},
+{label:t('fp.cupSize'),fn:g=>g.cup||'\u2014',alpha:g=>g.cup?g.cup.trim().charAt(0).toUpperCase():null},
+{label:t('field.rates30'),fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
+{label:t('field.rates45'),fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
+{label:t('field.rates60'),fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
+{label:t('field.experience'),fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null},
+{label:t('field.labels'),fn:g=>g.labels&&g.labels.length?g.labels.slice().sort().join(', '):'\u2014'}
 ];
 let html='<table class="compare-stat-table"><thead><tr><th></th>';
 sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo" alt="${g.name.replace(/"/g,'&quot;')}">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
@@ -590,12 +590,14 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
-<div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.specialJa)||g.special||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.langJa)||g.lang||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" style="margin-bottom:24px">${(siteLanguage==='ja'&&g.typeJa)||g.type||'\u2014'}</div>
-<div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc">${(siteLanguage==='ja'&&g.descJa)||g.desc}</div>
+<div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=siteLanguage==='ja'?(g.labelsJa&&g.labelsJa.length?g.labelsJa:g.labels||[]):(g.labels||[]);return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
+/* Auto-translate content fields in JP mode */
+if(siteLanguage==='ja'){[['profSpecialText',g.special],['profLangText',g.lang],['profTypeText',g.type],['profDescText',g.desc]].forEach(([id,src])=>{if(!src||src==='—')return;autoTranslate(src).then(tx=>{const el=document.getElementById(id);if(el)el.textContent=tx})});}
 if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
@@ -757,7 +759,7 @@ return d;
 function renderPageContent(pageId){
 const pd=pageData[pageId];if(!pd)return;
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=(siteLanguage==='ja'&&pd.announcementJa)?pd.announcementJa:pd.announcement;}}
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;if(siteLanguage==='ja')autoTranslate(pd.announcement).then(tx=>{if(el)el.textContent=tx});}}
 const wel=document.getElementById('homeWelcomeEn');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';
@@ -787,12 +789,10 @@ if(l.startsWith('## '))return '<h2 class="logo" style="margin-bottom:60px">'+l.s
 return '<p class="home-summary">'+l.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</p>';
 }).join('');
 }
-const _contactsSrc=(siteLanguage==='ja'&&pd.contactsJa)||pd.contacts;
-if(_contactsSrc){const ct=document.getElementById('employContacts');if(ct){
-let h=_contactsSrc.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>';});
-h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');
-ct.innerHTML=h.replace(/\n/g,'<br>');
+if(pd.contacts){const ct=document.getElementById('employContacts');if(ct){
+const _renderContacts=txt=>{let h=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;');h=h.replace(/(0\d[\d\s]{7,})/g,(m)=>{const num=m.replace(/\s/g,'');return '<a href="tel:+61'+num.slice(1)+'">'+m+'</a>'});h=h.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,'<a href="mailto:$1">$1</a>');ct.innerHTML=h.replace(/\n/g,'<br>')};
+_renderContacts(pd.contacts);
+if(siteLanguage==='ja')autoTranslate(pd.contacts).then(tx=>{if(ct)_renderContacts(tx)});
 }}
 }
 }

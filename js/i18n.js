@@ -73,7 +73,7 @@ const LANG_DICT = {
     'cal.copyDayTitle':'Copy Day Schedule','cal.copyDaySub':'Duplicate an entire day\'s roster to other days',
     'cal.sourceDay':'Source Day','cal.copyTo':'Copy To','cal.overwrite':'Overwrite existing entries on target days',
     'cal.copyDayBtn':'Copy Schedule','cal.bulkTimeSub':'Set availability for multiple days',
-    'cal.days':'Days','cal.startTime':'Start Time','cal.endTime':'End Time','cal.apply':'Apply','cal.all':'All',
+    'cal.days':'Days','cal.startTime':'Start Time','cal.endTime':'End Time','cal.apply':'Apply','cal.all':'All','cal.noScheduled':'No girls scheduled on this day',
     /* Form */
     'ui.addGirl':'Add Girl','form.addGirl':'Add New Girl','form.editGirl':'Edit Profile',
     'form.name':'Name','form.startDate':'Start Date','form.photos':'Photos',
@@ -165,7 +165,7 @@ const LANG_DICT = {
     'cal.copyDayTitle':'日程をコピー','cal.copyDaySub':'1日のシフトを他の日にコピー',
     'cal.sourceDay':'コピー元','cal.copyTo':'コピー先','cal.overwrite':'コピー先の既存データを上書き',
     'cal.copyDayBtn':'スケジュールをコピー','cal.bulkTimeSub':'複数日の出勤時間を設定',
-    'cal.days':'日程','cal.startTime':'開始時間','cal.endTime':'終了時間','cal.apply':'適用','cal.all':'全て',
+    'cal.days':'日程','cal.startTime':'開始時間','cal.endTime':'終了時間','cal.apply':'適用','cal.all':'全て','cal.noScheduled':'本日は予定なし',
     /* Form */
     'ui.addGirl':'女の子を追加','form.addGirl':'新規プロフィール追加','form.editGirl':'プロフィール編集',
     'form.name':'名前','form.startDate':'開始日','form.photos':'写真',
@@ -218,6 +218,21 @@ function setLang(lang) {
   if (_calP&&_calP.classList.contains('active')&&typeof renderCalendar==='function') renderCalendar();
   const _anP=document.getElementById('analyticsPage');
   if (_anP&&_anP.classList.contains('active')&&typeof renderAnalytics==='function') renderAnalytics();
+}
+
+/* Auto-translate EN content via MyMemory (free, no key) */
+const _atCache = new Map();
+async function autoTranslate(text) {
+  if (!text || !text.trim()) return '';
+  const k = text.trim();
+  if (_atCache.has(k)) return _atCache.get(k);
+  try {
+    const r = await fetch('https://api.mymemory.translated.net/get?q=' + encodeURIComponent(k.slice(0, 500)) + '&langpair=en|ja');
+    const d = await r.json();
+    const result = (d.responseStatus === 200 && d.responseData && d.responseData.translatedText) ? d.responseData.translatedText : k;
+    _atCache.set(k, result);
+    return result;
+  } catch (e) { _atCache.set(k, k); return k; }
 }
 
 function applyLang() {
