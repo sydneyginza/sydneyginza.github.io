@@ -11,6 +11,7 @@ const LANG_DICT = {
     'home.tagline':"Sydney's Premier Experience",
     'home.announcement':'Announcement','home.newGirls':'New Girls',
     'home.location':'Location','home.hours':'Hours',
+    'home.announceDefault':"Discover our exclusive selection of stunning girls. Each profile is carefully curated to ensure the highest quality experience. Browse our roster to find your perfect match.",
     /* Section titles */
     'page.roster':'Roster','page.girls':'Girls','page.rates':'Rates',
     'page.employment':'Employment','page.favorites':'Favorites',
@@ -103,6 +104,7 @@ const LANG_DICT = {
     'home.tagline':'シドニー最高のエクスペリエンス',
     'home.announcement':'お知らせ','home.newGirls':'新人',
     'home.location':'場所','home.hours':'営業時間',
+    'home.announceDefault':'魅力的な女の子をご覧ください。各プロフィールは最高の体験をお届けするよう丁寧に作成されています。ロースターをブラウズして、あなたにぴったりの女の子を見つけましょう。',
     /* Section titles */
     'page.roster':'シフト','page.girls':'女の子','page.rates':'料金表',
     'page.employment':'求人情報','page.favorites':'お気に入り',
@@ -192,6 +194,7 @@ const LANG_DICT = {
     'home.tagline':'시드니 최고의 경험',
     'home.announcement':'공지사항','home.newGirls':'신규',
     'home.location':'위치','home.hours':'영업시간',
+    'home.announceDefault':'아름다운 여성들의 엄선된 라인업을 확인해 보세요. 각 프로필은 최고의 경험을 제공하기 위해 정성껏 준비되었습니다. 로스터를 둘러보고 딱 맞는 분을 찾아보세요.',
     'page.roster':'스케줄','page.girls':'여자들','page.rates':'요금표',
     'page.employment':'채용정보','page.favorites':'즐겨찾기',
     'field.age':'나이','field.body':'체형','field.height':'키','field.cup':'컵',
@@ -261,6 +264,7 @@ const LANG_DICT = {
     'home.tagline':'悉尼最高端的体验',
     'home.announcement':'公告','home.newGirls':'新人',
     'home.location':'地址','home.hours':'营业时间',
+    'home.announceDefault':'探索我们精心挑选的迷人女孩。每份档案都经过精心策划，确保为您提供最高品质的体验。浏览我们的名单，找到最适合您的她。',
     'page.roster':'排班','page.girls':'女孩','page.rates':'价格表',
     'page.employment':'招聘信息','page.favorites':'收藏夹',
     'field.age':'年龄','field.body':'身材','field.height':'身高','field.cup':'罩杯',
@@ -403,12 +407,17 @@ function applyLang() {
   (function() {
     var annEl = document.getElementById('homeAnnounceText');
     if (!annEl) return;
-    if (!annEl.dataset.raw) annEl.dataset.raw = annEl.textContent.trim();
     if (siteLanguage === 'en') {
+      /* Restore English — use stored page-data source or leave as-is */
       if (annEl.dataset.raw) annEl.textContent = annEl.dataset.raw;
+      return;
+    }
+    if (annEl.dataset.raw) {
+      /* Admin has set custom content via page data — async translate */
+      autoTranslate(annEl.dataset.raw).then(function(tx) { if (annEl) annEl.textContent = tx; });
     } else {
-      var annSrc = annEl.dataset.raw;
-      if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
+      /* Static default text — use LANG_DICT (instant, no API needed) */
+      annEl.textContent = t('home.announceDefault');
     }
   })();
   /* Auto-translate visible lang-en sections for non-EN/JA languages */
