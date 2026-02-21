@@ -169,9 +169,6 @@ fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 }
 
-/* Load page content data and render */
-if(typeof loadPageData==='function'){try{await loadPageData();renderPageContent('home');renderPageContent('rates');renderPageContent('employment')}catch(e){console.error('Page data load error:',e)}}
-
 /* Check roster notifications after data is ready */
 if(typeof checkFavoritesOnRoster==='function'){try{checkFavoritesOnRoster()}catch(e){}}
 
