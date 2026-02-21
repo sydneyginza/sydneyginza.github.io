@@ -763,7 +763,7 @@ const _tx=siteLanguage!=='en';
 const _txKids=el=>{if(!_tx||!el)return;el.querySelectorAll('h2,p,address').forEach(c=>{const s=c.textContent.trim();if(s)autoTranslate(s).then(tx=>{if(c)c.textContent=tx})})};
 const _txEl=(el,src)=>{if(!_tx||!el||!src)return;autoTranslate(src).then(tx=>{if(el)el.textContent=tx})};
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;const _setTicker=txt=>{const safe=txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const dur=Math.max(10,txt.length*0.12);el.innerHTML=`<div class="announce-ticker-wrap"><span class="announce-ticker-track" style="animation-duration:${dur}s">${safe}&emsp;&#9670;&emsp;${safe}&emsp;&#9670;&emsp;</span></div>`};_setTicker(pd.announcement);if(_tx)autoTranslate(pd.announcement).then(tx=>{_setTicker(tx)});}}
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){el.dataset.raw=pd.announcement;el.textContent=pd.announcement;if(_tx)autoTranslate(pd.announcement).then(tx=>{if(el)el.textContent=tx;});}}
 const wel=document.getElementById('homeWelcomeEn');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';

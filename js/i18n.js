@@ -394,14 +394,18 @@ function applyLang() {
     var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
     el.style.display = (match || fallback) ? '' : 'none';
   });
-  /* Auto-translate home announcement paragraph for all non-EN languages */
-  if (siteLanguage !== 'en') {
+  /* Sync announcement paragraph with current language */
+  (function() {
     var annEl = document.getElementById('homeAnnounceText');
-    if (annEl) {
-      var annSrc = annEl.dataset.raw || annEl.textContent.trim();
+    if (!annEl) return;
+    if (!annEl.dataset.raw) annEl.dataset.raw = annEl.textContent.trim();
+    if (siteLanguage === 'en') {
+      if (annEl.dataset.raw) annEl.textContent = annEl.dataset.raw;
+    } else {
+      var annSrc = annEl.dataset.raw;
       if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
     }
-  }
+  })();
   /* Auto-translate static lang-en content for non-EN/JA languages */
   if (!knownLangs.includes(siteLanguage)) {
     document.querySelectorAll('.lang-section.lang-en').forEach(function(section) {
