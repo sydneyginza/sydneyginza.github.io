@@ -108,7 +108,7 @@ pane.appendChild(makeRangeSection(t('fp.age'),'ageMin','ageMax','age'));
 
 /* Body Size */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-pane.appendChild(makeRangeSection('Body Size','bodyMin','bodyMax','body'));
+pane.appendChild(makeRangeSection(t('fp.bodySize'),'bodyMin','bodyMax','body'));
 
 /* Height */
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
