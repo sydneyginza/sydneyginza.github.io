@@ -4,7 +4,7 @@
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
 /* Sort buttons */
 const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
-const sorts=[{key:'name',label:'Name'},{key:'newest',label:'Date Added'},{key:'age',label:'Age'},{key:'body',label:'Size'},{key:'height',label:'Height'},{key:'cup',label:'Cup'}];
+const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')}];
 sorts.forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(gridSort===s.key?' active':'');b.textContent=s.label;b.onclick=()=>{if(gridSort===s.key){gridSortDir=gridSortDir==='asc'?'desc':'asc'}else{gridSort=s.key;gridSortDir=s.key==='newest'?'desc':'asc'}renderFilters();renderGrid();renderRoster();renderFavoritesGrid()};fb.appendChild(b)});
 const dirBtn=document.createElement('button');dirBtn.className='sort-dir-btn';dirBtn.title=gridSortDir==='asc'?'Ascending':'Descending';dirBtn.innerHTML=gridSortDir==='asc'?'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>':'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>';dirBtn.onclick=()=>{gridSortDir=gridSortDir==='asc'?'desc':'asc';renderFilters();renderGrid();renderRoster();renderFavoritesGrid()};fb.appendChild(dirBtn);
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
@@ -26,8 +26,8 @@ const anyVisible=nowCount||sharedFilters.availableNow||todayCount||sharedFilters
 bar.innerHTML='';
 if(!anyVisible){bar.style.display='none';return}
 bar.style.display='';
-if(nowCount>0||sharedFilters.availableNow){const btn=document.createElement('button');btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');const countLabel=nowCount===1?'1 girl available now':nowCount+' girls available now';btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;if(sharedFilters.availableNow){sharedFilters.availableToday=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn)}
-if(todayCount>0||sharedFilters.availableToday){const btn2=document.createElement('button');btn2.className='avail-today-pill'+(sharedFilters.availableToday?' active':'');const countLabel2=todayCount===1?'1 girl available today':todayCount+' girls available today';btn2.innerHTML=`<span class="avail-today-dot"></span>${countLabel2}`;btn2.onclick=()=>{sharedFilters.availableToday=!sharedFilters.availableToday;if(sharedFilters.availableToday){sharedFilters.availableNow=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn2)}
+if(nowCount>0||sharedFilters.availableNow){const btn=document.createElement('button');btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');const countLabel=(nowCount===1&&siteLanguage==='en')?'1 girl available now':t('ui.girlsAvailNow').replace('{n}',nowCount);btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;if(sharedFilters.availableNow){sharedFilters.availableToday=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn)}
+if(todayCount>0||sharedFilters.availableToday){const btn2=document.createElement('button');btn2.className='avail-today-pill'+(sharedFilters.availableToday?' active':'');const countLabel2=(todayCount===1&&siteLanguage==='en')?'1 girl available today':t('ui.girlsAvailToday').replace('{n}',todayCount);btn2.innerHTML=`<span class="avail-today-dot"></span>${countLabel2}`;btn2.onclick=()=>{sharedFilters.availableToday=!sharedFilters.availableToday;if(sharedFilters.availableToday){sharedFilters.availableNow=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn2)}
 futureDates.forEach(ds=>{const f=dispDate(ds);const label=f.day+' '+f.date;const isActive=sharedFilters.availableDate===ds;const btn3=document.createElement('button');btn3.className='avail-date-pill'+(isActive?' active':'');btn3.textContent=label;btn3.onclick=()=>{sharedFilters.availableDate=isActive?null:ds;if(sharedFilters.availableDate){sharedFilters.availableNow=false;sharedFilters.availableToday=false}onFiltersChanged()};bar.appendChild(btn3)})}
 
 function applySortOrder(list){
@@ -81,19 +81,19 @@ function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar
 const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
-availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?'Today':f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
+availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
 
 /* Available Now / Today quick-filters */
 renderAvailNowBar()}
 function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';
-if(!rosterDateFilter){rg.innerHTML='<div class="empty-msg">No girls available this week</div>';return}
+if(!rosterDateFilter){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsWeek')}</div>`;return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
 let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 
 applySortOrder(filtered);
-if(!filtered.length){rg.innerHTML='<div class="empty-msg">No girls available for this date</div>';return}
+if(!filtered.length){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsDate')}</div>`;return}
 let _rosterHoverTimer;filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name):'<div class="silhouette"></div>';const isToday=ds===ts;const entry=getCalEntry(g.name,ds);
 const liveNow=isToday&&g.name&&isAvailableNow(g.name);
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
@@ -113,7 +113,7 @@ filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.ind
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name):'<div class="silhouette"></div>';
 const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
-const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>Available Now (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">Available Today (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
+const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>${t('avail.now')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">${t('avail.today')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})</div>`:'');
 const fav=cardFavBtn(g.name);const cmp=cardCompareBtn(g.name);
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${avail}<div class="card-hover-line"></div></div>`;
 el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare'))return;profileReturnPage='favoritesPage';showProfile(ri)};return el});if(card)fg.appendChild(card)});
@@ -128,7 +128,7 @@ const vals=[
 {label:'45 mins',key:'val2'},
 {label:'60 mins',key:'val3'}
 ];
-let html='<thead><tr><th style="text-align:left">Rates</th><th style="text-align:left">Price Range</th></tr></thead><tbody>';
+let html=`<thead><tr><th style="text-align:left">${t('table.rates')}</th><th style="text-align:left">${t('table.priceRange')}</th></tr></thead><tbody>`;
 vals.forEach(v=>{
 const nums=[];
 girls.forEach(g=>{

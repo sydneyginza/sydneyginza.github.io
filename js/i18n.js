@@ -47,6 +47,28 @@ const LANG_DICT = {
     'compare.clear':'Clear','compare.open':'Compare','compare.done':'Close',
     /* Employment contacts */
     'emp.contacts':'Contacts',
+    /* Admin nav */
+    'nav.calendar':'Calendar','nav.analytics':'Analytics','nav.menu':'Menu','ui.admin':'Admin',
+    /* Sort buttons */
+    'sort.name':'Name','sort.dateAdded':'Date Added','sort.age':'Age','sort.size':'Size','sort.height':'Height','sort.cup':'Cup',
+    /* Date & time */
+    'ui.today':'Today',
+    'date.sun':'Sun','date.mon':'Mon','date.tue':'Tue','date.wed':'Wed','date.thu':'Thu','date.fri':'Fri','date.sat':'Sat',
+    'date.jan':'Jan','date.feb':'Feb','date.mar':'Mar','date.apr':'Apr','date.may':'May','date.jun':'Jun',
+    'date.jul':'Jul','date.aug':'Aug','date.sep':'Sep','date.oct':'Oct','date.nov':'Nov','date.dec':'Dec',
+    /* Availability counts */
+    'ui.girlsAvailNow':'{n} girls available now','ui.girlsAvailToday':'{n} girls available today',
+    /* Empty states */
+    'ui.noGirlsWeek':'No girls available this week','ui.noGirlsDate':'No girls available for this date',
+    /* Value table */
+    'table.rates':'Rates','table.priceRange':'Price Range',
+    /* Filter pane */
+    'fp.search':'Search','fp.country':'Country','fp.age':'Age','fp.bodySize':'Body Size',
+    'fp.height':'Height (cm)','fp.cupSize':'Cup Size',
+    'fp.rates30':'Rates 30 mins','fp.rates45':'Rates 45 mins','fp.rates60':'Rates 60 mins',
+    'fp.experience':'Experience','fp.labels':'Labels','fp.clearAll':'Clear All Filters','fp.rangeSep':'to',
+    /* Calendar */
+    'cal.profile':'Profile','cal.allWeek':'All Week','cal.clear':'Clear',
   },
   ja: {
     /* Navigation */
@@ -94,6 +116,28 @@ const LANG_DICT = {
     'compare.clear':'クリア','compare.open':'比較','compare.done':'閉じる',
     /* Employment contacts */
     'emp.contacts':'お問い合わせ',
+    /* Admin nav */
+    'nav.calendar':'カレンダー','nav.analytics':'分析','nav.menu':'メニュー','ui.admin':'管理',
+    /* Sort buttons */
+    'sort.name':'名前','sort.dateAdded':'登録日','sort.age':'年齢','sort.size':'サイズ','sort.height':'身長','sort.cup':'カップ',
+    /* Date & time */
+    'ui.today':'今日',
+    'date.sun':'日','date.mon':'月','date.tue':'火','date.wed':'水','date.thu':'木','date.fri':'金','date.sat':'土',
+    'date.jan':'1月','date.feb':'2月','date.mar':'3月','date.apr':'4月','date.may':'5月','date.jun':'6月',
+    'date.jul':'7月','date.aug':'8月','date.sep':'9月','date.oct':'10月','date.nov':'11月','date.dec':'12月',
+    /* Availability counts */
+    'ui.girlsAvailNow':'現在{n}人出勤中','ui.girlsAvailToday':'本日{n}人出勤',
+    /* Empty states */
+    'ui.noGirlsWeek':'今週の出勤予定はありません','ui.noGirlsDate':'この日の出勤予定はありません',
+    /* Value table */
+    'table.rates':'料金','table.priceRange':'料金範囲',
+    /* Filter pane */
+    'fp.search':'検索','fp.country':'国籍','fp.age':'年齢','fp.bodySize':'体型',
+    'fp.height':'身長 (cm)','fp.cupSize':'カップサイズ',
+    'fp.rates30':'料金 30分','fp.rates45':'料金 45分','fp.rates60':'料金 60分',
+    'fp.experience':'経験','fp.labels':'ラベル','fp.clearAll':'フィルターをすべて解除','fp.rangeSep':'〜',
+    /* Calendar */
+    'cal.profile':'女の子','cal.allWeek':'全日','cal.clear':'クリア',
   }
 };
 
@@ -119,6 +163,13 @@ function setLang(lang) {
     if (typeof showProfile === 'function') showProfile(currentProfileIdx);
   }
   if (typeof renderPageContent === 'function') { renderPageContent('home'); renderPageContent('rates'); }
+  if (typeof renderValueTable === 'function') renderValueTable();
+  if (typeof renderFilterPane === 'function') {
+    renderFilterPane('girlsFilterPane');renderFilterPane('rosterFilterPane');
+    renderFilterPane('calFilterPane');renderFilterPane('profileFilterPane');
+  }
+  const _calP=document.getElementById('calendarPage');
+  if (_calP&&_calP.classList.contains('active')&&typeof renderCalendar==='function') renderCalendar();
 }
 
 function applyLang() {
