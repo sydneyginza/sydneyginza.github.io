@@ -818,3 +818,31 @@ body{padding-bottom:60px}
 .footer-privacy{font-size:10px;color:rgba(255,255,255,0.18);margin-top:6px;letter-spacing:0.5px}
 .footer-privacy-opt{background:none;border:none;color:rgba(255,255,255,0.28);cursor:pointer;font-size:10px;text-decoration:underline;padding:0;letter-spacing:0.5px;transition:color .2s;font-family:inherit}
 .footer-privacy-opt:hover{color:rgba(255,255,255,0.6)}
+
+/* ── Card Hover Preview ── */
+#cardHoverPreview{position:fixed;z-index:300;pointer-events:none;background:rgba(14,12,22,0.97);border:1px solid rgba(180,74,255,0.3);padding:14px 16px;min-width:200px;display:none;backdrop-filter:blur(12px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+#cardHoverPreview.visible{display:block}
+@media(hover:none){#cardHoverPreview{display:none!important}}
+.chp-name{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:#fff;margin-bottom:6px}
+.chp-avail{font-size:11px;color:rgba(255,204,68,0.85);margin-bottom:8px}
+.chp-stats{display:flex;flex-direction:column;gap:4px}
+.chp-row{display:flex;justify-content:space-between;gap:16px;font-size:12px}
+.chp-row span:first-child{color:rgba(255,255,255,0.4);white-space:nowrap}
+.chp-row span:last-child{color:#fff;font-weight:600;text-align:right}
+.chp-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0}
+
+/* ── Sticky Filter Wrap + Active Filter Chips ── */
+#listPage .sticky-filter-wrap{position:sticky;top:70px;z-index:99;background:var(--bg-dark);border-bottom:1px solid rgba(255,255,255,0.04)}
+@media(max-width:768px){#listPage .sticky-filter-wrap{position:static;border-bottom:none}}
+.active-filter-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 10px;align-items:center}
+.active-filter-chip{background:rgba(180,74,255,0.12);border:1px solid rgba(180,74,255,0.3);color:rgba(255,255,255,0.75);font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;padding:3px 10px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.active-filter-chip:hover{background:rgba(180,74,255,0.22);color:#fff}
+.chip-x{color:rgba(180,74,255,0.7);font-size:14px;line-height:1}
+.chip-clear-all{background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.35);font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.5px;padding:3px 10px;cursor:pointer;transition:all .2s}
+.chip-clear-all:hover{border-color:rgba(255,68,68,0.4);color:rgba(255,68,68,0.7)}
+
+/* ── Announcement Ticker ── */
+.announce-ticker-wrap{overflow:hidden;border-left:3px solid var(--accent);padding:8px 12px;background:rgba(180,74,255,0.04);border-radius:0 4px 4px 0;cursor:default}
+.announce-ticker-track{display:inline-block;white-space:nowrap;animation:ginza-ticker 20s linear infinite;color:var(--text-dim);font-size:14px}
+.announce-ticker-wrap:hover .announce-ticker-track{animation-play-state:paused}
+@keyframes ginza-ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}

@@ -182,6 +182,29 @@ let debounce;
 function clampAndApply(){const key=inp.dataset.fkey;let val=inp.value.trim();if(val===''){sharedFilters[key]=null}else{let num=parseFloat(val);if(isNaN(num)){sharedFilters[key]=null;return}const lo=inp.hasAttribute('min')?parseFloat(inp.min):null;const hi=inp.hasAttribute('max')?parseFloat(inp.max):null;if(lo!=null&&num<lo){num=lo;inp.value=num}if(hi!=null&&num>hi){num=hi;inp.value=num}const def=inp.dataset.default;sharedFilters[key]=(def!==''&&num===parseFloat(def))?null:num}onFiltersChanged()}
 inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(clampAndApply,400)});
 inp.addEventListener('blur',clampAndApply)})}
+function renderActiveFilterChips(){
+const bar=document.getElementById('activeFilterChips');if(!bar)return;
+const chips=[];
+if(sharedFilters.nameSearch)chips.push({label:'🔍 '+sharedFilters.nameSearch,rm:()=>{sharedFilters.nameSearch='';onFiltersChanged()}});
+sharedFilters.country.forEach(c=>chips.push({label:c,rm:()=>{sharedFilters.country=sharedFilters.country.filter(x=>x!==c);onFiltersChanged()}}));
+if(sharedFilters.ageMin!=null||sharedFilters.ageMax!=null)chips.push({label:'Age '+(sharedFilters.ageMin??'')+'–'+(sharedFilters.ageMax??''),rm:()=>{sharedFilters.ageMin=null;sharedFilters.ageMax=null;onFiltersChanged()}});
+if(sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null)chips.push({label:'Body '+(sharedFilters.bodyMin??'')+'–'+(sharedFilters.bodyMax??''),rm:()=>{sharedFilters.bodyMin=null;sharedFilters.bodyMax=null;onFiltersChanged()}});
+if(sharedFilters.heightMin!=null||sharedFilters.heightMax!=null)chips.push({label:'Height '+(sharedFilters.heightMin??'')+'–'+(sharedFilters.heightMax??''),rm:()=>{sharedFilters.heightMin=null;sharedFilters.heightMax=null;onFiltersChanged()}});
+if(sharedFilters.cupSize)chips.push({label:'Cup '+sharedFilters.cupSize,rm:()=>{sharedFilters.cupSize=null;onFiltersChanged()}});
+if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null)chips.push({label:'30min '+(sharedFilters.val1Min??'')+'–'+(sharedFilters.val1Max??''),rm:()=>{sharedFilters.val1Min=null;sharedFilters.val1Max=null;onFiltersChanged()}});
+if(sharedFilters.val2Min!=null||sharedFilters.val2Max!=null)chips.push({label:'45min '+(sharedFilters.val2Min??'')+'–'+(sharedFilters.val2Max??''),rm:()=>{sharedFilters.val2Min=null;sharedFilters.val2Max=null;onFiltersChanged()}});
+if(sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)chips.push({label:'60min '+(sharedFilters.val3Min??'')+'–'+(sharedFilters.val3Max??''),rm:()=>{sharedFilters.val3Min=null;sharedFilters.val3Max=null;onFiltersChanged()}});
+if(sharedFilters.experience)chips.push({label:sharedFilters.experience,rm:()=>{sharedFilters.experience=null;onFiltersChanged()}});
+sharedFilters.labels.forEach(l=>chips.push({label:l,rm:()=>{sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);onFiltersChanged()}}));
+if(sharedFilters.availableNow)chips.push({label:t('avail.now'),rm:()=>{sharedFilters.availableNow=false;onFiltersChanged()}});
+if(sharedFilters.availableToday)chips.push({label:t('avail.today'),rm:()=>{sharedFilters.availableToday=false;onFiltersChanged()}});
+if(sharedFilters.availableDate){const f=dispDate(sharedFilters.availableDate);chips.push({label:f.day+' '+f.date,rm:()=>{sharedFilters.availableDate=null;onFiltersChanged()}})}
+bar.innerHTML='';
+if(!chips.length){bar.style.display='none';return}
+bar.style.display='flex';
+chips.forEach(c=>{const ch=document.createElement('button');ch.className='active-filter-chip';ch.innerHTML=c.label+' <span class="chip-x">×</span>';ch.onclick=c.rm;bar.appendChild(ch)});
+const clr=document.createElement('button');clr.className='active-filter-chip chip-clear-all';clr.textContent='Clear all';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};bar.appendChild(clr);
+}
 function onFiltersChanged(){
 const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
 const cursorPos=hadFocus?document.activeElement.selectionStart:0;
@@ -195,7 +218,7 @@ renderFilters();renderGrid();renderRoster();
 updateFilterToggle();pushFiltersToURL();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
 if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
-if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}}}
+if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}};renderActiveFilterChips()}
 const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','analyticsPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
@@ -711,7 +734,7 @@ employment:[
 function extractPageDefaults(pageId){
 const d={};
 if(pageId==='home'){
-const at=document.getElementById('homeAnnounceText');d.announcement=at?at.textContent:'';
+const at=document.getElementById('homeAnnounceText');d.announcement=at?(at.dataset.raw||at.textContent):'';
 const wel=document.getElementById('homeWelcome');
 if(wel){const h=wel.querySelector('h2');d.welcomeTitle=h?h.textContent:'';const ps=wel.querySelectorAll('p.home-summary');d.welcomeBody=Array.from(ps).map(p=>p.textContent).join('\n\n');}
 const loc=document.getElementById('homeLocation');d.location=loc?loc.textContent.replace(/\n/g,'\n').trim():'';
@@ -733,7 +756,7 @@ return d;
 function renderPageContent(pageId){
 const pd=pageData[pageId];if(!pd)return;
 if(pageId==='home'){
-if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el)el.textContent=pd.announcement;}
+if(pd.announcement){const el=document.getElementById('homeAnnounceText');if(el){const safe=pd.announcement.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const dur=Math.max(10,pd.announcement.length*0.12);el.dataset.raw=pd.announcement;el.innerHTML=`<div class="announce-ticker-wrap"><span class="announce-ticker-track" style="animation-duration:${dur}s">${safe}&emsp;&#9670;&emsp;${safe}&emsp;&#9670;&emsp;</span></div>`;}}
 const wel=document.getElementById('homeWelcome');
 if(wel&&(pd.welcomeTitle||pd.welcomeBody)){
 let h='';

@@ -144,7 +144,10 @@
 </section></div>
 
 <div class="page" id="listPage"><section class="section">
+<div class="sticky-filter-wrap">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag">Ginza Empire</div><div class="section-title">Girls</div></div><div class="filter-bar" id="filterBar"><div class="skeleton-fade" id="girlsFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
+<div id="activeFilterChips" class="active-filter-chips" style="display:none"></div>
+</div>
 <div id="availNowBar"></div>
 <div class="page-with-sidebar">
 <div class="page-main-content">
@@ -450,5 +453,6 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <script src="/js/forms.js"></script>
 <script src="/js/analytics.js"></script>
 <script>(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})()</script>
+<div id="cardHoverPreview" class="card-hover-preview"></div>
 </body>
 </html>

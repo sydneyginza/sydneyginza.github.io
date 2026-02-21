@@ -15,6 +15,7 @@ const VisitorLog=(function(){
 const UUID_KEY='ginza_visitor_uuid';
 const OPTOUT_KEY='ginza_analytics_optout';
 const LOG_DIR='data/logs';
+const LOG_MAX=500; /* max entries per day file; oldest trimmed on overflow */
 
 /* ── In-memory queue of entries to flush to GitHub ── */
 let _queue=[];
@@ -166,6 +167,10 @@ async function flush(){
       catch(e){existing=[];}
     }
 
+    /* Cap file size — trim oldest entries if needed */
+    if(existing.length+entries.length>LOG_MAX){
+      existing=existing.slice(existing.length+entries.length-LOG_MAX);
+    }
     /* Append all queued entries */
     existing.push(...entries);
 
