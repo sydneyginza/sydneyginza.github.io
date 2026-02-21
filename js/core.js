@@ -10,8 +10,9 @@ const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
 let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
+let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
 let GT = true;
 
@@ -263,9 +264,31 @@ async function saveCalData(retryOnConflict = true) {
     }
     calSha = (await r.json()).content.sha;
     updateCalCache();
+    /* Update roster history for past/today entries */
+    const todayStr=fmtDate(getAEDTDate());let histChanged=false;
+    for(const n in calData){for(const dt of Object.keys(calData[n]||{})){const ce=calData[n][dt];if(dt<=todayStr&&ce&&ce.start&&ce.end){if(!rosterHistory[n]||dt>rosterHistory[n]){rosterHistory[n]=dt;histChanged=true}}}}
+    if(histChanged)saveRosterHistory();
     return true;
   } catch (e) { showToast('Calendar save failed', 'error'); return false; }
 }
+
+/* === Roster History === */
+async function loadRosterHistory(){
+  try{
+    const r=await fetchWithRetry(`${DATA_API}/${RHP}`,{headers:proxyHeaders()});
+    if(r.ok){const d=await r.json();rosterHistorySha=d.sha;rosterHistory=dec(d.content)||{};return}
+    if(r.status===404){rosterHistorySha=null;rosterHistory={}}
+  }catch(_){}
+}
+async function saveRosterHistory(){
+  try{
+    const body={message:'Update roster history',content:enc(rosterHistory)};
+    if(rosterHistorySha)body.sha=rosterHistorySha;
+    const r=await fetchWithRetry(`${DATA_API}/${RHP}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)});
+    if(r.ok)rosterHistorySha=(await r.json()).content.sha;
+  }catch(_){}
+}
+function getLastRostered(name){return rosterHistory[name]||null}
 
 /* === Page Content Data === */
 const PP = 'data/pages.json';

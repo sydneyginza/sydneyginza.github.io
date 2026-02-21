@@ -132,7 +132,7 @@ renderedFromCache=true;
 }
 
 /* Phase 2: Fetch fresh data in background */
-const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),loadCalData()]);
+const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),loadCalData(),loadRosterHistory()]);
 
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 
@@ -174,6 +174,9 @@ if(typeof loadPageData==='function'){try{await loadPageData();renderPageContent(
 
 /* Check roster notifications after data is ready */
 if(typeof checkFavoritesOnRoster==='function'){try{checkFavoritesOnRoster()}catch(e){}}
+
+/* Apply saved language preference */
+if(typeof applyLang==='function'){try{applyLang()}catch(e){}}
 
 }catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}
 })();
