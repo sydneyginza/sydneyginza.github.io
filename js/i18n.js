@@ -394,15 +394,29 @@ function applyLang() {
     var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
     el.style.display = (match || fallback) ? '' : 'none';
   });
-  /* Auto-translate static lang-en section text nodes for KO/ZH */
+  /* Auto-translate static lang-en content for non-EN/JA languages */
   if (!knownLangs.includes(siteLanguage)) {
     document.querySelectorAll('.lang-section.lang-en').forEach(function(section) {
       if (section.style.display === 'none') return;
-      section.querySelectorAll('h2, p, address').forEach(function(c) {
-        var src = c.textContent.trim();
-        if (src) autoTranslate(src).then(function(tx) { if (c) c.textContent = tx; });
-      });
+      var tag = section.tagName.toLowerCase();
+      /* Leaf text element (p, address) — translate the element itself */
+      if (tag === 'p' || tag === 'address') {
+        var src = section.textContent.trim();
+        if (src) autoTranslate(src).then(function(tx) { if (section) section.textContent = tx; });
+      } else {
+        /* Container element (article, div) — translate each text child */
+        section.querySelectorAll('h2, p, address').forEach(function(c) {
+          var src = c.textContent.trim();
+          if (src) autoTranslate(src).then(function(tx) { if (c) c.textContent = tx; });
+        });
+      }
     });
+    /* Also translate the home announcement paragraph (not a lang-section) */
+    var annEl = document.getElementById('homeAnnounceText');
+    if (annEl) {
+      var annSrc = annEl.textContent.trim();
+      if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
+    }
   }
   /* Lang selector button label + active state */
   var labels = {en:'EN', ja:'JP', ko:'KO', zh:'ZH'};
