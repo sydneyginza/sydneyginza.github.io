@@ -372,6 +372,10 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .home-divider-sm{width:50px;height:2px;background:var(--accent);margin-bottom:20px}
 .home-announce{color:var(--text-dim);font-size:15px;line-height:1.8;min-height:100px}
 .home-announce p{margin-bottom:12px}
+.announce-ticker-wrap{overflow:hidden;border-left:3px solid var(--accent);padding:8px 12px;background:rgba(180,74,255,0.04);border-radius:0 4px 4px 0;cursor:default}
+.announce-ticker-track{display:inline-block;white-space:nowrap;animation:ginza-ticker 20s linear infinite;color:var(--text-dim);font-size:14px}
+.announce-ticker-wrap:hover .announce-ticker-track{animation-play-state:paused}
+@keyframes ginza-ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .home-mid-right{display:flex;flex-direction:column;align-items:flex-end}
 .home-newgirls{display:flex;align-items:center;gap:24px}
 .ng-nav{display:flex;flex-direction:column;align-items:center;gap:12px}

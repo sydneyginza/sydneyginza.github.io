@@ -394,6 +394,14 @@ function applyLang() {
     var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
     el.style.display = (match || fallback) ? '' : 'none';
   });
+  /* Auto-translate home announcement paragraph for all non-EN languages */
+  if (siteLanguage !== 'en') {
+    var annEl = document.getElementById('homeAnnounceText');
+    if (annEl) {
+      var annSrc = annEl.dataset.raw || annEl.textContent.trim();
+      if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
+    }
+  }
   /* Auto-translate static lang-en content for non-EN/JA languages */
   if (!knownLangs.includes(siteLanguage)) {
     document.querySelectorAll('.lang-section.lang-en').forEach(function(section) {
@@ -411,12 +419,6 @@ function applyLang() {
         });
       }
     });
-    /* Also translate the home announcement paragraph (not a lang-section) */
-    var annEl = document.getElementById('homeAnnounceText');
-    if (annEl) {
-      var annSrc = annEl.textContent.trim();
-      if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
-    }
   }
   /* Lang selector button label + active state */
   var labels = {en:'EN', ja:'JP', ko:'KO', zh:'ZH'};
