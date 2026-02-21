@@ -2,6 +2,8 @@
 
 const LANG_DICT = {
   en: {
+    'page.title':'GINZA EMPIRE',
+    'page.titlelower':'Ginza Empire',
     /* Section titles */
     'page.roster':'Roster',
     'page.girls':'Girls',
@@ -47,6 +49,7 @@ const LANG_DICT = {
     'field.description':'Description',
     'field.special':'Special Requests',
     'field.labels':'Labels',
+    'field.photocount':'(0 / 10)',
     /* Availability */
     'avail.now':'Available Now',
     'avail.today':'Available Today',
@@ -58,6 +61,7 @@ const LANG_DICT = {
     'ui.addFav':'Add to Favorites',
     'ui.favorited':'Favorited',
     'ui.edit':'Edit Profile',
+    'ui.editPage':'Edit Page',
     'ui.delete':'Delete',
     'ui.compare':'Compare',
     'ui.linkCopied':'Link copied!',
@@ -66,6 +70,9 @@ const LANG_DICT = {
     'ui.favEmpty':'No favorites yet. Tap the heart on any profile to save it here.',
     'ui.noResults':'No girls match your filters.',
     'ui.search':'Search by name...',
+    'ui.type':'(select one or more)',
+    'ui.select':'(type and press Enter)',
+    'ui.confirm':'Are you sure?',
     /* Filters */
     'filter.availNow':'Available Now',
     'filter.availToday':'Available Today',
