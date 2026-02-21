@@ -150,7 +150,8 @@ const wrap=sec.querySelector('.fp-options');
 exps.forEach(e=>{
 const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
 const cnt=namedGirls.filter(g=>g.exp===e).length;
-btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${e}<span class="fp-count">${cnt}</span>`;
+const eLabel=e==='Experienced'?t('exp.experienced'):e==='Inexperienced'?t('exp.inexperienced'):e;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${eLabel}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
 wrap.appendChild(btn)})}
 
@@ -387,7 +388,7 @@ const dates=getWeekDates();const ts=dates[0];
 const tc=document.getElementById('bulkTimeDays');tc.innerHTML='';
 dates.forEach(ds=>{const f=dispDate(ds);const has=getCalEntry(bulkTimeName,ds);
 const b=document.createElement('button');b.className='copy-day-btn'+(bulkTimeDays.includes(ds)?' target-active':'');
-b.innerHTML=(ds===ts?'Today':f.day)+(has&&has.start?' <span style="opacity:.4;font-size:10px">\u2713</span>':'');
+b.innerHTML=(ds===ts?t('ui.today'):f.day)+(has&&has.start?' <span style="opacity:.4;font-size:10px">\u2713</span>':'');
 b.onclick=()=>{const idx=bulkTimeDays.indexOf(ds);if(idx>=0)bulkTimeDays.splice(idx,1);else bulkTimeDays.push(ds);renderBulkTimeDays()};tc.appendChild(b)});
 /* All button */
 const ab=document.createElement('button');ab.className='copy-day-btn'+(bulkTimeDays.length===dates.length?' target-active':'');

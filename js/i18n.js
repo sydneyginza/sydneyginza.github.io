@@ -69,6 +69,16 @@ const LANG_DICT = {
     'fp.experience':'Experience','fp.labels':'Labels','fp.clearAll':'Clear All Filters','fp.rangeSep':'to',
     /* Calendar */
     'cal.profile':'Profile','cal.allWeek':'All Week','cal.clear':'Clear',
+    'cal.copyTimesTitle':'Copy Times?','cal.setNewTime':'Set New Time','cal.copyTimesBtn':'Copy Times',
+    'cal.copyDayTitle':'Copy Day Schedule','cal.copyDaySub':'Duplicate an entire day\'s roster to other days',
+    'cal.sourceDay':'Source Day','cal.copyTo':'Copy To','cal.overwrite':'Overwrite existing entries on target days',
+    'cal.copyDayBtn':'Copy Schedule','cal.bulkTimeSub':'Set availability for multiple days',
+    'cal.days':'Days','cal.startTime':'Start Time','cal.endTime':'End Time','cal.apply':'Apply','cal.all':'All',
+    /* Form */
+    'ui.addGirl':'Add Girl','form.addGirl':'Add New Girl','form.editGirl':'Edit Profile',
+    'form.name':'Name','form.startDate':'Start Date','form.photos':'Photos',
+    'form.cancel':'Cancel','form.save':'Save','form.delete':'Delete','form.confirmDelete':'Confirm Delete',
+    'form.expSelect':'Select experience','exp.experienced':'Experienced','exp.inexperienced':'Inexperienced',
     /* Analytics */
     'an.days':' Days','an.loading':'Loading visitor data...','an.uniqueVisitors':'Unique Visitors','an.sessions':'Sessions','an.totalPageViews':'Total Page Views','an.totalProfileViews':'Total Profile Views',
     'an.topProfiles':'Top Profiles','an.topHint':'(most viewed this period)','an.uniqueCount':'{n} unique',
@@ -151,6 +161,16 @@ const LANG_DICT = {
     'fp.experience':'経験','fp.labels':'ラベル','fp.clearAll':'フィルターをすべて解除','fp.rangeSep':'〜',
     /* Calendar */
     'cal.profile':'女の子','cal.allWeek':'全日','cal.clear':'クリア',
+    'cal.copyTimesTitle':'時間をコピー？','cal.setNewTime':'新しい時間を設定','cal.copyTimesBtn':'時間をコピー',
+    'cal.copyDayTitle':'日程をコピー','cal.copyDaySub':'1日のシフトを他の日にコピー',
+    'cal.sourceDay':'コピー元','cal.copyTo':'コピー先','cal.overwrite':'コピー先の既存データを上書き',
+    'cal.copyDayBtn':'スケジュールをコピー','cal.bulkTimeSub':'複数日の出勤時間を設定',
+    'cal.days':'日程','cal.startTime':'開始時間','cal.endTime':'終了時間','cal.apply':'適用','cal.all':'全て',
+    /* Form */
+    'ui.addGirl':'女の子を追加','form.addGirl':'新規プロフィール追加','form.editGirl':'プロフィール編集',
+    'form.name':'名前','form.startDate':'開始日','form.photos':'写真',
+    'form.cancel':'キャンセル','form.save':'保存','form.delete':'削除','form.confirmDelete':'削除確認',
+    'form.expSelect':'経験を選択','exp.experienced':'経験あり','exp.inexperienced':'未経験',
     /* Analytics */
     'an.days':'日間','an.loading':'訪問者データを読み込み中...','an.uniqueVisitors':'ユニーク訪問者','an.sessions':'セッション','an.totalPageViews':'総ページビュー','an.totalProfileViews':'総プロフィールビュー',
     'an.topProfiles':'人気プロフィール','an.topHint':'（期間内最多閲覧）','an.uniqueCount':'{n}件ユニーク',

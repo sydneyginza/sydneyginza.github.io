@@ -325,21 +325,21 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <button class="modal-close" id="formClose">&times;</button>
 <div class="form-title" id="formTitle">Add New Girl</div>
 <input type="hidden" id="editIndex" value="-1">
-<div class="form-row"><div class="form-group"><label class="form-label">Name</label><input class="form-input" id="fName" placeholder="Name..."></div><div class="form-group"><label class="form-label">Start Date</label><input type="date" class="form-input" id="fStartDate"></div></div>
-<div class="form-row country-stats-row"><div class="form-group"><label class="form-label">Country <span style="color:var(--text-dim);font-weight:400">(select one or more)</span></label><div id="fCountryOptions" class="country-multi-wrap"></div><div id="fCountryTags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div></div>
-<div class="form-group form-stack-right"><div class="form-group"><label class="form-label">Age</label><input class="form-input" id="fAge" type="number" min="0" placeholder="e.g. 23"></div><div class="form-group"><label class="form-label">Body Size</label><input class="form-input" id="fBody" type="number" min="0" placeholder="e.g. 6"></div><div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div></div></div>
-<div class="form-row"><div class="form-group"><label class="form-label">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
-<div class="form-group"><label class="form-label">Experience</label><select class="form-input" id="fExp"><option value="">Select experience</option><option value="Experienced">Experienced</option><option value="Inexperienced">Inexperienced</option></select></div></div>
-<div class="form-row"><div class="form-group"><label class="form-label">Rates 30 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal1" type="number" min="0" style="padding-left:26px" placeholder="e.g. 100"></div></div>
-<div class="form-group"><label class="form-label">Rates 45 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div></div>
-<div class="form-row"><div class="form-group"><label class="form-label">Rates 60 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
-<div class="form-group"><label class="form-label">Special Requests</label><input class="form-input" id="fSpecial" placeholder="e.g. No special requests"></div></div>
-<div class="form-row"><div class="form-group"><label class="form-label">Language</label><input class="form-input" id="fLang" placeholder="e.g. Japanese, English"></div>
-<div class="form-group"><label class="form-label">Type</label><input class="form-input" id="fType" placeholder="e.g. Very young, small, cute, innocent..."></div></div>
-<div class="form-row full"><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="fDesc" placeholder="Description..."></textarea></div></div>
-<div class="form-row full"><div class="form-group"><label class="form-label">Photos <span style="color:var(--text-dim);font-weight:400;" id="fPhotoCount">(0 / 10)</span></label>
+<div class="form-row"><div class="form-group"><label class="form-label" data-i18n="form.name">Name</label><input class="form-input" id="fName" placeholder="Name..."></div><div class="form-group"><label class="form-label" data-i18n="form.startDate">Start Date</label><input type="date" class="form-input" id="fStartDate"></div></div>
+<div class="form-row country-stats-row"><div class="form-group"><label class="form-label"><span data-i18n="fp.country">Country</span> <span style="color:var(--text-dim);font-weight:400">(select one or more)</span></label><div id="fCountryOptions" class="country-multi-wrap"></div><div id="fCountryTags" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div></div>
+<div class="form-group form-stack-right"><div class="form-group"><label class="form-label" data-i18n="field.age">Age</label><input class="form-input" id="fAge" type="number" min="0" placeholder="e.g. 23"></div><div class="form-group"><label class="form-label" data-i18n="field.body">Body Size</label><input class="form-input" id="fBody" type="number" min="0" placeholder="e.g. 6"></div><div class="form-group"><label class="form-label" data-i18n="fp.height">Height (cm)</label><input class="form-input" id="fHeight" type="number" min="0" placeholder="e.g. 162"></div></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label" data-i18n="field.cup">Cup Size</label><input class="form-input" id="fCup" placeholder="e.g. B-C"></div>
+<div class="form-group"><label class="form-label" data-i18n="field.experience">Experience</label><select class="form-input" id="fExp"><option value="" data-i18n="form.expSelect">Select experience</option><option value="Experienced" data-i18n="exp.experienced">Experienced</option><option value="Inexperienced" data-i18n="exp.inexperienced">Inexperienced</option></select></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label" data-i18n="field.rates30">Rates 30 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal1" type="number" min="0" style="padding-left:26px" placeholder="e.g. 100"></div></div>
+<div class="form-group"><label class="form-label" data-i18n="field.rates45">Rates 45 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal2" type="number" min="0" style="padding-left:26px" placeholder="e.g. 200"></div></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label" data-i18n="field.rates60">Rates 60 mins</label><div style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px;pointer-events:none">$</span><input class="form-input" id="fVal3" type="number" min="0" style="padding-left:26px" placeholder="e.g. 300"></div></div>
+<div class="form-group"><label class="form-label" data-i18n="field.special">Special Requests</label><input class="form-input" id="fSpecial" placeholder="e.g. No special requests"></div></div>
+<div class="form-row"><div class="form-group"><label class="form-label" data-i18n="field.language">Language</label><input class="form-input" id="fLang" placeholder="e.g. Japanese, English"></div>
+<div class="form-group"><label class="form-label" data-i18n="field.type">Type</label><input class="form-input" id="fType" placeholder="e.g. Very young, small, cute, innocent..."></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label" data-i18n="field.description">Description</label><textarea class="form-textarea" id="fDesc" placeholder="Description..."></textarea></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label"><span data-i18n="form.photos">Photos</span> <span style="color:var(--text-dim);font-weight:400;" id="fPhotoCount">(0 / 10)</span></label>
 <div id="fPhotoGrid" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"></div></div></div>
-<div class="form-row full"><div class="form-group"><label class="form-label">Labels <span style="color:var(--text-dim);font-weight:400">(type and press Enter)</span></label>
+<div class="form-row full"><div class="form-group"><label class="form-label"><span data-i18n="field.labels">Labels</span> <span style="color:var(--text-dim);font-weight:400">(type and press Enter)</span></label>
 <div class="labels-input-wrap"><input class="form-input" id="fLabelInput" placeholder="Type a label and press Enter..." style="margin-bottom:8px"><div id="fLabelTags" style="display:flex;gap:6px;flex-wrap:wrap"></div></div></div></div>
 <div class="form-row full"><div class="form-group"><label class="form-label" style="color:var(--accent);letter-spacing:2px">JAPANESE CONTENT <span style="color:var(--text-dim);font-weight:400">(optional)</span></label></div></div>
 <div class="form-row full"><div class="form-group"><label class="form-label">Special Requests (JP)</label><input class="form-input" id="fSpecialJa" placeholder="特別リクエスト..."></div></div>
@@ -347,47 +347,47 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <div class="form-row full"><div class="form-group"><label class="form-label">Description (JP)</label><textarea class="form-textarea" id="fDescJa" placeholder="プロフィール..."></textarea></div></div>
 <div class="form-row full"><div class="form-group"><label class="form-label">Labels (JP) <span style="color:var(--text-dim);font-weight:400">(press Enter)</span></label>
 <div class="labels-input-wrap"><input class="form-input" id="fLabelInputJa" placeholder="ラベルを入力してEnterを押してください..." style="margin-bottom:8px"><div id="fLabelTagsJa" style="display:flex;gap:6px;flex-wrap:wrap"></div></div></div></div>
-<div class="form-actions"><button class="btn btn-secondary" id="formCancel">Cancel</button><button class="btn btn-primary" id="formSave">Save</button></div>
+<div class="form-actions"><button class="btn btn-secondary" id="formCancel" data-i18n="form.cancel">Cancel</button><button class="btn btn-primary" id="formSave" data-i18n="form.save">Save</button></div>
 </div></div>
 
 <div class="modal-overlay" id="deleteOverlay"><div class="form-modal" style="max-width:420px;text-align:center">
-<div class="form-title" style="margin-bottom:12px">Confirm Delete</div>
+<div class="form-title" style="margin-bottom:12px" data-i18n="form.confirmDelete">Confirm Delete</div>
 <p style="color:var(--text-dim);margin-bottom:28px;font-size:15px" id="deleteMsg">Are you sure?</p>
-<div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel">Cancel</button><button class="btn btn-danger" id="deleteConfirm">Delete</button></div>
+<div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel" data-i18n="form.cancel">Cancel</button><button class="btn btn-danger" id="deleteConfirm" data-i18n="form.delete">Delete</button></div>
 </div></div>
 
 <div class="copy-time-modal" id="copyTimeModal">
 <div class="copy-time-box">
-<div class="copy-time-title">Copy Times?</div>
+<div class="copy-time-title" data-i18n="cal.copyTimesTitle">Copy Times?</div>
 <div class="copy-time-msg" id="copyTimeMsg"></div>
 <div class="copy-time-detail" id="copyTimeDetail"></div>
 <div class="copy-time-actions">
-<button class="btn btn-danger" id="copyTimeCancel">Cancel</button>
-<button class="btn btn-secondary" id="copyTimeNew">Set New Time</button>
-<button class="btn btn-primary" id="copyTimeCopy">Copy Times</button>
+<button class="btn btn-danger" id="copyTimeCancel" data-i18n="form.cancel">Cancel</button>
+<button class="btn btn-secondary" id="copyTimeNew" data-i18n="cal.setNewTime">Set New Time</button>
+<button class="btn btn-primary" id="copyTimeCopy" data-i18n="cal.copyTimesBtn">Copy Times</button>
 </div>
 </div>
 </div>
 
 <div class="copy-day-modal" id="copyDayModal">
 <div class="copy-day-box">
-<div class="copy-day-title">Copy Day Schedule</div>
-<div class="copy-day-subtitle">Duplicate an entire day's roster to other days</div>
+<div class="copy-day-title" data-i18n="cal.copyDayTitle">Copy Day Schedule</div>
+<div class="copy-day-subtitle" data-i18n="cal.copyDaySub">Duplicate an entire day's roster to other days</div>
 <div class="copy-day-section">
-<div class="copy-day-label">Source Day</div>
+<div class="copy-day-label" data-i18n="cal.sourceDay">Source Day</div>
 <div class="copy-day-sources" id="copyDaySources"></div>
 </div>
 <div class="copy-day-preview" id="copyDayPreview"></div>
 <div class="copy-day-section">
-<div class="copy-day-label">Copy To</div>
+<div class="copy-day-label" data-i18n="cal.copyTo">Copy To</div>
 <div class="copy-day-targets" id="copyDayTargets"></div>
 </div>
 <div class="copy-day-overwrite">
-<label class="copy-day-check-label"><input type="checkbox" id="copyDayOverwrite" checked><span>Overwrite existing entries on target days</span></label>
+<label class="copy-day-check-label"><input type="checkbox" id="copyDayOverwrite" checked><span data-i18n="cal.overwrite">Overwrite existing entries on target days</span></label>
 </div>
 <div class="copy-day-actions">
-<button class="btn btn-danger" id="copyDayCancel">Cancel</button>
-<button class="btn btn-primary" id="copyDayApply">Copy Schedule</button>
+<button class="btn btn-danger" id="copyDayCancel" data-i18n="form.cancel">Cancel</button>
+<button class="btn btn-primary" id="copyDayApply" data-i18n="cal.copyDayBtn">Copy Schedule</button>
 </div>
 </div>
 </div>
@@ -395,22 +395,22 @@ Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="
 <div class="bulk-time-modal" id="bulkTimeModal">
 <div class="bulk-time-box">
 <div class="copy-day-title" id="bulkTimeName"></div>
-<div class="copy-day-subtitle">Set availability for multiple days</div>
+<div class="copy-day-subtitle" data-i18n="cal.bulkTimeSub">Set availability for multiple days</div>
 <div class="copy-day-section">
-<div class="copy-day-label">Days</div>
+<div class="copy-day-label" data-i18n="cal.days">Days</div>
 <div class="copy-day-targets" id="bulkTimeDays"></div>
 </div>
 <div class="copy-day-section">
-<div class="copy-day-label">Start Time</div>
+<div class="copy-day-label" data-i18n="cal.startTime">Start Time</div>
 <select class="bulk-time-select" id="bulkTimeStart"></select>
 </div>
 <div class="copy-day-section">
-<div class="copy-day-label">End Time</div>
+<div class="copy-day-label" data-i18n="cal.endTime">End Time</div>
 <select class="bulk-time-select" id="bulkTimeEnd"></select>
 </div>
 <div class="copy-day-actions">
-<button class="btn btn-danger" id="bulkTimeCancel">Cancel</button>
-<button class="btn btn-primary" id="bulkTimeApply">Apply</button>
+<button class="btn btn-danger" id="bulkTimeCancel" data-i18n="form.cancel">Cancel</button>
+<button class="btn btn-primary" id="bulkTimeApply" data-i18n="cal.apply">Apply</button>
 </div>
 </div>
 </div>
