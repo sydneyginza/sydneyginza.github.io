@@ -387,11 +387,16 @@ function applyLang() {
   document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
     var k = el.dataset.i18nPh; if (k) el.placeholder = t(k);
   });
-  /* Bilingual lang-section elements — KO/ZH fall back to lang-en */
+  /* Bilingual lang-section elements — fall back to lang-en only if no explicit lang-X exists */
   var knownLangs = ['en', 'ja'];
   document.querySelectorAll('.lang-section').forEach(function(el) {
     var match = el.classList.contains('lang-' + siteLanguage);
     var fallback = !knownLangs.includes(siteLanguage) && el.classList.contains('lang-en');
+    if (fallback) {
+      /* Suppress fallback when an explicit translation exists in the same parent group */
+      var parent = el.parentElement;
+      if (parent && parent.querySelector('.lang-section.lang-' + siteLanguage)) fallback = false;
+    }
     el.style.display = (match || fallback) ? '' : 'none';
   });
   /* Sync announcement paragraph with current language */
@@ -406,19 +411,21 @@ function applyLang() {
       if (annSrc) autoTranslate(annSrc).then(function(tx) { if (annEl) annEl.textContent = tx; });
     }
   })();
-  /* Auto-translate static lang-en content for non-EN/JA languages */
+  /* Auto-translate visible lang-en sections for non-EN/JA languages */
   if (!knownLangs.includes(siteLanguage)) {
     document.querySelectorAll('.lang-section.lang-en').forEach(function(section) {
       if (section.style.display === 'none') return;
       var tag = section.tagName.toLowerCase();
-      /* Leaf text element (p, address) — translate the element itself */
+      /* Leaf element (p, address) — store English source once, then translate */
       if (tag === 'p' || tag === 'address') {
-        var src = section.textContent.trim();
+        if (!section.dataset.raw) section.dataset.raw = section.textContent.trim();
+        var src = section.dataset.raw;
         if (src) autoTranslate(src).then(function(tx) { if (section) section.textContent = tx; });
       } else {
-        /* Container element (article, div) — translate each text child */
+        /* Container (article, div) — translate each text child from its stored source */
         section.querySelectorAll('h2, p, address').forEach(function(c) {
-          var src = c.textContent.trim();
+          if (!c.dataset.raw) c.dataset.raw = c.textContent.trim();
+          var src = c.dataset.raw;
           if (src) autoTranslate(src).then(function(tx) { if (c) c.textContent = tx; });
         });
       }
