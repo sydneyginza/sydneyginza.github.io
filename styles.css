@@ -496,7 +496,8 @@ tr:hover .cal-bulk-actions,.cal-bulk-actions:focus-within{opacity:1;pointer-even
 .bulk-time-modal.open{display:flex;opacity:1}
 .bulk-time-box{width:90%;max-width:440px;margin:auto;background:#111118;border:1px solid rgba(255,255,255,0.08);clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));padding:32px 28px;transform:scale(0.95);transition:transform .4s}
 .bulk-time-modal.open .bulk-time-box{transform:scale(1)}
-.bulk-time-select{width:100%;background:var(--bg-card);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 14px;cursor:pointer;transition:border-color .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.bulk-time-select{width:100%;background:#111118;border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px;padding:10px 14px;cursor:pointer;transition:border-color .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.bulk-time-select option{background:#111118;color:#fff}
 .bulk-time-select:focus{border-color:var(--accent);outline:none}
 
 /* ── Responsive ── */
