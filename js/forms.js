@@ -84,8 +84,6 @@ if(_refreshTick%5===0){
       if(ap){const id=ap.id;if(id==='rosterPage')renderRoster();else if(id==='listPage')renderGrid();else if(id==='favoritesPage')renderFavoritesGrid();else if(id==='homePage')renderHome();else if(id==='profilePage'&&currentProfileIdx>=0)showProfile(currentProfileIdx)}
     }
   }catch(e){/* silent */}
-  /* Check "Available Now" notifications every 5 minutes */
-  try{checkAvailableNowNotifications()}catch(e){}
 }
 try{
 const activePage=document.querySelector('.page.active');
@@ -172,9 +170,6 @@ if(document.getElementById('profilePage').classList.contains('active'))showProfi
 }
 
 /* Check roster notifications after data is ready */
-if(typeof checkFavoritesOnRoster==='function'){try{checkFavoritesOnRoster()}catch(e){}}
-if(typeof checkAvailableNowNotifications==='function'){try{checkAvailableNowNotifications()}catch(e){}}
-
 /* Apply saved language preference */
 if(typeof applyLang==='function'){try{applyLang()}catch(e){}}
 

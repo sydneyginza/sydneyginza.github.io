@@ -792,6 +792,4 @@ btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
 /* ── FAB (Floating Contact Buttons) ── */
 (function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{toggle.classList.toggle('open');menu.classList.toggle('open')};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open')}})})();
 
-/* ── Notification Bell ── */
-(function(){const bell=document.getElementById('notifBellBtn');if(!bell||!notifSupported())return;bell.style.display='';bell.classList.toggle('active',isNotifOptedIn());bell.onclick=async()=>{if(isNotifOptedIn()){setNotifOptIn(false);bell.classList.remove('active');showToast('Notifications disabled')}else{const granted=await requestNotifPermission();if(granted){setNotifOptIn(true);bell.classList.add('active');showToast('Notifications enabled! We\'ll notify you when favorites are on the roster.')}else{showToast('Notification permission denied by browser','error')}}}})()
 
