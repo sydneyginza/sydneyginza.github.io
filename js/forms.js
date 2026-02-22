@@ -134,7 +134,7 @@ renderedFromCache=true;
 }
 
 /* Phase 2: Fetch fresh data in background */
-const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),loadCalData(),loadRosterHistory(),loadReviews()]);
+const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),loadCalData(),loadRosterHistory()]);
 
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 

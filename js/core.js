@@ -10,10 +10,9 @@ const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', REVIEWS_PATH = 'data/reviews.json';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
 let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 let rosterHistory = {}, rosterHistorySha = null;
-let reviewsData = {}, reviewsSha = null;
 let girls = [];
 let GT = true;
 
@@ -357,82 +356,6 @@ async function saveRosterHistory(){
   }catch(_){}
 }
 function getLastRostered(name){return rosterHistory[name]||null}
-
-/* === Reviews === */
-async function loadReviews(){
-  try{
-    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
-    if(r.ok){const d=await r.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{};return}
-    if(r.status===404){reviewsSha=null;reviewsData={}}
-  }catch(_){}
-}
-
-async function saveReview(name,stars,text){
-  try{
-    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
-    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
-    else if(getR.status===404){reviewsSha=null;reviewsData={}}
-    if(!reviewsData[name])reviewsData[name]=[];
-    const uuid=crypto.randomUUID?crypto.randomUUID():(Date.now().toString(36)+'-'+Math.random().toString(36).substr(2,9));
-    reviewsData[name].push({id:uuid,stars:stars,text:text||'',ts:Date.now()});
-    const body={message:'Add review for '+name,content:enc(reviewsData)};
-    if(reviewsSha)body.sha=reviewsSha;
-    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
-    if(!r.ok)throw new Error(r.status);
-    reviewsSha=(await r.json()).content.sha;
-    return uuid;
-  }catch(e){showToast('Review save failed','error');return null}
-}
-
-function getReviewsForGirl(name){return(reviewsData&&reviewsData[name])||[]}
-
-function getAverageRating(name){
-  const reviews=getReviewsForGirl(name);
-  if(!reviews.length)return{avg:0,count:0};
-  const sum=reviews.reduce((a,r)=>a+r.stars,0);
-  return{avg:sum/reviews.length,count:reviews.length};
-}
-
-const REVIEW_LIMIT_KEY='ginza_reviews_submitted';
-function hasReviewedGirl(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};return!!map[name]}catch(e){return false}}
-function markReviewed(name,reviewId){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};map[name]=reviewId;localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
-function getOwnReviewId(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};return map[name]||null}catch(e){return null}}
-function clearReviewed(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};delete map[name];localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
-
-async function updateReview(name,reviewId,stars,text){
-  try{
-    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
-    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
-    else if(getR.status===404)return false;
-    const arr=reviewsData[name];if(!arr)return false;
-    const rev=arr.find(r=>r.id===reviewId);if(!rev)return false;
-    rev.stars=stars;rev.text=text||'';rev.ts=Date.now();
-    const body={message:'Update review for '+name,content:enc(reviewsData)};
-    if(reviewsSha)body.sha=reviewsSha;
-    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
-    if(!r.ok)throw new Error(r.status);
-    reviewsSha=(await r.json()).content.sha;
-    return true;
-  }catch(e){showToast('Review update failed','error');return false}
-}
-
-async function deleteReview(name,reviewId){
-  try{
-    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
-    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
-    else if(getR.status===404)return false;
-    if(!reviewsData[name])return false;
-    reviewsData[name]=reviewsData[name].filter(r=>r.id!==reviewId);
-    if(!reviewsData[name].length)delete reviewsData[name];
-    const body={message:'Delete review for '+name,content:enc(reviewsData)};
-    if(reviewsSha)body.sha=reviewsSha;
-    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
-    if(!r.ok)throw new Error(r.status);
-    reviewsSha=(await r.json()).content.sha;
-    clearReviewed(name);
-    return true;
-  }catch(e){showToast('Review delete failed','error');return false}
-}
 
 async function uploadToGithub(b64, name, fn) {
   const safe = name.replace(/[^a-zA-Z0-9_-]/g, '_');

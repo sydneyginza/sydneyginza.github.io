@@ -601,87 +601,6 @@ const strip=document.createElement('div');strip.className='also-avail-strip';
 candidates.forEach(c=>{const o=c.g;const liveNow=isAvailableNow(o.name);const card=document.createElement('div');card.className='also-avail-card';const thumb=o.photos&&o.photos.length?`<img src="${o.photos[0]}" alt="${o.name.replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';card.innerHTML=`${thumb}<div class="also-avail-name">${o.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}`;card.onclick=()=>showProfile(c.idx);strip.appendChild(card)});
 sec.appendChild(strip);document.getElementById('profileContent').appendChild(sec)}
 
-/* Star Rating Display */
-function renderStars(avg,count){
-if(!count)return '';
-const full=Math.floor(avg);const half=avg-full>=0.5?1:0;const empty=5-full-half;
-let html='<span class="star-rating">';
-for(let i=0;i<full;i++)html+='<span class="star star-full">\u2605</span>';
-if(half)html+='<span class="star star-half">\u2605</span>';
-for(let i=0;i<empty;i++)html+='<span class="star star-empty">\u2606</span>';
-html+=` <span class="star-count">(${count})</span></span>`;
-return html}
-
-/* Review Section on Profile */
-function _reviewStarPickerHtml(prefix){return [1,2,3,4,5].map(i=>`<span class="review-star-pick" data-star="${i}" id="${prefix}Star${i}">\u2606</span>`).join('')}
-function _bindStarPicker(pickerId,prefix,initial,onSelect){
-const picker=document.getElementById(pickerId);if(!picker)return;
-const stars=picker.querySelectorAll('.review-star-pick');let sel=initial||0;
-if(sel>0)stars.forEach((ss,i)=>{ss.textContent=(i+1)<=sel?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=sel)});
-stars.forEach(s=>{
-s.onmouseenter=()=>{const val=parseInt(s.dataset.star);stars.forEach((ss,i)=>{ss.textContent=(i+1)<=val?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=val)})};
-s.onclick=()=>{sel=parseInt(s.dataset.star);if(onSelect)onSelect(sel)}});
-picker.onmouseleave=()=>{stars.forEach((ss,i)=>{ss.textContent=(i+1)<=sel?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=sel)})};
-return()=>sel}
-
-function renderReviewSection(idx){
-const g=girls[idx];if(!g||!g.name)return;
-const reviews=getReviewsForGirl(g.name);
-const{avg,count}=getAverageRating(g.name);
-const ownReviewId=getOwnReviewId(g.name);
-const ownReview=ownReviewId?reviews.find(r=>r.id===ownReviewId):null;
-const showForm=!ownReview&&!ownReviewId;
-const sec=document.createElement('div');sec.className='profile-also review-section';sec.id='reviewSection';
-const months=['date.jan','date.feb','date.mar','date.apr','date.may','date.jun','date.jul','date.aug','date.sep','date.oct','date.nov','date.dec'];
-let html=`<div class="profile-desc-title">${t('review.title')}</div>`;
-if(count>0)html+=`<div class="review-summary">${renderStars(avg,count)} <span class="review-avg">${avg.toFixed(1)}</span></div>`;
-if(showForm){
-html+=`<div class="review-form" id="reviewForm"><div class="review-star-picker" id="reviewStarPicker">${_reviewStarPickerHtml('new')}</div><textarea class="review-text" id="reviewText" placeholder="${t('review.placeholder')}" maxlength="200"></textarea><button class="btn btn-primary review-submit" id="reviewSubmitBtn">${t('review.submit')}</button></div>`}
-if(reviews.length){
-const sorted=[...reviews].sort((a,b)=>b.ts-a.ts).slice(0,10);
-html+='<div class="review-list">';
-sorted.forEach(r=>{const d=new Date(r.ts);const ds=d.getDate()+' '+t(months[d.getMonth()]);const isOwn=ownReview&&r.id===ownReview.id;
-html+=`<div class="review-item${isOwn?' review-item-own':''}" data-rid="${r.id||''}">${isOwn?`<div class="review-own-badge">${t('review.yours')}</div>`:''}`;
-html+=`<div class="review-item-stars">${'\u2605'.repeat(r.stars)}${'\u2606'.repeat(5-r.stars)}</div>`;
-if(r.text)html+=`<div class="review-item-text">${r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
-html+=`<div class="review-item-date">${ds}</div>`;
-if(isOwn)html+=`<div class="review-item-actions"><button class="review-edit-btn" id="reviewEditBtn">${t('review.edit')}</button><button class="review-delete-btn" id="reviewDeleteBtn">${t('review.delete')}</button></div>`;
-html+='</div>'});
-html+='</div>'}
-sec.innerHTML=html;document.getElementById('profileContent').appendChild(sec);
-/* Bind new-review form */
-if(showForm){
-const getSel=_bindStarPicker('reviewStarPicker','new',0);
-document.getElementById('reviewSubmitBtn').onclick=async()=>{
-const selectedStars=getSel();
-if(selectedStars<1){showToast(t('review.selectStars'),'error');return}
-const text=document.getElementById('reviewText').value.trim();
-const btn=document.getElementById('reviewSubmitBtn');btn.textContent='...';btn.disabled=true;
-const reviewId=await saveReview(g.name,selectedStars,text);
-if(reviewId){markReviewed(g.name,reviewId);showToast(t('review.thanks'));showProfile(idx)}
-else{btn.textContent=t('review.submit');btn.disabled=false}}}
-/* Bind edit button */
-const editBtn=document.getElementById('reviewEditBtn');
-if(editBtn&&ownReview){editBtn.onclick=()=>{
-const item=editBtn.closest('.review-item');if(!item)return;
-item.innerHTML=`<div class="review-own-badge">${t('review.yours')}</div><div class="review-edit-form"><div class="review-star-picker" id="editStarPicker">${_reviewStarPickerHtml('edit')}</div><textarea class="review-text" id="editReviewText" placeholder="${t('review.placeholder')}" maxlength="200">${(ownReview.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea><div style="display:flex;gap:8px"><button class="btn btn-primary review-save-btn" id="editSaveBtn">${t('review.save')}</button><button class="btn review-cancel-btn" id="editCancelBtn">${t('review.cancel')}</button></div></div>`;
-const getSel=_bindStarPicker('editStarPicker','edit',ownReview.stars);
-document.getElementById('editSaveBtn').onclick=async()=>{
-const stars=getSel();if(stars<1){showToast(t('review.selectStars'),'error');return}
-const text=document.getElementById('editReviewText').value.trim();
-const btn=document.getElementById('editSaveBtn');btn.textContent='...';btn.disabled=true;
-const ok=await updateReview(g.name,ownReview.id,stars,text);
-if(ok){showToast(t('review.updated'));showProfile(idx)}
-else{btn.textContent=t('review.save');btn.disabled=false}};
-document.getElementById('editCancelBtn').onclick=()=>showProfile(idx)}}
-/* Bind delete button */
-const delBtn=document.getElementById('reviewDeleteBtn');
-if(delBtn&&ownReview){delBtn.onclick=async()=>{
-if(!confirm(t('review.confirmDelete')))return;
-delBtn.textContent='...';delBtn.disabled=true;
-const ok=await deleteReview(g.name,ownReview.id);
-if(ok){showToast(t('review.deleted'));showProfile(idx)}
-else{delBtn.textContent=t('review.delete');delBtn.disabled=false}}}}
 
 function updateFavBadge(){const b=document.getElementById('navFavBadge');const bb=document.getElementById('bnFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:'';if(bb)bb.textContent=c>0?c:''}
 
@@ -724,7 +643,7 @@ const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
 const profShare=document.getElementById('profShareBtn');
 if(profShare){profShare.onclick=async()=>{const url=window.location.origin+Router.pathForProfile(idx);if(navigator.share){try{await navigator.share({title:g.name+' - Ginza',text:g.name+' at Ginza Sydney',url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);showToast(t('ui.linkCopied'))}catch(e){const tmp=document.createElement('input');tmp.value=url;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');document.body.removeChild(tmp);showToast(t('ui.linkCopied'))}}}}
-renderGallery(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderReviewSection(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
