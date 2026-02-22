@@ -546,18 +546,31 @@ const set=(prop,val,attr)=>{attr=attr||'property';let el=document.querySelector(
 const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
 const img=g.photos&&g.photos.length?g.photos[0]:'https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
 const country=Array.isArray(g.country)?g.country.join('/'):(g.country||'');
-const parts=[country,g.age?'Age '+g.age:'',g.exp||''].filter(Boolean);
-const desc=parts.length?parts.join(' · '):'View profile at Ginza Empire, Sydney.';
-const title=(g.name||'Profile')+' – Ginza Empire';
+const parts=[country,g.age?'Age '+g.age:'',g.body?'Body '+g.body:'',g.height?g.height+' cm':'',g.cup?g.cup+' cup':'',g.val3?'From '+g.val3+'/hr':'',g.exp||''].filter(Boolean);
+const desc=parts.length?parts.join(' \u00b7 ')+' \u2013 Ginza Empire, Sydney':'View profile at Ginza Empire, Sydney.';
+const title=(g.name||'Profile')+' \u2013 Ginza Empire';
 set('og:title',title);set('og:description',desc);set('og:url',url);set('og:image',img);
-set('twitter:title',title,'name');set('twitter:description',desc,'name');set('twitter:image',img,'name')}
+set('twitter:title',title,'name');set('twitter:description',desc,'name');set('twitter:image',img,'name');
+set('description',desc,'name');
+let canon=document.querySelector('link[rel="canonical"]');if(!canon){canon=document.createElement('link');canon.rel='canonical';document.head.appendChild(canon)}canon.href=url}
+function updateProfileJsonLd(g,idx){
+let el=document.getElementById('profileLd');if(!el){el=document.createElement('script');el.type='application/ld+json';el.id='profileLd';document.head.appendChild(el)}
+const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
+const img=g.photos&&g.photos.length?g.photos[0]:'';
+const country=Array.isArray(g.country)?g.country[0]:(g.country||'');
+const ld={"@context":"https://schema.org","@type":"ProfilePage","url":url,"mainEntity":{"@type":"Person","name":g.name||'','image':img,'worksFor':{"@id":"https://sydneyginza.github.io/#empire"}}};
+if(country)ld.mainEntity.nationality=country;
+el.textContent=JSON.stringify(ld)}
 function resetOgMeta(){
 const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
-const t='Ginza Empire – Sydney\'s Premier Asian Bordello';
-const d='Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates.';
+const t='Ginza Empire \u2013 Sydney\'s Premier Asian Bordello';
+const d='Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates. Open daily 10:30am\u20131am at 310 Cleveland St.';
 const i='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
 set('og:title',t);set('og:description',d);set('og:url','https://sydneyginza.github.io');set('og:image',i);
-set('twitter:title',t,'name');set('twitter:description',d,'name');set('twitter:image',i,'name')}
+set('twitter:title',t,'name');set('twitter:description',d,'name');set('twitter:image',i,'name');
+set('description',d,'name');
+const canon=document.querySelector('link[rel="canonical"]');if(canon)canon.href='https://sydneyginza.github.io';
+const pld=document.getElementById('profileLd');if(pld)pld.remove()}
 
 /* Profile Page */
 function renderAlsoAvailable(idx){
@@ -607,7 +620,7 @@ function updateFavBadge(){const b=document.getElementById('navFavBadge');const b
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
 function showProfile(idx){safeRender('Profile',()=>{
-const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);
+const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
 /* URL routing & dynamic title */
 const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
