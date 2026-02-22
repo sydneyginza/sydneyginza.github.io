@@ -244,6 +244,19 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .profile-labels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
 .profile-label{display:inline-flex;padding:5px 14px;background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.2);color:var(--accent);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
 
+/* ── Card Rating ── */
+.card-rating{display:flex;align-items:center;gap:4px;margin-top:4px}
+.card-rating .review-star{display:inline-flex;color:rgba(255,255,255,0.15)}
+.card-rating .review-star.filled{color:#ffcc44}
+.card-rating .review-star svg{width:12px;height:12px;fill:currentColor}
+.card-rating-num{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--text-dim);letter-spacing:0.5px}
+.card-rating-count{font-family:'Rajdhani',sans-serif;font-size:11px;color:rgba(255,255,255,0.25)}
+
+/* ── Profile Rating (header) ── */
+.profile-rating-summary{display:inline-flex;align-items:center;gap:6px}
+.profile-rating-num{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text-dim);letter-spacing:1px}
+.profile-rating-count{font-family:'Rajdhani',sans-serif;font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:0.5px}
+
 /* ── Reviews ── */
 .profile-reviews{margin-top:8px}
 .review-count{font-size:11px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:0}

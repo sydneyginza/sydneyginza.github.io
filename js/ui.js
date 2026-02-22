@@ -636,7 +636,6 @@ const hasReviewed=loggedIn&&reviews.some(r=>r.user===loggedInUser);
 let html='<div class="profile-reviews"><div class="profile-desc-title" style="margin-top:32px">'+t('review.title');
 if(reviews.length)html+=' <span class="review-count">('+reviews.length+')</span>';
 html+='</div>';
-if(reviews.length){html+='<div class="review-summary">'+renderStarsStatic(Math.round(avg))+'<span class="review-avg">'+avg.toFixed(1)+' / 5</span></div>'}
 /* Write / Sign-in prompt */
 if(loggedIn&&!hasReviewed){html+='<button class="review-write-btn" id="rvWriteBtn">'+t('review.write')+'</button>'}
 else if(!loggedIn){html+='<div class="review-signin">'+t('review.signin').replace('{link}','<a href="#" id="rvSignInLink">'+t('ui.signIn')+'</a>')+'</div>'}
@@ -701,6 +700,8 @@ const liveNow=g.name&&isAvailableNow(g.name);
 let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>'+t('avail.now')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 else if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#ffcc44;font-weight:600">'+t('avail.today')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 else{const wdates=getWeekDates();const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);if(upcoming){const dn=dispDate(upcoming).day;availHtml='<span class="dim">|</span><span class="profile-avail-coming">'+t('avail.coming')+' '+dn+'</span>'}else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';availHtml='<span class="dim">|</span><span class="profile-avail-last">'+t('avail.lastSeen')+' '+rel+'</span>'}}}
+const rvs=g.reviews||[];const rvAvg=rvs.length?rvs.reduce((s,r)=>s+r.rating,0)/rvs.length:0;
+const ratingHtml=rvs.length?'<span class="dim">|</span><span class="profile-rating-summary">'+renderStarsStatic(Math.round(rvAvg))+'<span class="profile-rating-num">'+rvAvg.toFixed(1)+' / 5</span><span class="profile-rating-count">('+rvs.length+')</span></span>':'';
 const stats=[{l:t('field.age'),v:g.age},{l:t('field.body'),v:g.body},{l:t('field.height'),v:g.height+' cm'},{l:t('field.cup'),v:g.cup},{l:t('field.rates30'),v:g.val1||'\u2014'},{l:t('field.rates45'),v:g.val2||'\u2014'},{l:t('field.rates60'),v:g.val3||'\u2014'},{l:t('field.experience'),v:g.exp||'\u2014'}];
 const mainImg=g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';
 const hasMultiple=g.photos.length>1;
@@ -713,7 +714,7 @@ const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg 
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${t('ui.back')}</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
-<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
