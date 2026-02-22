@@ -698,7 +698,7 @@ c.appendChild(t)})}
 function openMyProfile(){
 const overlay=document.getElementById('myProfileOverlay');
 const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
-const roleBadge=loggedInRole==='admin'?'<span class="mp-role-badge admin">ADMIN</span>':'<span class="mp-role-badge member">MEMBER</span>';
+const roleBadge=loggedInRole==='owner'?'<span class="mp-role-badge owner">OWNER</span>':loggedInRole==='admin'?'<span class="mp-role-badge admin">ADMIN</span>':'<span class="mp-role-badge member">MEMBER</span>';
 document.getElementById('mpUserDisplay').innerHTML=`<div class="mp-username">${loggedInUser.toUpperCase()}</div>${roleBadge}`;
 document.getElementById('mpEmail').value=entry.email||'';
 document.getElementById('mpMobile').value=entry.mobile||'';

@@ -965,6 +965,7 @@ html+='<select class="pdb-role-filter" id="pdbRoleFilter"><option value=""'+ (_p
 /* Filter CRED */
 const q=_pdbSearch.toLowerCase();
 const filtered=CRED.map((c,i)=>({c,i})).filter(({c})=>{
+if(c.role==='owner')return false;
 if(_pdbRoleFilter&&c.role!==_pdbRoleFilter)return false;
 if(q){const u=(c.user||'').toLowerCase(),e=(c.email||'').toLowerCase(),m=(c.mobile||'').toLowerCase();if(!u.includes(q)&&!e.includes(q)&&!m.includes(q))return false}
 return true});

@@ -52,6 +52,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .mp-role-badge{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border:1px solid;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px))}
 .mp-role-badge.admin{color:var(--accent);border-color:var(--accent);background:rgba(180,74,255,0.1)}
 .mp-role-badge.member{color:#ffcc44;border-color:#ffcc44;background:rgba(255,204,68,0.08)}
+.mp-role-badge.owner{color:#00ff7f;border-color:#00ff7f;background:rgba(0,255,127,0.1)}
 .login-form-inline{padding:16px 18px}
 .login-form-inline .lf-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#fff;margin-bottom:14px}
 .login-form-inline .lf-group{margin-bottom:10px}

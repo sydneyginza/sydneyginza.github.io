@@ -12,7 +12,7 @@ const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
 const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
 let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, authSha = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
-function isAdmin(){ return loggedIn && loggedInRole === 'admin' }
+function isAdmin(){ return loggedIn && (loggedInRole === 'admin' || loggedInRole === 'owner') }
 let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
 let GT = true;
