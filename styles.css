@@ -858,6 +858,9 @@ body{padding-bottom:60px}
 @media(hover:none){#cardHoverPreview{display:none!important}}
 .chp-name{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:#fff;margin-bottom:6px}
 .chp-avail{font-size:11px;color:rgba(255,204,68,0.85);margin-bottom:8px}
+.chp-avail-live{color:#00ff7f;display:flex;align-items:center;gap:5px;font-weight:700;text-shadow:0 0 8px rgba(0,255,127,0.3)}
+.chp-avail-coming{color:rgba(180,74,255,0.85)}
+.chp-avail-last{color:rgba(255,255,255,0.3);font-style:italic}
 .chp-stats{display:flex;flex-direction:column;gap:4px}
 .chp-row{display:flex;justify-content:space-between;gap:16px;font-size:12px}
 .chp-row span:first-child{color:rgba(255,255,255,0.4);white-space:nowrap}
