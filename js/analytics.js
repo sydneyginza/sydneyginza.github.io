@@ -109,6 +109,16 @@ function _makeProfileViewEntry(profileName){
   };
 }
 
+/* Filter use entry — logged when filters change (debounced) */
+function _makeFilterUseEntry(activeFilters){
+  return{type:'filterUse',uuid:_sessionUUID,timestamp:new Date().toISOString(),active:activeFilters};
+}
+
+/* Phone tap entry — logged when FAB phone link is tapped */
+function _makePhoneTapEntry(number){
+  return{type:'phoneTap',uuid:_sessionUUID,timestamp:new Date().toISOString(),number:number};
+}
+
 /* ── Queue management ── */
 
 function enqueue(entry){
@@ -128,6 +138,20 @@ function trackPageView(pageId){
 function trackProfileView(profileName){
   if(!profileName||isOptedOut())return;
   enqueue(_makeProfileViewEntry(profileName));
+}
+
+/* Track filter usage (debounced 3s to avoid noise) */
+let _filterTimer=null;
+function trackFilterUse(activeFilters){
+  if(isOptedOut()||!activeFilters||!activeFilters.length)return;
+  clearTimeout(_filterTimer);
+  _filterTimer=setTimeout(()=>enqueue(_makeFilterUseEntry(activeFilters)),3000);
+}
+
+/* Track phone tap (FAB call button) */
+function trackPhoneTap(number){
+  if(isOptedOut())return;
+  enqueue(_makePhoneTapEntry(number||'unknown'));
 }
 
 /* Get today's log filename in AEDT */
@@ -309,6 +333,16 @@ function aggregateLogs(entries){
   const profileViewsTotal={};
   const profileViewsUniques={}; /* profile -> Set of uuids */
 
+  /* Filter usage */
+  const filterDimensions={};
+  const filterDimensionsUniques={};
+  let totalFilterUses=0;
+
+  /* Phone taps */
+  const phoneTapsByNumber={};
+  const phoneTapUuids=new Set();
+  let totalPhoneTaps=0;
+
   let totalHits=0;
   let totalPageViews=0;
   let totalProfileViews=0;
@@ -398,6 +432,26 @@ function aggregateLogs(entries){
       uuids.add(uuid);
     }
 
+    /* ── Filter use entries ── */
+    if(e.type==='filterUse'){
+      totalFilterUses++;
+      (e.active||[]).forEach(dim=>{
+        filterDimensions[dim]=(filterDimensions[dim]||0)+1;
+        if(!filterDimensionsUniques[dim])filterDimensionsUniques[dim]=new Set();
+        filterDimensionsUniques[dim].add(uuid);
+      });
+      uuids.add(uuid);
+    }
+
+    /* ── Phone tap entries ── */
+    if(e.type==='phoneTap'){
+      totalPhoneTaps++;
+      phoneTapUuids.add(uuid);
+      const num=e.number||'unknown';
+      phoneTapsByNumber[num]=(phoneTapsByNumber[num]||0)+1;
+      uuids.add(uuid);
+    }
+
     /* Hourly (use AEDT) — for all entry types */
     if(e.timestamp){
       try{
@@ -446,10 +500,19 @@ function aggregateLogs(entries){
   const referrersUniqueCounts={};
   for(const k in referrersUniques)referrersUniqueCounts[k]=referrersUniques[k].size;
 
+  const filterDimensionsUniqueCounts={};
+  for(const k in filterDimensionsUniques)filterDimensionsUniqueCounts[k]=filterDimensionsUniques[k].size;
+
   return{
     totalHits,
     totalPageViews,
     totalProfileViews,
+    totalPhoneTaps,
+    phoneTapUnique:phoneTapUuids.size,
+    phoneTapsByNumber,
+    totalFilterUses,
+    filterDimensions,
+    filterDimensionsUniqueCounts,
     uniqueVisitors:uuids.size,
     browsers,oses,devices,languages,siteLanguages,timezones,referrers,screens,
     browsersUniqueCounts,osesUniqueCounts,devicesUniqueCounts,
@@ -501,7 +564,7 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-return{trackPageView,trackProfileView,flush,loadLogs,aggregateLogs,getUUID,isOptedOut,optOut,optIn};
+return{trackPageView,trackProfileView,trackFilterUse,trackPhoneTap,flush,loadLogs,aggregateLogs,getUUID,isOptedOut,optOut,optIn};
 })();
 
 
@@ -569,6 +632,8 @@ const summaryHtml=`<div class="an-summary">
 <div class="an-card"><div class="an-card-val">${v.totalHits}</div><div class="an-card-label">${t('an.sessions')}</div></div>
 <div class="an-card"><div class="an-card-val">${v.totalPageViews}</div><div class="an-card-label">${t('an.totalPageViews')}</div></div>
 <div class="an-card"><div class="an-card-val">${v.totalProfileViews}</div><div class="an-card-label">${t('an.totalProfileViews')}</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalPhoneTaps}</div><div class="an-card-label">${t('an.phoneTaps')}</div></div>
+<div class="an-card"><div class="an-card-val">${v.totalFilterUses}</div><div class="an-card-label">${t('an.filterUses')}</div></div>
 </div>`;
 
 /* ── Top 5 Profiles ── */
@@ -590,6 +655,19 @@ for(let ri=0;ri<5;ri++){
   }
 }
 top5Html+='</div></div>';
+
+/* ── Conversion (phone taps) ── */
+const convRate=v.uniqueVisitors>0?(v.phoneTapUnique/v.uniqueVisitors*100).toFixed(1):'0.0';
+const sortedTaps=Object.entries(v.phoneTapsByNumber).sort((a,b)=>b[1]-a[1]);
+const maxTap=sortedTaps.length?sortedTaps[0][1]:1;
+let convHtml=`<div class="an-section"><div class="an-section-title">${t('an.conversion')} <span class="an-hint">${t('an.conversionHint')}</span></div>`;
+convHtml+=`<div class="an-summary" style="margin-bottom:16px"><div class="an-card"><div class="an-card-val">${v.totalPhoneTaps}</div><div class="an-card-label">${t('an.phoneTaps')}</div></div><div class="an-card"><div class="an-card-val">${v.phoneTapUnique}</div><div class="an-card-label">${t('an.uniqueTappers')}</div></div><div class="an-card"><div class="an-card-val">${convRate}%</div><div class="an-card-label">${t('an.convRate')}</div></div></div>`;
+if(sortedTaps.length){
+convHtml+='<div class="an-bars">';
+sortedTaps.forEach(([num,count])=>{const pct=count/maxTap*100;convHtml+=`<div class="an-bar-row"><div class="an-bar-label">${num}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-conv" style="width:${pct}%"></div></div><div class="an-bar-val">${count}</div></div>`});
+convHtml+='</div>';
+}else{convHtml+='<div class="an-empty">'+t('an.noTaps')+'</div>'}
+convHtml+='</div>';
 
 /* ── Daily Visitors Trend (hits + uniques) ── */
 const sortedDays=Object.entries(v.daily).sort((a,b)=>a[0].localeCompare(b[0]));
@@ -739,6 +817,20 @@ sortedRefs.forEach(([name,count])=>{
 if(!sortedRefs.length)refsHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 refsHtml+='</div></div>';
 
+/* ── Filter Usage Patterns ── */
+const _filterLabels={country:'Country',age:'Age',body:'Body',height:'Height',cup:'Cup',rate30:'30min Rate',rate45:'45min Rate',rate60:'60min Rate',experience:'Experience',labels:'Labels',availableNow:'Avail. Now',availableToday:'Avail. Today'};
+const sortedFilters=Object.entries(v.filterDimensions).sort((a,b)=>b[1]-a[1]);
+const maxFD=sortedFilters.length?sortedFilters[0][1]:1;
+let filterHtml=`<div class="an-section"><div class="an-section-title">${t('an.filterPatterns')} <span class="an-hint">${t('an.filterHint')}</span></div><div class="an-bars">`;
+sortedFilters.forEach(([dim,count])=>{
+  const unique=v.filterDimensionsUniqueCounts[dim]||0;
+  const pct=count/maxFD*100;
+  const label=_filterLabels[dim]||dim;
+  filterHtml+=`<div class="an-bar-row"><div class="an-bar-label">${label}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-filter" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+});
+if(!sortedFilters.length)filterHtml+='<div class="an-empty">'+t('an.noFilters')+'</div>';
+filterHtml+='</div></div>';
+
 /* ── Recent Unique Visitors Table (one row per UUID per day) ── */
 const allSessions=entries.filter(e=>e.type==='session'||!e.type);
 const seenUUIDDay=new Set();
@@ -786,12 +878,12 @@ const actionsHtml=`<div class="an-actions">
 <button class="an-action-btn" id="anRefreshVisitors">${t('an.refresh')}</button>
 </div>`;
 
-container.innerHTML=periodHtml+summaryHtml+top5Html+trendHtml+hoursHtml
+container.innerHTML=periodHtml+summaryHtml+top5Html+convHtml+trendHtml+hoursHtml
   +'<div class="an-two-col">'+pvHtml+pfHtml+'</div>'
   +'<div class="an-two-col">'+browsersHtml+osHtml+'</div>'
   +'<div class="an-two-col">'+devHtml+langHtml+'</div>'
   +'<div class="an-two-col">'+siteLangHtml+tzHtml+'</div>'
-  +'<div class="an-two-col">'+refsHtml+'</div>'
+  +'<div class="an-two-col">'+refsHtml+filterHtml+'</div>'
   +tableHtml+actionsHtml;
 
 /* Bind period buttons */
@@ -856,5 +948,35 @@ if(document.getElementById('analyticsPage').classList.contains('active')){
 showPage('homePage');
 }
 }
+};
+})();
+
+/* ── Track FAB phone taps ── */
+document.querySelectorAll('.fab-item.fab-call').forEach(link=>{
+link.addEventListener('click',()=>{
+  const num=(link.getAttribute('href')||'').replace('tel:+61','0').replace(/\D/g,'');
+  VisitorLog.trackPhoneTap(num);
+});
+});
+
+/* ── Track filter usage (patch onFiltersChanged) ── */
+(function(){
+const _origOnFiltersChanged=onFiltersChanged;
+window.onFiltersChanged=function(){
+  _origOnFiltersChanged();
+  const active=[];
+  if(sharedFilters.country&&sharedFilters.country.length)active.push('country');
+  if(sharedFilters.ageMin!=null||sharedFilters.ageMax!=null)active.push('age');
+  if(sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null)active.push('body');
+  if(sharedFilters.heightMin!=null||sharedFilters.heightMax!=null)active.push('height');
+  if(sharedFilters.cupSize)active.push('cup');
+  if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null)active.push('rate30');
+  if(sharedFilters.val2Min!=null||sharedFilters.val2Max!=null)active.push('rate45');
+  if(sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)active.push('rate60');
+  if(sharedFilters.experience)active.push('experience');
+  if(sharedFilters.labels&&sharedFilters.labels.length)active.push('labels');
+  if(sharedFilters.availableNow)active.push('availableNow');
+  if(sharedFilters.availableToday)active.push('availableToday');
+  if(active.length)VisitorLog.trackFilterUse(active);
 };
 })();
