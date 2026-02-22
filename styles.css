@@ -913,7 +913,8 @@ body{padding-bottom:60px}
 #cardHoverPreview{position:fixed;z-index:300;pointer-events:none;background:rgba(14,12,22,0.97);border:1px solid rgba(180,74,255,0.3);padding:14px 16px;min-width:200px;display:none;backdrop-filter:blur(12px);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 #cardHoverPreview.visible{display:block}
 @media(hover:none){#cardHoverPreview{display:none!important}}
-.chp-name{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:#fff;margin-bottom:6px}
+.chp-name{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:#fff;margin-bottom:2px}
+.chp-country{font-size:11px;color:var(--text-dim);letter-spacing:0.5px;margin-bottom:6px}
 .chp-avail{font-size:11px;color:rgba(255,204,68,0.85);margin-bottom:8px}
 .chp-avail-live{color:#00ff7f;display:flex;align-items:center;gap:5px;font-weight:700;text-shadow:0 0 8px rgba(0,255,127,0.3)}
 .chp-avail-coming{color:rgba(180,74,255,0.85)}
