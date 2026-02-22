@@ -714,6 +714,8 @@ const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
 const newPass=document.getElementById('mpNewPass').value;
 const confirmPass=document.getElementById('mpConfirmPass').value;
 const errEl=document.getElementById('mpError');
+const emailVal=document.getElementById('mpEmail').value.trim();
+if(!emailVal){errEl.textContent=t('ui.emailRequired');return}
 if(newPass&&newPass!==confirmPass){errEl.textContent=t('ui.passwordMismatch');return}
 errEl.textContent='';
 const saveBtn=document.getElementById('myProfileSave');saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
