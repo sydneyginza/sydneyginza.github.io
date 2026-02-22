@@ -523,7 +523,7 @@ if(ov)ov.onclick=e=>{if(e.target===ov)closeCompareModal()};
 document.addEventListener('keydown',e=>{if(ov&&ov.classList.contains('open')&&e.key==='Escape')closeCompareModal()})})();
 
 /* Profile Nav Rail */
-function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0);const filtered=applySharedFilters(named.map(x=>x.g));const result=named.filter(x=>filtered.includes(x.g));const sorted=applySortOrder(result.map(x=>x.g));return sorted.map(g=>result.find(x=>x.g===g).i)}
+function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0&&(isAdmin()||!x.g.hidden));const filtered=applySharedFilters(named.map(x=>x.g));const result=named.filter(x=>filtered.includes(x.g));const sorted=applySortOrder(result.map(x=>x.g));return sorted.map(g=>result.find(x=>x.g===g).i)}
 /* Navigate via nav rail — replaceState to avoid history bloat */
 function showProfileReplace(idx){const origPush=Router.push;Router.push=Router.replace;try{showProfile(idx)}finally{Router.push=origPush}}
 function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
@@ -576,7 +576,7 @@ const pld=document.getElementById('profileLd');if(pld)pld.remove()}
 function renderAlsoAvailable(idx){
 const g=girls[idx];if(!g)return;
 const ts=fmtDate(getAEDTDate());
-const alsoList=girls.filter(o=>{if(!o.name||o.name===g.name)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8);
+const alsoList=girls.filter(o=>{if(!o.name||o.name===g.name)return false;if(!isAdmin()&&o.hidden)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8);
 if(!alsoList.length)return;
 const sec=document.createElement('div');sec.className='profile-also';
 const title=document.createElement('div');title.className='profile-desc-title';title.textContent=t('ui.alsoAvail');sec.appendChild(title);
