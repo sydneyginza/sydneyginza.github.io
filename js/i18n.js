@@ -50,6 +50,8 @@ const LANG_DICT = {
     'field.description':'Description',
     'field.special':'Special Requests',
     'field.labels':'Labels',
+    'field.email':'Email',
+    'field.mobile':'Mobile',
     'field.photocount':'(0 / 10)',
     /* Availability */
     'avail.now':'Available Now',
@@ -315,6 +317,8 @@ const LANG_DICT = {
     'field.description':'説明',
     'field.special':'スペシャルリクエスト',
     'field.labels':'ラベル',
+    'field.email':'メール',
+    'field.mobile':'携帯電話',
     'field.photocount':'(0 / 10)',
     /* Availability */
     'avail.now':'今すぐ利用可能',
@@ -580,6 +584,8 @@ const LANG_DICT = {
     'field.description':'설명',
     'field.special':'특별 요청',
     'field.labels':'라벨',
+    'field.email':'이메일',
+    'field.mobile':'휴대전화',
     'field.photocount':'(0 / 10)',
     /* Availability */
     'avail.now':'지금 이용 가능',
@@ -845,6 +851,8 @@ const LANG_DICT = {
     'field.description':'描述',
     'field.special':'特殊要求',
     'field.labels':'标签',
+    'field.email':'邮箱',
+    'field.mobile':'手机',
     'field.photocount':'(0 / 10)',
     /* Availability */
     'avail.now':'现在可用',

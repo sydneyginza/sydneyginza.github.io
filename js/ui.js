@@ -648,6 +648,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
+${loggedIn&&g.email?`<div class="profile-desc-title">${t('field.email')}</div><div class="profile-desc" style="margin-bottom:24px">${g.email}</div>`:''}${loggedIn&&g.mobile?`<div class="profile-desc-title">${t('field.mobile')}</div><div class="profile-desc" style="margin-bottom:24px">${g.mobile}</div>`:''}
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
