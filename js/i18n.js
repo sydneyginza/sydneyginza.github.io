@@ -84,6 +84,10 @@ const LANG_DICT = {
     'ui.usernameRequired':'Username is required.',
     'ui.passwordRequired':'Password is required.',
     'ui.accountCreated':'Account created.',
+    'ui.hideGirl':'Hide profile',
+    'ui.showGirl':'Show profile',
+    'ui.girlHidden':'Profile hidden from members.',
+    'ui.girlVisible':'Profile visible to all.',
     /* Empty states */
     'ui.favEmpty':'No favorites yet. Tap the heart on any profile to save it here.',
     'ui.noResults':'No girls match your filters.',
@@ -367,6 +371,10 @@ const LANG_DICT = {
     'ui.usernameRequired':'ユーザー名は必須です。',
     'ui.passwordRequired':'パスワードは必須です。',
     'ui.accountCreated':'アカウントが作成されました。',
+    'ui.hideGirl':'プロフィールを非表示',
+    'ui.showGirl':'プロフィールを表示',
+    'ui.girlHidden':'メンバーからプロフィールを非表示にしました。',
+    'ui.girlVisible':'プロフィールを全員に表示しました。',
     /* Empty states */
     'ui.favEmpty':'お気に入りがまだありません。プロフィールのハートをタップして保存しましょう。',
     'ui.noResults':'条件に合う女の子がいません。',
@@ -650,6 +658,10 @@ const LANG_DICT = {
     'ui.usernameRequired':'사용자 이름은 필수입니다.',
     'ui.passwordRequired':'비밀번호는 필수입니다.',
     'ui.accountCreated':'계정이 생성되었습니다.',
+    'ui.hideGirl':'프로필 숨기기',
+    'ui.showGirl':'프로필 표시',
+    'ui.girlHidden':'멤버에게 프로필이 숨겨졌습니다.',
+    'ui.girlVisible':'모든 사용자에게 프로필이 표시됩니다.',
     /* Empty states */
     'ui.favEmpty':'아직 즐겨찾기가 없습니다. 프로필의 하트를 탭하여 저장하세요.',
     'ui.noResults':'조건에 맞는 여성이 없습니다.',
@@ -933,6 +945,10 @@ const LANG_DICT = {
     'ui.usernameRequired':'用户名为必填项。',
     'ui.passwordRequired':'密码为必填项。',
     'ui.accountCreated':'账户已创建。',
+    'ui.hideGirl':'隐藏档案',
+    'ui.showGirl':'显示档案',
+    'ui.girlHidden':'档案已对会员隐藏。',
+    'ui.girlVisible':'档案对所有人可见。',
     /* Empty states */
     'ui.favEmpty':'暂无收藏。点击任意档案上的心形图标保存到此处。',
     'ui.noResults':'没有符合您筛选条件的女生。',

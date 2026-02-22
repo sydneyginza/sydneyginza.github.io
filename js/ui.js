@@ -421,7 +421,7 @@ closeBulkTimeModal();
 };
 
 /* Home Page */
-function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
+function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
 
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
@@ -433,7 +433,7 @@ ngList=getNewGirls();ngIdx=0;renderNewGirls();renderRecentlyViewed()})}
 function renderRecentlyViewed(){
 const container=document.getElementById('homeRecentlyViewed');if(!container)return;
 const rv=getRecentlyViewed();
-const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(Boolean);
+const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(v=>v&&(isAdmin()||!v.g.hidden));
 if(!valid.length){container.style.display='none';return}
 container.style.display='';
 let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="rvClearBtn">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
@@ -605,8 +605,8 @@ function renderSimilarGirls(idx){
 const g=girls[idx];if(!g||!g.name)return;
 const ts=fmtDate(getAEDTDate());
 const alsoNames=new Set();
-girls.filter(o=>{if(!o.name||o.name===g.name)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8).forEach(o=>alsoNames.add(o.name));
-const candidates=girls.map((o,i)=>({g:o,idx:i})).filter(x=>x.g.name&&x.g.name!==g.name&&!alsoNames.has(x.g.name)).map(x=>({...x,score:computeSimilarity(g,x.g)})).filter(x=>x.score>=0.4).sort((a,b)=>b.score-a.score).slice(0,6);
+girls.filter(o=>{if(!o.name||o.name===g.name)return false;if(!isAdmin()&&o.hidden)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8).forEach(o=>alsoNames.add(o.name));
+const candidates=girls.map((o,i)=>({g:o,idx:i})).filter(x=>x.g.name&&x.g.name!==g.name&&!alsoNames.has(x.g.name)&&(isAdmin()||!x.g.hidden)).map(x=>({...x,score:computeSimilarity(g,x.g)})).filter(x=>x.score>=0.4).sort((a,b)=>b.score-a.score).slice(0,6);
 if(!candidates.length)return;
 const sec=document.createElement('div');sec.className='profile-also';
 const title=document.createElement('div');title.className='profile-desc-title';title.textContent=t('sim.title');sec.appendChild(title);
@@ -620,7 +620,7 @@ function updateFavBadge(){const b=document.getElementById('navFavBadge');const b
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
 function showProfile(idx){safeRender('Profile',()=>{
-const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
+const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');return}currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
 /* URL routing & dynamic title */
 const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
