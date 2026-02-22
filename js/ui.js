@@ -621,6 +621,74 @@ function updateFavBadge(){const b=document.getElementById('navFavBadge');const b
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
+/* ── Reviews ── */
+const starSvgFull='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+const starSvgEmpty='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>';
+
+function renderStarsStatic(rating){let h='';for(let i=1;i<=5;i++)h+='<span class="review-star'+(i<=rating?' filled':'')+'">'+( i<=rating?starSvgFull:starSvgEmpty)+'</span>';return h}
+
+function renderReviews(idx){
+const container=document.getElementById('profileReviews');if(!container)return;
+const g=girls[idx];if(!g)return;
+const reviews=g.reviews||[];
+const avg=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:0;
+const hasReviewed=loggedIn&&reviews.some(r=>r.user===loggedInUser);
+let html='<div class="profile-reviews"><div class="profile-desc-title" style="margin-top:32px">'+t('review.title');
+if(reviews.length)html+=' <span class="review-count">('+reviews.length+')</span>';
+html+='</div>';
+if(reviews.length){html+='<div class="review-summary">'+renderStarsStatic(Math.round(avg))+'<span class="review-avg">'+avg.toFixed(1)+' / 5</span></div>'}
+/* Write / Sign-in prompt */
+if(loggedIn&&!hasReviewed){html+='<button class="review-write-btn" id="rvWriteBtn">'+t('review.write')+'</button>'}
+else if(!loggedIn){html+='<div class="review-signin">'+t('review.signin').replace('{link}','<a href="#" id="rvSignInLink">'+t('ui.signIn')+'</a>')+'</div>'}
+html+='<div id="rvFormArea"></div>';
+/* Review list */
+if(!reviews.length&&!loggedIn){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
+else if(!reviews.length){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
+reviews.slice().sort((a,b)=>new Date(b.ts)-new Date(a.ts)).forEach(r=>{
+const isOwn=loggedIn&&r.user===loggedInUser;
+const canEdit=isOwn||isAdmin();
+const d=new Date(r.ts);const dateStr=d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+html+='<div class="review-card"><div class="review-header"><span class="review-user">'+r.user.toUpperCase()+'</span><span class="review-stars">'+renderStarsStatic(r.rating)+'</span><span class="review-date">'+dateStr+'</span></div>';
+if(r.text)html+='<div class="review-text">'+r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+if(canEdit){html+='<div class="review-actions">';
+if(isOwn||isAdmin())html+='<button class="review-action-btn review-edit-btn" data-rv-user="'+r.user+'">'+t('review.edit')+'</button>';
+html+='<button class="review-action-btn review-delete-btn" data-rv-user="'+r.user+'">'+t('review.delete')+'</button></div>'}
+html+='</div>'});
+html+='</div>';
+container.innerHTML=html;
+/* Bind events */
+const writeBtn=document.getElementById('rvWriteBtn');
+if(writeBtn)writeBtn.onclick=()=>openReviewForm(idx,null);
+const signInLink=document.getElementById('rvSignInLink');
+if(signInLink)signInLink.onclick=e=>{e.preventDefault();showAuthSignIn()};
+container.querySelectorAll('.review-edit-btn').forEach(btn=>{btn.onclick=()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(rv)openReviewForm(idx,rv)}});
+container.querySelectorAll('.review-delete-btn').forEach(btn=>{btn.onclick=async()=>{if(!confirm(t('review.confirmDelete')))return;const u=btn.dataset.rvUser;g.reviews=(g.reviews||[]).filter(r=>r.user!==u);if(await saveData()){showToast(t('review.deleted'));renderReviews(idx)}}})}
+
+function openReviewForm(idx,existing){
+const area=document.getElementById('rvFormArea');if(!area)return;
+const rating=existing?existing.rating:0;
+const text=existing?existing.text:'';
+let html='<div class="review-form"><div class="review-stars-input" id="rvStarPicker">';
+for(let i=1;i<=5;i++)html+='<span class="review-star-pick'+(i<=rating?' active':'')+'" data-val="'+i+'">'+starSvgFull+'</span>';
+html+='</div><textarea class="review-textarea" id="rvText" placeholder="'+t('review.placeholder')+'" rows="3">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>';
+html+='<div class="review-form-actions"><button class="btn btn-primary review-submit-btn" id="rvSubmitBtn">'+(existing?t('review.edit'):t('review.write'))+'</button><button class="btn review-cancel-btn" id="rvCancelBtn">'+t('ui.cancel')+'</button></div>';
+html+='<div class="review-form-error" id="rvError"></div></div>';
+area.innerHTML=html;
+let picked=rating;
+document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(s=>{
+s.onmouseenter=()=>{const v=parseInt(s.dataset.val);document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach((ss,i)=>ss.classList.toggle('hover',i<v))};
+s.onmouseleave=()=>{document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(ss=>ss.classList.remove('hover'))};
+s.onclick=()=>{picked=parseInt(s.dataset.val);document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach((ss,i)=>ss.classList.toggle('active',i<picked))}});
+document.getElementById('rvCancelBtn').onclick=()=>{area.innerHTML='';if(!existing){const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display=''}};
+document.getElementById('rvSubmitBtn').onclick=async()=>{
+if(!picked){document.getElementById('rvError').textContent=t('review.ratingRequired');return}
+const g=girls[idx];if(!g.reviews)g.reviews=[];
+const txt=document.getElementById('rvText').value.trim();
+if(existing){const rv=g.reviews.find(r=>r.user===existing.user);if(rv){rv.rating=picked;rv.text=txt;rv.ts=new Date().toISOString()}}
+else{g.reviews.push({user:loggedInUser,rating:picked,text:txt,ts:new Date().toISOString()})}
+if(await saveData()){showToast(existing?t('review.updated'):t('review.submitted'));renderReviews(idx)}};
+const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display='none'}
+
 function showProfile(idx){safeRender('Profile',()=>{
 const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');return}currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
 /* URL routing & dynamic title */
@@ -651,14 +719,14 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
-${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
+${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
 if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
 const profShare=document.getElementById('profShareBtn');
 if(profShare){profShare.onclick=async()=>{const url=window.location.origin+Router.pathForProfile(idx);if(navigator.share){try{await navigator.share({title:g.name+' - Ginza',text:g.name+' at Ginza Sydney',url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);showToast(t('ui.linkCopied'))}catch(e){const tmp=document.createElement('input');tmp.value=url;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');document.body.removeChild(tmp);showToast(t('ui.linkCopied'))}}}}
-renderGallery(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderReviews(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;

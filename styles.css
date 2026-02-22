@@ -244,6 +244,44 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .profile-labels{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
 .profile-label{display:inline-flex;padding:5px 14px;background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.2);color:var(--accent);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Orbitron',sans-serif;clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
 
+/* ── Reviews ── */
+.profile-reviews{margin-top:8px}
+.review-count{font-size:11px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:0}
+.review-summary{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.review-star{display:inline-flex;color:rgba(255,255,255,0.15)}
+.review-star.filled{color:#ffcc44}
+.review-star svg{fill:currentColor}
+.review-avg{font-family:'Rajdhani',sans-serif;font-size:14px;color:var(--text-dim);letter-spacing:1px}
+.review-write-btn{background:rgba(180,74,255,0.08);border:1px solid rgba(180,74,255,0.25);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:10px 24px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
+.review-write-btn:hover{background:rgba(180,74,255,0.18);border-color:var(--accent)}
+.review-signin{font-size:13px;color:var(--text-dim);letter-spacing:0.5px;margin-bottom:16px}
+.review-signin a{color:var(--accent);text-decoration:none;font-weight:600}
+.review-signin a:hover{text-decoration:underline}
+.review-empty{font-size:13px;color:rgba(255,255,255,0.25);font-style:italic;margin:12px 0}
+.review-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);padding:16px;margin-top:12px;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.review-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.review-user{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;color:#fff}
+.review-stars{display:inline-flex;gap:1px}
+.review-date{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:0.5px;margin-left:auto}
+.review-text{font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;letter-spacing:0.3px}
+.review-actions{display:flex;gap:8px;margin-top:8px}
+.review-action-btn{background:none;border:none;color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:2px 0;transition:color .2s}
+.review-action-btn:hover{color:#fff}
+.review-delete-btn:hover{color:#ff4444}
+.review-form{margin:16px 0}
+.review-stars-input{display:flex;gap:4px;margin-bottom:12px}
+.review-star-pick{display:inline-flex;cursor:pointer;color:rgba(255,255,255,0.15);transition:color .15s}
+.review-star-pick svg{fill:currentColor}
+.review-star-pick.active{color:#ffcc44}
+.review-star-pick.hover{color:rgba(255,204,68,0.6)}
+.review-textarea{width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:0.5px;padding:12px;resize:vertical;min-height:60px;transition:border-color .3s}
+.review-textarea::placeholder{color:rgba(255,255,255,0.2)}
+.review-textarea:focus{outline:none;border-color:var(--accent)}
+.review-form-actions{display:flex;gap:10px;margin-top:10px}
+.review-form-error{color:#ff4444;font-size:12px;margin-top:6px;min-height:16px}
+.review-cancel-btn{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.1)!important;color:var(--text-dim)!important}
+.review-cancel-btn:hover{border-color:rgba(255,255,255,0.25)!important;color:#fff!important}
+
 /* ── Lightbox ── */
 .lightbox-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px)}
 .lightbox-overlay.open{opacity:1;pointer-events:all}
