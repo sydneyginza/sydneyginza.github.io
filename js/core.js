@@ -11,7 +11,7 @@ const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
 const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
-let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
+let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, authSha = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 function isAdmin(){ return loggedIn && loggedInRole === 'admin' }
 let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
@@ -253,7 +253,7 @@ async function fetchWithRetry(url, opts = {}, { retries = 3, baseDelay = 600 } =
 async function loadAuth() {
   try {
     const r = await fetchWithRetry(`${DATA_API}/${AP}`, { headers: proxyHeaders() });
-    if (r.ok) return dec((await r.json()).content);
+    if (r.ok) { const d = await r.json(); authSha = d.sha; return dec(d.content); }
     if (r.status === 404) {
       const d = [{ user: 'admin', pass: 'admin123' }];
       await fetchWithRetry(`${DATA_API}/${AP}`, {
@@ -265,6 +265,28 @@ async function loadAuth() {
     }
   } catch (e) { console.error('loadAuth error:', e); }
   return [];
+}
+
+async function saveAuth(retryOnConflict = true) {
+  try {
+    const body = { message: 'Update auth', content: enc(CRED) };
+    if (authSha) body.sha = authSha;
+    const r = await fetchWithRetry(`${DATA_API}/${AP}`, {
+      method: 'PUT',
+      headers: proxyHeaders(),
+      body: JSON.stringify(body)
+    }, { retries: 2 });
+    const rd = await r.json();
+    if (!r.ok) {
+      if (r.status === 409 && retryOnConflict) {
+        const fresh = await fetchWithRetry(`${DATA_API}/${AP}`, { headers: proxyHeaders() });
+        if (fresh.ok) { authSha = (await fresh.json()).sha; return saveAuth(false); }
+      }
+      throw new Error(rd.message || r.status);
+    }
+    authSha = rd.content.sha;
+    return true;
+  } catch (e) { showToast('Save failed: ' + e.message, 'error'); return false; }
 }
 
 async function loadData() {

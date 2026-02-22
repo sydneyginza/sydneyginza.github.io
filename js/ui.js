@@ -692,10 +692,45 @@ t.onclick=()=>galGoTo(i,g.photos);
 if(isAdmin()){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
 c.appendChild(t)})}
 
+/* My Profile Modal */
+function openMyProfile(){
+const overlay=document.getElementById('myProfileOverlay');
+const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
+const roleBadge=loggedInRole==='admin'?'<span class="mp-role-badge admin">ADMIN</span>':'<span class="mp-role-badge member">MEMBER</span>';
+document.getElementById('mpUserDisplay').innerHTML=`<div class="mp-username">${loggedInUser.toUpperCase()}</div>${roleBadge}`;
+document.getElementById('mpEmail').value=entry.email||'';
+document.getElementById('mpMobile').value=entry.mobile||'';
+document.getElementById('mpNewPass').value='';
+document.getElementById('mpConfirmPass').value='';
+document.getElementById('mpError').textContent='';
+overlay.classList.add('open')}
+
+document.getElementById('myProfileClose').onclick=()=>document.getElementById('myProfileOverlay').classList.remove('open');
+document.getElementById('myProfileCancel').onclick=()=>document.getElementById('myProfileOverlay').classList.remove('open');
+document.getElementById('myProfileOverlay').onclick=e=>{if(e.target.id==='myProfileOverlay')e.target.classList.remove('open')};
+
+document.getElementById('myProfileSave').onclick=async()=>{
+const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
+const newPass=document.getElementById('mpNewPass').value;
+const confirmPass=document.getElementById('mpConfirmPass').value;
+const errEl=document.getElementById('mpError');
+if(newPass&&newPass!==confirmPass){errEl.textContent=t('ui.passwordMismatch');return}
+errEl.textContent='';
+const saveBtn=document.getElementById('myProfileSave');saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
+try{
+entry.email=document.getElementById('mpEmail').value.trim()||undefined;
+entry.mobile=document.getElementById('mpMobile').value.trim()||undefined;
+if(newPass)entry.pass=newPass;
+loggedInEmail=entry.email||null;
+loggedInMobile=entry.mobile||null;
+if(await saveAuth()){document.getElementById('myProfileOverlay').classList.remove('open');showToast(t('ui.profileSaved'))}
+}catch(e){errEl.textContent='Error: '+e.message}finally{saveBtn.textContent=t('form.save');saveBtn.style.pointerEvents='auto'}};
+
 /* Auth / Login */
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
-if(loggedIn){loginIconBtn.classList.add('logged-in');const contactLines=(loggedInEmail?`<div class="dropdown-contact">${loggedInEmail}</div>`:'')+(loggedInMobile?`<div class="dropdown-contact">${loggedInMobile}</div>`:'');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div>${contactLines}</div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
+if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
+document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
 document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
 document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}

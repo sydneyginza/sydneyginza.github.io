@@ -279,6 +279,18 @@
 <div class="form-actions" style="justify-content:center"><button class="btn btn-secondary" id="deleteCancel" data-i18n="form.cancel"></button><button class="btn btn-danger" id="deleteConfirm" data-i18n="form.delete"></button></div>
 </div></div>
 
+<div class="modal-overlay" id="myProfileOverlay"><div class="form-modal" style="max-width:420px">
+<button class="modal-close" id="myProfileClose">&times;</button>
+<div class="form-title" data-i18n="ui.myProfile"></div>
+<div class="mp-user-display" id="mpUserDisplay"></div>
+<div class="form-row full" style="margin-top:20px"><div class="form-group"><label class="form-label" data-i18n="field.email"></label><input class="form-input" id="mpEmail" type="email" placeholder="email@example.com"></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label" data-i18n="field.mobile"></label><input class="form-input" id="mpMobile" type="tel" placeholder="04XX XXX XXX"></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label" data-i18n="ui.newPassword"></label><input class="form-input" id="mpNewPass" type="password" data-i18n-ph="ui.leaveBlank"></div></div>
+<div class="form-row full"><div class="form-group"><label class="form-label" data-i18n="ui.confirmPassword"></label><input class="form-input" id="mpConfirmPass" type="password"></div></div>
+<div class="lf-error" id="mpError" style="margin-bottom:8px"></div>
+<div class="form-actions"><button class="btn btn-secondary" id="myProfileCancel" data-i18n="form.cancel"></button><button class="btn btn-primary" id="myProfileSave" data-i18n="form.save"></button></div>
+</div></div>
+
 <div class="copy-time-modal" id="copyTimeModal">
 <div class="copy-time-box">
 <div class="copy-time-title" data-i18n="cal.copyTimesTitle"></div>
