@@ -89,6 +89,18 @@ let debounce;
 searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();renderFilters();renderGrid();renderRoster();if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();document.querySelectorAll('[data-role="name-search"]').forEach(inp=>{if(inp!==searchInp){inp.value=sharedFilters.nameSearch}})},300)});
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
+/* Rating */
+{pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.rating')}</div><div class="fp-rating-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-rating-options');
+for(let star=5;star>=1;star--){
+const btn=document.createElement('button');btn.className='fp-option fp-rating-opt'+(sharedFilters.ratingMin===star?' active':'');
+const cnt=namedGirls.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=star}).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.ratingMin===star?'✓':''}</span><span class="fp-rating-stars">${renderStarsStatic(star)}</span><span class="fp-rating-label">& up</span><span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.ratingMin=sharedFilters.ratingMin===star?null:star;onFiltersChanged()};
+wrap.appendChild(btn)}}
 
 /* Country */
 if(countries.length){
@@ -155,19 +167,6 @@ const eLabel=e==='Experienced'?t('exp.experienced'):e==='Inexperienced'?t('exp.i
 btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${eLabel}<span class="fp-count">${cnt}</span>`;
 btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
 wrap.appendChild(btn)})}
-
-/* Rating */
-{pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
-const sec=document.createElement('div');sec.className='fp-section';
-sec.innerHTML=`<div class="fp-title">${t('fp.rating')}</div><div class="fp-rating-options"></div>`;
-pane.appendChild(sec);
-const wrap=sec.querySelector('.fp-rating-options');
-for(let star=5;star>=1;star--){
-const btn=document.createElement('button');btn.className='fp-option fp-rating-opt'+(sharedFilters.ratingMin===star?' active':'');
-const cnt=namedGirls.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=star}).length;
-btn.innerHTML=`<span class="fp-check">${sharedFilters.ratingMin===star?'✓':''}</span><span class="fp-rating-stars">${renderStarsStatic(star)}</span><span class="fp-rating-label">& up</span><span class="fp-count">${cnt}</span>`;
-btn.onclick=()=>{sharedFilters.ratingMin=sharedFilters.ratingMin===star?null:star;onFiltersChanged()};
-wrap.appendChild(btn)}}
 
 /* Labels */
 if(labels.length){
