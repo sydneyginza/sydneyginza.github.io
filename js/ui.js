@@ -15,7 +15,7 @@ function updateCompareBar(){const bar=document.getElementById('compareBar');if(!
 function updateCompareButtons(){document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare'})}
 
 /* ── Shared Filter State (resets on refresh) ── */
-let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false,availableToday:false,availableDate:null};
+let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[],availableNow:false,availableToday:false,availableDate:null};
 
 function applySharedFilters(list){
 let f=list;
@@ -36,14 +36,15 @@ if(sharedFilters.val3Min!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return 
 if(sharedFilters.val3Max!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v<=sharedFilters.val3Max});
 if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
 if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
+if(sharedFilters.ratingMin!=null)f=f.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=sharedFilters.ratingMin});
 if(sharedFilters.availableNow)f=f.filter(g=>g.name&&isAvailableNow(g.name));
 if(sharedFilters.availableToday)f=f.filter(g=>g.name&&isAvailableToday(g.name));
 if(sharedFilters.availableDate){const ds=sharedFilters.availableDate;f=f.filter(g=>{const e=getCalEntry(g.name,ds);return !!(e&&e.start&&e.end)})}
 return f}
 
-function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.labels.length||sharedFilters.availableNow||sharedFilters.availableToday||sharedFilters.availableDate)}
+function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.ratingMin!=null||sharedFilters.labels.length||sharedFilters.availableNow||sharedFilters.availableToday||sharedFilters.availableDate)}
 
-function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,labels:[],availableNow:false,availableToday:false,availableDate:null}}
+function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[],availableNow:false,availableToday:false,availableDate:null}}
 
 function filtersToQuery(){const p=new URLSearchParams();if(sharedFilters.nameSearch)p.set('search',sharedFilters.nameSearch);if(sharedFilters.country.length)p.set('country',sharedFilters.country.join(','));if(sharedFilters.ageMin!=null)p.set('ageMin',sharedFilters.ageMin);if(sharedFilters.ageMax!=null)p.set('ageMax',sharedFilters.ageMax);if(sharedFilters.bodyMin!=null)p.set('bodyMin',sharedFilters.bodyMin);if(sharedFilters.bodyMax!=null)p.set('bodyMax',sharedFilters.bodyMax);if(sharedFilters.heightMin!=null)p.set('heightMin',sharedFilters.heightMin);if(sharedFilters.heightMax!=null)p.set('heightMax',sharedFilters.heightMax);if(sharedFilters.cupSize)p.set('cup',sharedFilters.cupSize);if(sharedFilters.val1Min!=null)p.set('v1Min',sharedFilters.val1Min);if(sharedFilters.val1Max!=null)p.set('v1Max',sharedFilters.val1Max);if(sharedFilters.val2Min!=null)p.set('v2Min',sharedFilters.val2Min);if(sharedFilters.val2Max!=null)p.set('v2Max',sharedFilters.val2Max);if(sharedFilters.val3Min!=null)p.set('v3Min',sharedFilters.val3Min);if(sharedFilters.val3Max!=null)p.set('v3Max',sharedFilters.val3Max);if(sharedFilters.experience)p.set('exp',sharedFilters.experience);if(sharedFilters.labels.length)p.set('labels',sharedFilters.labels.join(','));if(sharedFilters.availableNow)p.set('now','1');return p}
 
@@ -155,6 +156,19 @@ btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</
 btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
 wrap.appendChild(btn)})}
 
+/* Rating */
+{pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.rating')}</div><div class="fp-rating-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-rating-options');
+for(let star=5;star>=1;star--){
+const btn=document.createElement('button');btn.className='fp-option fp-rating-opt'+(sharedFilters.ratingMin===star?' active':'');
+const cnt=namedGirls.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=star}).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.ratingMin===star?'✓':''}</span><span class="fp-rating-stars">${renderStarsStatic(star)}</span><span class="fp-rating-label">& up</span><span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.ratingMin=sharedFilters.ratingMin===star?null:star;onFiltersChanged()};
+wrap.appendChild(btn)}}
+
 /* Labels */
 if(labels.length){
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
@@ -196,6 +210,7 @@ if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null)chips.push({label:'3
 if(sharedFilters.val2Min!=null||sharedFilters.val2Max!=null)chips.push({label:'45min '+(sharedFilters.val2Min??'')+'–'+(sharedFilters.val2Max??''),rm:()=>{sharedFilters.val2Min=null;sharedFilters.val2Max=null;onFiltersChanged()}});
 if(sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)chips.push({label:'60min '+(sharedFilters.val3Min??'')+'–'+(sharedFilters.val3Max??''),rm:()=>{sharedFilters.val3Min=null;sharedFilters.val3Max=null;onFiltersChanged()}});
 if(sharedFilters.experience)chips.push({label:sharedFilters.experience,rm:()=>{sharedFilters.experience=null;onFiltersChanged()}});
+if(sharedFilters.ratingMin!=null)chips.push({label:'★ '+sharedFilters.ratingMin+'+ stars',rm:()=>{sharedFilters.ratingMin=null;onFiltersChanged()}});
 sharedFilters.labels.forEach(l=>chips.push({label:l,rm:()=>{sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);onFiltersChanged()}}));
 if(sharedFilters.availableNow)chips.push({label:t('avail.now'),rm:()=>{sharedFilters.availableNow=false;onFiltersChanged()}});
 if(sharedFilters.availableToday)chips.push({label:t('avail.today'),rm:()=>{sharedFilters.availableToday=false;onFiltersChanged()}});
