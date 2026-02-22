@@ -939,17 +939,37 @@ const _origRenderDropdown=renderDropdown;
 window.renderDropdown=function(){
 _origRenderDropdown();
 const navLink=document.getElementById('navAnalytics');
+const dbLink=document.getElementById('navProfileDb');
 if(isAdmin()){
 if(navLink)navLink.style.display='';
+if(dbLink)dbLink.style.display='';
 }else{
 if(navLink)navLink.style.display='none';
-if(document.getElementById('analyticsPage').classList.contains('active')){
-/* Redirect away from analytics if logged out */
+if(dbLink)dbLink.style.display='none';
+if(document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')){
 showPage('homePage');
 }
 }
 };
 })();
+
+/* ── Profile Database ── */
+function renderProfileDb(){
+if(!isAdmin())return;
+const container=document.getElementById('profileDbContent');
+if(!container)return;
+let html='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.role')+'</th></tr></thead><tbody>';
+CRED.forEach((c,i)=>{
+html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td></tr>'});
+html+='</tbody></table>';
+container.innerHTML=html;
+container.querySelectorAll('.pdb-role-select').forEach(sel=>{
+sel.onchange=async function(){
+const idx=parseInt(this.dataset.credIdx);const newRole=this.value;
+if(CRED[idx].user===loggedInUser&&newRole!=='admin'){this.value='admin';showToast(t('pdb.cannotDemoteSelf'));return}
+CRED[idx].role=newRole;
+if(await saveAuth()){showToast(t('pdb.roleUpdated'))}else{showToast(t('pdb.saveFailed'))}
+}})}
 
 /* ── Track FAB phone taps ── */
 document.querySelectorAll('.fab-item.fab-call').forEach(link=>{

@@ -138,8 +138,14 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'Calendar',
     'nav.analytics':'Analytics',
+    'nav.profileDb':'Profile Database',
     'nav.menu':'Menu',
     'ui.admin':'Admin',
+    'pdb.username':'Username',
+    'pdb.role':'Role',
+    'pdb.roleUpdated':'Role updated.',
+    'pdb.saveFailed':'Failed to save.',
+    'pdb.cannotDemoteSelf':'Cannot change your own role.',
     /* Sort buttons */
     'sort.name':'Name',
     'sort.dateAdded':'Date Added',
@@ -427,8 +433,14 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'カレンダー',
     'nav.analytics':'アナリティクス',
+    'nav.profileDb':'プロフィールDB',
     'nav.menu':'メニュー',
     'ui.admin':'管理',
+    'pdb.username':'ユーザー名',
+    'pdb.role':'役割',
+    'pdb.roleUpdated':'役割が更新されました。',
+    'pdb.saveFailed':'保存に失敗しました。',
+    'pdb.cannotDemoteSelf':'自分の役割は変更できません。',
     /* Sort buttons */
     'sort.name':'名前',
     'sort.dateAdded':'追加日',
@@ -716,8 +728,14 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'캘린더',
     'nav.analytics':'분석',
+    'nav.profileDb':'프로필 DB',
     'nav.menu':'메뉴',
     'ui.admin':'관리자',
+    'pdb.username':'사용자명',
+    'pdb.role':'역할',
+    'pdb.roleUpdated':'역할이 업데이트되었습니다.',
+    'pdb.saveFailed':'저장에 실패했습니다.',
+    'pdb.cannotDemoteSelf':'자신의 역할은 변경할 수 없습니다.',
     /* Sort buttons */
     'sort.name':'이름',
     'sort.dateAdded':'추가일',
@@ -1005,8 +1023,14 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'日历',
     'nav.analytics':'分析',
+    'nav.profileDb':'用户数据库',
     'nav.menu':'菜单',
     'ui.admin':'管理',
+    'pdb.username':'用户名',
+    'pdb.role':'角色',
+    'pdb.roleUpdated':'角色已更新。',
+    'pdb.saveFailed':'保存失败。',
+    'pdb.cannotDemoteSelf':'无法更改自己的角色。',
     /* Sort buttons */
     'sort.name':'姓名',
     'sort.dateAdded':'添加日期',

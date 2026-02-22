@@ -869,6 +869,18 @@ body{padding-bottom:60px}
 .chp-row span:last-child{color:#fff;font-weight:600;text-align:right}
 .chp-divider{height:1px;background:rgba(255,255,255,0.08);margin:4px 0}
 
+/* ── Profile Database Table ── */
+.pdb-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:24px}
+.pdb-table th{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:14px 16px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}
+.pdb-table td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:rgba(255,255,255,0.8);letter-spacing:0.5px}
+.pdb-table tr:hover td{background:rgba(255,255,255,0.02)}
+.pdb-user{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:#fff}
+.pdb-role-select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;padding:6px 12px;cursor:pointer;transition:all .3s}
+.pdb-role-select:hover{border-color:var(--accent)}
+.pdb-role-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 8px rgba(180,74,255,0.2)}
+.pdb-role-select option{background:#111118;color:#fff}
+@media(max-width:600px){.pdb-table,.pdb-table thead,.pdb-table tbody,.pdb-table tr,.pdb-table th,.pdb-table td{display:block}.pdb-table thead{display:none}.pdb-table tr{margin-bottom:12px;border:1px solid rgba(255,255,255,0.06);padding:12px}.pdb-table td{padding:6px 0;border:none;font-size:12px}.pdb-table td::before{content:attr(data-label);display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:2px}}
+
 /* ── Sticky Filter Wrap + Active Filter Chips ── */
 #listPage .sticky-filter-wrap{position:sticky;top:70px;z-index:99;background:var(--bg-dark);border-bottom:1px solid rgba(255,255,255,0.04)}
 @media(max-width:768px){#listPage .sticky-filter-wrap{position:static;border-bottom:none}}
