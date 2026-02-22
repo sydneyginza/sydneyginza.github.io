@@ -84,7 +84,8 @@ function _makeSessionEntry(){
     page:window.location.pathname+window.location.search,
     referrer:document.referrer||'direct',
     screen:window.screen?window.screen.width+'x'+window.screen.height:'unknown',
-    viewport:window.innerWidth+'x'+window.innerHeight
+    viewport:window.innerWidth+'x'+window.innerHeight,
+    siteLang:(function(){try{return localStorage.getItem('ginza_lang')||'en'}catch(e){return'en'}})()
   };
 }
 
@@ -289,6 +290,8 @@ function aggregateLogs(entries){
   const devicesUniques={};
   const languages={};
   const languagesUniques={};
+  const siteLanguages={};
+  const siteLanguagesUniques={};
   const timezones={};
   const timezonesUniques={};
   const referrers={};
@@ -339,6 +342,13 @@ function aggregateLogs(entries){
       languages[lang]=(languages[lang]||0)+1;
       if(!languagesUniques[lang])languagesUniques[lang]=new Set();
       languagesUniques[lang].add(uuid);
+
+      if(e.siteLang){
+        const sl=e.siteLang;
+        siteLanguages[sl]=(siteLanguages[sl]||0)+1;
+        if(!siteLanguagesUniques[sl])siteLanguagesUniques[sl]=new Set();
+        siteLanguagesUniques[sl].add(uuid);
+      }
 
       const tz=e.timezone||'unknown';
       timezones[tz]=(timezones[tz]||0)+1;
@@ -429,6 +439,8 @@ function aggregateLogs(entries){
   for(const k in devicesUniques)devicesUniqueCounts[k]=devicesUniques[k].size;
   const languagesUniqueCounts={};
   for(const k in languagesUniques)languagesUniqueCounts[k]=languagesUniques[k].size;
+  const siteLanguagesUniqueCounts={};
+  for(const k in siteLanguagesUniques)siteLanguagesUniqueCounts[k]=siteLanguagesUniques[k].size;
   const timezonesUniqueCounts={};
   for(const k in timezonesUniques)timezonesUniqueCounts[k]=timezonesUniques[k].size;
   const referrersUniqueCounts={};
@@ -439,9 +451,9 @@ function aggregateLogs(entries){
     totalPageViews,
     totalProfileViews,
     uniqueVisitors:uuids.size,
-    browsers,oses,devices,languages,timezones,referrers,screens,
+    browsers,oses,devices,languages,siteLanguages,timezones,referrers,screens,
     browsersUniqueCounts,osesUniqueCounts,devicesUniqueCounts,
-    languagesUniqueCounts,timezonesUniqueCounts,referrersUniqueCounts,
+    languagesUniqueCounts,siteLanguagesUniqueCounts,timezonesUniqueCounts,referrersUniqueCounts,
     hourly,daily,dailyUniqueCounts,
     pageViewsTotal,pageViewsUniqueCounts,
     profileViewsTotal,profileViewsUniqueCounts
@@ -690,6 +702,18 @@ sortedLangs.forEach(([name,count])=>{
 if(!sortedLangs.length)langHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
 langHtml+='</div></div>';
 
+/* ── Website Language ── */
+const sortedSiteLangs=Object.entries(v.siteLanguages).sort((a,b)=>b[1]-a[1]);
+const maxSL=sortedSiteLangs.length?sortedSiteLangs[0][1]:1;
+let siteLangHtml=`<div class="an-section"><div class="an-section-title">${t('an.siteLanguages')} <span class="an-hint">${t('an.pvHint')}</span></div><div class="an-bars">`;
+sortedSiteLangs.forEach(([name,count])=>{
+  const unique=v.siteLanguagesUniqueCounts[name]||0;
+  const pct=count/maxSL*100;
+  siteLangHtml+=`<div class="an-bar-row"><div class="an-bar-label">${name}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-lang" style="width:${pct}%"></div></div><div class="an-bar-val">${count} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+});
+if(!sortedSiteLangs.length)siteLangHtml+='<div class="an-empty">'+t('an.noData')+'</div>';
+siteLangHtml+='</div></div>';
+
 /* ── Timezones ── */
 const sortedTZ=Object.entries(v.timezones).sort((a,b)=>b[1]-a[1]).slice(0,10);
 const maxTZ=sortedTZ.length?sortedTZ[0][1]:1;
@@ -737,7 +761,7 @@ for(let i=allSessions.length-1;i>=0;i--){
 }
 let tableHtml=`<div class="an-section"><div class="an-section-title">${t('an.recentVisitors')} <span class="an-hint">${t('an.recentHint')}</span></div>`;
 if(uniqueDayVisitors.length){
-  tableHtml+=`<div class="an-table-wrap"><table class="an-table"><thead><tr><th>${t('an.tableDate')}</th><th>UUID</th><th>${t('an.tableBrowser')}</th><th>${t('an.tableOS')}</th><th>${t('an.tableDevice')}</th><th>${t('an.tableLang')}</th><th>${t('an.tableTZ')}</th></tr></thead><tbody>`;
+  tableHtml+=`<div class="an-table-wrap"><table class="an-table"><thead><tr><th>${t('an.tableDate')}</th><th>UUID</th><th>${t('an.tableBrowser')}</th><th>${t('an.tableOS')}</th><th>${t('an.tableDevice')}</th><th>${t('an.tableLang')}</th><th>${t('an.tableSiteLang')}</th><th>${t('an.tableTZ')}</th></tr></thead><tbody>`;
   uniqueDayVisitors.forEach(e=>{
     const _mths=[t('date.jan'),t('date.feb'),t('date.mar'),t('date.apr'),t('date.may'),t('date.jun'),t('date.jul'),t('date.aug'),t('date.sep'),t('date.oct'),t('date.nov'),t('date.dec')];
     const dateStr=e._day!=='unknown'?(function(d){const dt=new Date(d+'T00:00:00');return dt.getDate()+' '+_mths[dt.getMonth()]})(e._day):'—';
@@ -746,8 +770,9 @@ if(uniqueDayVisitors.length){
     const os=e.os||'—';
     const dev=e.device||'—';
     const lang=(e.language||'—').split('-')[0];
+    const sl=e.siteLang||'—';
     const tz=(e.timezone||'—').replace('Australia/','AU/').replace('America/','US/');
-    tableHtml+=`<tr><td>${dateStr}</td><td class="an-mono">${uuid}</td><td>${br}</td><td>${os}</td><td>${dev}</td><td>${lang}</td><td title="${e.timezone||''}">${tz}</td></tr>`;
+    tableHtml+=`<tr><td>${dateStr}</td><td class="an-mono">${uuid}</td><td>${br}</td><td>${os}</td><td>${dev}</td><td>${lang}</td><td>${sl}</td><td title="${e.timezone||''}">${tz}</td></tr>`;
   });
   tableHtml+='</tbody></table></div>';
 }else{
@@ -765,7 +790,8 @@ container.innerHTML=periodHtml+summaryHtml+top5Html+trendHtml+hoursHtml
   +'<div class="an-two-col">'+pvHtml+pfHtml+'</div>'
   +'<div class="an-two-col">'+browsersHtml+osHtml+'</div>'
   +'<div class="an-two-col">'+devHtml+langHtml+'</div>'
-  +'<div class="an-two-col">'+tzHtml+refsHtml+'</div>'
+  +'<div class="an-two-col">'+siteLangHtml+tzHtml+'</div>'
+  +'<div class="an-two-col">'+refsHtml+'</div>'
   +tableHtml+actionsHtml;
 
 /* Bind period buttons */
