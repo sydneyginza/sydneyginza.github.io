@@ -10,9 +10,10 @@ const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', REVIEWS_PATH = 'data/reviews.json';
 let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 let rosterHistory = {}, rosterHistorySha = null;
+let reviewsData = {}, reviewsSha = null;
 let girls = [];
 let GT = true;
 
@@ -144,6 +145,28 @@ function getFavCount() {
   return girls.filter(g => g.name && favs.includes(g.name)).length;
 }
 
+/* === Recently Viewed === */
+const RV_KEY = 'ginza_recently_viewed';
+const RV_MAX = 20;
+
+function getRecentlyViewed() {
+  try { const v = localStorage.getItem(RV_KEY); return v ? JSON.parse(v) : []; }
+  catch (e) { return []; }
+}
+
+function addRecentlyViewed(name) {
+  if (!name) return;
+  let rv = getRecentlyViewed();
+  rv = rv.filter(r => r.name !== name);
+  rv.unshift({ name: name, ts: Date.now() });
+  if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
+  try { localStorage.setItem(RV_KEY, JSON.stringify(rv)); } catch (e) {}
+}
+
+function clearRecentlyViewed() {
+  try { localStorage.removeItem(RV_KEY); } catch (e) {}
+}
+
 /* === Roster Notifications === */
 const NOTIF_OPTIN_KEY='ginza_notif_optin';
 const NOTIF_LAST_KEY='ginza_notif_last';
@@ -154,6 +177,51 @@ function setNotifLastDate(ds){try{localStorage.setItem(NOTIF_LAST_KEY,ds)}catch(
 function notifSupported(){return 'Notification' in window}
 async function requestNotifPermission(){if(!notifSupported())return false;if(Notification.permission==='granted')return true;if(Notification.permission==='denied')return false;const result=await Notification.requestPermission();return result==='granted'}
 function checkFavoritesOnRoster(){const today=fmtDate(getAEDTDate());if(getNotifLastDate()===today)return;if(!isNotifOptedIn())return;if(Notification.permission!=='granted')return;const favs=getFavorites();if(!favs.length)return;const onRoster=girls.filter(g=>{if(!g.name||!favs.includes(g.name))return false;const entry=getCalEntry(g.name,today);return entry&&entry.start&&entry.end});if(!onRoster.length)return;setNotifLastDate(today);const names=onRoster.map(g=>g.name);const body=names.length===1?names[0]+' is available today!':names.slice(0,3).join(', ')+(names.length>3?' and '+(names.length-3)+' more':'')+' are available today!';new Notification('Ginza - Favorites Available',{body,tag:'ginza-roster-'+today})}
+
+/* === "Available Now" Push Notifications === */
+const NOTIF_NOW_SENT_KEY='ginza_notif_now_sent';
+
+function getNotifNowSent(){
+  try{
+    const v=localStorage.getItem(NOTIF_NOW_SENT_KEY);
+    if(!v)return{date:'',names:[]};
+    const obj=JSON.parse(v);
+    const today=fmtDate(getAEDTDate());
+    if(obj.date!==today)return{date:today,names:[]};
+    return obj;
+  }catch(e){return{date:fmtDate(getAEDTDate()),names:[]}}
+}
+
+function markNotifNowSent(name){
+  try{
+    const state=getNotifNowSent();
+    if(!state.names.includes(name))state.names.push(name);
+    state.date=fmtDate(getAEDTDate());
+    localStorage.setItem(NOTIF_NOW_SENT_KEY,JSON.stringify(state));
+  }catch(e){}
+}
+
+function checkAvailableNowNotifications(){
+  if(!isNotifOptedIn())return;
+  if(!notifSupported()||Notification.permission!=='granted')return;
+  const favs=getFavorites();if(!favs.length)return;
+  const sent=getNotifNowSent();
+  const newlyAvailable=girls.filter(g=>{
+    if(!g.name||!favs.includes(g.name))return false;
+    if(sent.names.includes(g.name))return false;
+    return isAvailableNow(g.name);
+  });
+  newlyAvailable.forEach(g=>{
+    const entry=getCalEntry(g.name,fmtDate(getAEDTDate()));
+    const timeStr=entry?fmtTime12(entry.start)+' - '+fmtTime12(entry.end):'';
+    new Notification('Ginza - '+g.name+' is Available Now!',{
+      body:g.name+' is available now'+(timeStr?' ('+timeStr+')':'')+'. Visit Ginza Empire to see her.',
+      tag:'ginza-avail-now-'+g.name+'-'+fmtDate(getAEDTDate()),
+      icon:g.photos&&g.photos.length?g.photos[0]:undefined
+    });
+    markNotifNowSent(g.name);
+  });
+}
 
 /* === API Functions (with retry) === */
 
@@ -289,6 +357,44 @@ async function saveRosterHistory(){
   }catch(_){}
 }
 function getLastRostered(name){return rosterHistory[name]||null}
+
+/* === Reviews === */
+async function loadReviews(){
+  try{
+    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
+    if(r.ok){const d=await r.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{};return}
+    if(r.status===404){reviewsSha=null;reviewsData={}}
+  }catch(_){}
+}
+
+async function saveReview(name,stars,text){
+  try{
+    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
+    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
+    else if(getR.status===404){reviewsSha=null;reviewsData={}}
+    if(!reviewsData[name])reviewsData[name]=[];
+    reviewsData[name].push({stars:stars,text:text||'',ts:Date.now()});
+    const body={message:'Add review for '+name,content:enc(reviewsData)};
+    if(reviewsSha)body.sha=reviewsSha;
+    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
+    if(!r.ok)throw new Error(r.status);
+    reviewsSha=(await r.json()).content.sha;
+    return true;
+  }catch(e){showToast('Review save failed','error');return false}
+}
+
+function getReviewsForGirl(name){return(reviewsData&&reviewsData[name])||[]}
+
+function getAverageRating(name){
+  const reviews=getReviewsForGirl(name);
+  if(!reviews.length)return{avg:0,count:0};
+  const sum=reviews.reduce((a,r)=>a+r.stars,0);
+  return{avg:sum/reviews.length,count:reviews.length};
+}
+
+const REVIEW_LIMIT_KEY='ginza_reviews_submitted';
+function hasReviewedGirl(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};return!!map[name]}catch(e){return false}}
+function markReviewed(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};map[name]=Date.now();localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
 
 async function uploadToGithub(b64, name, fn) {
   const safe = name.replace(/[^a-zA-Z0-9_-]/g, '_');

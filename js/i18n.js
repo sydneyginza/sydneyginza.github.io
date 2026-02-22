@@ -103,6 +103,18 @@ const LANG_DICT = {
     'compare.clear':'Clear',
     'compare.open':'Compare',
     'compare.done':'Close',
+    /* Recently Viewed */
+    'rv.title':'Recently Viewed',
+    'rv.clear':'Clear',
+    /* Similar Girls */
+    'sim.title':'Girls Like Her',
+    /* Reviews */
+    'review.title':'Reviews',
+    'review.placeholder':'Write a short review (optional)...',
+    'review.submit':'Submit Review',
+    'review.already':'You have already reviewed this profile.',
+    'review.thanks':'Thank you for your review!',
+    'review.selectStars':'Please select a star rating',
     /* Employment contacts */
     'emp.contacts':'Contacts',
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
@@ -353,6 +365,18 @@ const LANG_DICT = {
     'compare.clear':'クリア',
     'compare.open':'比較',
     'compare.done':'閉じる',
+    /* Recently Viewed */
+    'rv.title':'最近閲覧した女の子',
+    'rv.clear':'クリア',
+    /* Similar Girls */
+    'sim.title':'似ている女の子',
+    /* Reviews */
+    'review.title':'レビュー',
+    'review.placeholder':'短いレビューを書く（任意）...',
+    'review.submit':'レビューを投稿',
+    'review.already':'このプロフィールにはすでにレビューを投稿済みです。',
+    'review.thanks':'レビューありがとうございます！',
+    'review.selectStars':'星の評価を選択してください',
     /* Employment contacts */
     'emp.contacts':'連絡先',
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
@@ -603,6 +627,18 @@ const LANG_DICT = {
     'compare.clear':'지우기',
     'compare.open':'비교',
     'compare.done':'닫기',
+    /* Recently Viewed */
+    'rv.title':'최근 본 여성',
+    'rv.clear':'지우기',
+    /* Similar Girls */
+    'sim.title':'비슷한 여성',
+    /* Reviews */
+    'review.title':'리뷰',
+    'review.placeholder':'짧은 리뷰 작성 (선택 사항)...',
+    'review.submit':'리뷰 제출',
+    'review.already':'이 프로필에 이미 리뷰를 작성했습니다.',
+    'review.thanks':'리뷰 감사합니다!',
+    'review.selectStars':'별점을 선택해 주세요',
     /* Employment contacts */
     'emp.contacts':'연락처',
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
@@ -853,6 +889,18 @@ const LANG_DICT = {
     'compare.clear':'清除',
     'compare.open':'比较',
     'compare.done':'关闭',
+    /* Recently Viewed */
+    'rv.title':'最近浏览',
+    'rv.clear':'清除',
+    /* Similar Girls */
+    'sim.title':'相似女生',
+    /* Reviews */
+    'review.title':'评价',
+    'review.placeholder':'写一条简短评价（可选）...',
+    'review.submit':'提交评价',
+    'review.already':'您已经评价过该档案。',
+    'review.thanks':'感谢您的评价！',
+    'review.selectStars':'请选择星级评分',
     /* Employment contacts */
     'emp.contacts':'联系方式',
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',

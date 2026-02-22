@@ -428,7 +428,19 @@ const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML='<p></p>';
-ngList=getNewGirls();ngIdx=0;renderNewGirls()})}
+ngList=getNewGirls();ngIdx=0;renderNewGirls();renderRecentlyViewed()})}
+
+function renderRecentlyViewed(){
+const container=document.getElementById('homeRecentlyViewed');if(!container)return;
+const rv=getRecentlyViewed();
+const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(Boolean);
+if(!valid.length){container.style.display='none';return}
+container.style.display='';
+let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="rvClearBtn">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
+valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const thumb=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';html+=`<div class="also-avail-card" data-rv-idx="${idx}">${thumb}<div class="also-avail-name">${g.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}</div>`});
+html+='</div>';container.innerHTML=html;
+container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{profileReturnPage='homePage';showProfile(parseInt(card.dataset.rvIdx))}});
+const clearBtn=document.getElementById('rvClearBtn');if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed()}}
 
 function renderNewGirls(){
 const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDisplay');nav.innerHTML='';disp.innerHTML='';
@@ -560,12 +572,85 @@ alsoList.forEach(o=>{const ri=girls.indexOf(o);const liveNow=isAvailableNow(o.na
 sec.appendChild(strip);
 document.getElementById('profileContent').appendChild(sec)}
 
+/* Similar Girls */
+function _avgRate(g){const vals=[parseFloat(g.val1),parseFloat(g.val2),parseFloat(g.val3)].filter(v=>!isNaN(v)&&v>0);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0}
+function computeSimilarity(a,b){
+let score=0;
+const ac=Array.isArray(a.country)?a.country:[a.country];
+const bc=Array.isArray(b.country)?b.country:[b.country];
+if(ac.some(c=>c&&bc.includes(c)))score+=1;
+const aa=parseFloat(a.age),ba=parseFloat(b.age);
+if(!isNaN(aa)&&!isNaN(ba)&&Math.abs(aa-ba)<=3)score+=1;
+const ab=parseFloat(a.body),bb=parseFloat(b.body);
+if(!isNaN(ab)&&!isNaN(bb)&&Math.abs(ab-bb)<=2)score+=1;
+if(a.cup&&b.cup&&a.cup.trim().charAt(0).toUpperCase()===b.cup.trim().charAt(0).toUpperCase())score+=1;
+const aAvg=_avgRate(a),bAvg=_avgRate(b);
+if(aAvg>0&&bAvg>0&&Math.abs(aAvg-bAvg)/Math.max(aAvg,bAvg)<=0.2)score+=1;
+return score/5}
+
+function renderSimilarGirls(idx){
+const g=girls[idx];if(!g||!g.name)return;
+const ts=fmtDate(getAEDTDate());
+const alsoNames=new Set();
+girls.filter(o=>{if(!o.name||o.name===g.name)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8).forEach(o=>alsoNames.add(o.name));
+const candidates=girls.map((o,i)=>({g:o,idx:i})).filter(x=>x.g.name&&x.g.name!==g.name&&!alsoNames.has(x.g.name)).map(x=>({...x,score:computeSimilarity(g,x.g)})).filter(x=>x.score>=0.4).sort((a,b)=>b.score-a.score).slice(0,6);
+if(!candidates.length)return;
+const sec=document.createElement('div');sec.className='profile-also';
+const title=document.createElement('div');title.className='profile-desc-title';title.textContent=t('sim.title');sec.appendChild(title);
+const strip=document.createElement('div');strip.className='also-avail-strip';
+candidates.forEach(c=>{const o=c.g;const liveNow=isAvailableNow(o.name);const card=document.createElement('div');card.className='also-avail-card';const thumb=o.photos&&o.photos.length?`<img src="${o.photos[0]}" alt="${o.name.replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';card.innerHTML=`${thumb}<div class="also-avail-name">${o.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}`;card.onclick=()=>showProfile(c.idx);strip.appendChild(card)});
+sec.appendChild(strip);document.getElementById('profileContent').appendChild(sec)}
+
+/* Star Rating Display */
+function renderStars(avg,count){
+if(!count)return '';
+const full=Math.floor(avg);const half=avg-full>=0.5?1:0;const empty=5-full-half;
+let html='<span class="star-rating">';
+for(let i=0;i<full;i++)html+='<span class="star star-full">\u2605</span>';
+if(half)html+='<span class="star star-half">\u2605</span>';
+for(let i=0;i<empty;i++)html+='<span class="star star-empty">\u2606</span>';
+html+=` <span class="star-count">(${count})</span></span>`;
+return html}
+
+/* Review Section on Profile */
+function renderReviewSection(idx){
+const g=girls[idx];if(!g||!g.name)return;
+const reviews=getReviewsForGirl(g.name);
+const{avg,count}=getAverageRating(g.name);
+const alreadyReviewed=hasReviewedGirl(g.name);
+const sec=document.createElement('div');sec.className='profile-also review-section';sec.id='reviewSection';
+let html=`<div class="profile-desc-title">${t('review.title')}</div>`;
+if(count>0)html+=`<div class="review-summary">${renderStars(avg,count)} <span class="review-avg">${avg.toFixed(1)}</span></div>`;
+if(!alreadyReviewed){
+html+=`<div class="review-form" id="reviewForm"><div class="review-star-picker" id="reviewStarPicker">${[1,2,3,4,5].map(i=>`<span class="review-star-pick" data-star="${i}">\u2606</span>`).join('')}</div><textarea class="review-text" id="reviewText" placeholder="${t('review.placeholder')}" maxlength="200"></textarea><button class="btn btn-primary review-submit" id="reviewSubmitBtn">${t('review.submit')}</button></div>`}
+else{html+=`<div class="review-already">${t('review.already')}</div>`}
+if(reviews.length){
+const months=['date.jan','date.feb','date.mar','date.apr','date.may','date.jun','date.jul','date.aug','date.sep','date.oct','date.nov','date.dec'];
+const sorted=[...reviews].sort((a,b)=>b.ts-a.ts).slice(0,10);
+html+='<div class="review-list">';
+sorted.forEach(r=>{const d=new Date(r.ts);const ds=d.getDate()+' '+t(months[d.getMonth()]);html+=`<div class="review-item"><div class="review-item-stars">${'\u2605'.repeat(r.stars)}${'\u2606'.repeat(5-r.stars)}</div>${r.text?`<div class="review-item-text">${r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}<div class="review-item-date">${ds}</div></div>`});
+html+='</div>'}
+sec.innerHTML=html;document.getElementById('profileContent').appendChild(sec);
+if(!alreadyReviewed){
+let selectedStars=0;const picker=document.getElementById('reviewStarPicker');const stars=picker.querySelectorAll('.review-star-pick');
+stars.forEach(s=>{
+s.onmouseenter=()=>{const val=parseInt(s.dataset.star);stars.forEach((ss,i)=>{ss.textContent=(i+1)<=val?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=val)})};
+s.onclick=()=>{selectedStars=parseInt(s.dataset.star)}});
+picker.onmouseleave=()=>{stars.forEach((ss,i)=>{ss.textContent=(i+1)<=selectedStars?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=selectedStars)})};
+document.getElementById('reviewSubmitBtn').onclick=async()=>{
+if(selectedStars<1){showToast(t('review.selectStars'),'error');return}
+const text=document.getElementById('reviewText').value.trim();
+const btn=document.getElementById('reviewSubmitBtn');btn.textContent='...';btn.disabled=true;
+const ok=await saveReview(g.name,selectedStars,text);
+if(ok){markReviewed(g.name);showToast(t('review.thanks'));showProfile(idx)}
+else{btn.textContent=t('review.submit');btn.disabled=false}}}}
+
 function updateFavBadge(){const b=document.getElementById('navFavBadge');const bb=document.getElementById('bnFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:'';if(bb)bb.textContent=c>0?c:''}
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
 function showProfile(idx){safeRender('Profile',()=>{
-const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];updateOgMeta(g,idx);
+const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);
 /* URL routing & dynamic title */
 const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
@@ -601,7 +686,7 @@ const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
 const profShare=document.getElementById('profShareBtn');
 if(profShare){profShare.onclick=async()=>{const url=window.location.origin+Router.pathForProfile(idx);if(navigator.share){try{await navigator.share({title:g.name+' - Ginza',text:g.name+' at Ginza Sydney',url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);showToast(t('ui.linkCopied'))}catch(e){const tmp=document.createElement('input');tmp.value=url;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');document.body.removeChild(tmp);showToast(t('ui.linkCopied'))}}}}
-renderGallery(idx);renderAlsoAvailable(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
+renderGallery(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderReviewSection(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');allPages.forEach(p=>p.classList.remove('active'));document.getElementById('profilePage').classList.add('active');document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0)})}
 
 /* Profile Gallery */
 let galIdx=0;
