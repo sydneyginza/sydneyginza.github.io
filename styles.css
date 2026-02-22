@@ -104,8 +104,10 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-action-btn.hide-toggle{font-size:16px}
 .card-action-btn.hide-toggle:hover{color:#ffcc44;border-color:#ffcc44}
 .card-action-btn.hide-toggle.active{color:#ffcc44;border-color:#ffcc44;background:rgba(255,204,68,0.15)}
-.card-hidden{opacity:0.4}
-.card-hidden:hover{opacity:0.75}
+.card-hidden{opacity:0.4;filter:grayscale(1)}
+.card-hidden:hover{opacity:0.75;filter:grayscale(0.5)}
+.pnav-dot-hidden{opacity:0.35;filter:grayscale(1)}
+.pnav-dot-hidden:hover{opacity:0.6;filter:grayscale(0.5)}
 .card-info{padding:16px;position:relative}
 .card-name{font-family:'Orbitron',sans-serif;font-weight:600;font-size:14px;letter-spacing:2px;color:#fff;text-transform:uppercase}
 .card-country{font-size:12px;color:var(--text-dim);letter-spacing:1px;margin-top:4px}
