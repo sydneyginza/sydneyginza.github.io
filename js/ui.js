@@ -640,7 +640,7 @@ const arrows=hasMultiple?`<button class="gallery-main-arrow prev" id="galPrev"><
 const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><span>1</span> / ${g.photos.length}</div>`:'';
 const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</div>`:'';
 const isFav=g.name&&isFavorite(g.name);
-const favBtn=g.name?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
+const favBtn=g.name&&loggedIn?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
 const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>${t('ui.share')}</button>`:'';
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${t('ui.back')}</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
@@ -739,7 +739,7 @@ authOverlay.onclick=e=>{if(e.target===authOverlay)authOverlay.classList.remove('
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
 document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
-document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
+document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navFavorites').style.display='none';document.getElementById('bnFavorites').style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
 function showAuthSignIn(){
@@ -778,6 +778,7 @@ const entry={user:u,pass,role:'member',email,mobile:mobile||undefined};
 CRED.push(entry);
 if(await saveAuth()){
 loggedIn=true;loggedInUser=entry.user;loggedInRole='member';loggedInEmail=entry.email;loggedInMobile=entry.mobile||null;
+document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';
 authOverlay.classList.remove('open');
 renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();
 showToast(t('ui.accountCreated'))}
@@ -786,7 +787,7 @@ else{CRED.pop()}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList.toggle('open')}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});

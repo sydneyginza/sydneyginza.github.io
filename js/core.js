@@ -116,16 +116,18 @@ function isCalCacheStale() {
   catch(e) { return true; }
 }
 
-/* === Favorites === */
-const FAV_KEY = 'ginza_favorites';
+/* === Favorites (per-user in auth.json) === */
 
 function getFavorites() {
-  try { const v = localStorage.getItem(FAV_KEY); return v ? JSON.parse(v) : []; }
-  catch (e) { return []; }
+  if (!loggedIn || !loggedInUser) return [];
+  const entry = CRED.find(c => c.user === loggedInUser);
+  return entry && Array.isArray(entry.favorites) ? entry.favorites : [];
 }
 
 function saveFavorites(favs) {
-  try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) {}
+  if (!loggedIn || !loggedInUser) return;
+  const entry = CRED.find(c => c.user === loggedInUser);
+  if (entry) { entry.favorites = favs; saveAuth(); }
 }
 
 function isFavorite(name) {
@@ -573,6 +575,13 @@ const Router = (function() {
     /* Standard pages */
     const pageId = PATH_TO_PAGE[path];
     if (pageId) {
+      if (pageId === 'favoritesPage' && !loggedIn) {
+        _suppressPush = true;
+        showPage('homePage');
+        _suppressPush = false;
+        replace('/', 'Ginza Empire');
+        return true;
+      }
       if (pageId === 'calendarPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
