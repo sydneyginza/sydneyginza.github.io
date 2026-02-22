@@ -786,8 +786,12 @@ else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
+async function checkFavoriteNotifications(username){
+try{const r=await fetch(PROXY+'/send-notification',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username})});
+if(r.ok){const d=await r.json();if(d.sent&&d.matchCount>0){showToast(d.matchCount===1?t('ui.favAvailOne'):t('ui.favAvailMany').replace('{count}',d.matchCount))}}}catch(e){}}
+
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user)}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList.toggle('open')}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
