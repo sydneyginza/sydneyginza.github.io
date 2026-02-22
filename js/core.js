@@ -373,14 +373,15 @@ async function saveReview(name,stars,text){
     if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
     else if(getR.status===404){reviewsSha=null;reviewsData={}}
     if(!reviewsData[name])reviewsData[name]=[];
-    reviewsData[name].push({stars:stars,text:text||'',ts:Date.now()});
+    const uuid=crypto.randomUUID?crypto.randomUUID():(Date.now().toString(36)+'-'+Math.random().toString(36).substr(2,9));
+    reviewsData[name].push({id:uuid,stars:stars,text:text||'',ts:Date.now()});
     const body={message:'Add review for '+name,content:enc(reviewsData)};
     if(reviewsSha)body.sha=reviewsSha;
     const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
     if(!r.ok)throw new Error(r.status);
     reviewsSha=(await r.json()).content.sha;
-    return true;
-  }catch(e){showToast('Review save failed','error');return false}
+    return uuid;
+  }catch(e){showToast('Review save failed','error');return null}
 }
 
 function getReviewsForGirl(name){return(reviewsData&&reviewsData[name])||[]}
@@ -394,7 +395,44 @@ function getAverageRating(name){
 
 const REVIEW_LIMIT_KEY='ginza_reviews_submitted';
 function hasReviewedGirl(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};return!!map[name]}catch(e){return false}}
-function markReviewed(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};map[name]=Date.now();localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
+function markReviewed(name,reviewId){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};map[name]=reviewId;localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
+function getOwnReviewId(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};return map[name]||null}catch(e){return null}}
+function clearReviewed(name){try{const v=localStorage.getItem(REVIEW_LIMIT_KEY);const map=v?JSON.parse(v):{};delete map[name];localStorage.setItem(REVIEW_LIMIT_KEY,JSON.stringify(map))}catch(e){}}
+
+async function updateReview(name,reviewId,stars,text){
+  try{
+    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
+    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
+    else if(getR.status===404)return false;
+    const arr=reviewsData[name];if(!arr)return false;
+    const rev=arr.find(r=>r.id===reviewId);if(!rev)return false;
+    rev.stars=stars;rev.text=text||'';rev.ts=Date.now();
+    const body={message:'Update review for '+name,content:enc(reviewsData)};
+    if(reviewsSha)body.sha=reviewsSha;
+    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
+    if(!r.ok)throw new Error(r.status);
+    reviewsSha=(await r.json()).content.sha;
+    return true;
+  }catch(e){showToast('Review update failed','error');return false}
+}
+
+async function deleteReview(name,reviewId){
+  try{
+    const getR=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{headers:proxyHeaders()});
+    if(getR.ok){const d=await getR.json();reviewsSha=d.sha;reviewsData=dec(d.content)||{}}
+    else if(getR.status===404)return false;
+    if(!reviewsData[name])return false;
+    reviewsData[name]=reviewsData[name].filter(r=>r.id!==reviewId);
+    if(!reviewsData[name].length)delete reviewsData[name];
+    const body={message:'Delete review for '+name,content:enc(reviewsData)};
+    if(reviewsSha)body.sha=reviewsSha;
+    const r=await fetchWithRetry(`${DATA_API}/${REVIEWS_PATH}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)},{retries:2});
+    if(!r.ok)throw new Error(r.status);
+    reviewsSha=(await r.json()).content.sha;
+    clearReviewed(name);
+    return true;
+  }catch(e){showToast('Review delete failed','error');return false}
+}
 
 async function uploadToGithub(b64, name, fn) {
   const safe = name.replace(/[^a-zA-Z0-9_-]/g, '_');

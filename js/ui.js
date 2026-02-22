@@ -613,37 +613,75 @@ html+=` <span class="star-count">(${count})</span></span>`;
 return html}
 
 /* Review Section on Profile */
+function _reviewStarPickerHtml(prefix){return [1,2,3,4,5].map(i=>`<span class="review-star-pick" data-star="${i}" id="${prefix}Star${i}">\u2606</span>`).join('')}
+function _bindStarPicker(pickerId,prefix,initial,onSelect){
+const picker=document.getElementById(pickerId);if(!picker)return;
+const stars=picker.querySelectorAll('.review-star-pick');let sel=initial||0;
+if(sel>0)stars.forEach((ss,i)=>{ss.textContent=(i+1)<=sel?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=sel)});
+stars.forEach(s=>{
+s.onmouseenter=()=>{const val=parseInt(s.dataset.star);stars.forEach((ss,i)=>{ss.textContent=(i+1)<=val?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=val)})};
+s.onclick=()=>{sel=parseInt(s.dataset.star);if(onSelect)onSelect(sel)}});
+picker.onmouseleave=()=>{stars.forEach((ss,i)=>{ss.textContent=(i+1)<=sel?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=sel)})};
+return()=>sel}
+
 function renderReviewSection(idx){
 const g=girls[idx];if(!g||!g.name)return;
 const reviews=getReviewsForGirl(g.name);
 const{avg,count}=getAverageRating(g.name);
-const alreadyReviewed=hasReviewedGirl(g.name);
+const ownReviewId=getOwnReviewId(g.name);
+const ownReview=ownReviewId?reviews.find(r=>r.id===ownReviewId):null;
+const showForm=!ownReview&&!ownReviewId;
 const sec=document.createElement('div');sec.className='profile-also review-section';sec.id='reviewSection';
+const months=['date.jan','date.feb','date.mar','date.apr','date.may','date.jun','date.jul','date.aug','date.sep','date.oct','date.nov','date.dec'];
 let html=`<div class="profile-desc-title">${t('review.title')}</div>`;
 if(count>0)html+=`<div class="review-summary">${renderStars(avg,count)} <span class="review-avg">${avg.toFixed(1)}</span></div>`;
-if(!alreadyReviewed){
-html+=`<div class="review-form" id="reviewForm"><div class="review-star-picker" id="reviewStarPicker">${[1,2,3,4,5].map(i=>`<span class="review-star-pick" data-star="${i}">\u2606</span>`).join('')}</div><textarea class="review-text" id="reviewText" placeholder="${t('review.placeholder')}" maxlength="200"></textarea><button class="btn btn-primary review-submit" id="reviewSubmitBtn">${t('review.submit')}</button></div>`}
-else{html+=`<div class="review-already">${t('review.already')}</div>`}
+if(showForm){
+html+=`<div class="review-form" id="reviewForm"><div class="review-star-picker" id="reviewStarPicker">${_reviewStarPickerHtml('new')}</div><textarea class="review-text" id="reviewText" placeholder="${t('review.placeholder')}" maxlength="200"></textarea><button class="btn btn-primary review-submit" id="reviewSubmitBtn">${t('review.submit')}</button></div>`}
 if(reviews.length){
-const months=['date.jan','date.feb','date.mar','date.apr','date.may','date.jun','date.jul','date.aug','date.sep','date.oct','date.nov','date.dec'];
 const sorted=[...reviews].sort((a,b)=>b.ts-a.ts).slice(0,10);
 html+='<div class="review-list">';
-sorted.forEach(r=>{const d=new Date(r.ts);const ds=d.getDate()+' '+t(months[d.getMonth()]);html+=`<div class="review-item"><div class="review-item-stars">${'\u2605'.repeat(r.stars)}${'\u2606'.repeat(5-r.stars)}</div>${r.text?`<div class="review-item-text">${r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}<div class="review-item-date">${ds}</div></div>`});
+sorted.forEach(r=>{const d=new Date(r.ts);const ds=d.getDate()+' '+t(months[d.getMonth()]);const isOwn=ownReview&&r.id===ownReview.id;
+html+=`<div class="review-item${isOwn?' review-item-own':''}" data-rid="${r.id||''}">${isOwn?`<div class="review-own-badge">${t('review.yours')}</div>`:''}`;
+html+=`<div class="review-item-stars">${'\u2605'.repeat(r.stars)}${'\u2606'.repeat(5-r.stars)}</div>`;
+if(r.text)html+=`<div class="review-item-text">${r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+html+=`<div class="review-item-date">${ds}</div>`;
+if(isOwn)html+=`<div class="review-item-actions"><button class="review-edit-btn" id="reviewEditBtn">${t('review.edit')}</button><button class="review-delete-btn" id="reviewDeleteBtn">${t('review.delete')}</button></div>`;
+html+='</div>'});
 html+='</div>'}
 sec.innerHTML=html;document.getElementById('profileContent').appendChild(sec);
-if(!alreadyReviewed){
-let selectedStars=0;const picker=document.getElementById('reviewStarPicker');const stars=picker.querySelectorAll('.review-star-pick');
-stars.forEach(s=>{
-s.onmouseenter=()=>{const val=parseInt(s.dataset.star);stars.forEach((ss,i)=>{ss.textContent=(i+1)<=val?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=val)})};
-s.onclick=()=>{selectedStars=parseInt(s.dataset.star)}});
-picker.onmouseleave=()=>{stars.forEach((ss,i)=>{ss.textContent=(i+1)<=selectedStars?'\u2605':'\u2606';ss.classList.toggle('active',(i+1)<=selectedStars)})};
+/* Bind new-review form */
+if(showForm){
+const getSel=_bindStarPicker('reviewStarPicker','new',0);
 document.getElementById('reviewSubmitBtn').onclick=async()=>{
+const selectedStars=getSel();
 if(selectedStars<1){showToast(t('review.selectStars'),'error');return}
 const text=document.getElementById('reviewText').value.trim();
 const btn=document.getElementById('reviewSubmitBtn');btn.textContent='...';btn.disabled=true;
-const ok=await saveReview(g.name,selectedStars,text);
-if(ok){markReviewed(g.name);showToast(t('review.thanks'));showProfile(idx)}
-else{btn.textContent=t('review.submit');btn.disabled=false}}}}
+const reviewId=await saveReview(g.name,selectedStars,text);
+if(reviewId){markReviewed(g.name,reviewId);showToast(t('review.thanks'));showProfile(idx)}
+else{btn.textContent=t('review.submit');btn.disabled=false}}}
+/* Bind edit button */
+const editBtn=document.getElementById('reviewEditBtn');
+if(editBtn&&ownReview){editBtn.onclick=()=>{
+const item=editBtn.closest('.review-item');if(!item)return;
+item.innerHTML=`<div class="review-own-badge">${t('review.yours')}</div><div class="review-edit-form"><div class="review-star-picker" id="editStarPicker">${_reviewStarPickerHtml('edit')}</div><textarea class="review-text" id="editReviewText" placeholder="${t('review.placeholder')}" maxlength="200">${(ownReview.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea><div style="display:flex;gap:8px"><button class="btn btn-primary review-save-btn" id="editSaveBtn">${t('review.save')}</button><button class="btn review-cancel-btn" id="editCancelBtn">${t('review.cancel')}</button></div></div>`;
+const getSel=_bindStarPicker('editStarPicker','edit',ownReview.stars);
+document.getElementById('editSaveBtn').onclick=async()=>{
+const stars=getSel();if(stars<1){showToast(t('review.selectStars'),'error');return}
+const text=document.getElementById('editReviewText').value.trim();
+const btn=document.getElementById('editSaveBtn');btn.textContent='...';btn.disabled=true;
+const ok=await updateReview(g.name,ownReview.id,stars,text);
+if(ok){showToast(t('review.updated'));showProfile(idx)}
+else{btn.textContent=t('review.save');btn.disabled=false}};
+document.getElementById('editCancelBtn').onclick=()=>showProfile(idx)}}
+/* Bind delete button */
+const delBtn=document.getElementById('reviewDeleteBtn');
+if(delBtn&&ownReview){delBtn.onclick=async()=>{
+if(!confirm(t('review.confirmDelete')))return;
+delBtn.textContent='...';delBtn.disabled=true;
+const ok=await deleteReview(g.name,ownReview.id);
+if(ok){showToast(t('review.deleted'));showProfile(idx)}
+else{delBtn.textContent=t('review.delete');delBtn.disabled=false}}}}
 
 function updateFavBadge(){const b=document.getElementById('navFavBadge');const bb=document.getElementById('bnFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:'';if(bb)bb.textContent=c>0?c:''}
 
