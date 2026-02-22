@@ -251,6 +251,8 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-rating .review-star svg{width:12px;height:12px;fill:currentColor}
 .card-rating-num{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--text-dim);letter-spacing:0.5px}
 .card-rating-count{font-family:'Rajdhani',sans-serif;font-size:11px;color:rgba(255,255,255,0.25)}
+.chp-rating{padding:0 12px 4px}
+.chp-rating .card-rating{margin-top:2px}
 
 /* ── Profile Rating (header) ── */
 .profile-rating-summary{display:inline-flex;align-items:center;gap:6px}
