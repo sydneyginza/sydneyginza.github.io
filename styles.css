@@ -401,7 +401,7 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 .review-section{margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,0.06)}
 .review-summary{display:flex;align-items:center;gap:8px;margin-bottom:20px}
 .review-avg{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:600;color:#fff}
-.review-form{margin-bottom:24px}
+.review-form{margin-bottom:24px;display:flex;flex-direction:column;align-items:flex-start}
 .review-star-picker{display:flex;gap:4px;margin-bottom:12px}
 .review-star-pick{font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .2s,transform .2s;user-select:none}
 .review-star-pick:hover,.review-star-pick.active{color:#ffcc44;transform:scale(1.1)}
