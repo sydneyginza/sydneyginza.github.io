@@ -730,17 +730,30 @@ if(await saveAuth()){document.getElementById('myProfileOverlay').classList.remov
 
 /* Auth / Login */
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
+const authOverlay=document.getElementById('authOverlay'),authContent=document.getElementById('authContent');
+document.getElementById('authClose').onclick=()=>authOverlay.classList.remove('open');
+authOverlay.onclick=e=>{if(e.target===authOverlay)authOverlay.classList.remove('open')};
+
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
 document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
 document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
-else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">${t('ui.signIn')}</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">${t('ui.signIn')}</button><div class="lf-error" id="lfError"></div><div class="lf-switch">${t('ui.noAccount')} <a href="#" id="lfSignUpLink">${t('ui.signUp')}</a></div></div>`;
-document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()});document.getElementById('lfSignUpLink').onclick=e=>{e.preventDefault();renderSignUp()}}}
-function renderSignUp(){
-userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">${t('ui.signUp')}</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="suUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">${t('field.email')} *</label><input class="lf-input" id="suEmail" type="email" placeholder="email@example.com"></div><div class="lf-group"><label class="lf-label">${t('field.mobile')}</label><input class="lf-input" id="suMobile" type="tel" placeholder="04XX XXX XXX"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="suPass" type="password" placeholder="Password"></div><div class="lf-group"><label class="lf-label">${t('ui.confirmPassword')}</label><input class="lf-input" id="suConfirm" type="password" placeholder="Confirm"></div><button class="lf-btn" id="suBtn">${t('ui.createAccount')}</button><div class="lf-error" id="suError"></div><div class="lf-switch">${t('ui.haveAccount')} <a href="#" id="suSignInLink">${t('ui.signIn')}</a></div></div>`;
+else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
+
+function showAuthSignIn(){
+authContent.innerHTML=`<div class="form-title">${t('ui.signIn')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username</label><input class="form-input" id="lfUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password</label><input class="form-input" id="lfPass" type="password" placeholder="Password"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="lfBtn" style="width:100%">${t('ui.signIn')}</button></div><div class="lf-error" id="lfError"></div><div class="lf-switch">${t('ui.noAccount')} <a href="#" id="lfSignUpLink">${t('ui.signUp')}</a></div>`;
+document.getElementById('lfBtn').onclick=doLogin;
+document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()});
+document.getElementById('lfSignUpLink').onclick=e=>{e.preventDefault();showAuthSignUp()};
+authOverlay.classList.add('open')}
+
+function showAuthSignUp(){
+authContent.innerHTML=`<div class="form-title">${t('ui.signUp')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="suUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.email')} *</label><input class="form-input" id="suEmail" type="email" placeholder="email@example.com"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.mobile')}</label><input class="form-input" id="suMobile" type="tel" placeholder="04XX XXX XXX"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="suPass" type="password" placeholder="Password"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('ui.confirmPassword')} *</label><input class="form-input" id="suConfirm" type="password" placeholder="Confirm"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="suBtn" style="width:100%">${t('ui.createAccount')}</button></div><div class="lf-error" id="suError"></div><div class="lf-switch">${t('ui.haveAccount')} <a href="#" id="suSignInLink">${t('ui.signIn')}</a></div>`;
 document.getElementById('suBtn').onclick=doSignUp;
 document.getElementById('suConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doSignUp()});
-document.getElementById('suSignInLink').onclick=e=>{e.preventDefault();renderDropdown()}}
+document.getElementById('suSignInLink').onclick=e=>{e.preventDefault();showAuthSignIn()};
+authOverlay.classList.add('open')}
 
 async function doSignUp(){
 const u=document.getElementById('suUser').value.trim();
@@ -752,6 +765,8 @@ const errEl=document.getElementById('suError');
 if(!u){errEl.textContent=t('ui.usernameRequired');return}
 if(CRED.some(c=>c.user.toLowerCase()===u.toLowerCase())){errEl.textContent=t('ui.usernameTaken');return}
 if(!email){errEl.textContent=t('ui.emailRequired');return}
+if(CRED.some(c=>c.email&&c.email.toLowerCase()===email.toLowerCase())){errEl.textContent=t('ui.emailTaken');return}
+if(mobile&&CRED.some(c=>c.mobile&&c.mobile===mobile)){errEl.textContent=t('ui.mobileTaken');return}
 if(!pass){errEl.textContent=t('ui.passwordRequired');return}
 if(pass!==confirm){errEl.textContent=t('ui.passwordMismatch');return}
 errEl.textContent='';
@@ -761,17 +776,17 @@ const entry={user:u,pass,role:'member',email,mobile:mobile||undefined};
 CRED.push(entry);
 if(await saveAuth()){
 loggedIn=true;loggedInUser=entry.user;loggedInRole='member';loggedInEmail=entry.email;loggedInMobile=entry.mobile||null;
+authOverlay.classList.remove('open');
 renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();
-setTimeout(()=>userDropdown.classList.remove('open'),600);
 showToast(t('ui.accountCreated'))}
 else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
-loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
+loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList.toggle('open')}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
 renderDropdown();
 

@@ -60,7 +60,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .login-form-inline .lf-input:focus{border-color:var(--accent)}
 .login-form-inline .lf-btn{width:100%;margin-top:12px;background:rgba(180,74,255,0.12);border:1px solid var(--accent);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:10px;cursor:pointer;transition:all .3s}
 .login-form-inline .lf-btn:hover{background:rgba(180,74,255,0.22)}
-.login-form-inline .lf-error{color:#ff4444;font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+.login-form-inline .lf-error,.lf-error{color:#ff4444;font-size:12px;text-align:center;margin-top:8px;min-height:16px}
 .lf-switch{font-size:11px;color:var(--text-dim);text-align:center;margin-top:14px;letter-spacing:.5px}
 .lf-switch a{color:var(--accent);text-decoration:none;font-weight:600;letter-spacing:1px}
 .lf-switch a:hover{text-decoration:underline}
