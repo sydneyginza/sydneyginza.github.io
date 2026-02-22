@@ -954,22 +954,48 @@ showPage('homePage');
 })();
 
 /* ── Profile Database ── */
+let _pdbSearch='',_pdbRoleFilter='';
 function renderProfileDb(){
 if(!isAdmin())return;
 const container=document.getElementById('profileDbContent');
 if(!container)return;
-let html='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.role')+'</th></tr></thead><tbody>';
-CRED.forEach((c,i)=>{
-html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td></tr>'});
+/* Filters bar */
+let html='<div class="pdb-filters"><input class="pdb-search" id="pdbSearch" type="text" placeholder="'+t('pdb.searchPlaceholder')+'" value="'+(_pdbSearch||'').replace(/"/g,'&quot;')+'">';
+html+='<select class="pdb-role-filter" id="pdbRoleFilter"><option value=""'+ (_pdbRoleFilter===''?' selected':'')+'>'+t('pdb.allRoles')+'</option><option value="admin"'+(_pdbRoleFilter==='admin'?' selected':'')+'>Admin</option><option value="member"'+(_pdbRoleFilter==='member'?' selected':'')+'>Member</option></select></div>';
+/* Filter CRED */
+const q=_pdbSearch.toLowerCase();
+const filtered=CRED.map((c,i)=>({c,i})).filter(({c})=>{
+if(_pdbRoleFilter&&c.role!==_pdbRoleFilter)return false;
+if(q){const u=(c.user||'').toLowerCase(),e=(c.email||'').toLowerCase(),m=(c.mobile||'').toLowerCase();if(!u.includes(q)&&!e.includes(q)&&!m.includes(q))return false}
+return true});
+/* Table */
+html+='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.role')+'</th><th></th></tr></thead><tbody>';
+if(!filtered.length){html+='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px">'+t('pdb.noResults')+'</td></tr>'}
+filtered.forEach(({c,i})=>{
+const isSelf=c.user===loggedInUser;
+html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td><td>'+(isSelf?'':'<button class="pdb-delete-btn" data-cred-idx="'+i+'" title="'+t('pdb.deleteUser')+'">&#x2715;</button>')+'</td></tr>'});
 html+='</tbody></table>';
 container.innerHTML=html;
+/* Bind search */
+const searchEl=document.getElementById('pdbSearch');
+searchEl.oninput=()=>{_pdbSearch=searchEl.value;renderProfileDb()};
+searchEl.focus();searchEl.setSelectionRange(searchEl.value.length,searchEl.value.length);
+/* Bind role filter */
+document.getElementById('pdbRoleFilter').onchange=function(){_pdbRoleFilter=this.value;renderProfileDb()};
+/* Bind role selects */
 container.querySelectorAll('.pdb-role-select').forEach(sel=>{
 sel.onchange=async function(){
 const idx=parseInt(this.dataset.credIdx);const newRole=this.value;
 if(CRED[idx].user===loggedInUser&&newRole!=='admin'){this.value='admin';showToast(t('pdb.cannotDemoteSelf'));return}
 CRED[idx].role=newRole;
-if(await saveAuth()){showToast(t('pdb.roleUpdated'))}else{showToast(t('pdb.saveFailed'))}
-}})}
+if(await saveAuth()){showToast(t('pdb.roleUpdated'))}else{showToast(t('pdb.saveFailed'))}}});
+/* Bind delete buttons */
+container.querySelectorAll('.pdb-delete-btn').forEach(btn=>{
+btn.onclick=async function(){
+const idx=parseInt(this.dataset.credIdx);const name=(CRED[idx].user||'').toUpperCase();
+if(!confirm(t('pdb.confirmDelete').replace('{user}',name)))return;
+CRED.splice(idx,1);
+if(await saveAuth()){showToast(t('pdb.userDeleted'));renderProfileDb()}else{showToast(t('pdb.saveFailed'))}}})}
 
 /* ── Track FAB phone taps ── */
 document.querySelectorAll('.fab-item.fab-call').forEach(link=>{
