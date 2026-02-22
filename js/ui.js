@@ -625,7 +625,7 @@ const g=girls[idx];if(!g)return;currentProfileIdx=idx;if(!g.photos)g.photos=[];i
 const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
-const admin=loggedIn?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">${t('ui.edit')}</button><button class="btn btn-danger" id="profDelete">${t('ui.delete')}</button></div>`:'';
+const admin=isAdmin()?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">${t('ui.edit')}</button><button class="btn btn-danger" id="profDelete">${t('ui.delete')}</button></div>`:'';
 const ts=fmtDate(getAEDTDate());const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
 let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>'+t('avail.now')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
@@ -651,7 +651,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}</div></div>`;
 document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
-if(loggedIn){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
+if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
 const profShare=document.getElementById('profShareBtn');
@@ -689,18 +689,18 @@ if(nextBtn)nextBtn.onclick=e=>{e.stopPropagation();galGoTo((galIdx+1)%g.photos.l
 const c=document.getElementById('galThumbs');if(!c)return;c.innerHTML='';
 g.photos.forEach((src,i)=>{const t=document.createElement('div');t.className='gallery-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`;
 t.onclick=()=>galGoTo(i,g.photos);
-if(loggedIn){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
+if(isAdmin()){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
 c.appendChild(t)})}
 
 /* Auth / Login */
 const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
-document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
+document.getElementById('logoutBtn').onclick=()=>{loggedIn=false;loggedInUser=null;loggedInRole=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=`<div class="login-form-inline"><div class="lf-title">Sign In</div><div class="lf-group"><label class="lf-label">Username</label><input class="lf-input" id="lfUser" placeholder="Username" autocomplete="off"></div><div class="lf-group"><label class="lf-label">Password</label><input class="lf-input" id="lfPass" type="password" placeholder="Password"></div><button class="lf-btn" id="lfBtn">Access</button><div class="lf-error" id="lfError"></div></div>`;
 document.getElementById('lfBtn').onclick=doLogin;document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()})}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase());document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);setTimeout(()=>userDropdown.classList.remove('open'),600);showToast('Signed in as '+match.user.toUpperCase())}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();userDropdown.classList.toggle('open')};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});

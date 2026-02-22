@@ -939,7 +939,7 @@ const _origRenderDropdown=renderDropdown;
 window.renderDropdown=function(){
 _origRenderDropdown();
 const navLink=document.getElementById('navAnalytics');
-if(loggedIn){
+if(isAdmin()){
 if(navLink)navLink.style.display='';
 }else{
 if(navLink)navLink.style.display='none';

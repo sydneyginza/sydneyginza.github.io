@@ -11,7 +11,8 @@ const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
 const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json';
-let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
+let loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
+function isAdmin(){ return loggedIn && loggedInRole === 'admin' }
 let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
 let GT = true;
@@ -605,14 +606,14 @@ const Router = (function() {
     /* Standard pages */
     const pageId = PATH_TO_PAGE[path];
     if (pageId) {
-      if (pageId === 'calendarPage' && !loggedIn) {
+      if (pageId === 'calendarPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
         replace('/', 'Ginza Empire');
         return true;
       }
-      if (pageId === 'analyticsPage' && !loggedIn) {
+      if (pageId === 'analyticsPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
