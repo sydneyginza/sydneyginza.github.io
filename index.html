@@ -418,16 +418,5 @@
 <script>(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})()</script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');</script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
-<input type="file" id="csvFileInput" accept=".csv" style="display:none">
-<div class="modal-overlay" id="csvImportOverlay">
-<div class="form-modal" style="max-width:520px">
-<div class="modal-title">Import CSV</div>
-<div id="csvImportSummary"></div>
-<div class="modal-actions">
-<button class="btn" id="csvImportCancel">Cancel</button>
-<button class="btn btn-primary" id="csvImportConfirm">Apply Changes</button>
-</div>
-</div>
-</div>
 </body>
 </html>
