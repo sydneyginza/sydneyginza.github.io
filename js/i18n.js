@@ -58,6 +58,7 @@ const LANG_DICT = {
     'avail.today':'Available Today',
     'avail.coming':'Coming',
     'avail.lastSeen':'Last seen',
+    'avail.finished':'Finished for the Day',
     'avail.endsIn':'Ends in {t}',
     'avail.startsIn':'Starts in {t}',
     /* UI actions */
@@ -380,6 +381,7 @@ const LANG_DICT = {
     'avail.today':'本日利用可能',
     'avail.coming':'間もなく',
     'avail.lastSeen':'最終確認',
+    'avail.finished':'本日の営業終了',
     'avail.endsIn':'あと{t}で終了',
     'avail.startsIn':'{t}後に開始',
     /* UI actions */
@@ -702,6 +704,7 @@ const LANG_DICT = {
     'avail.today':'오늘 이용 가능',
     'avail.coming':'곧 등장',
     'avail.lastSeen':'마지막 확인',
+    'avail.finished':'오늘 영업 종료',
     'avail.endsIn':'{t} 후 종료',
     'avail.startsIn':'{t} 후 시작',
     /* UI actions */
@@ -1024,6 +1027,7 @@ const LANG_DICT = {
     'avail.today':'今日可用',
     'avail.coming':'即将到来',
     'avail.lastSeen':'最后出现',
+    'avail.finished':'今日已结束',
     'avail.endsIn':'{t}后结束',
     'avail.startsIn':'{t}后开始',
     /* UI actions */

@@ -117,6 +117,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 
 /* Available Now — live badge on cards */
 .card-avail-live{display:flex;align-items:center;gap:5px;color:#00ff7f;font-weight:700;text-shadow:0 0 8px rgba(0,255,127,0.3)}
+.card-avail-finished{color:rgba(255,255,255,0.3);font-style:italic}
 
 /* Pulsing green dot (shared across cards, filter pane, roster bar, profile) */
 .avail-now-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#00ff7f;box-shadow:0 0 6px rgba(0,255,127,0.6),0 0 12px rgba(0,255,127,0.3);animation:availPulse 2s ease-in-out infinite;flex-shrink:0}
