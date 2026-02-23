@@ -415,6 +415,7 @@
 <script src="/js/forms.js"></script>
 <script src="/js/analytics.js"></script>
 <script>(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})()</script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');</script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
 </body>
 </html>
