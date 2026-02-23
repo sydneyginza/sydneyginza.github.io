@@ -13,8 +13,8 @@ const COMPARE_MAX=5;
 function isCompareSelected(name){return compareSelected.includes(name)}
 function toggleCompare(name){const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
 function clearCompare(){compareSelected=[];updateCompareBar();updateCompareButtons()}
-function updateCompareBar(){const bar=document.getElementById('compareBar');if(!bar)return;const count=compareSelected.length;document.getElementById('compareBarCount').textContent=count;bar.classList.toggle('visible',count>0);const openBtn=document.getElementById('compareOpen');if(openBtn){openBtn.disabled=count<2;openBtn.style.opacity=count<2?'.4':'1';openBtn.style.pointerEvents=count<2?'none':'auto'}}
-function updateCompareButtons(){document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare'})}
+function updateCompareBar(){const bar=document.getElementById('compareBar');if(!bar)return;const count=compareSelected.length;const prev=parseInt(bar.dataset.prevCount||'0');bar.dataset.prevCount=count;document.getElementById('compareBarCount').textContent=count;bar.classList.toggle('visible',count>0);if(count>prev&&count>0){bar.classList.remove('compare-pulse');void bar.offsetWidth;bar.classList.add('compare-pulse');setTimeout(()=>bar.classList.remove('compare-pulse'),600)}const openBtn=document.getElementById('compareOpen');if(openBtn){openBtn.disabled=count<2;openBtn.style.opacity=count<2?'.4':'1';openBtn.style.pointerEvents=count<2?'none':'auto'}}
+function updateCompareButtons(){const cnt=compareSelected.length;document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare';const badge=btn.querySelector('.compare-badge');if(badge){badge.textContent=cnt+'/'+COMPARE_MAX;badge.style.display=sel&&cnt>0?'':'none'}})}
 
 /* ── Shared Filter State (resets on refresh) ── */
 let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[],availableNow:false,availableToday:false,availableDate:null};
@@ -45,6 +45,7 @@ if(sharedFilters.availableDate){const ds=sharedFilters.availableDate;f=f.filter(
 return f}
 
 function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.ratingMin!=null||sharedFilters.labels.length||sharedFilters.availableNow||sharedFilters.availableToday||sharedFilters.availableDate)}
+function countActiveFilters(){let n=0;if(sharedFilters.nameSearch)n++;if(sharedFilters.country.length)n++;if(sharedFilters.ageMin!=null||sharedFilters.ageMax!=null)n++;if(sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null)n++;if(sharedFilters.heightMin!=null||sharedFilters.heightMax!=null)n++;if(sharedFilters.cupSize)n++;if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)n++;if(sharedFilters.experience)n++;if(sharedFilters.ratingMin!=null)n++;if(sharedFilters.labels.length)n++;if(sharedFilters.availableNow||sharedFilters.availableToday||sharedFilters.availableDate)n++;return n}
 
 function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[],availableNow:false,availableToday:false,availableDate:null}}
 
@@ -458,7 +459,7 @@ const clearId='rvClearBtn_'+containerId;
 let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="${clearId}">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
 valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const thumb=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';html+=`<div class="also-avail-card" data-rv-idx="${idx}">${thumb}<div class="also-avail-name">${g.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}</div>`});
 html+='</div>';container.innerHTML=html;
-container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
+container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
 const clearBtn=document.getElementById(clearId);if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed(containerId,returnPage)}}
 
 function renderNewGirls(){
@@ -472,8 +473,8 @@ nav.appendChild(dots);const ctr=document.createElement('div');ctr.className='ng-
 const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
 const g=ngList[ngIdx],ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name}">`:'<div class="ng-placeholder"></div>';
 disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" style="cursor:pointer">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
-disp.querySelector('.ng-photo').onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage='homePage';showProfile(ri)};
-disp.querySelector('.ng-name').onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage='homePage';showProfile(ri)}}
+disp.querySelector('.ng-photo').onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(ri)};
+disp.querySelector('.ng-name').onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(ri)}}
 
 /* Home Search Bar */
 (function(){const inp=document.getElementById('homeSearchInput'),btn=document.getElementById('homeSearchBtn');if(!inp||!btn)return;function doHomeSearch(){const q=inp.value.trim();if(!q)return;sharedFilters.nameSearch=q;showPage('listPage');inp.value=''}inp.addEventListener('keydown',e=>{if(e.key==='Enter')doHomeSearch()});btn.onclick=doHomeSearch})();
@@ -743,7 +744,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
-document.getElementById('backBtn').onclick=()=>{showPage(profileReturnPage);requestAnimationFrame(()=>window.scrollTo(0,_savedScrollY))};
+document.getElementById('backBtn').onclick=()=>{const y=_savedScrollY||parseFloat(sessionStorage.getItem('ginza_scroll')||'0');showPage(profileReturnPage);requestAnimationFrame(()=>window.scrollTo(0,y))};
 if(_cd){_countdownInterval=setInterval(()=>{const el=document.getElementById('profCountdown');if(!el){clearInterval(_countdownInterval);return}const c=getAvailCountdown(g.name);if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}else{el.textContent='';clearInterval(_countdownInterval)}},30000)}
 if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
@@ -901,7 +902,10 @@ const _pagesWithFilters=['rosterPage','listPage','calendarPage','profilePage'];
 function updateFilterToggle(){
 const hasPage=_pagesWithFilters.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});
 _filterToggle.classList.toggle('visible',hasPage);
-_filterToggle.classList.toggle('has-filters',hasActiveFilters());
+const cnt=countActiveFilters();
+_filterToggle.classList.toggle('has-filters',cnt>0);
+const ftText=_filterToggle.querySelector('.ft-text');
+if(ftText)ftText.textContent=cnt>0?t('ui.filtersActive').replace('{n}',cnt):t('ui.filters');
 }
 
 function openFilterPanel(){

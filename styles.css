@@ -164,6 +164,9 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .card-compare.active{color:var(--accent);border-color:rgba(180,74,255,0.4);background:rgba(180,74,255,0.15)}
 .card-compare svg{width:14px;height:14px;fill:currentColor;transition:transform .25s}
 .card-compare.active svg{transform:scale(1.15)}
+.compare-badge{position:absolute;top:-5px;right:-5px;background:var(--accent);color:#fff;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.5px;border-radius:10px;padding:1px 4px;min-width:20px;text-align:center;line-height:14px;border:1px solid var(--bg-dark);pointer-events:none}
+@keyframes comparePulse{0%,100%{border-color:rgba(180,74,255,0.3);box-shadow:none}50%{border-color:rgba(180,74,255,0.85);box-shadow:0 0 18px rgba(180,74,255,0.35)}}
+.compare-bar.compare-pulse{animation:comparePulse .6s ease}
 .compare-bar{position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:20px;padding:14px 24px;background:rgba(12,10,18,0.95);border:1px solid rgba(180,74,255,0.3);backdrop-filter:blur(20px);transition:bottom .35s cubic-bezier(0.4,0,0.2,1);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
 .compare-bar.visible{bottom:20px}
 .compare-bar-info{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;white-space:nowrap}
@@ -608,6 +611,14 @@ nav{padding:0 20px}.nav-menu-btn{padding:6px 12px;font-size:12px;gap:6px}.nav-dr
 .back-to-top{bottom:76px;left:16px}
 /* Footer needs extra bottom padding */
 footer{padding-bottom:100px}
+/* Filter toggle → floating pill on mobile */
+.filter-toggle{right:auto;left:50%;top:auto;bottom:76px;transform:translateX(-50%);width:auto;height:40px;border-radius:20px;padding:0 18px;gap:8px;clip-path:none;flex-direction:row;border-right:1px solid rgba(180,74,255,0.25)}
+.filter-toggle.open{right:auto;transform:translateX(-50%)}
+.filter-toggle:hover{width:auto}
+.filter-toggle>svg{display:none}
+.filter-indicator{display:none}
+.ft-text{display:block;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;white-space:nowrap}
+.filter-toggle.has-filters .ft-text{color:var(--accent)}
 }
 
 /* ── Mobile Bottom Tab Bar ── */
@@ -676,6 +687,7 @@ footer{padding-bottom:100px}
 .filter-toggle.open svg{transform:rotate(180deg)}
 .filter-toggle .filter-indicator{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--accent);border-radius:50%;display:none}
 .filter-toggle.has-filters .filter-indicator{display:block}
+.ft-text{display:none}
 
 /* Filter overlay backdrop */
 .filter-backdrop{display:none;position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.3)}
