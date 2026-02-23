@@ -4,6 +4,8 @@ let rosterDateFilter=null,calPending={};
 let gridSort='name',gridSortDir='asc';
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
+let _savedScrollY=0;
+let _countdownInterval=null;
 
 /* ── Compare Feature State ── */
 let compareSelected=[];
@@ -48,7 +50,7 @@ function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,a
 
 function filtersToQuery(){const p=new URLSearchParams();if(sharedFilters.nameSearch)p.set('search',sharedFilters.nameSearch);if(sharedFilters.country.length)p.set('country',sharedFilters.country.join(','));if(sharedFilters.ageMin!=null)p.set('ageMin',sharedFilters.ageMin);if(sharedFilters.ageMax!=null)p.set('ageMax',sharedFilters.ageMax);if(sharedFilters.bodyMin!=null)p.set('bodyMin',sharedFilters.bodyMin);if(sharedFilters.bodyMax!=null)p.set('bodyMax',sharedFilters.bodyMax);if(sharedFilters.heightMin!=null)p.set('heightMin',sharedFilters.heightMin);if(sharedFilters.heightMax!=null)p.set('heightMax',sharedFilters.heightMax);if(sharedFilters.cupSize)p.set('cup',sharedFilters.cupSize);if(sharedFilters.val1Min!=null)p.set('v1Min',sharedFilters.val1Min);if(sharedFilters.val1Max!=null)p.set('v1Max',sharedFilters.val1Max);if(sharedFilters.val2Min!=null)p.set('v2Min',sharedFilters.val2Min);if(sharedFilters.val2Max!=null)p.set('v2Max',sharedFilters.val2Max);if(sharedFilters.val3Min!=null)p.set('v3Min',sharedFilters.val3Min);if(sharedFilters.val3Max!=null)p.set('v3Max',sharedFilters.val3Max);if(sharedFilters.experience)p.set('exp',sharedFilters.experience);if(sharedFilters.labels.length)p.set('labels',sharedFilters.labels.join(','));if(sharedFilters.availableNow)p.set('now','1');if(sharedFilters.availableToday)p.set('today','1');if(sharedFilters.availableDate)p.set('date',sharedFilters.availableDate);if(sharedFilters.ratingMin!=null)p.set('rating',sharedFilters.ratingMin);if(gridSort!=='name')p.set('sort',gridSort);if(gridSortDir!=='asc')p.set('sortDir',gridSortDir);return p}
 
-function queryToFilters(){const p=new URLSearchParams(window.location.search);if(p.has('search'))sharedFilters.nameSearch=p.get('search');if(p.has('country'))sharedFilters.country=p.get('country').split(',').filter(Boolean);if(p.has('ageMin')){const v=parseFloat(p.get('ageMin'));if(!isNaN(v))sharedFilters.ageMin=v}if(p.has('ageMax')){const v=parseFloat(p.get('ageMax'));if(!isNaN(v))sharedFilters.ageMax=v}if(p.has('bodyMin')){const v=parseFloat(p.get('bodyMin'));if(!isNaN(v))sharedFilters.bodyMin=v}if(p.has('bodyMax')){const v=parseFloat(p.get('bodyMax'));if(!isNaN(v))sharedFilters.bodyMax=v}if(p.has('heightMin')){const v=parseFloat(p.get('heightMin'));if(!isNaN(v))sharedFilters.heightMin=v}if(p.has('heightMax')){const v=parseFloat(p.get('heightMax'));if(!isNaN(v))sharedFilters.heightMax=v}if(p.has('cup'))sharedFilters.cupSize=p.get('cup');if(p.has('v1Min')){const v=parseFloat(p.get('v1Min'));if(!isNaN(v))sharedFilters.val1Min=v}if(p.has('v1Max')){const v=parseFloat(p.get('v1Max'));if(!isNaN(v))sharedFilters.val1Max=v}if(p.has('v2Min')){const v=parseFloat(p.get('v2Min'));if(!isNaN(v))sharedFilters.val2Min=v}if(p.has('v2Max')){const v=parseFloat(p.get('v2Max'));if(!isNaN(v))sharedFilters.val2Max=v}if(p.has('v3Min')){const v=parseFloat(p.get('v3Min'));if(!isNaN(v))sharedFilters.val3Min=v}if(p.has('v3Max')){const v=parseFloat(p.get('v3Max'));if(!isNaN(v))sharedFilters.val3Max=v}if(p.has('exp'))sharedFilters.experience=p.get('exp');if(p.has('labels'))sharedFilters.labels=p.get('labels').split(',').filter(Boolean);if(p.has('now'))sharedFilters.availableNow=p.get('now')==='1';if(p.has('today'))sharedFilters.availableToday=p.get('today')==='1';if(p.has('date'))sharedFilters.availableDate=p.get('date');if(p.has('rating')){const v=parseFloat(p.get('rating'));if(!isNaN(v))sharedFilters.ratingMin=v}if(p.has('sort')){const VALID=['name','newest','age','body','height','cup'];const s=p.get('sort');if(VALID.includes(s))gridSort=s}if(p.has('sortDir')){const d=p.get('sortDir');if(d==='asc'||d==='desc')gridSortDir=d}}
+function queryToFilters(){const p=new URLSearchParams(window.location.search);if(p.has('search'))sharedFilters.nameSearch=p.get('search');if(p.has('country'))sharedFilters.country=p.get('country').split(',').filter(Boolean);if(p.has('ageMin')){const v=parseFloat(p.get('ageMin'));if(!isNaN(v))sharedFilters.ageMin=v}if(p.has('ageMax')){const v=parseFloat(p.get('ageMax'));if(!isNaN(v))sharedFilters.ageMax=v}if(p.has('bodyMin')){const v=parseFloat(p.get('bodyMin'));if(!isNaN(v))sharedFilters.bodyMin=v}if(p.has('bodyMax')){const v=parseFloat(p.get('bodyMax'));if(!isNaN(v))sharedFilters.bodyMax=v}if(p.has('heightMin')){const v=parseFloat(p.get('heightMin'));if(!isNaN(v))sharedFilters.heightMin=v}if(p.has('heightMax')){const v=parseFloat(p.get('heightMax'));if(!isNaN(v))sharedFilters.heightMax=v}if(p.has('cup'))sharedFilters.cupSize=p.get('cup');if(p.has('v1Min')){const v=parseFloat(p.get('v1Min'));if(!isNaN(v))sharedFilters.val1Min=v}if(p.has('v1Max')){const v=parseFloat(p.get('v1Max'));if(!isNaN(v))sharedFilters.val1Max=v}if(p.has('v2Min')){const v=parseFloat(p.get('v2Min'));if(!isNaN(v))sharedFilters.val2Min=v}if(p.has('v2Max')){const v=parseFloat(p.get('v2Max'));if(!isNaN(v))sharedFilters.val2Max=v}if(p.has('v3Min')){const v=parseFloat(p.get('v3Min'));if(!isNaN(v))sharedFilters.val3Min=v}if(p.has('v3Max')){const v=parseFloat(p.get('v3Max'));if(!isNaN(v))sharedFilters.val3Max=v}if(p.has('exp'))sharedFilters.experience=p.get('exp');if(p.has('labels'))sharedFilters.labels=p.get('labels').split(',').filter(Boolean);if(p.has('now'))sharedFilters.availableNow=p.get('now')==='1';if(p.has('today'))sharedFilters.availableToday=p.get('today')==='1';if(p.has('date'))sharedFilters.availableDate=p.get('date');if(p.has('rating')){const v=parseFloat(p.get('rating'));if(!isNaN(v))sharedFilters.ratingMin=v}if(p.has('sort')){const VALID=['name','newest','age','body','height','cup','lastSeen'];const s=p.get('sort');if(VALID.includes(s))gridSort=s}if(p.has('sortDir')){const d=p.get('sortDir');if(d==='asc'||d==='desc')gridSortDir=d}}
 
 function pushFiltersToURL(){const q=filtersToQuery();const qs=q.toString();const newUrl=window.location.pathname+(qs?'?'+qs:'');history.replaceState({path:window.location.pathname},document.title,newUrl)}
 
@@ -446,17 +448,18 @@ for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='h
 document.getElementById('homeAnnounce').innerHTML='<p></p>';
 ngList=getNewGirls();ngIdx=0;renderNewGirls();renderRecentlyViewed()})}
 
-function renderRecentlyViewed(){
-const container=document.getElementById('homeRecentlyViewed');if(!container)return;
+function renderRecentlyViewed(containerId='homeRecentlyViewed',returnPage='homePage'){
+const container=document.getElementById(containerId);if(!container)return;
 const rv=getRecentlyViewed();
 const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(v=>v&&(isAdmin()||!v.g.hidden));
 if(!valid.length){container.style.display='none';return}
 container.style.display='';
-let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="rvClearBtn">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
+const clearId='rvClearBtn_'+containerId;
+let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="${clearId}">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
 valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const thumb=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';html+=`<div class="also-avail-card" data-rv-idx="${idx}">${thumb}<div class="also-avail-name">${g.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}</div>`});
 html+='</div>';container.innerHTML=html;
-container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{profileReturnPage='homePage';showProfile(parseInt(card.dataset.rvIdx))}});
-const clearBtn=document.getElementById('rvClearBtn');if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed()}}
+container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
+const clearBtn=document.getElementById(clearId);if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed(containerId,returnPage)}}
 
 function renderNewGirls(){
 const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDisplay');nav.innerHTML='';disp.innerHTML='';
@@ -469,8 +472,8 @@ nav.appendChild(dots);const ctr=document.createElement('div');ctr.className='ng-
 const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
 const g=ngList[ngIdx],ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name}">`:'<div class="ng-placeholder"></div>';
 disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" style="cursor:pointer">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
-disp.querySelector('.ng-photo').onclick=()=>{profileReturnPage='homePage';showProfile(ri)};
-disp.querySelector('.ng-name').onclick=()=>{profileReturnPage='homePage';showProfile(ri)}}
+disp.querySelector('.ng-photo').onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage='homePage';showProfile(ri)};
+disp.querySelector('.ng-name').onclick=()=>{_savedScrollY=window.scrollY;profileReturnPage='homePage';showProfile(ri)}}
 
 /* Home Search Bar */
 (function(){const inp=document.getElementById('homeSearchInput'),btn=document.getElementById('homeSearchBtn');if(!inp||!btn)return;function doHomeSearch(){const q=inp.value.trim();if(!q)return;sharedFilters.nameSearch=q;showPage('listPage');inp.value=''}inp.addEventListener('keydown',e=>{if(e.key==='Enter')doHomeSearch()});btn.onclick=doHomeSearch})();
@@ -703,7 +706,9 @@ if(await saveData()){showToast(existing?t('review.updated'):t('review.submitted'
 const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display='none'}
 
 function showProfile(idx){safeRender('Profile',()=>{
-const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');return}currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
+const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');return}currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);
+if(_countdownInterval){clearInterval(_countdownInterval);_countdownInterval=null}
+updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
 /* URL routing & dynamic title */
 const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
@@ -714,6 +719,8 @@ const liveNow=g.name&&isAvailableNow(g.name);
 let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>'+t('avail.now')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 else if(entry&&entry.start&&entry.end)availHtml='<span class="dim">|</span><span style="color:#ffcc44;font-weight:600">'+t('avail.today')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 else{const wdates=getWeekDates();const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);if(upcoming){const dn=dispDate(upcoming).day;availHtml='<span class="dim">|</span><span class="profile-avail-coming">'+t('avail.coming')+' '+dn+'</span>'}else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';availHtml='<span class="dim">|</span><span class="profile-avail-last">'+t('avail.lastSeen')+' '+rel+'</span>'}}}
+const _cd=g.name?getAvailCountdown(g.name):null;
+if(_cd){const _cdKey=_cd.type==='ends'?'avail.endsIn':'avail.startsIn';availHtml+='<span class="dim"> · </span><span id="profCountdown">'+t(_cdKey).replace('{t}',_cd.str)+'</span>'}
 const rvs=g.reviews||[];const rvAvg=rvs.length?rvs.reduce((s,r)=>s+r.rating,0)/rvs.length:0;
 const ratingHtml=rvs.length?'<span class="dim">|</span><span class="profile-rating-summary">'+renderStarsStatic(Math.round(rvAvg))+'<span class="profile-rating-num">'+rvAvg.toFixed(1)+' / 5</span><span class="profile-rating-count">('+rvs.length+')</span></span>':'';
 const stats=[{l:t('field.age'),v:g.age},{l:t('field.body'),v:g.body},{l:t('field.height'),v:g.height+' cm'},{l:t('field.cup'),v:g.cup},{l:t('field.rates30'),v:g.val1||'\u2014'},{l:t('field.rates45'),v:g.val2||'\u2014'},{l:t('field.rates60'),v:g.val3||'\u2014'},{l:t('field.experience'),v:g.exp||'\u2014'}];
@@ -725,7 +732,8 @@ const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</
 const isFav=g.name&&isFavorite(g.name);
 const favBtn=g.name&&loggedIn?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
 const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>${t('ui.share')}</button>`:'';
-document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${t('ui.back')}</button>
+const _backLabel={listPage:t('page.girls'),rosterPage:t('page.roster'),homePage:t('nav.home'),favoritesPage:t('page.favorites')}[profileReturnPage]||t('ui.back');
+document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${_backLabel}</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
 <div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
@@ -735,7 +743,8 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
-document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}};
+document.getElementById('backBtn').onclick=()=>{showPage(profileReturnPage);requestAnimationFrame(()=>window.scrollTo(0,_savedScrollY))};
+if(_cd){_countdownInterval=setInterval(()=>{const el=document.getElementById('profCountdown');if(!el){clearInterval(_countdownInterval);return}const c=getAvailCountdown(g.name);if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}else{el.textContent='';clearInterval(_countdownInterval)}},30000)}
 if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}

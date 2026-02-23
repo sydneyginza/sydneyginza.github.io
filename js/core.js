@@ -54,6 +54,22 @@ function isAvailableNow(name) {
   return nowMins >= startMins && nowMins < endMins;
 }
 
+/* Time until a girl's shift starts or ends (for countdown display) */
+function getAvailCountdown(name) {
+  const now=getAEDTDate();
+  const entry=getCalEntry(name,fmtDate(now));
+  if(!entry||!entry.start||!entry.end)return null;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const [sh,sm]=entry.start.split(':').map(Number);
+  const [eh,em]=entry.end.split(':').map(Number);
+  const startMins=sh*60+sm,endMins=eh*60+em;
+  const fmt=m=>{const h=Math.floor(m/60),mm=m%60;return h>0?`${h}h ${mm}m`:`${mm}m`};
+  if(isAvailableNow(name)){let rem=endMins-nowMins;if(rem<=0)rem+=1440;return{type:'ends',str:fmt(rem)}}
+  const rem=startMins-nowMins;
+  if(rem>0&&rem<=720)return{type:'starts',str:fmt(rem)};
+  return null;
+}
+
 /* Count how many girls are available right now */
 function getAvailableNowCount() {
   return girls.filter(g => g.name && isAvailableNow(g.name)).length;

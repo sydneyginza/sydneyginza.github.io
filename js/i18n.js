@@ -58,6 +58,8 @@ const LANG_DICT = {
     'avail.today':'Available Today',
     'avail.coming':'Coming',
     'avail.lastSeen':'Last seen',
+    'avail.endsIn':'Ends in {t}',
+    'avail.startsIn':'Starts in {t}',
     /* UI actions */
     'ui.back':'Back',
     'ui.share':'Share',
@@ -174,6 +176,7 @@ const LANG_DICT = {
     'sort.size':'Size',
     'sort.height':'Height',
     'sort.cup':'Cup',
+    'sort.lastSeen':'Last Seen',
     /* Date & time */
     'ui.today':'Today',
     'date.sun':'Sun','date.mon':'Mon','date.tue':'Tue','date.wed':'Wed','date.thu':'Thu','date.fri':'Fri','date.sat':'Sat',
@@ -375,6 +378,8 @@ const LANG_DICT = {
     'avail.today':'本日利用可能',
     'avail.coming':'間もなく',
     'avail.lastSeen':'最終確認',
+    'avail.endsIn':'あと{t}で終了',
+    'avail.startsIn':'{t}後に開始',
     /* UI actions */
     'ui.back':'戻る',
     'ui.share':'共有',
@@ -491,6 +496,7 @@ const LANG_DICT = {
     'sort.size':'サイズ',
     'sort.height':'身長',
     'sort.cup':'カップ',
+    'sort.lastSeen':'最終確認',
     /* Date & time */
     'ui.today':'今日',
     'date.sun':'日','date.mon':'月','date.tue':'火','date.wed':'水','date.thu':'木','date.fri':'金','date.sat':'土',
@@ -692,6 +698,8 @@ const LANG_DICT = {
     'avail.today':'오늘 이용 가능',
     'avail.coming':'곧 등장',
     'avail.lastSeen':'마지막 확인',
+    'avail.endsIn':'{t} 후 종료',
+    'avail.startsIn':'{t} 후 시작',
     /* UI actions */
     'ui.back':'뒤로',
     'ui.share':'공유',
@@ -808,6 +816,7 @@ const LANG_DICT = {
     'sort.size':'사이즈',
     'sort.height':'키',
     'sort.cup':'컵',
+    'sort.lastSeen':'마지막 확인',
     /* Date & time */
     'ui.today':'오늘',
     'date.sun':'일','date.mon':'월','date.tue':'화','date.wed':'수','date.thu':'목','date.fri':'금','date.sat':'토',
@@ -1009,6 +1018,8 @@ const LANG_DICT = {
     'avail.today':'今日可用',
     'avail.coming':'即将到来',
     'avail.lastSeen':'最后出现',
+    'avail.endsIn':'{t}后结束',
+    'avail.startsIn':'{t}后开始',
     /* UI actions */
     'ui.back':'返回',
     'ui.share':'分享',
@@ -1125,6 +1136,7 @@ const LANG_DICT = {
     'sort.size':'尺寸',
     'sort.height':'身高',
     'sort.cup':'罩杯',
+    'sort.lastSeen':'最近所见',
     /* Date & time */
     'ui.today':'今天',
     'date.sun':'周日','date.mon':'周一','date.tue':'周二','date.wed':'周三','date.thu':'周四','date.fri':'周五','date.sat':'周六',
