@@ -8,7 +8,7 @@ const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateA
 sorts.forEach(s=>{const b=document.createElement('button');b.className='sort-btn'+(gridSort===s.key?' active':'');b.textContent=s.label;b.onclick=()=>{if(gridSort===s.key){gridSortDir=gridSortDir==='asc'?'desc':'asc'}else{gridSort=s.key;gridSortDir=s.key==='newest'?'desc':'asc'}renderFilters();renderGrid();renderRoster();renderFavoritesGrid();pushFiltersToURL()};fb.appendChild(b)});
 const dirBtn=document.createElement('button');dirBtn.className='sort-dir-btn';dirBtn.title=gridSortDir==='asc'?'Ascending':'Descending';dirBtn.innerHTML=gridSortDir==='asc'?'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>':'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>';dirBtn.onclick=()=>{gridSortDir=gridSortDir==='asc'?'desc':'asc';renderFilters();renderGrid();renderRoster();renderFavoritesGrid();pushFiltersToURL()};fb.appendChild(dirBtn);
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
-if(isAdmin()){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ '+t('ui.addGirl');ab.onclick=()=>openForm();fb.appendChild(ab)}}
+if(isAdmin()){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ '+t('ui.addGirl');ab.onclick=()=>openForm();fb.appendChild(ab);const expBtn=document.createElement('button');expBtn.className='add-btn';expBtn.textContent='↓ Export CSV';expBtn.onclick=exportGirlsCSV;fb.appendChild(expBtn);const impBtn=document.createElement('button');impBtn.className='add-btn';impBtn.textContent='↑ Import CSV';impBtn.onclick=()=>document.getElementById('csvFileInput').click();fb.appendChild(impBtn)}}
 
 function renderAvailNowBar(){
 ['availNowBar','rosterAvailBar'].forEach(id=>{
@@ -216,3 +216,13 @@ else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d]
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';queueCalSave(this.closest('td'));showToast('Schedule saved')}
 else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});})}
+
+/* Wire CSV file input and import overlay */
+(function(){
+const fi=document.getElementById('csvFileInput');if(!fi)return;
+fi.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>importGirlsCSV(ev.target.result);r.readAsText(f);e.target.value=''};
+const ov=document.getElementById('csvImportOverlay');
+const cancelBtn=document.getElementById('csvImportCancel');
+if(cancelBtn)cancelBtn.onclick=()=>ov.classList.remove('open');
+if(ov)ov.onclick=e=>{if(e.target===ov)ov.classList.remove('open')};
+})();

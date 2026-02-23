@@ -232,6 +232,7 @@
 <div class="page" id="analyticsPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag" data-i18n="ui.admin"></div><div class="section-title" data-i18n="nav.analytics"></div></div></div>
 <div id="analyticsContent"></div>
+<div id="adminLogContent"></div>
 </section></div>
 
 <div class="page" id="profileDbPage"><section class="section">
@@ -417,5 +418,16 @@
 <script>(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})()</script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');</script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
+<input type="file" id="csvFileInput" accept=".csv" style="display:none">
+<div class="overlay" id="csvImportOverlay">
+<div class="modal" style="max-width:520px">
+<div class="modal-title">Import CSV</div>
+<div id="csvImportSummary"></div>
+<div class="modal-actions">
+<button class="btn" id="csvImportCancel">Cancel</button>
+<button class="btn btn-primary" id="csvImportConfirm">Apply Changes</button>
+</div>
+</div>
+</div>
 </body>
 </html>

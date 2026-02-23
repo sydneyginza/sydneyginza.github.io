@@ -580,6 +580,7 @@ function renderAnalytics(){
 const container=document.getElementById('analyticsContent');
 if(!container)return;
 renderVisitorAnalytics(container);
+renderAdminLog();
 }
 
 function _todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -715,21 +716,21 @@ sortedPV.forEach(([page,total])=>{
 if(!sortedPV.length)pvHtml+='<div class="an-empty">'+t('an.noPV')+'</div>';
 pvHtml+='</div></div>';
 
-/* ── Most Viewed Profiles (unique + total + thumbnail + availability) ── */
-const sortedPF=Object.entries(v.profileViewsTotal).sort((a,b)=>b[1]-a[1]).slice(0,15);
-const maxPF=sortedPF.length?sortedPF[0][1]:1;
+/* ── Profile Traffic — all profiles sorted by views ── */
+const namedGirls=typeof girls!=='undefined'?girls.filter(g=>g&&g.name&&String(g.name).trim()):[];
+const allPFData=namedGirls.map(g=>({name:g.name,total:v.profileViewsTotal[g.name]||0,unique:v.profileViewsUniqueCounts[g.name]||0,girl:g})).sort((a,b)=>b.total-a.total);
+const maxPF=allPFData.length&&allPFData[0].total>0?allPFData[0].total:1;
 let pfHtml=`<div class="an-section"><div class="an-section-title">${t('an.mostProfiles')} <span class="an-hint">${t('an.pfHint')}</span></div><div class="an-bars">`;
-sortedPF.forEach(([name,total],i)=>{
-  const unique=v.profileViewsUniqueCounts[name]||0;
-  const pct=total/maxPF*100;
-  const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-  const girl=typeof girls!=='undefined'?girls.find(g=>g&&g.name===name):null;
-  const thumb=girl&&girl.photos&&girl.photos.length?`<img class="an-profile-thumb" src="${girl.photos[0]}" alt="${name.replace(/"/g,'&quot;')}">`:'<div class="an-profile-thumb an-profile-thumb-empty"></div>';
-  const liveNow=girl&&typeof isAvailableNow==='function'&&isAvailableNow(girl.name);
+allPFData.forEach(({name,total,unique,girl},i)=>{
+  const pct=total>0?total/maxPF*100:0;
+  const medal=i===0&&total>0?'🥇':i===1&&total>0?'🥈':i===2&&total>0?'🥉':'';
+  const thumb=girl.photos&&girl.photos.length?`<img class="an-profile-thumb" src="${girl.photos[0]}" alt="${name.replace(/"/g,'&quot;')}">`:'<div class="an-profile-thumb an-profile-thumb-empty"></div>';
+  const liveNow=typeof isAvailableNow==='function'&&isAvailableNow(name);
   const availDot=liveNow?'<span class="avail-now-dot" title="Available now"></span>':'';
-  pfHtml+=`<div class="an-bar-row"><div class="an-bar-label an-bar-label-profile">${thumb}<span>${medal} ${name}</span>${availDot}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
+  const dimStyle=total===0?'opacity:0.4':'';
+  pfHtml+=`<div class="an-bar-row" style="${dimStyle}"><div class="an-bar-label an-bar-label-profile">${thumb}<span>${medal} ${name}</span>${availDot}</div><div class="an-bar-track"><div class="an-bar-fill an-bar-profile" style="width:${pct}%"></div></div><div class="an-bar-val">${total} <span class="an-bar-unique">/ ${unique}</span></div></div>`;
 });
-if(!sortedPF.length)pfHtml+='<div class="an-empty">'+t('an.noPF')+'</div>';
+if(!allPFData.length)pfHtml+='<div class="an-empty">'+t('an.noPF')+'</div>';
 pfHtml+='</div></div>';
 
 /* ── Browsers ── */
@@ -906,6 +907,36 @@ document.getElementById('anRefreshVisitors').onclick=()=>{
 
 
 /* ══════════════════════════════════════
+   ACTIVITY LOG DISPLAY
+   ══════════════════════════════════════ */
+
+async function renderAdminLog(){
+  if(!isAdmin())return;
+  const container=document.getElementById('adminLogContent');
+  if(!container)return;
+  container.innerHTML='<div class="an-section"><div class="an-section-title">Activity Log <span class="an-hint">Last 50 admin actions</span></div><div class="an-loading"><div class="an-loading-spinner"></div><div class="an-loading-text">Loading…</div></div></div>';
+  try{
+    const r=await fetch(`${DATA_API}/${ALP}`,{headers:proxyHeaders()});
+    if(!r.ok){container.innerHTML='<div class="an-section"><div class="an-section-title">Activity Log</div><div class="an-empty">No activity recorded yet</div></div>';return}
+    const d=await r.json();
+    const entries=dec(d.content);
+    const recent=[...entries].reverse().slice(0,50);
+    const ACTION_LABELS={profile_add:'Added profile',profile_edit:'Edited profile',profile_delete:'Deleted profile',user_role_change:'Changed role',user_delete:'Deleted user',csv_import:'CSV import'};
+    let html='<div class="an-section"><div class="an-section-title">Activity Log <span class="an-hint">Last 50 admin actions</span></div>';
+    if(!recent.length){html+='<div class="an-empty">No activity recorded yet</div></div>';container.innerHTML=html;return}
+    html+='<table class="pdb-table"><thead><tr><th>Time (AEDT)</th><th>Admin</th><th>Action</th><th>Target</th></tr></thead><tbody>';
+    recent.forEach(e=>{
+      let timeStr='';try{timeStr=new Date(e.ts).toLocaleString('en-AU',{timeZone:'Australia/Sydney',dateStyle:'short',timeStyle:'short'})}catch(_){timeStr=e.ts||''}
+      const action=ACTION_LABELS[e.action]||e.action||'';
+      let target=e.target||'';if(e.newRole)target+=` → ${e.newRole}`;
+      html+=`<tr><td style="white-space:nowrap;font-size:12px">${timeStr}</td><td><b>${(e.admin||'').toUpperCase()}</b></td><td>${action}</td><td>${target}</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+    container.innerHTML=html;
+  }catch(err){container.innerHTML='<div class="an-section"><div class="an-empty">Could not load activity log</div></div>'}
+}
+
+/* ══════════════════════════════════════
    HOOK INTO EXISTING CODE
    ══════════════════════════════════════ */
 
@@ -989,14 +1020,14 @@ sel.onchange=async function(){
 const idx=parseInt(this.dataset.credIdx);const newRole=this.value;
 if(CRED[idx].user===loggedInUser&&newRole!=='admin'){this.value='admin';showToast(t('pdb.cannotDemoteSelf'));return}
 CRED[idx].role=newRole;
-if(await saveAuth()){showToast(t('pdb.roleUpdated'))}else{showToast(t('pdb.saveFailed'))}}});
+if(await saveAuth()){logAdminAction('user_role_change',CRED[idx].user,{newRole});showToast(t('pdb.roleUpdated'))}else{showToast(t('pdb.saveFailed'))}}});
 /* Bind delete buttons */
 container.querySelectorAll('.pdb-delete-btn').forEach(btn=>{
 btn.onclick=async function(){
 const idx=parseInt(this.dataset.credIdx);const name=(CRED[idx].user||'').toUpperCase();
 if(!confirm(t('pdb.confirmDelete').replace('{user}',name)))return;
 CRED.splice(idx,1);
-if(await saveAuth()){showToast(t('pdb.userDeleted'));renderProfileDb()}else{showToast(t('pdb.saveFailed'))}}})}
+if(await saveAuth()){logAdminAction('user_delete',name);showToast(t('pdb.userDeleted'));renderProfileDb()}else{showToast(t('pdb.saveFailed'))}}})}
 
 /* ── Track FAB phone taps ── */
 document.querySelectorAll('.fab-item.fab-call').forEach(link=>{

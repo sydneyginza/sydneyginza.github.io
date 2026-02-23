@@ -8,6 +8,7 @@ document.getElementById('formCancel').onclick=()=>formOverlay.classList.remove('
 formOverlay.onclick=e=>{if(e.target===formOverlay)formOverlay.classList.remove('open')};
 let formPhotos=[],formPhotosToDelete=[],formNewPhotos=[],formNewFiles=[];
 let formCountries=[];
+let selectedPhotoIdx=null;
 const COUNTRY_OPTIONS=['Chinese','French','Italian','Japanese','Korean','Russian','Thailand','Vietnamese','Other'];
 
 function renderFormCountries(){const wrap=document.getElementById('fCountryOptions');wrap.innerHTML='';
@@ -15,11 +16,12 @@ COUNTRY_OPTIONS.forEach(c=>{const btn=document.createElement('div');btn.classNam
 
 
 function renderFormPhotos(){const g=document.getElementById('fPhotoGrid'),count=document.getElementById('fPhotoCount');g.innerHTML='';count.textContent=`(${formPhotos.length} / ${MAX_PHOTOS})`;
-if(formPhotos.length>1){const hint=document.createElement('div');hint.style.cssText='width:100%;font-family:"Rajdhani",sans-serif;font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:1px;margin-bottom:6px';hint.textContent='Drag to reorder';g.appendChild(hint)}
+if(formPhotos.length>1){const hint=document.createElement('div');hint.style.cssText='width:100%;font-family:"Rajdhani",sans-serif;font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:1px;margin-bottom:6px';hint.textContent='Click to select · ← → to move · Drag to reorder';g.appendChild(hint)}
 let _dragIdx=null;
 formPhotos.forEach((src,i)=>{const w=document.createElement('div');w.style.cssText='position:relative;display:inline-block;cursor:grab';w.draggable=true;
-const t=document.createElement('div');t.style.cssText='width:64px;height:64px;border:2px solid rgba(255,255,255,0.1);overflow:hidden;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:border-color .15s';t.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;pointer-events:none">`;
-const rm=document.createElement('button');rm.style.cssText='position:absolute;top:1px;right:1px;width:18px;height:18px;background:rgba(0,0,0,0.85);border:1px solid rgba(255,68,68,0.5);color:#ff4444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;z-index:2';rm.innerHTML='&#x2715;';rm.onclick=e=>{e.stopPropagation();const removed=formPhotos[i];if(removed.startsWith('data:')){const ni=formNewPhotos.indexOf(removed);if(ni>=0){formNewPhotos.splice(ni,1);formNewFiles.splice(ni,1)}}formPhotosToDelete.push(removed);formPhotos.splice(i,1);renderFormPhotos()};
+const t=document.createElement('div');t.style.cssText='width:64px;height:64px;border:2px solid rgba(255,255,255,0.1);overflow:hidden;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:border-color .15s';if(selectedPhotoIdx===i)t.style.borderColor='var(--accent)';t.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;pointer-events:none">`;
+w.onclick=e=>{if(e.target===rm||rm.contains(e.target))return;selectedPhotoIdx=(selectedPhotoIdx===i)?null:i;renderFormPhotos()};
+const rm=document.createElement('button');rm.style.cssText='position:absolute;top:1px;right:1px;width:18px;height:18px;background:rgba(0,0,0,0.85);border:1px solid rgba(255,68,68,0.5);color:#ff4444;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:2px;z-index:2';rm.innerHTML='&#x2715;';rm.onclick=e=>{e.stopPropagation();if(selectedPhotoIdx===i)selectedPhotoIdx=null;else if(selectedPhotoIdx>i)selectedPhotoIdx--;const removed=formPhotos[i];if(removed.startsWith('data:')){const ni=formNewPhotos.indexOf(removed);if(ni>=0){formNewPhotos.splice(ni,1);formNewFiles.splice(ni,1)}}formPhotosToDelete.push(removed);formPhotos.splice(i,1);renderFormPhotos()};
 w.ondragstart=e=>{_dragIdx=i;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(i));setTimeout(()=>{w.style.opacity='0.35'},0)};
 w.ondragend=()=>{w.style.opacity='';_dragIdx=null;g.querySelectorAll('div[draggable]').forEach(el=>{const inner=el.querySelector('div');if(inner)inner.style.borderColor='rgba(255,255,255,0.1)'})};
 w.ondragover=e=>{e.preventDefault();e.dataTransfer.dropEffect='move';if(_dragIdx!==null&&_dragIdx!==i)t.style.borderColor='var(--accent)'};
@@ -34,11 +36,18 @@ formLabels.forEach((lbl,i)=>{const tag=document.createElement('span');tag.classN
 
 document.addEventListener('DOMContentLoaded',()=>{
 const inp=document.getElementById('fLabelInput');if(inp){inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=sanitize(inp.value);if(v&&!formLabels.includes(v)){formLabels.push(v);renderFormLabels()}inp.value=''}})}
+document.addEventListener('keydown',e=>{
+  if(!formOverlay.classList.contains('open'))return;
+  if(selectedPhotoIdx===null)return;
+  if(document.activeElement&&document.activeElement.matches('input,textarea,select'))return;
+  if(e.key==='ArrowLeft'&&selectedPhotoIdx>0){e.preventDefault();const moved=formPhotos.splice(selectedPhotoIdx,1)[0];selectedPhotoIdx--;formPhotos.splice(selectedPhotoIdx,0,moved);renderFormPhotos()}
+  else if(e.key==='ArrowRight'&&selectedPhotoIdx<formPhotos.length-1){e.preventDefault();const moved=formPhotos.splice(selectedPhotoIdx,1)[0];selectedPhotoIdx++;formPhotos.splice(selectedPhotoIdx,0,moved);renderFormPhotos()}
+});
 });
 
 function sanitize(s){return(s||'').replace(/<[^>]+>/g,'').trim()}
 
-function openForm(idx=-1){document.getElementById('editIndex').value=idx;formPhotosToDelete=[];formNewPhotos=[];formNewFiles=[];
+function openForm(idx=-1){document.getElementById('editIndex').value=idx;formPhotosToDelete=[];formNewPhotos=[];formNewFiles=[];selectedPhotoIdx=null;
 if(idx>=0){document.getElementById('formTitle').textContent=t('form.editGirl');const g=girls[idx];document.getElementById('fName').value=g.name;const gc=g.country||'';formCountries=Array.isArray(gc)?[...gc]:(gc?[gc]:[]);document.getElementById('fAge').value=g.age;document.getElementById('fBody').value=g.body;document.getElementById('fHeight').value=g.height;document.getElementById('fCup').value=g.cup;document.getElementById('fVal1').value=g.val1||'';document.getElementById('fVal2').value=g.val2||'';document.getElementById('fVal3').value=g.val3||'';document.getElementById('fSpecial').value=g.special||'';document.getElementById('fExp').value=g.exp||'';document.getElementById('fStartDate').value=g.startDate||fmtDate(getAEDTDate());document.getElementById('fLang').value=g.lang||'';document.getElementById('fType').value=g.type||'';document.getElementById('fDesc').value=g.desc;formPhotos=[...(g.photos||[])];formLabels=[...(g.labels||[])]}
 else{document.getElementById('formTitle').textContent=t('form.addGirl');formFields.forEach(id=>document.getElementById(id).value='');document.getElementById('fStartDate').value=fmtDate(getAEDTDate());formPhotos=[];formLabels=[];formCountries=[]}renderFormPhotos();renderFormLabels();renderFormCountries();formOverlay.classList.add('open')}
 
@@ -53,14 +62,14 @@ const finalPhotos=[];for(const src of formPhotos){if(src.startsWith('data:')){if
 const special=document.getElementById('fSpecial').value.trim(),lang=document.getElementById('fLang').value.trim(),type=document.getElementById('fType').value.trim(),desc=sanitize(document.getElementById('fDesc').value);
 const o={name,location:'Empire',country:[...formCountries],age:document.getElementById('fAge').value.trim(),body:document.getElementById('fBody').value.trim(),height:document.getElementById('fHeight').value.trim(),cup:document.getElementById('fCup').value.trim(),val1:document.getElementById('fVal1').value.trim(),val2:document.getElementById('fVal2').value.trim(),val3:document.getElementById('fVal3').value.trim(),special,exp:document.getElementById('fExp').value.trim(),startDate:document.getElementById('fStartDate').value.trim(),lang,type,desc,specialJa:special,langJa:lang,typeJa:type,descJa:desc,photos:finalPhotos,labels:[...formLabels],labelsJa:[...formLabels],lastModified:new Date().toISOString()};
 const idx=parseInt(document.getElementById('editIndex').value);if(idx>=0)girls[idx]=o;else girls.push(o);
-if(await saveData()){formOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active')&&idx>=0)showProfile(idx);showToast(idx>=0?'Profile updated':'Profile added')}}catch(err){showToast('Error: '+err.message,'error')}finally{saveBtn.textContent='SAVE';saveBtn.style.pointerEvents='auto'}};
+if(await saveData()){logAdminAction(idx>=0?'profile_edit':'profile_add',name);formOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active')&&idx>=0)showProfile(idx);showToast(idx>=0?'Profile updated':'Profile added')}}catch(err){showToast('Error: '+err.message,'error')}finally{saveBtn.textContent='SAVE';saveBtn.style.pointerEvents='auto'}};
 
 /* Delete */
 const deleteOverlay=document.getElementById('deleteOverlay');
 document.getElementById('deleteCancel').onclick=()=>deleteOverlay.classList.remove('open');
 deleteOverlay.onclick=e=>{if(e.target===deleteOverlay)deleteOverlay.classList.remove('open')};
 function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').textContent=`Remove "${girls[idx].name}" from the roster?`;deleteOverlay.classList.add('open')}
-document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){const g=girls[deleteTarget];if(g.photos&&GT)for(const url of g.photos){if(url.includes('githubusercontent.com'))await deleteFromGithub(url)}girls.splice(deleteTarget,1);await saveData();deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showPage('homePage');showToast('Profile deleted')}};
+document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){const g=girls[deleteTarget];if(g.photos&&GT)for(const url of g.photos){if(url.includes('githubusercontent.com'))await deleteFromGithub(url)}const deletedName=g.name;girls.splice(deleteTarget,1);await saveData();logAdminAction('profile_delete',deletedName);deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showPage('homePage');showToast('Profile deleted')}};
 
 /* Init */
 function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
