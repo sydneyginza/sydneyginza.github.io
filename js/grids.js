@@ -60,15 +60,17 @@ const hideIcon=g.hidden?'&#x1F441;':'&#x1F6AB;';const hideTitle=g.hidden?t('ui.s
 const act=isAdmin()?`<div class="card-actions"><button class="card-action-btn hide-toggle${g.hidden?' active':''}" title="${hideTitle}" data-idx="${ri}">${hideIcon}</button><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name):'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
 const liveNow=g.name&&isAvailableNow(g.name);
+const now=getAEDTDate();
+const _todayShiftEnded=entry&&entry.start&&entry.end&&!liveNow&&(()=>{const nm=now.getHours()*60+now.getMinutes();const[eh,em]=entry.end.split(':').map(Number);const[sh,sm]=entry.start.split(':').map(Number);return eh*60+em>sh*60+sm&&nm>=eh*60+em})();
 const _gcd=g.name?getAvailCountdown(g.name):null;
 const _gcdText=_gcd?(' <span style="opacity:.65;font-size:.85em">·</span> '+(_gcd.type==='ends'?t('avail.endsIn'):t('avail.startsIn')).replace('{t}',_gcd.str)):'';
-const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>${t('avail.now')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:(entry&&entry.start&&entry.end?`<div class="card-avail">${t('avail.today')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:'');
+const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span>${t('avail.now')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:(!_todayShiftEnded&&entry&&entry.start&&entry.end?`<div class="card-avail">${t('avail.today')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:'');
 /* Last-seen / coming-up label when not available today */
 let schedLabel='';
 if(!avail&&g.name){
   const wdates=getWeekDates();
   const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);
-  if(upcoming){const dayName=dispDate(upcoming).day;schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}</div>`}
+  if(upcoming){const dayName=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?` (${fmtTime12(upEnt.start)} - ${fmtTime12(upEnt.end)})`:'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?` <span style="opacity:.65;font-size:.85em">·</span> `+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}${timeStr}${comingCd}</div>`}
   else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
 }
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
