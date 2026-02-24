@@ -1,5 +1,8 @@
 /* === GIRLS GRID, ROSTER, CALENDAR & VALUE === */
 
+/* Roster-only availability filter (local, not shared) */
+let rosterAvailFilter=null; /* null | 'now' | 'today' | 'finished' */
+
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
 /* Sort buttons */
@@ -10,7 +13,29 @@ const dirBtn=document.createElement('button');dirBtn.className='sort-dir-btn';di
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(isAdmin()){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ '+t('ui.addGirl');ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
-function renderAvailNowBar(){}
+function renderAvailNowBar(){
+const bar=document.getElementById('rosterAvailBar');
+if(!bar)return;
+const ts=fmtDate(getAEDTDate());
+if(rosterDateFilter!==ts){rosterAvailFilter=null;bar.innerHTML='';bar.style.display='none';return}
+const now=getAEDTDate();const nowMins=now.getHours()*60+now.getMinutes();
+const rostered=girls.filter(g=>{const e=getCalEntry(g.name,ts);return e&&e.start&&e.end});
+let nowCount=0,todayCount=0,finishedCount=0;
+rostered.forEach(g=>{
+const e=getCalEntry(g.name,ts);const[sh,sm]=e.start.split(':').map(Number);const[eh,em]=e.end.split(':').map(Number);
+const sMins=sh*60+sm,eMins=eh*60+em;
+const isNow=eMins<=sMins?(nowMins>=sMins||nowMins<eMins):(nowMins>=sMins&&nowMins<eMins);
+if(isNow){nowCount++;todayCount++}
+else if(eMins>sMins&&nowMins>=eMins){finishedCount++;todayCount++}
+else{todayCount++}
+});
+bar.innerHTML='';
+if(!nowCount&&!todayCount&&!finishedCount){bar.style.display='none';return}
+bar.style.display='';
+if(nowCount>0){const btn=document.createElement('button');btn.className='avail-now-pill'+(rosterAvailFilter==='now'?' active':'');const lbl=(nowCount===1&&siteLanguage==='en')?'1 girl available now':t('ui.girlsAvailNow').replace('{n}',nowCount);btn.innerHTML=`<span class="avail-now-dot"></span>${lbl}`;btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='now'?null:'now';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
+if(todayCount>0){const btn=document.createElement('button');btn.className='avail-today-pill'+(rosterAvailFilter==='today'?' active':'');const lbl=(todayCount===1&&siteLanguage==='en')?'1 girl available today':t('ui.girlsAvailToday').replace('{n}',todayCount);btn.innerHTML=`<span class="avail-today-dot"></span>${lbl}`;btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='today'?null:'today';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
+if(finishedCount>0){const btn=document.createElement('button');btn.className='avail-finished-pill'+(rosterAvailFilter==='finished'?' active':'');btn.textContent=finishedCount+(finishedCount===1?' girl ':' girls ')+t('avail.finished').toLowerCase();btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='finished'?null:'finished';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
+}
 
 function applySortOrder(list){
 const dir=gridSortDir==='desc'?-1:1;
@@ -62,7 +87,7 @@ if(isAdmin()){el.querySelector('.hide-toggle').onclick=async e=>{e.stopPropagati
 el.addEventListener('mouseenter',()=>{clearTimeout(_hoverTimer);_hoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});
 el.addEventListener('mouseleave',()=>{clearTimeout(_hoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
 el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});
-return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid);renderAvailNowBar()})}
+return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid)})}
 
 /* Roster */
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
@@ -71,7 +96,7 @@ function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar
 const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
-availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
+availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
 
 /* Available Now / Today quick-filters */
 renderAvailNowBar()}
@@ -82,6 +107,7 @@ let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.st
 if(!isAdmin())filtered=filtered.filter(g=>!g.hidden);
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
+if(ds===ts&&rosterAvailFilter){const _now=getAEDTDate(),_nm=_now.getHours()*60+_now.getMinutes();if(rosterAvailFilter==='now')filtered=filtered.filter(g=>g.name&&isAvailableNow(g.name));else if(rosterAvailFilter==='today')filtered=filtered.filter(g=>g.name&&isAvailableToday(g.name));else if(rosterAvailFilter==='finished')filtered=filtered.filter(g=>{const e=getCalEntry(g.name,ts);if(!e||!e.start||!e.end)return false;const[sh,sm]=e.start.split(':').map(Number);const[eh,em]=e.end.split(':').map(Number);const sMins=sh*60+sm,eMins=eh*60+em;if(eMins<=sMins)return false;return _nm>=eMins&&!isAvailableNow(g.name)})}
 
 applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsDate')}</div>`;return}

@@ -827,6 +827,20 @@ footer{padding-bottom:100px}
 @media(max-width:768px){.an-table{font-size:10px}.an-table th,.an-table td{padding:5px 6px}}
 
 
+/* ── Roster availability filter bar ── */
+#rosterAvailBar{margin-bottom:24px;display:flex;flex-wrap:wrap;gap:10px}
+.avail-now-pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(0,255,127,0.2);color:rgba(0,255,127,0.6);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));background:rgba(0,255,127,0.03)}
+.avail-now-pill:hover{border-color:rgba(0,255,127,0.4);color:rgba(0,255,127,0.85);background:rgba(0,255,127,0.07)}
+.avail-now-pill.active{background:rgba(0,255,127,0.1);border-color:rgba(0,255,127,0.5);color:#00ff7f}
+.avail-today-pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,204,68,0.2);color:rgba(255,204,68,0.6);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));background:rgba(255,204,68,0.03)}
+.avail-today-pill:hover{border-color:rgba(255,204,68,0.4);color:rgba(255,204,68,0.85);background:rgba(255,204,68,0.07)}
+.avail-today-pill.active{background:rgba(255,204,68,0.1);border-color:rgba(255,204,68,0.5);color:#ffcc44}
+.avail-today-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ffcc44;box-shadow:0 0 6px rgba(255,204,68,0.6),0 0 12px rgba(255,204,68,0.3);flex-shrink:0}
+.avail-finished-pill{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.35);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 28px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));background:rgba(255,255,255,0.02);font-style:italic}
+.avail-finished-pill:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.04)}
+.avail-finished-pill.active{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.6)}
+@media(max-width:768px){.avail-now-pill,.avail-today-pill,.avail-finished-pill{width:100%;box-sizing:border-box;justify-content:center;padding:14px 20px;font-size:14px}}
+
 /* ── Bottom Navigation Bar (mobile only) ── */
 .bottom-nav{display:none}
 @media(max-width:768px){
