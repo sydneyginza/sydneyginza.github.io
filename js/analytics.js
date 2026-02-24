@@ -819,7 +819,7 @@ if(!sortedRefs.length)refsHtml+='<div class="an-empty">'+t('an.noData')+'</div>'
 refsHtml+='</div></div>';
 
 /* ── Filter Usage Patterns ── */
-const _filterLabels={country:'Country',age:'Age',body:'Body',height:'Height',cup:'Cup',rate30:'30min Rate',rate45:'45min Rate',rate60:'60min Rate',experience:'Experience',labels:'Labels',availableNow:'Avail. Now',availableToday:'Avail. Today'};
+const _filterLabels={country:'Country',age:'Age',body:'Body',height:'Height',cup:'Cup',rate30:'30min Rate',rate45:'45min Rate',rate60:'60min Rate',experience:'Experience',labels:'Labels'};
 const sortedFilters=Object.entries(v.filterDimensions).sort((a,b)=>b[1]-a[1]);
 const maxFD=sortedFilters.length?sortedFilters[0][1]:1;
 let filterHtml=`<div class="an-section"><div class="an-section-title">${t('an.filterPatterns')} <span class="an-hint">${t('an.filterHint')}</span></div><div class="an-bars">`;
@@ -1053,8 +1053,6 @@ window.onFiltersChanged=function(){
   if(sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)active.push('rate60');
   if(sharedFilters.experience)active.push('experience');
   if(sharedFilters.labels&&sharedFilters.labels.length)active.push('labels');
-  if(sharedFilters.availableNow)active.push('availableNow');
-  if(sharedFilters.availableToday)active.push('availableToday');
   if(active.length)VisitorLog.trackFilterUse(active);
 };
 })();

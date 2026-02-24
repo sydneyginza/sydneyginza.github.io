@@ -10,25 +10,7 @@ const dirBtn=document.createElement('button');dirBtn.className='sort-dir-btn';di
 if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(isAdmin()){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ '+t('ui.addGirl');ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
-function renderAvailNowBar(){
-['availNowBar','rosterAvailBar'].forEach(id=>{
-const bar=document.getElementById(id);
-if(!bar)return;
-_renderAvailBar(bar)});
-}
-function _renderAvailBar(bar){
-const nowCount=getAvailableNowCount();
-const todayCount=getAvailableTodayCount();
-const weekDates=getWeekDates();
-const ts=weekDates[0];
-const futureDates=weekDates.slice(1).filter(ds=>girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end}));
-const anyVisible=nowCount||sharedFilters.availableNow||todayCount||sharedFilters.availableToday||futureDates.length||sharedFilters.availableDate;
-bar.innerHTML='';
-if(!anyVisible){bar.style.display='none';return}
-bar.style.display='';
-if(nowCount>0||sharedFilters.availableNow){const btn=document.createElement('button');btn.className='avail-now-pill'+(sharedFilters.availableNow?' active':'');const countLabel=(nowCount===1&&siteLanguage==='en')?'1 girl available now':t('ui.girlsAvailNow').replace('{n}',nowCount);btn.innerHTML=`<span class="avail-now-dot"></span>${countLabel}`;btn.onclick=()=>{sharedFilters.availableNow=!sharedFilters.availableNow;if(sharedFilters.availableNow){sharedFilters.availableToday=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn)}
-if(todayCount>0||sharedFilters.availableToday){const btn2=document.createElement('button');btn2.className='avail-today-pill'+(sharedFilters.availableToday?' active':'');const countLabel2=(todayCount===1&&siteLanguage==='en')?'1 girl available today':t('ui.girlsAvailToday').replace('{n}',todayCount);btn2.innerHTML=`<span class="avail-today-dot"></span>${countLabel2}`;btn2.onclick=()=>{sharedFilters.availableToday=!sharedFilters.availableToday;if(sharedFilters.availableToday){sharedFilters.availableNow=false;sharedFilters.availableDate=null}onFiltersChanged()};bar.appendChild(btn2)}
-futureDates.forEach(ds=>{const f=dispDate(ds);const label=f.day+' '+f.date;const isActive=sharedFilters.availableDate===ds;const btn3=document.createElement('button');btn3.className='avail-date-pill'+(isActive?' active':'');btn3.textContent=label;btn3.onclick=()=>{sharedFilters.availableDate=isActive?null:ds;if(sharedFilters.availableDate){sharedFilters.availableNow=false;sharedFilters.availableToday=false}onFiltersChanged()};bar.appendChild(btn3)})}
+function renderAvailNowBar(){}
 
 function applySortOrder(list){
 const dir=gridSortDir==='desc'?-1:1;
