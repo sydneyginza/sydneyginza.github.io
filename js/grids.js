@@ -1,7 +1,7 @@
 /* === GIRLS GRID, ROSTER, CALENDAR & VALUE === */
 
 /* Roster-only availability filter (local, not shared) */
-let rosterAvailFilter=null; /* null | 'now' | 'today' | 'finished' */
+let rosterAvailFilter=null; /* null | 'now' | 'later' | 'finished' */
 
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
@@ -20,20 +20,20 @@ const ts=fmtDate(getAEDTDate());
 if(rosterDateFilter!==ts){rosterAvailFilter=null;bar.innerHTML='';bar.style.display='none';return}
 const now=getAEDTDate();const nowMins=now.getHours()*60+now.getMinutes();
 const rostered=girls.filter(g=>{const e=getCalEntry(g.name,ts);return e&&e.start&&e.end});
-let nowCount=0,todayCount=0,finishedCount=0;
+let nowCount=0,laterCount=0,finishedCount=0;
 rostered.forEach(g=>{
 const e=getCalEntry(g.name,ts);const[sh,sm]=e.start.split(':').map(Number);const[eh,em]=e.end.split(':').map(Number);
 const sMins=sh*60+sm,eMins=eh*60+em;
 const isNow=eMins<=sMins?(nowMins>=sMins||nowMins<eMins):(nowMins>=sMins&&nowMins<eMins);
-if(isNow){nowCount++;todayCount++}
-else if(eMins>sMins&&nowMins>=eMins){finishedCount++;todayCount++}
-else{todayCount++}
+if(isNow){nowCount++}
+else if(eMins>sMins&&nowMins>=eMins){finishedCount++}
+else{laterCount++}
 });
 bar.innerHTML='';
-if(!nowCount&&!todayCount&&!finishedCount){bar.style.display='none';return}
+if(!nowCount&&!laterCount&&!finishedCount){bar.style.display='none';return}
 bar.style.display='';
 if(nowCount>0){const btn=document.createElement('button');btn.className='avail-now-pill'+(rosterAvailFilter==='now'?' active':'');const lbl=(nowCount===1&&siteLanguage==='en')?'1 girl available now':t('ui.girlsAvailNow').replace('{n}',nowCount);btn.innerHTML=`<span class="avail-now-dot"></span>${lbl}`;btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='now'?null:'now';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
-if(todayCount>0){const btn=document.createElement('button');btn.className='avail-today-pill'+(rosterAvailFilter==='today'?' active':'');const lbl=(todayCount===1&&siteLanguage==='en')?'1 girl available today':t('ui.girlsAvailToday').replace('{n}',todayCount);btn.innerHTML=`<span class="avail-today-dot"></span>${lbl}`;btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='today'?null:'today';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
+if(laterCount>0){const btn=document.createElement('button');btn.className='avail-today-pill'+(rosterAvailFilter==='later'?' active':'');const lbl=(laterCount===1&&siteLanguage==='en')?'1 girl available later today':t('ui.girlsAvailLater').replace('{n}',laterCount);btn.innerHTML=`<span class="avail-today-dot"></span>${lbl}`;btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='later'?null:'later';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
 if(finishedCount>0){const btn=document.createElement('button');btn.className='avail-finished-pill'+(rosterAvailFilter==='finished'?' active':'');btn.textContent=finishedCount+(finishedCount===1?' girl ':' girls ')+t('avail.finished').toLowerCase();btn.onclick=()=>{rosterAvailFilter=rosterAvailFilter==='finished'?null:'finished';renderAvailNowBar();renderRosterGrid()};bar.appendChild(btn)}
 }
 
@@ -107,7 +107,7 @@ let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.st
 if(!isAdmin())filtered=filtered.filter(g=>!g.hidden);
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
-if(ds===ts&&rosterAvailFilter){const _now=getAEDTDate(),_nm=_now.getHours()*60+_now.getMinutes();if(rosterAvailFilter==='now')filtered=filtered.filter(g=>g.name&&isAvailableNow(g.name));else if(rosterAvailFilter==='today')filtered=filtered.filter(g=>g.name&&isAvailableToday(g.name));else if(rosterAvailFilter==='finished')filtered=filtered.filter(g=>{const e=getCalEntry(g.name,ts);if(!e||!e.start||!e.end)return false;const[sh,sm]=e.start.split(':').map(Number);const[eh,em]=e.end.split(':').map(Number);const sMins=sh*60+sm,eMins=eh*60+em;if(eMins<=sMins)return false;return _nm>=eMins&&!isAvailableNow(g.name)})}
+if(ds===ts&&rosterAvailFilter){const _now=getAEDTDate(),_nm=_now.getHours()*60+_now.getMinutes();if(rosterAvailFilter==='now')filtered=filtered.filter(g=>g.name&&isAvailableNow(g.name));else if(rosterAvailFilter==='later')filtered=filtered.filter(g=>{if(!g.name)return false;if(isAvailableNow(g.name))return false;const e=getCalEntry(g.name,ts);if(!e||!e.start||!e.end)return false;const[sh,sm]=e.start.split(':').map(Number);const sMins=sh*60+sm;const[eh,em]=e.end.split(':').map(Number);const eMins=eh*60+em;if(eMins<=sMins)return _nm<sMins;return _nm<sMins});else if(rosterAvailFilter==='finished')filtered=filtered.filter(g=>{const e=getCalEntry(g.name,ts);if(!e||!e.start||!e.end)return false;const[sh,sm]=e.start.split(':').map(Number);const[eh,em]=e.end.split(':').map(Number);const sMins=sh*60+sm,eMins=eh*60+em;if(eMins<=sMins)return false;return _nm>=eMins&&!isAvailableNow(g.name)})}
 
 applySortOrder(filtered);
 if(!filtered.length){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsDate')}</div>`;return}

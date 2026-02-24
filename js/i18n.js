@@ -187,6 +187,7 @@ const LANG_DICT = {
     /* Availability counts */
     'ui.girlsAvailNow':'{n} girls available now',
     'ui.girlsAvailToday':'{n} girls available today',
+    'ui.girlsAvailLater':'{n} girls available later today',
     /* Empty states */
     'ui.noGirlsWeek':'No girls available this week',
     'ui.noGirlsDate':'No girls available for this date',
@@ -510,6 +511,7 @@ const LANG_DICT = {
     /* Availability counts */
     'ui.girlsAvailNow':'{n}人の女の子が今すぐ利用可能',
     'ui.girlsAvailToday':'{n}人の女の子が本日利用可能',
+    'ui.girlsAvailLater':'{n}人の女の子が本日後ほど利用可能',
     /* Empty states */
     'ui.noGirlsWeek':'今週は予約可能な女の子がいません',
     'ui.noGirlsDate':'この日付に予約可能な女の子がいません',
@@ -833,6 +835,7 @@ const LANG_DICT = {
     /* Availability counts */
     'ui.girlsAvailNow':'{n}명의 여성이 지금 이용 가능',
     'ui.girlsAvailToday':'{n}명의 여성이 오늘 이용 가능',
+    'ui.girlsAvailLater':'{n}명의 여성이 오늘 나중에 이용 가능',
     /* Empty states */
     'ui.noGirlsWeek':'이번 주 이용 가능한 여성이 없습니다',
     'ui.noGirlsDate':'해당 날짜에 이용 가능한 여성이 없습니다',
@@ -1156,6 +1159,7 @@ const LANG_DICT = {
     /* Availability counts */
     'ui.girlsAvailNow':'{n}位女生现在可用',
     'ui.girlsAvailToday':'{n}位女生今日可用',
+    'ui.girlsAvailLater':'{n}位女生今日稍后可用',
     /* Empty states */
     'ui.noGirlsWeek':'本周没有可用的女生',
     'ui.noGirlsDate':'该日期没有可用的女生',
