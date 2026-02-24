@@ -37,6 +37,37 @@ async function trimImageCache() {
   }
 }
 
+/* Push notification handler */
+self.addEventListener('push', e => {
+  const data = e.data ? e.data.json() : {};
+  const title = data.title || 'Ginza Empire';
+  const options = {
+    body: data.body || '',
+    icon: '/fav-icon.png',
+    badge: '/fav-icon.png',
+    data: { url: data.url || '/roster' },
+    tag: 'ginza-avail',
+    renotify: true,
+  };
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = e.notification.data && e.notification.data.url ? e.notification.data.url : '/roster';
+  e.waitUntil(
+    clients.matchAll({ type: 'window' }).then(list => {
+      for (const c of list) {
+        if (new URL(c.url).origin === self.location.origin && 'focus' in c) {
+          c.navigate(url);
+          return c.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 

@@ -2,6 +2,8 @@
 let deleteTarget=-1,currentProfileIdx=0;
 let rosterDateFilter=null,calPending={};
 let gridSort='name',gridSortDir='asc';
+try{const _ss=localStorage.getItem('ginza_sort');if(_ss){const _sp=JSON.parse(_ss);if(_sp.s)gridSort=_sp.s;if(_sp.d)gridSortDir=_sp.d}}catch(e){}
+function _persistSort(){try{localStorage.setItem('ginza_sort',JSON.stringify({s:gridSort,d:gridSortDir}))}catch(e){}}
 let ngIdx=0,ngList=[];
 let copyTimeResolve=null;
 let _savedScrollY=0;
@@ -881,7 +883,7 @@ loggedIn=true;loggedInUser=entry.user;loggedInRole='member';loggedInEmail=entry.
 document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';
 authOverlay.classList.remove('open');
 renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();
-showToast(t('ui.accountCreated'))}
+showToast(t('ui.accountCreated'));updatePushToggle()}
 else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
@@ -891,11 +893,29 @@ try{const r=await fetch(PROXY+'/send-notification',{method:'POST',headers:proxyH
 if(r.ok){const d=await r.json();if(d.sent&&d.matchCount>0){showToast(d.matchCount===1?t('ui.favAvailOne'):t('ui.favAvailMany').replace('{count}',d.matchCount))}}}catch(e){}}
 
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user)}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle()}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList.toggle('open')}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
 renderDropdown();
+
+/* Push notification toggle */
+const _pushBtn=document.getElementById('pushToggleBtn');
+const _pushLabel=document.getElementById('pushToggleLabel');
+
+async function updatePushToggle(){
+if(!_pushBtn||!('PushManager' in window)||!loggedIn){if(_pushBtn)_pushBtn.style.display='none';return}
+_pushBtn.style.display='';
+const sub=await getPushSubscription();
+_pushBtn.classList.toggle('active',!!sub);
+_pushLabel.textContent=sub?t('ui.pushDisable'):t('ui.pushEnable')}
+
+if(_pushBtn){_pushBtn.onclick=async()=>{
+_pushBtn.disabled=true;
+const sub=await getPushSubscription();
+if(sub){await unsubscribeFromPush();showToast(t('ui.pushOff'))}
+else{const newSub=await subscribeToPush();if(newSub)showToast(t('ui.pushOn'));else showToast(t('ui.pushDenied'),'error')}
+_pushBtn.disabled=false;updatePushToggle()}}
 
 /* Particles */
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}

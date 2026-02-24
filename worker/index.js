@@ -61,6 +61,133 @@ function nameToSlug(name) {
   return encodeURIComponent((name || '').trim().replace(/\s+/g, '-'));
 }
 
+/* ── Web Push Helpers (RFC 8291 via Web Crypto API) ── */
+
+function base64UrlEncode(buf) {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlDecode(str) {
+  const padded = str + '='.repeat((4 - str.length % 4) % 4);
+  const binary = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function createVapidJwt(audience, env) {
+  const header = base64UrlEncode(new TextEncoder().encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const now = Math.floor(Date.now() / 1000);
+  const payload = base64UrlEncode(new TextEncoder().encode(JSON.stringify({
+    aud: audience,
+    exp: now + 43200,
+    sub: 'mailto:admin@sydneyginza.github.io'
+  })));
+  const unsignedToken = header + '.' + payload;
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    JSON.parse(env.VAPID_PRIVATE_JWK),
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['sign']
+  );
+  const sig = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    key,
+    new TextEncoder().encode(unsignedToken)
+  );
+  /* Convert DER-style WebCrypto signature to raw r||s (64 bytes) */
+  const sigBytes = new Uint8Array(sig);
+  return unsignedToken + '.' + base64UrlEncode(sigBytes);
+}
+
+async function hkdfDeriveKey(ikm, salt, info, len) {
+  const key = await crypto.subtle.importKey('raw', ikm, { name: 'HKDF' }, false, ['deriveBits']);
+  return new Uint8Array(
+    await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, key, len * 8)
+  );
+}
+
+async function encryptPushPayload(subscription, payload) {
+  const subKey = base64UrlDecode(subscription.keys.p256dh);
+  const authSecret = base64UrlDecode(subscription.keys.auth);
+
+  /* Generate ephemeral ECDH key pair */
+  const localKeyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const localPubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', localKeyPair.publicKey));
+
+  /* Import subscriber's public key */
+  const subscriberKey = await crypto.subtle.importKey('raw', subKey, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+
+  /* ECDH shared secret */
+  const sharedSecret = new Uint8Array(
+    await crypto.subtle.deriveBits({ name: 'ECDH', public: subscriberKey }, localKeyPair.privateKey, 256)
+  );
+
+  /* Key derivation (RFC 8291) */
+  const enc = new TextEncoder();
+  const keyInfoBuf = new Uint8Array([
+    ...enc.encode('WebPush: info\0'),
+    ...subKey,
+    ...localPubRaw
+  ]);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const ikm = await hkdfDeriveKey(sharedSecret, authSecret, keyInfoBuf, 32);
+  const contentKey = await hkdfDeriveKey(ikm, salt, enc.encode('Content-Encoding: aes128gcm\0'), 16);
+  const nonce = await hkdfDeriveKey(ikm, salt, enc.encode('Content-Encoding: nonce\0'), 12);
+
+  /* Pad and encrypt payload */
+  const payloadBytes = enc.encode(JSON.stringify(payload));
+  const paddedPayload = new Uint8Array(payloadBytes.length + 2);
+  paddedPayload.set(payloadBytes);
+  paddedPayload[payloadBytes.length] = 2; /* delimiter */
+
+  const aesKey = await crypto.subtle.importKey('raw', contentKey, 'AES-GCM', false, ['encrypt']);
+  const encrypted = new Uint8Array(
+    await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, paddedPayload)
+  );
+
+  /* Build aes128gcm header: salt(16) + rs(4) + keyIdLen(1) + keyId(65) + ciphertext */
+  const rs = new Uint8Array(4);
+  new DataView(rs.buffer).setUint32(0, 4096, false);
+  const body = new Uint8Array(16 + 4 + 1 + localPubRaw.length + encrypted.length);
+  body.set(salt, 0);
+  body.set(rs, 16);
+  body[20] = localPubRaw.length;
+  body.set(localPubRaw, 21);
+  body.set(encrypted, 21 + localPubRaw.length);
+
+  return body;
+}
+
+async function sendPushNotification(env, subscription, payload) {
+  try {
+    const endpoint = subscription.endpoint;
+    const audience = new URL(endpoint).origin;
+    const jwt = await createVapidJwt(audience, env);
+    const body = await encryptPushPayload(subscription, payload);
+
+    const r = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `vapid t=${jwt}, k=${env.VAPID_PUBLIC_KEY}`,
+        'Content-Encoding': 'aes128gcm',
+        'Content-Type': 'application/octet-stream',
+        'TTL': '86400',
+      },
+      body: body,
+    });
+    if (r.status === 410 || r.status === 404) return 'expired';
+    return r.ok ? 'sent' : 'failed';
+  } catch (e) {
+    console.error('Push send error:', e);
+    return 'failed';
+  }
+}
+
 /* ── GitHub API ── */
 
 function ghHeaders(env) {
@@ -257,6 +384,7 @@ async function processNotifications(env, { singleUser } = {}) {
   const log = logResult.content;
   let logSha = logResult.sha;
   let logChanged = false;
+  let authChanged = false;
   let sentCount = 0;
 
   const targets = singleUser
@@ -264,14 +392,33 @@ async function processNotifications(env, { singleUser } = {}) {
     : users;
 
   for (const user of targets) {
-    if (!user.email || !Array.isArray(user.favorites) || !user.favorites.length) continue;
+    if (!Array.isArray(user.favorites) || !user.favorites.length) continue;
     if (log[user.user] === today) continue;
+    if (!user.email && !user.pushSub) continue;
 
     const matches = findMatches(user, calData, today);
     if (!matches.length) continue;
 
-    const sent = await sendEmail(env, user.email, user.user, matches);
-    if (sent) {
+    let notified = false;
+    /* Email notification */
+    if (user.email) {
+      const sent = await sendEmail(env, user.email, user.user, matches);
+      if (sent) notified = true;
+    }
+    /* Push notification */
+    if (user.pushSub && env.VAPID_PRIVATE_JWK) {
+      const pushPayload = {
+        title: matches.length === 1
+          ? `${matches[0].girlName} is available today`
+          : `${matches.length} favourites available today`,
+        body: matches.map(m => `${m.girlName} (${fmtTime12(m.start)} – ${fmtTime12(m.end)})`).join(', '),
+        url: '/roster',
+      };
+      const result = await sendPushNotification(env, user.pushSub, pushPayload);
+      if (result === 'sent') notified = true;
+      if (result === 'expired') { delete user.pushSub; authChanged = true; } /* clean up expired sub */
+    }
+    if (notified) {
       log[user.user] = today;
       logChanged = true;
       sentCount += matches.length;
@@ -289,6 +436,13 @@ async function processNotifications(env, { singleUser } = {}) {
         await ghPut(env, NOTIF_LOG_PATH, fresh.content, fresh.sha, 'Update notification log');
       }
     }
+  }
+
+  /* Save auth if any expired push subscriptions were cleaned up */
+  if (authChanged) {
+    try {
+      await ghPut(env, 'data/auth.json', users, authResult.sha, 'Clean expired push subscriptions');
+    } catch (e) { console.error('Auth save error:', e); }
   }
 
   return { sent: logChanged, matchCount: sentCount, alreadyNotified: !logChanged && sentCount === 0 };
@@ -404,6 +558,47 @@ export default {
           ...corsHeaders(),
         },
       });
+    }
+
+    // VAPID public key (no auth required)
+    if (url.pathname === '/vapid-public-key' && request.method === 'GET') {
+      if (!env.VAPID_PUBLIC_KEY) return jsonResp({ error: 'push not configured' }, 501);
+      return jsonResp({ key: env.VAPID_PUBLIC_KEY });
+    }
+
+    // Push subscribe
+    if (url.pathname === '/push-subscribe' && request.method === 'POST') {
+      try {
+        const { username, subscription } = await request.json();
+        if (!username || !subscription) return jsonResp({ error: 'missing fields' }, 400);
+        const authResult = await ghGet(env, 'data/auth.json');
+        const users = authResult.content;
+        const user = users.find(u => u.user === username);
+        if (!user) return jsonResp({ error: 'user not found' }, 404);
+        user.pushSub = subscription;
+        await ghPut(env, 'data/auth.json', users, authResult.sha, 'Save push subscription');
+        return jsonResp({ success: true });
+      } catch (e) {
+        return jsonResp({ error: e.message }, 500);
+      }
+    }
+
+    // Push unsubscribe
+    if (url.pathname === '/push-unsubscribe' && request.method === 'POST') {
+      try {
+        const { username } = await request.json();
+        if (!username) return jsonResp({ error: 'missing username' }, 400);
+        const authResult = await ghGet(env, 'data/auth.json');
+        const users = authResult.content;
+        const user = users.find(u => u.user === username);
+        if (user && user.pushSub) {
+          delete user.pushSub;
+          await ghPut(env, 'data/auth.json', users, authResult.sha, 'Remove push subscription');
+        }
+        return jsonResp({ success: true });
+      } catch (e) {
+        return jsonResp({ error: e.message }, 500);
+      }
     }
 
     // Notification endpoint

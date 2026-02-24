@@ -157,6 +157,10 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .fav-empty-hint{font-size:13px;color:var(--text-dim);opacity:.6;letter-spacing:1px}
 .empty-state-cta{background:rgba(180,74,255,0.1);border:1px solid rgba(180,74,255,0.35);color:var(--accent);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));margin-top:16px}
 .empty-state-cta:hover{background:rgba(180,74,255,0.2);border-color:var(--accent)}
+.push-toggle-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));margin-left:auto}
+.push-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
+.push-toggle-btn.active{background:rgba(180,74,255,0.1);border-color:var(--accent);color:var(--accent)}
+.push-toggle-btn:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── Compare ── */
 .card-compare{position:absolute;top:46px;left:10px;z-index:3;width:30px;height:30px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;border-radius:50%;backdrop-filter:blur(4px);padding:0}
