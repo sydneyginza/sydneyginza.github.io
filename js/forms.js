@@ -119,9 +119,10 @@ history.replaceState({path:'/'},'Ginza Empire','/');
 }
 }
 
-(async()=>{
+async function initApp(){
 try{
 await loadConfig();
+if(typeof initOfflineDetection==='function')initOfflineDetection();
 
 /* Phase 1: Instant render from cache */
 const cachedGirls=getCachedGirls();
@@ -154,7 +155,15 @@ girls=freshData;
 girlsChanged=true;
 updateGirlsCache();
 }
-}else if(!renderedFromCache){showToast('Could not load data','error')}
+}else if(!renderedFromCache){
+/* No cache AND network failed — show error state with retry */
+const msg=typeof t==='function'?t('ui.loadFailed'):'Unable to load data. Please check your connection and try again.';
+showErrorState('rosterGrid',msg,initApp);
+showErrorState('girlsGrid',msg,initApp);
+showErrorState('homeImages',msg,initApp);
+removeSkeletons();
+return;
+}
 
 /* Compare and update calendar if changed */
 let calChanged=false;
@@ -178,9 +187,16 @@ fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 }
 
-/* Check roster notifications after data is ready */
 /* Apply saved language preference */
 if(typeof applyLang==='function'){try{applyLang()}catch(e){}}
 
-}catch(e){console.error('Init error:',e);showToast('Init error: '+e.message,'error');removeSkeletons()}
-})();
+}catch(e){
+console.error('Init error:',e);
+removeSkeletons();
+const msg=typeof t==='function'?t('ui.loadFailed'):'Unable to load data. Please check your connection and try again.';
+showErrorState('rosterGrid',msg,initApp);
+showErrorState('girlsGrid',msg,initApp);
+showErrorState('homeImages',msg,initApp);
+}
+}
+initApp();;

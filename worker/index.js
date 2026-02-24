@@ -268,6 +268,40 @@ async function handleSendNotification(request, env) {
   }
 }
 
+/* ── Rate Limiting (sliding window, per-isolate) ── */
+
+const RATE_LIMIT_WINDOW = 60_000;         // 1 minute window
+const RATE_LIMIT_MAX_READ = 120;          // GET requests per window per IP
+const RATE_LIMIT_MAX_WRITE = 30;          // PUT/POST/DELETE per window per IP
+const rateBuckets = new Map();            // ip → { reads: [{ts}], writes: [{ts}] }
+
+function isRateLimited(ip, isWrite) {
+  const now = Date.now();
+  if (!rateBuckets.has(ip)) {
+    rateBuckets.set(ip, { reads: [], writes: [] });
+  }
+  const bucket = rateBuckets.get(ip);
+  // Prune expired entries
+  bucket.reads = bucket.reads.filter(ts => now - ts < RATE_LIMIT_WINDOW);
+  bucket.writes = bucket.writes.filter(ts => now - ts < RATE_LIMIT_WINDOW);
+
+  if (isWrite) {
+    if (bucket.writes.length >= RATE_LIMIT_MAX_WRITE) return true;
+    bucket.writes.push(now);
+  } else {
+    if (bucket.reads.length >= RATE_LIMIT_MAX_READ) return true;
+    bucket.reads.push(now);
+  }
+
+  // Evict old IPs to prevent memory buildup (keep max 5000)
+  if (rateBuckets.size > 5000) {
+    const oldest = rateBuckets.keys().next().value;
+    rateBuckets.delete(oldest);
+  }
+
+  return false;
+}
+
 /* ── GitHub API Proxy (existing logic) ── */
 
 async function handleProxy(request, env, pathname) {
@@ -300,6 +334,27 @@ export default {
     // CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders() });
+    }
+
+    // Origin check — only allow requests from the site (skip for scheduled triggers)
+    const origin = request.headers.get('Origin');
+    if (origin && origin !== ALLOWED_ORIGIN) {
+      return jsonResp({ error: 'forbidden origin' }, 403);
+    }
+
+    // Rate limiting
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const isWrite = request.method !== 'GET' && request.method !== 'HEAD';
+    if (isRateLimited(ip, isWrite)) {
+      const retryAfter = Math.ceil(RATE_LIMIT_WINDOW / 1000);
+      return new Response(JSON.stringify({ error: 'rate limited' }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(retryAfter),
+          ...corsHeaders(),
+        },
+      });
     }
 
     // Notification endpoint

@@ -439,6 +439,42 @@ function safeCardRender(g, idx, fn) {
   catch (e) { console.warn(`[Card] skipped index ${idx} (${g&&g.name||'unnamed'}):`, e); return null; }
 }
 
+/* === Error State UI === */
+function showErrorState(containerId, message, retryFn) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="error-state">
+    <div class="error-state-icon">!</div>
+    <div class="error-state-msg">${message}</div>
+    <button class="error-state-retry">${typeof t === 'function' ? t('ui.retry') : 'Retry'}</button>
+  </div>`;
+  const btn = el.querySelector('.error-state-retry');
+  if (btn && retryFn) {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = typeof t === 'function' ? t('ui.retrying') : 'Retrying...';
+      try { await retryFn(); }
+      catch (e) { btn.disabled = false; btn.textContent = typeof t === 'function' ? t('ui.retry') : 'Retry'; }
+    };
+  }
+}
+
+/* === Offline Detection === */
+let _isOffline = !navigator.onLine;
+
+function initOfflineDetection() {
+  const banner = document.getElementById('offlineBanner');
+  if (!banner) return;
+  function update() {
+    _isOffline = !navigator.onLine;
+    banner.classList.toggle('visible', _isOffline);
+    if (!_isOffline) showToast(typeof t === 'function' ? t('ui.backOnline') : 'Back online', 'success');
+  }
+  window.addEventListener('online', update);
+  window.addEventListener('offline', update);
+  if (_isOffline) banner.classList.add('visible');
+}
+
 /* === Lazy Loading === */
 const lazyObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
