@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "dev": "echo 'Serve index-dev.html for unminified development'"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
+}

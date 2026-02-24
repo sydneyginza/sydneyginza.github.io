@@ -552,6 +552,22 @@ function observeLazy(container) {
   container.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
 }
 
+/* Lazy-load iframes (Google Maps etc.) — only connect when scrolled into view */
+const iframeLazyObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const iframe = entry.target;
+      if (iframe.dataset.src) {
+        iframe.src = iframe.dataset.src;
+        delete iframe.dataset.src;
+      }
+      iframeLazyObserver.unobserve(iframe);
+    }
+  });
+}, { rootMargin: '300px 0px', threshold: 0 });
+
+document.querySelectorAll('iframe[data-src]').forEach(f => iframeLazyObserver.observe(f));
+
 function lazyThumb(src, cls, alt) {
   return `<img class="${cls || 'card-thumb'}" data-src="${src}" alt="${(alt||'').replace(/"/g,'&quot;')}">`;
 }
