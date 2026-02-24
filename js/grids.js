@@ -62,6 +62,7 @@ filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 applySortOrder(filtered);
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());let _hoverTimer;
+if(!filtered.length&&hasActiveFilters()){grid.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon" style="opacity:.15">&#x1F50D;</div><div class="fav-empty-text">${t('ui.noResults')}</div><button class="empty-state-cta" onclick="clearAllFilters();onFiltersChanged()">${t('ui.clearFilters')}</button></div>`;return}
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card'+(g.hidden?' card-hidden':'');
 const hideIcon=g.hidden?'&#x1F441;':'&#x1F6AB;';const hideTitle=g.hidden?t('ui.showGirl'):t('ui.hideGirl');
 const act=isAdmin()?`<div class="card-actions"><button class="card-action-btn hide-toggle${g.hidden?' active':''}" title="${hideTitle}" data-idx="${ri}">${hideIcon}</button><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
@@ -128,7 +129,7 @@ const favs=getFavorites();const ts=fmtDate(getAEDTDate());
 let filtered=girls.filter(g=>g.name&&favs.includes(g.name));
 if(!isAdmin())filtered=filtered.filter(g=>!g.hidden);
 applySortOrder(filtered);
-if(!filtered.length){fg.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">${t('ui.favEmpty')}</div></div>`;return}
+if(!filtered.length){fg.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">${t('ui.favEmpty')}</div><button class="empty-state-cta" onclick="showPage('listPage');Router.push('/girls')">${t('ui.favBrowse')}</button></div>`;return}
 let _favHoverTimer;filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name):'<div class="silhouette"></div>';
 const entry=getCalEntry(g.name,ts);

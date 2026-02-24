@@ -175,6 +175,55 @@ async function sendEmail(env, email, username, matches) {
   return true;
 }
 
+/* ── Sitemap Generation ── */
+
+async function generateSitemap(env) {
+  const { content: girlsData } = await ghGet(env, 'data/girls.json');
+  const today = fmtDate(getAEDTDate());
+  const base = 'https://sydneyginza.github.io';
+  const pages = [
+    { loc: '/',           freq: 'daily',   pri: '1.0' },
+    { loc: '/roster',     freq: 'daily',   pri: '0.9' },
+    { loc: '/girls',      freq: 'daily',   pri: '0.9' },
+    { loc: '/rates',      freq: 'weekly',  pri: '0.7' },
+    { loc: '/employment', freq: 'monthly', pri: '0.5' },
+  ];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  for (const p of pages) {
+    xml += `  <url>\n    <loc>${base}${p.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${p.freq}</changefreq>\n    <priority>${p.pri}</priority>\n  </url>\n`;
+  }
+  for (const g of girlsData) {
+    if (!g.name || g.hidden) continue;
+    const slug = nameToSlug(g.name);
+    const lastmod = g.lastModified ? g.lastModified.split('T')[0] : today;
+    xml += `  <url>\n    <loc>${base}/girls/${slug}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+  }
+  xml += '</urlset>\n';
+  return xml;
+}
+
+async function commitSitemap(env) {
+  const xml = await generateSitemap(env);
+  const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
+  const path = 'sitemap.xml';
+  // Fetch current sha
+  let sha = null;
+  try {
+    const r = await fetch(`${GH_API}/repos/${SITE_REPO}/contents/${path}`, { headers: ghHeaders(env) });
+    if (r.ok) { const d = await r.json(); sha = d.sha; }
+  } catch {}
+  const body = { message: 'Update sitemap.xml', content: btoa(unescape(encodeURIComponent(xml))) };
+  if (sha) body.sha = sha;
+  const r = await fetch(`${GH_API}/repos/${SITE_REPO}/contents/${path}`, {
+    method: 'PUT',
+    headers: ghHeaders(env),
+    body: JSON.stringify(body),
+  });
+  return r.ok;
+}
+
 /* ── Core: check favourites & send notifications ── */
 
 function findMatches(user, calData, today) {
@@ -362,6 +411,16 @@ export default {
       return handleSendNotification(request, env);
     }
 
+    // Sitemap regeneration (admin trigger)
+    if (url.pathname === '/generate-sitemap' && request.method === 'POST') {
+      try {
+        const ok = await commitSitemap(env);
+        return jsonResp({ success: ok });
+      } catch (e) {
+        return jsonResp({ error: e.message }, 500);
+      }
+    }
+
     // GitHub API proxy (/repos/...)
     if (url.pathname.startsWith('/repos/')) {
       return handleProxy(request, env, url.pathname);
@@ -371,6 +430,11 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(processNotifications(env));
+    ctx.waitUntil(
+      Promise.all([
+        processNotifications(env),
+        commitSitemap(env).catch(e => console.error('Sitemap error:', e)),
+      ])
+    );
   },
 };

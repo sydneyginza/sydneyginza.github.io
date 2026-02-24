@@ -72,7 +72,7 @@ function openDelete(idx){deleteTarget=idx;document.getElementById('deleteMsg').t
 document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){const g=girls[deleteTarget];if(g.photos&&GT)for(const url of g.photos){if(url.includes('githubusercontent.com'))await deleteFromGithub(url)}const deletedName=g.name;girls.splice(deleteTarget,1);await saveData();logAdminAction('profile_delete',deletedName);deleteTarget=-1;deleteOverlay.classList.remove('open');renderFilters();renderGrid();renderRoster();renderHome();if(document.getElementById('profilePage').classList.contains('active'))showPage('homePage');showToast('Profile deleted')}};
 
 /* Init */
-function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
+function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton','favoritesSkeleton','valueTableSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
 
 function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};return cal}
 
@@ -199,4 +199,4 @@ showErrorState('girlsGrid',msg,initApp);
 showErrorState('homeImages',msg,initApp);
 }
 }
-initApp();;
+initApp();

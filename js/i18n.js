@@ -113,7 +113,9 @@ const LANG_DICT = {
     'ui.girlVisible':'Profile visible to all.',
     /* Empty states */
     'ui.favEmpty':'No favorites yet. Tap the heart on any profile to save it here.',
+    'ui.favBrowse':'Browse Girls',
     'ui.noResults':'No girls match your filters.',
+    'ui.clearFilters':'Clear Filters',
     'ui.type':'(select one or more)',
     'ui.select':'(type and press Enter)',
     'ui.confirm':'Are you sure?',
@@ -443,7 +445,9 @@ const LANG_DICT = {
     'ui.girlVisible':'プロフィールを全員に表示しました。',
     /* Empty states */
     'ui.favEmpty':'お気に入りがまだありません。プロフィールのハートをタップして保存しましょう。',
+    'ui.favBrowse':'女の子を見る',
     'ui.noResults':'条件に合う女の子がいません。',
+    'ui.clearFilters':'フィルターをクリア',
     'ui.type':'（1つ以上選択）',
     'ui.select':'（入力してEnterキーを押す）',
     'ui.confirm':'よろしいですか？',
@@ -773,7 +777,9 @@ const LANG_DICT = {
     'ui.girlVisible':'모든 사용자에게 프로필이 표시됩니다.',
     /* Empty states */
     'ui.favEmpty':'아직 즐겨찾기가 없습니다. 프로필의 하트를 탭하여 저장하세요.',
+    'ui.favBrowse':'여성 둘러보기',
     'ui.noResults':'조건에 맞는 여성이 없습니다.',
+    'ui.clearFilters':'필터 초기화',
     'ui.type':'(하나 이상 선택)',
     'ui.select':'(입력 후 Enter 키를 누르세요)',
     'ui.confirm':'확실하십니까?',
@@ -1103,7 +1109,9 @@ const LANG_DICT = {
     'ui.girlVisible':'档案对所有人可见。',
     /* Empty states */
     'ui.favEmpty':'暂无收藏。点击任意档案上的心形图标保存到此处。',
+    'ui.favBrowse':'浏览女生',
     'ui.noResults':'没有符合您筛选条件的女生。',
+    'ui.clearFilters':'清除筛选',
     'ui.type':'（选择一个或多个）',
     'ui.select':'（输入并按Enter键）',
     'ui.confirm':'您确定吗？',

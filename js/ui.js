@@ -235,7 +235,7 @@ const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','
 
 function showPage(id){
 resetOgMeta();if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
-allPages.forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+const prev=document.querySelector('.page.active');const next=document.getElementById(id);if(prev&&prev!==next){prev.classList.remove('active');prev.classList.add('page-exit');const onDone=()=>{prev.classList.remove('page-exit');prev.removeEventListener('animationend',onDone)};prev.addEventListener('animationend',onDone);setTimeout(()=>{prev.classList.remove('page-exit')},200)}else{allPages.forEach(p=>p.classList.remove('active'))}next.classList.add('active');
 closeFilterPanel();
 /* URL routing & dynamic title */
 const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database'};
@@ -572,8 +572,20 @@ let el=document.getElementById('profileLd');if(!el){el=document.createElement('s
 const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
 const img=g.photos&&g.photos.length?g.photos[0]:'';
 const country=Array.isArray(g.country)?g.country[0]:(g.country||'');
-const ld={"@context":"https://schema.org","@type":"ProfilePage","url":url,"mainEntity":{"@type":"Person","name":g.name||'','image':img,'worksFor':{"@id":"https://sydneyginza.github.io/#empire"}}};
-if(country)ld.mainEntity.nationality=country;
+const person={"@type":"Person","name":g.name||'','worksFor':{"@id":"https://sydneyginza.github.io/#empire"}};
+if(img)person.image=g.photos.length>1?g.photos:img;
+if(country)person.nationality=country;
+if(g.desc)person.description=g.desc.replace(/<[^>]*>/g,'').substring(0,300);
+/* Offers from rates */
+const offers=[];
+if(g.val1)offers.push({"@type":"Offer","name":"30 min session","price":String(g.val1).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(g.val2)offers.push({"@type":"Offer","name":"45 min session","price":String(g.val2).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(g.val3)offers.push({"@type":"Offer","name":"60 min session","price":String(g.val3).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(offers.length)person.makesOffer=offers;
+/* Aggregate reviews */
+const rvs=g.reviews||[];
+const ld={"@context":"https://schema.org","@type":"ProfilePage","url":url,"mainEntity":person};
+if(rvs.length){const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;ld.mainEntity.aggregateRating={"@type":"AggregateRating","ratingValue":avg.toFixed(1),"bestRating":"5","ratingCount":rvs.length}}
 el.textContent=JSON.stringify(ld)}
 function resetOgMeta(){
 const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
