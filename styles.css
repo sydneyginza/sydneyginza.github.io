@@ -65,7 +65,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .lf-switch{font-size:11px;color:var(--text-dim);text-align:center;margin-top:14px;letter-spacing:.5px}
 .lf-switch a{color:var(--accent);text-decoration:none;font-weight:600;letter-spacing:1px}
 .lf-switch a:hover{text-decoration:underline}
-.page{display:none;opacity:0}.page.active{display:block;animation:pageFadeIn .3s ease forwards}.page.page-exit{display:block;animation:pageFadeOut .15s ease forwards}
+.page{display:none;opacity:0}.page.active{display:block;opacity:1;animation:pageFadeIn .3s ease}.page.page-exit{display:block;animation:pageFadeOut .15s ease forwards}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
 .section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}
