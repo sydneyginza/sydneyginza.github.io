@@ -5,6 +5,12 @@ let rosterAvailFilter=null; /* null | 'now' | 'later' | 'finished' */
 
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
+/* Inline name search */
+const sw=document.createElement('div');sw.className='inline-search-wrap';
+const si=document.createElement('input');si.type='text';si.className='inline-search-input';si.setAttribute('placeholder',t('ui.search'));si.setAttribute('aria-label',t('ui.search'));si.value=sharedFilters.nameSearch||'';
+let _sTimer;si.oninput=()=>{clearTimeout(_sTimer);_sTimer=setTimeout(()=>{sharedFilters.nameSearch=si.value;renderGrid();renderRoster();renderFavoritesGrid();renderActiveFilterChips();pushFiltersToURL()},200)};
+sw.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="opacity:.4;flex-shrink:0"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+sw.appendChild(si);fb.appendChild(sw);
 /* Sort buttons */
 const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
 const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')},{key:'lastSeen',label:t('sort.lastSeen')}];
@@ -62,6 +68,8 @@ filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
 applySortOrder(filtered);
 grid.innerHTML='';const ts=fmtDate(getAEDTDate());let _hoverTimer;
+/* ARIA live region for result count */
+let _ariaLive=document.getElementById('gridResultsLive');if(!_ariaLive){_ariaLive=document.createElement('div');_ariaLive.id='gridResultsLive';_ariaLive.setAttribute('role','status');_ariaLive.setAttribute('aria-live','polite');_ariaLive.className='sr-only';grid.parentElement.insertBefore(_ariaLive,grid)}_ariaLive.textContent=hasActiveFilters()?filtered.length+' results':'';
 if(!filtered.length&&hasActiveFilters()){grid.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon" style="opacity:.15">&#x1F50D;</div><div class="fav-empty-text">${t('ui.noResults')}</div><button class="empty-state-cta" onclick="clearAllFilters();onFiltersChanged()">${t('ui.clearFilters')}</button></div>`;return}
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card'+(g.hidden?' card-hidden':'');
 const hideIcon=g.hidden?'&#x1F441;':'&#x1F6AB;';const hideTitle=g.hidden?t('ui.showGirl'):t('ui.hideGirl');

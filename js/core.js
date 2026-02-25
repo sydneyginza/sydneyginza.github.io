@@ -759,3 +759,26 @@ async function logAdminAction(action,target,meta={}){
   try{await fetch(`${DATA_API}/${ALP}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)})}catch(_){}
 }
 
+/* === Privacy Banner (moved from inline for CSP compliance) === */
+(function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})();
+
+/* === Service Worker Registration === */
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');
+
+/* === Error Boundary: timeout for skeleton loaders === */
+setTimeout(function(){
+  document.querySelectorAll('.skeleton-fade').forEach(function(s){
+    if(s.offsetParent!==null){
+      s.innerHTML='<div class="error-state"><svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" style="opacity:.3;margin-bottom:12px"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><p>Unable to load. Please refresh.</p></div>';
+    }
+  });
+}, 15000);
+
+/* === Breadcrumb JSON-LD Helper === */
+function updateBreadcrumb(items){
+  var el=document.getElementById('breadcrumbLd');if(!el)return;
+  if(!items||!items.length){el.textContent='';return}
+  var list=items.map(function(item,i){return {"@type":"ListItem","position":i+1,"name":item.name,"item":item.url}});
+  el.textContent=JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":list});
+}
+

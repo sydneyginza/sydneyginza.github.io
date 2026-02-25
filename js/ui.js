@@ -590,7 +590,9 @@ if(offers.length)person.makesOffer=offers;
 const rvs=g.reviews||[];
 const ld={"@context":"https://schema.org","@type":"ProfilePage","url":url,"mainEntity":person};
 if(rvs.length){const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;ld.mainEntity.aggregateRating={"@type":"AggregateRating","ratingValue":avg.toFixed(1),"bestRating":"5","ratingCount":rvs.length}}
-el.textContent=JSON.stringify(ld)}
+el.textContent=JSON.stringify(ld);
+/* Update breadcrumb */
+if(typeof updateBreadcrumb==='function')updateBreadcrumb([{name:'Home',url:'https://sydneyginza.github.io/'},{name:'Girls',url:'https://sydneyginza.github.io/girls'},{name:g.name||'Profile',url:url}])}
 function resetOgMeta(){
 const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
 const t='Ginza Empire \u2013 Sydney\'s Premier Asian Bordello';
@@ -600,7 +602,8 @@ set('og:title',t);set('og:description',d);set('og:url','https://sydneyginza.gith
 set('twitter:title',t,'name');set('twitter:description',d,'name');set('twitter:image',i,'name');
 set('description',d,'name');
 const canon=document.querySelector('link[rel="canonical"]');if(canon)canon.href='https://sydneyginza.github.io';
-const pld=document.getElementById('profileLd');if(pld)pld.remove()}
+const pld=document.getElementById('profileLd');if(pld)pld.remove();
+if(typeof updateBreadcrumb==='function')updateBreadcrumb(null)}
 
 /* Profile Page */
 function renderAlsoAvailable(idx){
@@ -972,5 +975,17 @@ btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
 
 /* ── FAB (Floating Contact Buttons) ── */
 (function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{toggle.classList.toggle('open');menu.classList.toggle('open')};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open')}})})();
+
+/* ── Focus Trap for Modal Overlays ── */
+document.addEventListener('keydown',function(e){
+if(e.key!=='Tab')return;
+var openModal=document.querySelector('.modal-overlay.open,.lightbox-overlay.open');
+if(!openModal)return;
+var focusable=openModal.querySelectorAll('button:not([disabled]):not([style*="display:none"]):not([style*="display: none"]),[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+if(!focusable.length)return;
+var first=focusable[0],last=focusable[focusable.length-1];
+if(e.shiftKey){if(document.activeElement===first||!openModal.contains(document.activeElement)){e.preventDefault();last.focus()}}
+else{if(document.activeElement===last||!openModal.contains(document.activeElement)){e.preventDefault();first.focus()}}
+});
 
 
