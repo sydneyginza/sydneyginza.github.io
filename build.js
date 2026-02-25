@@ -1,51 +1,91 @@
 #!/usr/bin/env node
 /**
- * Build script — minifies CSS & JS for production.
+ * Build script — bundles & minifies CSS + JS for production.
  * Run: npm run build
  *
- * Produces *.min.js and styles.min.css alongside source files.
- * index.html already references the minified versions.
+ * Produces:
+ *   js/app.min.js       (i18n + core + ui + grids + forms)
+ *   js/analytics.min.js  (standalone, deferred)
+ *   styles.min.css
+ *
+ * After building, auto-injects SRI integrity hashes into index.html.
  */
 const esbuild = require('esbuild');
 const fs = require('fs');
-const path = require('path');
+const crypto = require('crypto');
 
-const JS_FILES = [
+/* Bundle A: concatenated in dependency order */
+const BUNDLE_A = [
   'js/i18n.js',
   'js/core.js',
   'js/ui.js',
   'js/grids.js',
   'js/forms.js',
-  'js/analytics.js',
 ];
+
+/* Bundle B: standalone deferred script */
+const BUNDLE_B = 'js/analytics.js';
+
+function sriHash(file) {
+  const content = fs.readFileSync(file);
+  return 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
+}
 
 async function build() {
   const t0 = Date.now();
   let totalBefore = 0;
   let totalAfter = 0;
 
-  /* Minify each JS file */
-  for (const file of JS_FILES) {
-    const src = fs.readFileSync(file, 'utf8');
-    const out = file.replace(/\.js$/, '.min.js');
-    const result = await esbuild.transform(src, { minify: true, target: 'es2020', charset: 'utf8' });
-    fs.writeFileSync(out, result.code, 'utf8');
-    totalBefore += src.length;
-    totalAfter += result.code.length;
-    console.log(`  ${file} → ${out}  (${src.length} → ${result.code.length})`);
-  }
+  /* --- Bundle A: concatenate sources, then minify --- */
+  const CSS_SWAP = "document.querySelector('link[href*=\"styles.min\"]').media='all';";
+  const bundleASrc = CSS_SWAP + '\n' + BUNDLE_A.map(f => fs.readFileSync(f, 'utf8')).join('\n');
+  const bundleA = await esbuild.transform(bundleASrc, { minify: true, target: 'es2020', charset: 'utf8' });
+  fs.writeFileSync('js/app.min.js', bundleA.code, 'utf8');
+  const aSrcLen = BUNDLE_A.reduce((s, f) => s + fs.statSync(f).size, 0);
+  totalBefore += aSrcLen;
+  totalAfter += bundleA.code.length;
+  console.log(`  app.min.js      ${aSrcLen} → ${bundleA.code.length} bytes`);
 
-  /* Minify CSS */
+  /* --- Bundle B: analytics standalone --- */
+  const bSrc = fs.readFileSync(BUNDLE_B, 'utf8');
+  const bundleB = await esbuild.transform(bSrc, { minify: true, target: 'es2020', charset: 'utf8' });
+  fs.writeFileSync('js/analytics.min.js', bundleB.code, 'utf8');
+  totalBefore += bSrc.length;
+  totalAfter += bundleB.code.length;
+  console.log(`  analytics.min.js  ${bSrc.length} → ${bundleB.code.length} bytes`);
+
+  /* --- CSS --- */
   const css = fs.readFileSync('styles.css', 'utf8');
   const cssResult = await esbuild.transform(css, { minify: true, loader: 'css' });
   fs.writeFileSync('styles.min.css', cssResult.code);
   totalBefore += css.length;
   totalAfter += cssResult.code.length;
-  console.log(`  styles.css → styles.min.css  (${css.length} → ${cssResult.code.length})`);
+  console.log(`  styles.min.css   ${css.length} → ${cssResult.code.length} bytes`);
 
   const pct = ((1 - totalAfter / totalBefore) * 100).toFixed(1);
   console.log(`\n  Total: ${totalBefore} → ${totalAfter} bytes  (${pct}% reduction)`);
-  console.log(`  Done in ${Date.now() - t0}ms`);
+
+  /* --- Compute SRI hashes --- */
+  const hashes = {
+    'styles.min.css':      sriHash('styles.min.css'),
+    'js/app.min.js':       sriHash('js/app.min.js'),
+    'js/analytics.min.js': sriHash('js/analytics.min.js'),
+  };
+  console.log('\n  SRI hashes:');
+  for (const [f, h] of Object.entries(hashes)) console.log(`    ${f}: ${h}`);
+
+  /* --- Auto-inject SRI hashes into index.html --- */
+  let html = fs.readFileSync('index.html', 'utf8');
+  for (const [file, hash] of Object.entries(hashes)) {
+    const escaped = file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Match integrity attribute on tags referencing this file
+    const re = new RegExp(`((?:href|src)="/(?:${escaped})"[^>]*?)integrity="sha384-[^"]*"`, 'g');
+    html = html.replace(re, `$1integrity="${hash}"`);
+  }
+  fs.writeFileSync('index.html', html, 'utf8');
+  console.log('  ✓ index.html SRI hashes updated');
+
+  console.log(`\n  Done in ${Date.now() - t0}ms`);
 }
 
 build().catch(e => { console.error(e); process.exit(1); });

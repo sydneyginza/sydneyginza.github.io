@@ -618,6 +618,7 @@ function observeCalEntrance(table) {
 }
 
 /* === URL Router (pushState / popstate) === */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const Router = (function() {
   const PAGE_ROUTES = {
     homePage:       '/',
