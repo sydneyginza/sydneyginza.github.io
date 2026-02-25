@@ -65,7 +65,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:
 .lf-switch{font-size:11px;color:var(--text-dim);text-align:center;margin-top:14px;letter-spacing:.5px}
 .lf-switch a{color:var(--accent);text-decoration:none;font-weight:600;letter-spacing:1px}
 .lf-switch a:hover{text-decoration:underline}
-.page{display:none;opacity:0}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}.page.slide-enter-right{animation:slideInRight .35s cubic-bezier(0.22,1,0.36,1)}.page.slide-enter-left{animation:slideInLeft .35s cubic-bezier(0.22,1,0.36,1)}.page.page-exit{display:block;animation:pageFadeOut .15s ease forwards}.page.slide-exit-left{display:block;animation:slideOutLeft .25s ease forwards}.page.slide-exit-right{display:block;animation:slideOutRight .25s ease forwards}
+.page{display:none;opacity:0}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}.page.slide-enter-right{animation:slideInRight .35s cubic-bezier(0.22,1,0.36,1)}.page.slide-enter-left{animation:slideInLeft .35s cubic-bezier(0.22,1,0.36,1)}.page.page-exit{display:block;position:fixed;top:0;left:0;width:100%;z-index:50;animation:pageFadeOut .15s ease forwards}.page.slide-exit-left{display:block;position:fixed;top:0;left:0;width:100%;z-index:50;animation:slideOutLeft .25s ease forwards}.page.slide-exit-right{display:block;position:fixed;top:0;left:0;width:100%;z-index:50;animation:slideOutRight .25s ease forwards}
 @keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pageFadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-8px)}}
 @keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
