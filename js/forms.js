@@ -170,11 +170,17 @@ function startAdaptivePolling(){
 function startCountdownTick(){
   if(_countdownTickInterval)clearInterval(_countdownTickInterval);
   _countdownTickInterval=setInterval(()=>{
-    const el=document.getElementById('profCountdown');if(!el)return;
-    const g=girls[currentProfileIdx];if(!g||!g.name)return;
-    const c=getAvailCountdown(g.name);
-    if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}
-    else{el.textContent='';clearInterval(_countdownTickInterval)}
+    const el=document.getElementById('profCountdown');if(el){
+      const g=girls[currentProfileIdx];if(g&&g.name){
+        const c=getAvailCountdown(g.name);
+        if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}
+        else{el.textContent=''}
+      }
+    }
+    /* Update available-now widget countdowns on homepage */
+    if(document.getElementById('homePage')&&document.getElementById('homePage').classList.contains('active')){
+      document.querySelectorAll('.anw-countdown').forEach(cd=>{const card=cd.closest('.avail-now-card');if(!card)return;const idx=parseInt(card.dataset.idx);const g=girls[idx];if(!g)return;const c=getAvailCountdown(g.name);cd.textContent=c&&c.type==='until_end'?c.display:''})
+    }
   },POLL_COUNTDOWN);
 }
 

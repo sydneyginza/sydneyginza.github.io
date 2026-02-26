@@ -239,10 +239,12 @@ function showPage(id){
 resetOgMeta();if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
 const prev=document.querySelector('.page.active');const next=document.getElementById(id);const _ec=['page-enter','slide-enter-right','slide-enter-left'];next.classList.remove(..._ec);if(prev&&prev!==next){const fromProfile=prev.id==='profilePage';const exitCls=fromProfile?'slide-exit-right':'page-exit';const enterCls=fromProfile?'slide-enter-left':'page-enter';prev.classList.remove('active',..._ec);prev.classList.add(exitCls);const onDone=()=>{prev.classList.remove(exitCls);prev.removeEventListener('animationend',onDone)};prev.addEventListener('animationend',onDone);setTimeout(()=>{prev.classList.remove(exitCls)},400);void next.offsetWidth;next.classList.add(enterCls)}else{allPages.forEach(p=>p.classList.remove('active',..._ec));next.classList.add('page-enter')}next.classList.add('active');
 closeFilterPanel();
+_kbFocusedCardIdx=-1;document.querySelectorAll('.girl-card.kb-focused').forEach(c=>c.classList.remove('kb-focused'));
 /* URL routing & dynamic title */
 const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database'};
 const pageTitle=titleMap[id]||'Ginza Empire';
 document.title=pageTitle;
+announce(pageTitle.replace('Ginza Empire – ','').replace('Ginza Empire','Home'));
 Router.push(Router.pathForPage(id),pageTitle);
 /* Determine which filter pane is active for this page */
 const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
@@ -282,8 +284,8 @@ document.getElementById('navProfileDb').onclick=e=>{e.preventDefault();showPage(
 /* Nav Dropdown Menu Toggle */
 const navMenuBtn=document.getElementById('navMenuBtn');
 const navDropdown=document.getElementById('navDropdown');
-navMenuBtn.onclick=()=>{navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open')};
-function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open')}
+navMenuBtn.onclick=()=>{const o=navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open');navMenuBtn.setAttribute('aria-expanded',String(o))};
+function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open');navMenuBtn.setAttribute('aria-expanded','false')}
 navDropdown.querySelectorAll('a').forEach(a=>{const orig=a.onclick;a.addEventListener('click',()=>closeNavMenu())});
 document.addEventListener('click',e=>{if(!e.target.closest('.nav-menu-wrap'))closeNavMenu()});
 
@@ -438,12 +440,24 @@ closeBulkTimeModal();
 /* Home Page */
 function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
 
+function renderAvailNowWidget(){
+const container=document.getElementById('homeAvailNow');if(!container)return;
+const avail=girls.filter(g=>!g.hidden&&isAvailableNow(g.name));
+if(!avail.length){container.style.display='none';container.innerHTML='';return}
+container.style.display='';
+const countLabel=avail.length===1?t('home.girlSingular'):t('home.girlPlural').replace('{n}',avail.length);
+let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><span class="avail-now-title">${countLabel} Available Now</span></div><div class="avail-now-strip">`;
+avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?g.photos[0]:'';const cd=getAvailCountdown(g.name);const cdText=cd&&cd.type==='until_end'?cd.display:'';
+html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
+html+='</div>';container.innerHTML=html;
+container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}})}
+
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
-document.getElementById('homeAnnounce').innerHTML='<p></p>';
-ngList=getNewGirls();ngIdx=0;renderNewGirls();renderRecentlyViewed();
+document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
+ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();renderRecentlyViewed();
 /* Scroll reveals for below-fold home sections */
 const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el))})}
 
@@ -509,6 +523,12 @@ el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].cli
 el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if(dx<0)lbGoTo((lbIdx+1)%lbPhotos.length);else lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)}},{passive:true})})();
 
 /* ── Compare Modal ── */
+function _compareBarHtml(val,min,max,rank){
+  if(isNaN(val)||min===null||max===null)return '';
+  const pct=max===min?50:((val-min)/(max-min))*100;
+  const cls=rank==='lo'?'compare-bar-lo':rank==='hi'?'compare-bar-hi':'compare-bar-mid';
+  return `<div class="compare-bar-track"><div class="compare-bar-fill ${cls}" style="width:${pct}%"></div></div>`;
+}
 function openCompareModal(){
 if(compareSelected.length<2)return;
 const overlay=document.getElementById('compareOverlay'),grid=document.getElementById('compareGrid');
@@ -524,14 +544,45 @@ const stats=[
 {label:t('field.rates30'),fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
 {label:t('field.rates45'),fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
 {label:t('field.rates60'),fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
-{label:t('field.experience'),fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null},
-{label:t('field.labels'),fn:g=>g.labels&&g.labels.length?g.labels.slice().sort().join(', '):'\u2014'}
+{label:t('field.experience'),fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null}
 ];
-let html='<table class="compare-stat-table"><thead><tr><th></th>';
+/* Desktop table */
+let html='<table class="compare-stat-table compare-desktop"><thead><tr><th></th>';
 sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo" alt="${g.name.replace(/"/g,'&quot;')}">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
 html+='</tr></thead><tbody>';
-stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.alpha){const vals=sel.map(g=>s.alpha(g));const valid=[...new Set(vals.filter(Boolean))].sort();const hi=valid.length?valid[valid.length-1]:null;const lo=valid.length?valid[0]:null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(v&&hi&&lo&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.fixedColor){sel.forEach(g=>{const c=s.fixedColor(g);html+=`<td${c?` style="color:${c};font-weight:600"`:''}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
+stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];const rank=!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo?(v===lo?'lo':v===hi?'hi':'mid'):null;const clr=rank==='lo'?'color:#00c864;font-weight:600':rank==='hi'?'color:#ff4d4d;font-weight:600':'';html+=`<td><span${clr?` style="${clr}"`:''} >${s.fn(g)}</span>${_compareBarHtml(v,lo,hi,rank)}</td>`})}else if(s.alpha){const vals=sel.map(g=>s.alpha(g));const valid=[...new Set(vals.filter(Boolean))].sort();const hi=valid.length?valid[valid.length-1]:null;const lo=valid.length?valid[0]:null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(v&&hi&&lo&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.fixedColor){sel.forEach(g=>{const c=s.fixedColor(g);html+=`<td${c?` style="color:${c};font-weight:600"`:''}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
 html+='</tbody></table>';
+/* Mobile cards */
+html+='<div class="compare-mobile-cards">';
+sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name.replace(/"/g,'&quot;')}">`:'';
+html+=`<div class="compare-mobile-card"><div class="cmc-header">${photo}<div class="cmc-name">${g.name}</div></div><div class="cmc-stats">`;
+stats.forEach(s=>{html+=`<div class="cmc-row"><span class="cmc-label">${s.label}</span><span class="cmc-value">${s.fn(g)}</span></div>`});
+html+=`</div></div>`});
+html+='</div>';
+/* Labels comparison */
+const allLabels=new Set();sel.forEach(g=>{if(g.labels)g.labels.forEach(l=>allLabels.add(l))});
+if(allLabels.size){const shared=[...allLabels].filter(l=>sel.every(g=>g.labels&&g.labels.includes(l))).sort();const unique=[...allLabels].filter(l=>!sel.every(g=>g.labels&&g.labels.includes(l))).sort();
+html+=`<div class="compare-labels-section">`;
+if(shared.length)html+=`<div class="compare-labels-group"><div class="compare-labels-title">${t('compare.sharedLabels')}</div><div class="compare-labels-list">${shared.map(l=>`<span class="compare-label shared">${l}</span>`).join('')}</div></div>`;
+if(unique.length)html+=`<div class="compare-labels-group"><div class="compare-labels-title">${t('compare.uniqueLabels')}</div><div class="compare-labels-list">${unique.map(l=>`<span class="compare-label unique">${l}</span>`).join('')}</div></div>`;
+html+=`</div>`}
+/* Availability timeline */
+const today=fmtDate(getAEDTDate());const entries=sel.map(g=>({name:g.name,entry:getCalEntry(g.name,today)}));const hasAnySchedule=entries.some(e=>e.entry&&e.entry.start&&e.entry.end);
+if(hasAnySchedule){
+const nowDate=getAEDTDate();const nowHr=nowDate.getHours()+nowDate.getMinutes()/60;
+const tlStart=10,tlEnd=26;/* 10am to 2am next day (26h) */
+html+=`<div class="compare-timeline"><div class="compare-tl-title">${t('compare.todaySchedule')}</div><div class="compare-tl-hours">`;
+for(let h=tlStart;h<=tlEnd;h+=2)html+=`<span class="compare-tl-hour">${h>24?(h-24):h>12?h-12:h===0?12:h}${h>=12&&h<24?'p':'a'}</span>`;
+html+=`</div>`;
+entries.forEach(e=>{const ent=e.entry;html+=`<div class="compare-tl-row"><span class="compare-tl-name">${e.name}</span><div class="compare-tl-track">`;
+if(ent&&ent.start&&ent.end){const[sh,sm]=ent.start.split(':').map(Number);const[eh,em]=ent.end.split(':').map(Number);let s=sh+sm/60,en=eh+em/60;if(en<s)en+=24;
+const left=Math.max(0,(s-tlStart)/(tlEnd-tlStart)*100);const width=Math.min(100-left,(en-Math.max(s,tlStart))/(tlEnd-tlStart)*100);
+html+=`<div class="compare-tl-bar" style="left:${left}%;width:${width}%"></div>`}
+/* Now marker */
+let nowPos=(nowHr<tlStart?nowHr+24:nowHr);const nowPct=(nowPos-tlStart)/(tlEnd-tlStart)*100;
+if(nowPct>=0&&nowPct<=100)html+=`<div class="compare-tl-now" style="left:${nowPct}%"></div>`;
+html+=`</div></div>`});
+html+=`</div>`}
 grid.innerHTML=html;
 overlay.classList.add('open');document.body.style.overflow='hidden'}
 function closeCompareModal(){const overlay=document.getElementById('compareOverlay');if(overlay)overlay.classList.remove('open');document.body.style.overflow=''}
@@ -946,10 +997,10 @@ try{const r=await fetch(PROXY+'/send-notification',{method:'POST',headers:proxyH
 if(r.ok){const d=await r.json();if(d.sent&&d.matchCount>0){showToast(d.matchCount===1?t('ui.favAvailOne'):t('ui.favAvailMany').replace('{count}',d.matchCount))}}}catch(e){}}
 
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle()}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle();if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
-loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList.toggle('open')}else{showAuthSignIn()}};
-document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
+loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
+document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
 renderDropdown();
 
 /* Notification preferences */
@@ -992,13 +1043,61 @@ async function saveNotifPrefs(){
   updatePushToggle();
 }
 
-if(_notifBtn){_notifBtn.onclick=e=>{e.stopPropagation();_notifDropdown.classList.toggle('open')}}
+if(_notifBtn){_notifBtn.onclick=e=>{e.stopPropagation();const o=_notifDropdown.classList.toggle('open');_notifBtn.setAttribute('aria-expanded',String(o))}}
 document.addEventListener('click',e=>{if(_notifDropdown&&!e.target.closest('#notifPrefsDropdown')&&!e.target.closest('#notifToggleBtn'))_notifDropdown.classList.remove('open')});
 if(_notifPrefPush)_notifPrefPush.onchange=()=>saveNotifPrefs();
 if(_notifPrefEmail)_notifPrefEmail.onchange=()=>saveNotifPrefs();
 
+/* ── Theme Toggle (Light/Dark) ── */
+const _themeToggleBtn=document.getElementById('themeToggleBtn');
+const _themeIcon=document.getElementById('themeIcon');
+const _sunPath='M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z';
+const _moonPath='M12 3a9 9 0 108.97 10.13.75.75 0 00-.93-.93A7.5 7.5 0 0112.87 3.07.75.75 0 0012 3z';
+function getStoredTheme(){
+  if(loggedIn){const entry=CRED.find(c=>c.user===loggedInUser);if(entry&&entry.themePref)return entry.themePref}
+  try{const v=localStorage.getItem('ginza_theme');if(v==='light'||v==='dark')return v}catch(e){}
+  return 'dark';
+}
+function applyTheme(theme){
+  const isLight=theme==='light';
+  document.body.classList.toggle('light-mode',isLight);
+  if(_themeIcon)_themeIcon.querySelector('path').setAttribute('d',isLight?_moonPath:_sunPath);
+  if(_themeToggleBtn)_themeToggleBtn.setAttribute('aria-label',isLight?t('theme.dark'):t('theme.light'));
+  try{localStorage.setItem('ginza_theme',theme)}catch(e){}
+}
+function toggleTheme(){
+  const next=document.body.classList.contains('light-mode')?'dark':'light';
+  applyTheme(next);
+  if(loggedIn&&loggedInUser){
+    fetch(PROXY+'/update-theme-pref',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username:loggedInUser,theme:next})}).catch(()=>{});
+  }
+}
+(function(){document.body.classList.add('no-transition');applyTheme(getStoredTheme());requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('no-transition')))})();
+if(_themeToggleBtn)_themeToggleBtn.onclick=toggleTheme;
+
 /* Particles */
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}
+
+/* ── Seasonal / Event Themes ── */
+const SEASONAL_THEMES=[
+  {id:'valentine',cls:'theme-valentine',match:(m,d)=>m===1&&d>=1&&d<=14,accent:'#ff4488',accent2:'#ff6fa8',icon:'\u2764\uFE0F',greetingKey:'season.valentine'},
+  {id:'sakura',cls:'theme-sakura',match:(m,d)=>(m===2&&d>=15)||(m===3&&d<=15),accent:'#f4a0b5',accent2:'#d4738a',icon:'\uD83C\uDF38',greetingKey:'season.sakura'},
+  {id:'christmas',cls:'theme-christmas',match:(m,d)=>m===11&&d>=1&&d<=25,accent:'#cc1111',accent2:'#00aa44',icon:'\uD83C\uDF84',greetingKey:'season.christmas'},
+  {id:'newyear',cls:'theme-newyear',match:(m,d)=>(m===11&&d>=26)||(m===0&&d<=7),accent:'#ffd700',accent2:'#ff6f00',icon:'\uD83C\uDF86',greetingKey:'season.newyear'}
+];
+let _activeSeason=null;
+function detectSeasonalTheme(){const d=getAEDTDate();const m=d.getMonth(),day=d.getDate();return SEASONAL_THEMES.find(th=>th.match(m,day))||null}
+function applySeasonalTheme(){
+  _activeSeason=detectSeasonalTheme();
+  SEASONAL_THEMES.forEach(th=>document.body.classList.remove(th.cls));
+  if(!_activeSeason)return;
+  document.body.classList.add(_activeSeason.cls);
+  document.documentElement.style.setProperty('--accent',_activeSeason.accent);
+  document.documentElement.style.setProperty('--accent2',_activeSeason.accent2);
+  particlesEl.querySelectorAll('.particle').forEach(p=>{p.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
+}
+function getSeasonalBanner(){if(!_activeSeason)return '';return `<div class="seasonal-banner"><span class="seasonal-icon">${_activeSeason.icon}</span> ${t(_activeSeason.greetingKey)}</div>`}
+applySeasonalTheme();
 
 /* Filter Panel Toggle */
 let _activeFilterPaneId=null;
@@ -1026,6 +1125,7 @@ renderFilterPane(_activeFilterPaneId);
 pane.classList.add('open');
 _filterToggle.classList.add('open');
 _filterBackdrop.classList.add('open');
+_filterToggle.setAttribute('aria-expanded','true');
 }
 
 function closeFilterPanel(){
@@ -1033,6 +1133,7 @@ function closeFilterPanel(){
 const el=document.getElementById(fp);if(el)el.classList.remove('open')});
 _filterToggle.classList.remove('open');
 _filterBackdrop.classList.remove('open');
+_filterToggle.setAttribute('aria-expanded','false');
 }
 
 function toggleFilterPanel(){
@@ -1049,7 +1150,7 @@ window.addEventListener('scroll',()=>{const active=targetPages.some(id=>{const e
 btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
 
 /* ── FAB (Floating Contact Buttons) ── */
-(function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{toggle.classList.toggle('open');menu.classList.toggle('open')};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open')}})})();
+(function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{const o=toggle.classList.toggle('open');menu.classList.toggle('open');toggle.setAttribute('aria-expanded',String(o))};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open');toggle.setAttribute('aria-expanded','false')}})})();
 
 /* ── Focus Trap for Modal Overlays ── */
 document.addEventListener('keydown',function(e){
@@ -1063,4 +1164,31 @@ if(e.shiftKey){if(document.activeElement===first||!openModal.contains(document.a
 else{if(document.activeElement===last||!openModal.contains(document.activeElement)){e.preventDefault();first.focus()}}
 });
 
+/* ── Keyboard Shortcuts ── */
+let _kbFocusedCardIdx=-1;
+function _kbIsTyping(){const el=document.activeElement;if(!el)return false;const tag=el.tagName;return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||el.isContentEditable}
+function _kbIsModalOpen(){return!!document.querySelector('.modal-overlay.open,.lightbox-overlay.open,.copy-time-modal.open,.copy-day-modal.open,.bulk-time-modal.open')}
+function _kbGetActivePage(){return['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','profilePage'].find(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')})||null}
+function _kbGetVisibleCards(){const page=_kbGetActivePage();const gridMap={listPage:'girlsGrid',rosterPage:'rosterGrid',favoritesPage:'favoritesGrid'};const gridId=gridMap[page];if(!gridId)return[];return Array.from(document.getElementById(gridId)?.querySelectorAll('.girl-card')||[])}
+function _kbFocusCard(idx){const cards=_kbGetVisibleCards();if(!cards.length)return;_kbFocusedCardIdx=Math.max(0,Math.min(idx,cards.length-1));cards.forEach((c,i)=>c.classList.toggle('kb-focused',i===_kbFocusedCardIdx));cards[_kbFocusedCardIdx].scrollIntoView({block:'nearest',behavior:'smooth'})}
+function _kbOpenHelp(){let ov=document.getElementById('kbHelpOverlay');if(!ov){ov=document.createElement('div');ov.id='kbHelpOverlay';ov.className='modal-overlay kb-help-overlay';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','kbHelpTitle');document.body.appendChild(ov)}
+ov.innerHTML=`<div class="form-modal" style="max-width:480px"><button class="modal-close" id="kbHelpClose" aria-label="Close">&times;</button><div class="form-title" id="kbHelpTitle">${t('kb.title')}</div><div class="kb-help-grid"><div class="kb-row"><kbd>j</kbd> <kbd>k</kbd><span>${t('kb.navCards')}</span></div><div class="kb-row"><kbd>Enter</kbd><span>${t('kb.openProfile')}</span></div><div class="kb-row"><kbd>f</kbd><span>${t('kb.favorite')}</span></div><div class="kb-row"><kbd>c</kbd><span>${t('kb.compare')}</span></div><div class="kb-row"><kbd>/</kbd><span>${t('kb.search')}</span></div><div class="kb-row"><kbd>Esc</kbd><span>${t('kb.back')}</span></div><div class="kb-row"><kbd>?</kbd><span>${t('kb.help')}</span></div></div></div>`;
+ov.classList.add('open');ov.querySelector('#kbHelpClose').onclick=()=>ov.classList.remove('open');ov.onclick=e=>{if(e.target===ov)ov.classList.remove('open')}}
+
+document.addEventListener('keydown',function(e){
+if(_kbIsTyping())return;
+const helpOv=document.getElementById('kbHelpOverlay');
+if(helpOv&&helpOv.classList.contains('open')){if(e.key==='Escape'||e.key==='?'){helpOv.classList.remove('open');e.preventDefault()}return}
+if(_kbIsModalOpen())return;
+const page=_kbGetActivePage();
+switch(e.key){
+case '?':e.preventDefault();_kbOpenHelp();break;
+case '/':e.preventDefault();{const inp=document.querySelector('#filterBar .inline-search-input,#rosterFilterBar .inline-search-input,#homeSearchInput');if(inp)inp.focus()}break;
+case 'Escape':if(page==='profilePage'){const btn=document.getElementById('backBtn');if(btn)btn.click()}break;
+case 'j':if(['listPage','rosterPage','favoritesPage'].includes(page)){e.preventDefault();_kbFocusCard(_kbFocusedCardIdx+1)}break;
+case 'k':if(['listPage','rosterPage','favoritesPage'].includes(page)){e.preventDefault();_kbFocusCard(_kbFocusedCardIdx-1)}break;
+case 'Enter':if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();if(cards[_kbFocusedCardIdx])cards[_kbFocusedCardIdx].click()}break;
+case 'f':if(page==='profilePage'){const btn=document.getElementById('profFavBtn');if(btn)btn.click()}else if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();const btn=cards[_kbFocusedCardIdx]?.querySelector('.card-fav');if(btn)btn.click()}break;
+case 'c':if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();const btn=cards[_kbFocusedCardIdx]?.querySelector('.card-compare');if(btn)btn.click()}break;
+}});
 

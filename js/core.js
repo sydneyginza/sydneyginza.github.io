@@ -17,6 +17,9 @@ let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
 let GT = true;
 
+/* === Screen Reader Announcer === */
+function announce(msg){const el=document.getElementById('a11yAnnouncer');if(el){el.textContent='';requestAnimationFrame(()=>el.textContent=msg)}}
+
 /* === Adaptive Polling === */
 const POLL_FAST = 30000;      // 30s for roster/profile when visible
 const POLL_NORMAL = 60000;    // 60s for other pages when visible
@@ -226,10 +229,41 @@ function addRecentlyViewed(name) {
   rv.unshift({ name: name, ts: Date.now() });
   if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
   try { localStorage.setItem(RV_KEY, JSON.stringify(rv)); } catch (e) {}
+  syncViewHistory();
 }
 
 function clearRecentlyViewed() {
   try { localStorage.removeItem(RV_KEY); } catch (e) {}
+}
+
+function getViewedDaysAgo(name) {
+  const rv = getRecentlyViewed();
+  const entry = rv.find(r => r.name === name);
+  if (!entry || !entry.ts) return null;
+  const diff = Date.now() - entry.ts;
+  return Math.floor(diff / 86400000);
+}
+
+function viewedBadgeHtml(name) {
+  if (!loggedIn) return '';
+  const days = getViewedDaysAgo(name);
+  if (days === null) return '';
+  let label;
+  if (days === 0) label = t('viewed.today');
+  else if (days === 1) label = t('viewed.yesterday');
+  else if (days <= 14) label = t('viewed.daysAgo').replace('{n}', days);
+  else return '';
+  return `<div class="card-viewed-badge"><svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> ${label}</div>`;
+}
+
+let _viewHistorySyncTimer = null;
+function syncViewHistory() {
+  if (!loggedIn || !loggedInUser) return;
+  clearTimeout(_viewHistorySyncTimer);
+  _viewHistorySyncTimer = setTimeout(() => {
+    const rv = getRecentlyViewed().slice(0, 50);
+    fetch(PROXY + '/update-view-history', { method: 'POST', headers: proxyHeaders(), body: JSON.stringify({ username: loggedInUser, history: rv }) }).catch(() => {});
+  }, 5000);
 }
 
 /* === API Functions (with retry) === */
@@ -599,8 +633,8 @@ const lazyObserver = new IntersectionObserver((entries) => {
       const src = img.dataset.src;
       if (src) {
         img.src = src;
-        img.onload = () => img.classList.add('lazy-loaded');
-        img.onerror = () => { img.classList.add('lazy-loaded'); };
+        img.onload = () => { img.classList.add('lazy-loaded'); img.classList.remove('blur-up'); };
+        img.onerror = () => { img.classList.add('lazy-loaded'); img.classList.remove('blur-up'); };
         delete img.dataset.src;
       }
       lazyObserver.unobserve(img);
@@ -629,8 +663,9 @@ const iframeLazyObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('iframe[data-src]').forEach(f => iframeLazyObserver.observe(f));
 
-function lazyThumb(src, cls, alt) {
-  return `<img class="${cls || 'card-thumb'}" data-src="${src}" alt="${(alt||'').replace(/"/g,'&quot;')}">`;
+function lazyThumb(src, cls, alt, color) {
+  const bg=color?' style="background:'+color+'"':'';
+  return `<img class="${cls || 'card-thumb'} blur-up" data-src="${src}" alt="${(alt||'').replace(/"/g,'&quot;')}"${bg}>`;
 }
 
 function lazyCalAvatar(src, alt) {
