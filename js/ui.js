@@ -1,11 +1,10 @@
 /* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
-let deleteTarget=-1,currentProfileIdx=0;
-let rosterDateFilter=null,calPending={};
+let currentProfileIdx=0;
+let rosterDateFilter=null;var calPending={};
 let gridSort='name',gridSortDir='asc';
 try{const _ss=localStorage.getItem('ginza_sort');if(_ss){const _sp=JSON.parse(_ss);if(_sp.s)gridSort=_sp.s;if(_sp.d)gridSortDir=_sp.d}}catch(e){}
 function _persistSort(){try{localStorage.setItem('ginza_sort',JSON.stringify({s:gridSort,d:gridSortDir}))}catch(e){}}
 let ngIdx=0,ngList=[];
-let copyTimeResolve=null;
 let _savedScrollY=0;
 let _countdownInterval=null;
 
@@ -289,153 +288,12 @@ function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classLis
 navDropdown.querySelectorAll('a').forEach(a=>{const orig=a.onclick;a.addEventListener('click',()=>closeNavMenu())});
 document.addEventListener('click',e=>{if(!e.target.closest('.nav-menu-wrap'))closeNavMenu()});
 
-/* Copy Time Modal */
-function findExistingTimes(name,excludeDate){const dates=getWeekDates();for(const dt of dates){if(dt===excludeDate)continue;const entry=getCalEntry(name,dt);if(entry&&entry.start&&entry.end)return{date:dt,start:entry.start,end:entry.end}}return null}
-function closeCopyTimeModal(result){const modal=document.getElementById('copyTimeModal');modal.classList.remove('open');if(copyTimeResolve){copyTimeResolve(result);copyTimeResolve=null}}
-function showCopyTimePrompt(name,sourceDate,start,end){return new Promise(resolve=>{const modal=document.getElementById('copyTimeModal');const f=dispDate(sourceDate);document.getElementById('copyTimeMsg').innerHTML=`<strong style="color:#fff">${name}</strong> has existing times from <strong style="color:#fff">${f.day} ${f.date}</strong>`;document.getElementById('copyTimeDetail').textContent=fmtTime12(start)+' \u2014 '+fmtTime12(end);copyTimeResolve=resolve;modal.classList.add('open')})}
-document.getElementById('copyTimeCopy').onclick=()=>closeCopyTimeModal('copy');
-document.getElementById('copyTimeNew').onclick=()=>closeCopyTimeModal('new');
-document.getElementById('copyTimeCancel').onclick=()=>closeCopyTimeModal('cancel');
-document.getElementById('copyTimeModal').onclick=e=>{if(e.target===document.getElementById('copyTimeModal'))closeCopyTimeModal('cancel')};
-window.addEventListener('beforeunload',()=>closeCopyTimeModal('cancel'));
-
-/* Copy Day Modal */
-let copyDaySource=null,copyDayTargets=[];
-
-function openCopyDayModal(){
-const dates=getWeekDates();
-copyDaySource=null;copyDayTargets=[];
-/* Pick first day that has entries as default source */
-for(const ds of dates){const count=getScheduledForDay(ds).length;if(count>0){copyDaySource=ds;break}}
-if(!copyDaySource)copyDaySource=dates[0];
-renderCopyDayModal();
-document.getElementById('copyDayModal').classList.add('open');
-}
-
-function getScheduledForDay(ds){return girls.filter(g=>{if(!g.name)return false;const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
-
-function renderCopyDayModal(){
-const dates=getWeekDates();const ts=dates[0];
-/* Source buttons */
-const sc=document.getElementById('copyDaySources');sc.innerHTML='';
-dates.forEach(ds=>{const f=dispDate(ds);const count=getScheduledForDay(ds).length;
-const b=document.createElement('button');b.className='copy-day-btn'+(ds===copyDaySource?' active':'')+(count===0?' disabled':'');
-b.innerHTML=(ds===ts?t('ui.today'):f.day)+' <span style="opacity:.5;font-size:11px">('+count+')</span>';
-b.onclick=()=>{copyDaySource=ds;copyDayTargets=copyDayTargets.filter(t=>t!==ds);renderCopyDayModal()};sc.appendChild(b)});
-/* Preview */
-const prev=document.getElementById('copyDayPreview');
-const scheduled=getScheduledForDay(copyDaySource);
-if(scheduled.length){
-const f=dispDate(copyDaySource);
-prev.innerHTML='<div class="copy-day-preview-title">'+f.day+' '+f.date+' — '+scheduled.length+' girl'+(scheduled.length>1?'s':'')+'</div><div class="copy-day-preview-list">'+
-scheduled.map(g=>{const e=getCalEntry(g.name,copyDaySource);return '<div class="copy-day-preview-item"><span class="cdp-name">'+g.name+'</span><span class="cdp-time">'+fmtTime12(e.start)+' — '+fmtTime12(e.end)+'</span></div>'}).join('')+'</div>';
-}else{prev.innerHTML='<div class="copy-day-preview-empty">'+t('cal.noScheduled')+'</div>'}
-/* Target buttons */
-const tc=document.getElementById('copyDayTargets');tc.innerHTML='';
-dates.forEach(ds=>{if(ds===copyDaySource)return;
-const f=dispDate(ds);const existing=getScheduledForDay(ds).length;
-const b=document.createElement('button');b.className='copy-day-btn'+(copyDayTargets.includes(ds)?' target-active':'');
-b.innerHTML=(ds===ts?t('ui.today'):f.day)+(existing>0?' <span style="opacity:.5;font-size:11px">('+existing+')</span>':'');
-b.onclick=()=>{const idx=copyDayTargets.indexOf(ds);if(idx>=0)copyDayTargets.splice(idx,1);else copyDayTargets.push(ds);renderCopyDayModal()};tc.appendChild(b)});
-/* Select all targets shortcut */
-const allTargets=dates.filter(ds=>ds!==copyDaySource);
-if(allTargets.length>1){const ab=document.createElement('button');ab.className='copy-day-btn'+(copyDayTargets.length===allTargets.length?' target-active':'');
-ab.style.fontStyle='italic';ab.textContent=t('cal.all');ab.onclick=()=>{if(copyDayTargets.length===allTargets.length)copyDayTargets=[];else copyDayTargets=[...allTargets];renderCopyDayModal()};tc.appendChild(ab)}
-/* Apply button state */
-const applyBtn=document.getElementById('copyDayApply');
-applyBtn.disabled=scheduled.length===0||copyDayTargets.length===0;
-applyBtn.style.opacity=applyBtn.disabled?'.4':'1';
-applyBtn.style.pointerEvents=applyBtn.disabled?'none':'auto';
-}
-
-function closeCopyDayModal(){document.getElementById('copyDayModal').classList.remove('open')}
-
-document.getElementById('copyDayCancel').onclick=closeCopyDayModal;
-document.getElementById('copyDayModal').onclick=e=>{if(e.target===document.getElementById('copyDayModal'))closeCopyDayModal()};
-
-document.getElementById('copyDayApply').onclick=async function(){
-const scheduled=getScheduledForDay(copyDaySource);
-if(!scheduled.length||!copyDayTargets.length)return;
-const overwrite=document.getElementById('copyDayOverwrite').checked;
-let copied=0;
-copyDayTargets.forEach(targetDate=>{
-scheduled.forEach(g=>{
-const entry=getCalEntry(g.name,copyDaySource);
-if(!entry||!entry.start||!entry.end)return;
-const existing=getCalEntry(g.name,targetDate);
-if(existing&&existing.start&&existing.end&&!overwrite)return;
-if(!calData[g.name])calData[g.name]={};
-calData[g.name][targetDate]={start:entry.start,end:entry.end};
-copied++;
-})});
-if(copied>0){
-this.textContent='Saving...';this.style.pointerEvents='none';
-await saveCalData();
-this.textContent=t('cal.copyDayBtn');this.style.pointerEvents='auto';
-renderCalendar();renderRoster();renderGrid();renderHome();
-showToast('Copied '+scheduled.length+' schedule'+(scheduled.length>1?'s':'')+' to '+copyDayTargets.length+' day'+(copyDayTargets.length>1?'s':''));
-}else{showToast('Nothing to copy (all targets already have entries)','error')}
-closeCopyDayModal();};
-
-/* Bulk Time Modal (mark available all week) */
-let bulkTimeName='',bulkTimeDays=[];
-
-function openBulkTimeModal(name){
-bulkTimeName=name;
-const dates=getWeekDates();
-/* Pre-select days that don't have entries yet */
-bulkTimeDays=dates.filter(ds=>{const e=getCalEntry(name,ds);return !e||!e.start||!e.end});
-if(!bulkTimeDays.length)bulkTimeDays=[...dates];
-/* Find existing time to pre-fill */
-let preStart='',preEnd='';
-for(const ds of dates){const e=getCalEntry(name,ds);if(e&&e.start&&e.end){preStart=e.start;preEnd=e.end;break}}
-document.getElementById('bulkTimeName').textContent=name;
-/* Populate time selects */
-const tOpts=generateTimeOptions();
-document.getElementById('bulkTimeStart').innerHTML=tOpts;
-document.getElementById('bulkTimeEnd').innerHTML=tOpts;
-if(preStart)document.getElementById('bulkTimeStart').value=preStart;
-if(preEnd)document.getElementById('bulkTimeEnd').value=preEnd;
-renderBulkTimeDays();
-document.getElementById('bulkTimeModal').classList.add('open');
-}
-
-function renderBulkTimeDays(){
-const dates=getWeekDates();const ts=dates[0];
-const tc=document.getElementById('bulkTimeDays');tc.innerHTML='';
-dates.forEach(ds=>{const f=dispDate(ds);const has=getCalEntry(bulkTimeName,ds);
-const b=document.createElement('button');b.className='copy-day-btn'+(bulkTimeDays.includes(ds)?' target-active':'');
-b.innerHTML=(ds===ts?t('ui.today'):f.day)+(has&&has.start?' <span style="opacity:.4;font-size:10px">\u2713</span>':'');
-b.onclick=()=>{const idx=bulkTimeDays.indexOf(ds);if(idx>=0)bulkTimeDays.splice(idx,1);else bulkTimeDays.push(ds);renderBulkTimeDays()};tc.appendChild(b)});
-/* All button */
-const ab=document.createElement('button');ab.className='copy-day-btn'+(bulkTimeDays.length===dates.length?' target-active':'');
-ab.style.fontStyle='italic';ab.textContent=t('cal.all');
-ab.onclick=()=>{if(bulkTimeDays.length===dates.length)bulkTimeDays=[];else bulkTimeDays=[...dates];renderBulkTimeDays()};tc.appendChild(ab);
-/* Update apply state */
-const applyBtn=document.getElementById('bulkTimeApply');
-applyBtn.disabled=bulkTimeDays.length===0;
-applyBtn.style.opacity=applyBtn.disabled?'.4':'1';
-applyBtn.style.pointerEvents=applyBtn.disabled?'none':'auto';
-}
-
-function closeBulkTimeModal(){document.getElementById('bulkTimeModal').classList.remove('open')}
-document.getElementById('bulkTimeCancel').onclick=closeBulkTimeModal;
-document.getElementById('bulkTimeModal').onclick=e=>{if(e.target===document.getElementById('bulkTimeModal'))closeBulkTimeModal()};
-
-document.getElementById('bulkTimeApply').onclick=async function(){
-const start=document.getElementById('bulkTimeStart').value;
-const end=document.getElementById('bulkTimeEnd').value;
-if(!start||!end){showToast('Please set both start and end times','error');return}
-const name=bulkTimeName;
-if(!calData[name])calData[name]={};
-bulkTimeDays.forEach(ds=>{calData[name][ds]={start,end};if(calPending[name])delete calPending[name][ds]});
-this.textContent='Saving...';this.style.pointerEvents='none';
-await saveCalData();
-this.textContent=t('cal.apply');this.style.pointerEvents='auto';
-renderCalendar();renderRoster();renderGrid();renderHome();
-showToast(name+' marked available for '+bulkTimeDays.length+' day'+(bulkTimeDays.length>1?'s':''));
-closeBulkTimeModal();
-};
+/* Admin calendar stubs — real implementations loaded via admin.js */
+function findExistingTimes(){return null}
+function closeCopyTimeModal(){}
+function showCopyTimePrompt(n,d,s,e){return loadAdminModule().then(function(){return showCopyTimePrompt(n,d,s,e)})}
+function openCopyDayModal(){loadAdminModule().then(function(){openCopyDayModal()})}
+function openBulkTimeModal(name){loadAdminModule().then(function(){openBulkTimeModal(name)})}
 
 /* Home Page */
 function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
@@ -997,7 +855,7 @@ try{const r=await fetch(PROXY+'/send-notification',{method:'POST',headers:proxyH
 if(r.ok){const d=await r.json();if(d.sent&&d.matchCount>0){showToast(d.matchCount===1?t('ui.favAvailOne'):t('ui.favAvailMany').replace('{count}',d.matchCount))}}}catch(e){}}
 
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='')}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle();if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle();if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});

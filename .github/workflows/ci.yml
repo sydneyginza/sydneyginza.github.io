@@ -20,7 +20,7 @@ jobs:
       - run: npm run build
       - name: Verify build artifacts committed
         run: |
-          if ! git diff --quiet js/app.min.js styles.min.css; then
+          if ! git diff --quiet js/app.min.js js/admin.min.js styles.min.css; then
             echo "::error::Build out of sync. Run 'npm run build' and commit."
             exit 1
           fi

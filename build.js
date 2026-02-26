@@ -26,6 +26,9 @@ const BUNDLE_A = [
 /* Bundle B: standalone deferred script */
 const BUNDLE_B = 'js/analytics.js';
 
+/* Bundle C: admin module (lazy-loaded) */
+const BUNDLE_C = 'js/admin.js';
+
 function sriHash(file) {
   const content = fs.readFileSync(file);
   return 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
@@ -53,6 +56,14 @@ async function build() {
   totalBefore += bSrc.length;
   totalAfter += bundleB.code.length;
   console.log(`  analytics.min.js  ${bSrc.length} → ${bundleB.code.length} bytes`);
+
+  /* --- Bundle C: admin module (lazy-loaded) --- */
+  const cSrc = fs.readFileSync(BUNDLE_C, 'utf8');
+  const bundleC = await esbuild.transform(cSrc, { minify: true, target: 'es2020', charset: 'utf8' });
+  fs.writeFileSync('js/admin.min.js', bundleC.code, 'utf8');
+  totalBefore += cSrc.length;
+  totalAfter += bundleC.code.length;
+  console.log(`  admin.min.js    ${cSrc.length} → ${bundleC.code.length} bytes`);
 
   /* --- CSS --- */
   const css = fs.readFileSync('styles.css', 'utf8');
