@@ -36,7 +36,7 @@
   })();
 </script>
 <style>@font-face{font-family:'Orbitron';font-style:normal;font-weight:400 900;font-display:swap;src:url('/fonts/orbitron-var-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/rajdhani-400-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/rajdhani-600-latin.woff2') format('woff2')}*{margin:0;padding:0;box-sizing:border-box}:root{--accent:#b44aff;--accent2:#ff6f00;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.04);--text:#e0e0e0;--text-dim:#888}body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}.page{display:none;opacity:0}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}@keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}.skeleton-shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0.03) 80%);background-size:800px 100%;animation:skeletonShimmer 1.8s ease-in-out infinite}@keyframes skeletonShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.skeleton-card{background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}.skeleton-card .skel-img{width:100%;aspect-ratio:3/4}.skeleton-card .skel-info{padding:16px;display:flex;flex-direction:column;gap:8px}.skeleton-card .skel-line{height:12px;border-radius:2px}.skeleton-card .skel-line.w60{width:60%}.skeleton-card .skel-line.w40{width:40%}.skeleton-card .skel-line.w80{width:80%}.skeleton-fade{transition:opacity .4s ease;opacity:1}</style>
-<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-h3bLMSDyUDKOyiwTid8/PeSCQ8M4qBH8RenQhxuDcPNAtIpMLcmGlwNiWSF2k38v" crossorigin="anonymous">
+<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-cyZPAAVvyuCeA6plYGDgp32j025WEg6g7zPA6vkMoWIfPmFH0szefgvtzluxzHk2" crossorigin="anonymous">
 <noscript><link rel="stylesheet" href="/styles.min.css" media="all"></noscript>
 <script type="application/ld+json">
 {
@@ -207,7 +207,7 @@
 </section></div>
 
 <div class="page" id="favoritesPage"><section class="section">
-<div class="section-header"><div class="section-line"></div><div><div class="section-tag" data-i18n="page.titlelower"></div><div class="section-title" data-i18n="page.favorites"></div></div><button class="push-toggle-btn" id="pushToggleBtn" style="display:none" title="Push notifications"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg><span id="pushToggleLabel" data-i18n="ui.pushEnable"></span></button></div>
+<div class="section-header"><div class="section-line"></div><div><div class="section-tag" data-i18n="page.titlelower"></div><div class="section-title" data-i18n="page.favorites"></div></div><div class="notif-prefs-wrap" style="position:relative"><button class="push-toggle-btn" id="notifToggleBtn" style="display:none" title="Notification preferences"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg><span id="notifToggleLabel" data-i18n="ui.notifPrefs"></span></button><div class="notif-prefs-dropdown" id="notifPrefsDropdown"><div class="notif-prefs-title" data-i18n="ui.notifPrefs"></div><label class="notif-pref-row"><input type="checkbox" id="notifPrefPush" class="notif-pref-check"><span data-i18n="ui.notifPush"></span></label><label class="notif-pref-row"><input type="checkbox" id="notifPrefEmail" class="notif-pref-check"><span data-i18n="ui.notifEmail"></span></label></div></div></div>
 <div class="girls-grid" id="favoritesGrid"><div class="skeleton-fade" id="favoritesSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
 </section></div>
 
@@ -440,6 +440,49 @@
 <div class="compare-actions"><button class="btn btn-secondary" id="compareDone" data-i18n="compare.done"></button></div>
 </div></div>
 
+<div class="modal-overlay" id="enquiryOverlay"><div class="form-modal" style="max-width:480px">
+<button class="modal-close" id="enquiryClose">&times;</button>
+<div class="form-title" data-i18n="enquiry.title"></div>
+<div class="enquiry-girl-name" id="enquiryGirlName"></div>
+<div class="form-row full"><div class="form-group">
+<label class="form-label" data-i18n="enquiry.name"></label>
+<input class="form-input" id="eqName" data-i18n-ph="enquiry.namePh" autocomplete="name">
+</div></div>
+<div class="form-row"><div class="form-group">
+<label class="form-label" data-i18n="enquiry.phone"></label>
+<input class="form-input" id="eqPhone" type="tel" data-i18n-ph="enquiry.phonePh" autocomplete="tel">
+</div><div class="form-group">
+<label class="form-label" data-i18n="enquiry.email"></label>
+<input class="form-input" id="eqEmail" type="email" data-i18n-ph="enquiry.emailPh" autocomplete="email">
+</div></div>
+<div class="form-row"><div class="form-group">
+<label class="form-label" data-i18n="enquiry.date"></label>
+<input class="form-input" id="eqDate" type="date">
+</div><div class="form-group">
+<label class="form-label" data-i18n="enquiry.time"></label>
+<input class="form-input" id="eqTime" type="time">
+</div></div>
+<div class="form-row full"><div class="form-group">
+<label class="form-label" data-i18n="enquiry.duration"></label>
+<div class="enquiry-duration-options" id="eqDurationOptions">
+<button type="button" class="enquiry-dur-btn" data-dur="30">30 min</button>
+<button type="button" class="enquiry-dur-btn active" data-dur="45">45 min</button>
+<button type="button" class="enquiry-dur-btn" data-dur="60">60 min</button>
+</div></div></div>
+<div class="form-row full"><div class="form-group">
+<label class="form-label" data-i18n="enquiry.message"></label>
+<textarea class="form-textarea" id="eqMessage" rows="3" data-i18n-ph="enquiry.messagePh"></textarea>
+</div></div>
+<div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+<input id="eqWebsite" type="text" name="website" tabindex="-1" autocomplete="off">
+</div>
+<div class="lf-error" id="eqError" style="margin-bottom:8px"></div>
+<div class="form-actions">
+<button class="btn btn-secondary" id="enquiryCancel" data-i18n="form.cancel"></button>
+<button class="btn btn-primary" id="enquirySubmit" data-i18n="enquiry.submit"></button>
+</div>
+</div></div>
+
 <div class="fab-container" id="fabContainer">
 <button class="fab-toggle" id="fabToggle"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg></button>
 <div class="fab-menu" id="fabMenu">
@@ -450,7 +493,7 @@
 
 <footer><p data-i18n="footer.rights"></p><p class="footer-privacy" data-i18n="footer.privacy"></p></footer>
 
-<script src="/js/app.min.js" defer integrity="sha384-w9e0gJB3j8xRlD1efDKQAQVuyNGVbWX7ljLccvxRNZtw3Ed7RNKOUc4ES3Y/xLAA" crossorigin="anonymous"></script>
+<script src="/js/app.min.js" defer integrity="sha384-nnAWnRG8yyO7s6SIjn65Q3/72+oNFhhn/U5Vg/+pHt6agaXNmN56KYXzeI45GeOA" crossorigin="anonymous"></script>
 <script src="/js/analytics.min.js" defer integrity="sha384-qokflJtySEw2G6dESeZECDRnQr9ThNlYEv6s3czLW+YdLipMF/TZlEo/n3XDOzaE" crossorigin="anonymous"></script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
 </body>

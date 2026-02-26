@@ -393,20 +393,40 @@ async function processNotifications(env, { singleUser } = {}) {
 
   for (const user of targets) {
     if (!Array.isArray(user.favorites) || !user.favorites.length) continue;
-    if (log[user.user] === today) continue;
     if (!user.email && !user.pushSub) continue;
+
+    /* Resolve per-user notification preferences (default: both enabled) */
+    const prefs = user.notifPrefs || { push: true, email: true };
+
+    /* Per-channel dedup: log format is { user: { date, channels: [] } } or legacy string */
+    const userLog = log[user.user];
+    let alreadySent = [];
+    if (userLog) {
+      if (typeof userLog === 'string') {
+        /* Legacy format: "2025-02-25" means both channels sent */
+        if (userLog === today) alreadySent = ['email', 'push'];
+      } else if (userLog.date === today) {
+        alreadySent = userLog.channels || [];
+      }
+    }
+
+    /* Determine which channels still need sending */
+    const wantEmail = prefs.email && user.email && !alreadySent.includes('email');
+    const wantPush = prefs.push && user.pushSub && env.VAPID_PRIVATE_JWK && !alreadySent.includes('push');
+    if (!wantEmail && !wantPush) continue;
 
     const matches = findMatches(user, calData, today);
     if (!matches.length) continue;
 
-    let notified = false;
+    const sentChannels = [...alreadySent];
+
     /* Email notification */
-    if (user.email) {
+    if (wantEmail) {
       const sent = await sendEmail(env, user.email, user.user, matches);
-      if (sent) notified = true;
+      if (sent) sentChannels.push('email');
     }
     /* Push notification */
-    if (user.pushSub && env.VAPID_PRIVATE_JWK) {
+    if (wantPush) {
       const pushPayload = {
         title: matches.length === 1
           ? `${matches[0].girlName} is available today`
@@ -415,11 +435,12 @@ async function processNotifications(env, { singleUser } = {}) {
         url: '/roster',
       };
       const result = await sendPushNotification(env, user.pushSub, pushPayload);
-      if (result === 'sent') notified = true;
-      if (result === 'expired') { delete user.pushSub; authChanged = true; } /* clean up expired sub */
+      if (result === 'sent') sentChannels.push('push');
+      if (result === 'expired') { delete user.pushSub; authChanged = true; }
     }
-    if (notified) {
-      log[user.user] = today;
+
+    if (sentChannels.length > alreadySent.length) {
+      log[user.user] = { date: today, channels: sentChannels };
       logChanged = true;
       sentCount += matches.length;
     }
@@ -528,6 +549,71 @@ async function handleProxy(request, env, pathname) {
   return new Response(ghResp.body, { status: ghResp.status, headers: respHeaders });
 }
 
+/* ── Enquiry Submission ── */
+
+const ENQUIRY_PATH = 'data/enquiries.json';
+const ENQUIRY_RATE = new Map();
+const ENQUIRY_MAX_PER_HOUR = 5;
+
+async function handleSubmitEnquiry(request, env) {
+  if (request.method !== 'POST') return jsonResp({ error: 'method not allowed' }, 405);
+
+  const xrw = request.headers.get('X-Requested-With');
+  if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403);
+
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const now = Date.now();
+  if (!ENQUIRY_RATE.has(ip)) ENQUIRY_RATE.set(ip, []);
+  const timestamps = ENQUIRY_RATE.get(ip).filter(t => now - t < 3600000);
+  if (timestamps.length >= ENQUIRY_MAX_PER_HOUR) {
+    return jsonResp({ error: 'Too many enquiries. Please try again later.' }, 429);
+  }
+  timestamps.push(now);
+  ENQUIRY_RATE.set(ip, timestamps);
+  if (ENQUIRY_RATE.size > 5000) { ENQUIRY_RATE.delete(ENQUIRY_RATE.keys().next().value); }
+
+  let data;
+  try { data = await request.json(); } catch { return jsonResp({ error: 'invalid body' }, 400); }
+
+  if (!data.girlName || !data.customerName) {
+    return jsonResp({ error: 'missing required fields' }, 400);
+  }
+  if (!data.phone && !data.email) {
+    return jsonResp({ error: 'phone or email required' }, 400);
+  }
+
+  try {
+    let existing = [], sha = null;
+    try {
+      const r = await ghGet(env, ENQUIRY_PATH);
+      existing = r.content;
+      sha = r.sha;
+    } catch { /* file doesn't exist yet */ }
+
+    if (existing.length >= 200) existing = existing.slice(existing.length - 199);
+    existing.push({
+      girlName: data.girlName,
+      customerName: data.customerName,
+      phone: data.phone || '',
+      email: data.email || '',
+      date: data.date || '',
+      time: data.time || '',
+      duration: data.duration || 45,
+      message: data.message || '',
+      lang: data.lang || 'en',
+      ts: data.ts || new Date().toISOString(),
+      username: data.username || null,
+      status: 'new',
+    });
+
+    await ghPut(env, ENQUIRY_PATH, existing, sha, 'New enquiry');
+    return jsonResp({ success: true });
+  } catch (e) {
+    console.error('Enquiry error:', e);
+    return jsonResp({ error: 'internal error' }, 500);
+  }
+}
+
 /* ── Main Export ── */
 
 export default {
@@ -599,6 +685,28 @@ export default {
       } catch (e) {
         return jsonResp({ error: e.message }, 500);
       }
+    }
+
+    // Update notification preferences
+    if (url.pathname === '/update-notif-prefs' && request.method === 'POST') {
+      try {
+        const xrw = request.headers.get('X-Requested-With');
+        if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403);
+        const { username, prefs } = await request.json();
+        if (!username || !prefs) return jsonResp({ error: 'missing fields' }, 400);
+        const authResult = await ghGet(env, 'data/auth.json');
+        const users = authResult.content;
+        const user = users.find(u => u.user === username);
+        if (!user) return jsonResp({ error: 'user not found' }, 404);
+        user.notifPrefs = { push: !!prefs.push, email: !!prefs.email };
+        await ghPut(env, 'data/auth.json', users, authResult.sha, 'Update notification preferences');
+        return jsonResp({ success: true });
+      } catch (e) { return jsonResp({ error: e.message }, 500); }
+    }
+
+    // Enquiry submission
+    if (url.pathname === '/submit-enquiry' && request.method === 'POST') {
+      return handleSubmitEnquiry(request, env);
     }
 
     // Notification endpoint

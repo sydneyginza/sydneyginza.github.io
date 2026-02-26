@@ -17,6 +17,53 @@ let rosterHistory = {}, rosterHistorySha = null;
 let girls = [];
 let GT = true;
 
+/* === Adaptive Polling === */
+const POLL_FAST = 30000;      // 30s for roster/profile when visible
+const POLL_NORMAL = 60000;    // 60s for other pages when visible
+const POLL_SLOW = 300000;     // 5min when tab hidden
+const POLL_COUNTDOWN = 10000; // 10s countdown-only tick (no API)
+let _pollInterval = null;
+let _countdownTickInterval = null;
+let _isTabVisible = !document.hidden;
+let _lastCalFetch = 0;
+let _lastCalFetchDisplay = '';
+let _calRefreshing = false;
+
+async function refreshCalendar() {
+  if (_isOffline || _calRefreshing) return false;
+  _calRefreshing = true;
+  try {
+    const prevSha = calSha;
+    const freshCal = await loadCalData();
+    _lastCalFetch = Date.now();
+    _lastCalFetchDisplay = new Date().toLocaleTimeString('en-AU', {
+      timeZone: 'Australia/Sydney', hour: '2-digit', minute: '2-digit'
+    });
+    if (calSha && calSha !== prevSha) {
+      calData = normalizeCalData(freshCal);
+      updateCalCache();
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.warn('Calendar refresh failed:', e);
+    return false;
+  } finally {
+    _calRefreshing = false;
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  _isTabVisible = !document.hidden;
+  if (_isTabVisible) {
+    const elapsed = Date.now() - _lastCalFetch;
+    if (elapsed > POLL_FAST) refreshCalendar().then(changed => { if (changed) renderActivePage() });
+    startAdaptivePolling();
+  } else {
+    startAdaptivePolling();
+  }
+});
+
 // ✅ No auth headers needed — the proxy injects the token server-side
 function proxyHeaders() {
   return {
@@ -353,6 +400,20 @@ async function uploadToGithub(b64, name, fn) {
   } catch (e) {}
   const body = { message: `Upload ${path}`, content: pure };
   if (sha) body.sha = sha;
+  const r = await fetchWithRetry(`${SITE_API}/${path}`, {
+    method: 'PUT',
+    headers: proxyHeaders(),
+    body: JSON.stringify(body)
+  }, { retries: 2 });
+  if (!r.ok) throw new Error(r.status);
+  return `https://raw.githubusercontent.com/${SITE_REPO}/main/${path}`;
+}
+
+async function uploadReviewPhoto(b64) {
+  const fn = 'rv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.jpg';
+  const path = `Images/_reviews/${fn}`;
+  const pure = b64.split(',')[1];
+  const body = { message: 'Upload review photo', content: pure };
   const r = await fetchWithRetry(`${SITE_API}/${path}`, {
     method: 'PUT',
     headers: proxyHeaders(),

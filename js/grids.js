@@ -107,6 +107,12 @@ if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=av
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
 
+/* Last Updated indicator + manual refresh */
+const uw=document.createElement('div');uw.className='roster-updated-wrap';uw.id='rosterLastUpdated';
+uw.innerHTML='<span class="roster-updated-label">'+t('roster.lastUpdated')+'</span><span class="roster-updated-time" id="rosterLastUpdatedTime">'+(_lastCalFetchDisplay||'--:--')+'</span><button class="roster-refresh-btn" id="rosterRefreshBtn" title="'+t('roster.refresh')+'"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>';
+fb.appendChild(uw);
+setTimeout(()=>{const rb=document.getElementById('rosterRefreshBtn');if(rb)rb.onclick=async()=>{rb.classList.add('spinning');rb.disabled=true;const changed=await refreshCalendar();if(changed){renderRoster()}updateLastUpdatedDisplay();rb.classList.remove('spinning');rb.disabled=false;showToast(changed?t('roster.dataUpdated'):t('roster.upToDate'))}},0);
+
 /* Available Now / Today quick-filters */
 renderAvailNowBar()}
 function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';

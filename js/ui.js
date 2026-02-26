@@ -655,6 +655,9 @@ function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M1
 /* ── Reviews ── */
 const starSvgFull='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
 const starSvgEmpty='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>';
+const verifiedSvg='<svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>';
+const helpfulThumbSvg='<svg viewBox="0 0 24 24" width="14" height="14"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>';
+let _reviewSort='newest';
 
 function renderStarsStatic(rating){let h='';for(let i=1;i<=5;i++)h+='<span class="review-star'+(i<=rating?' filled':'')+'">'+( i<=rating?starSvgFull:starSvgEmpty)+'</span>';return h}
 
@@ -671,17 +674,34 @@ html+='</div>';
 if(loggedIn&&!hasReviewed){html+='<button class="review-write-btn" id="rvWriteBtn">'+t('review.write')+'</button>'}
 else if(!loggedIn){html+='<div class="review-signin">'+t('review.signin').replace('{link}','<a href="#" id="rvSignInLink">'+t('ui.signIn')+'</a>')+'</div>'}
 html+='<div id="rvFormArea"></div>';
+/* Sort bar */
+if(reviews.length>1){html+='<div class="review-sort-bar"><button class="review-sort-btn'+(_reviewSort==='newest'?' active':'')+'" data-sort="newest">'+t('review.sortNewest')+'</button><button class="review-sort-btn'+(_reviewSort==='helpful'?' active':'')+'" data-sort="helpful">'+t('review.sortHelpful')+'</button></div>'}
 /* Review list */
-if(!reviews.length&&!loggedIn){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
-else if(!reviews.length){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
-reviews.slice().sort((a,b)=>new Date(b.ts)-new Date(a.ts)).forEach(r=>{
+if(!reviews.length){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
+const sorted=reviews.slice().sort((a,b)=>{
+  if(_reviewSort==='helpful'){const ha=(a.helpful||[]).length,hb=(b.helpful||[]).length;if(hb!==ha)return hb-ha;return new Date(b.ts)-new Date(a.ts)}
+  return new Date(b.ts)-new Date(a.ts)});
+sorted.forEach(r=>{
 const isOwn=loggedIn&&r.user===loggedInUser;
 const canEdit=isOwn||isAdmin();
 const d=new Date(r.ts);const dateStr=d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
-html+='<div class="review-card"><div class="review-header"><span class="review-user">'+r.user.toUpperCase()+'</span><span class="review-stars">'+renderStarsStatic(r.rating)+'</span><span class="review-date">'+dateStr+'</span></div>';
+html+='<div class="review-card"><div class="review-header"><span class="review-user">'+r.user.toUpperCase()+'</span>';
+if(r.verified)html+='<span class="review-verified-badge" title="'+t('review.verifiedTip')+'">'+verifiedSvg+' '+t('review.verified')+'</span>';
+html+='<span class="review-stars">'+renderStarsStatic(r.rating)+'</span><span class="review-date">'+dateStr+'</span></div>';
 if(r.text)html+='<div class="review-text">'+r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+/* Review photos */
+if(r.photos&&r.photos.length){html+='<div class="review-photos">';r.photos.forEach(src=>{html+='<div class="review-photo"><img src="'+src+'" loading="lazy" alt="Review photo"></div>'});html+='</div>'}
+/* Helpful voting */
+const helpfulCount=(r.helpful||[]).length;
+const hasVoted=loggedIn&&(r.helpful||[]).includes(loggedInUser);
+html+='<div class="review-helpful">';
+if(loggedIn&&!isOwn){html+='<button class="review-helpful-btn'+(hasVoted?' voted':'')+'" data-rv-user="'+r.user+'">'+helpfulThumbSvg+(hasVoted?t('review.helpfulVoted'):t('review.helpful'))+'</button>'}
+if(helpfulCount>0){html+='<span class="review-helpful-count">'+helpfulCount+' '+(helpfulCount===1?t('review.helpfulOne'):t('review.helpfulMany'))+'</span>'}
+html+='</div>';
+/* Edit/delete/verify actions */
 if(canEdit){html+='<div class="review-actions">';
 if(isOwn||isAdmin())html+='<button class="review-action-btn review-edit-btn" data-rv-user="'+r.user+'">'+t('review.edit')+'</button>';
+if(isAdmin()&&!r.verified)html+='<button class="review-action-btn review-verify-btn" data-rv-user="'+r.user+'">'+t('review.verify')+'</button>';
 html+='<button class="review-action-btn review-delete-btn" data-rv-user="'+r.user+'">'+t('review.delete')+'</button></div>'}
 html+='</div>'});
 html+='</div>';
@@ -691,20 +711,38 @@ const writeBtn=document.getElementById('rvWriteBtn');
 if(writeBtn)writeBtn.onclick=()=>openReviewForm(idx,null);
 const signInLink=document.getElementById('rvSignInLink');
 if(signInLink)signInLink.onclick=e=>{e.preventDefault();showAuthSignIn()};
+container.querySelectorAll('.review-sort-btn').forEach(btn=>{btn.onclick=()=>{_reviewSort=btn.dataset.sort;renderReviews(idx)}});
 container.querySelectorAll('.review-edit-btn').forEach(btn=>{btn.onclick=()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(rv)openReviewForm(idx,rv)}});
-container.querySelectorAll('.review-delete-btn').forEach(btn=>{btn.onclick=async()=>{if(!confirm(t('review.confirmDelete')))return;const u=btn.dataset.rvUser;g.reviews=(g.reviews||[]).filter(r=>r.user!==u);if(await saveData()){showToast(t('review.deleted'));renderReviews(idx)}}})}
+container.querySelectorAll('.review-verify-btn').forEach(btn=>{btn.onclick=async()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(rv){rv.verified=true;if(await saveData()){showToast(t('review.verifiedDone'));renderReviews(idx)}}}});
+container.querySelectorAll('.review-helpful-btn').forEach(btn=>{btn.onclick=async()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(!rv)return;if(!rv.helpful)rv.helpful=[];const hi=rv.helpful.indexOf(loggedInUser);if(hi>=0)rv.helpful.splice(hi,1);else rv.helpful.push(loggedInUser);if(!rv.helpful.length)delete rv.helpful;if(await saveData())renderReviews(idx)}});
+container.querySelectorAll('.review-delete-btn').forEach(btn=>{btn.onclick=async()=>{if(!confirm(t('review.confirmDelete')))return;const u=btn.dataset.rvUser;g.reviews=(g.reviews||[]).filter(r=>r.user!==u);if(await saveData()){showToast(t('review.deleted'));renderReviews(idx)}}});
+container.querySelectorAll('.review-photo').forEach(ph=>{ph.onclick=()=>{const src=ph.querySelector('img').src;if(src){const lb=document.getElementById('galMain');const lbImg=document.getElementById('lbImg');if(lb&&lbImg){lbImg.src=src}}}})}
 
 function openReviewForm(idx,existing){
 const area=document.getElementById('rvFormArea');if(!area)return;
 const rating=existing?existing.rating:0;
 const text=existing?existing.text:'';
+let rvFormPhotos=existing&&existing.photos?[...existing.photos]:[];
+let rvNewPhotos=[];
 let html='<div class="review-form"><div class="review-stars-input" id="rvStarPicker">';
 for(let i=1;i<=5;i++)html+='<span class="review-star-pick'+(i<=rating?' active':'')+'" data-val="'+i+'">'+starSvgFull+'</span>';
 html+='</div><textarea class="review-textarea" id="rvText" placeholder="'+t('review.placeholder')+'" rows="3">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>';
+/* Photo upload area */
+html+='<div class="review-photos-area"><div class="review-photos-grid" id="rvPhotoGrid"></div>';
+html+='<button type="button" class="review-photo-add-btn" id="rvPhotoAdd">'+t('review.addPhoto')+'</button></div>';
 html+='<div class="review-form-actions"><button class="btn btn-primary review-submit-btn" id="rvSubmitBtn">'+(existing?t('review.edit'):t('review.write'))+'</button><button class="btn review-cancel-btn" id="rvCancelBtn">'+t('ui.cancel')+'</button></div>';
 html+='<div class="review-form-error" id="rvError"></div></div>';
 area.innerHTML=html;
 let picked=rating;
+function renderRvPhotos(){const grid=document.getElementById('rvPhotoGrid');if(!grid)return;grid.innerHTML='';
+rvFormPhotos.forEach((src,i)=>{const wrap=document.createElement('div');wrap.className='rv-photo-thumb';wrap.innerHTML='<img src="'+src+'"><button class="rv-photo-remove">&times;</button>';wrap.querySelector('.rv-photo-remove').onclick=()=>{rvFormPhotos.splice(i,1);rvNewPhotos=rvNewPhotos.filter(p=>p!==src);renderRvPhotos()};grid.appendChild(wrap)});
+const addBtn=document.getElementById('rvPhotoAdd');if(addBtn)addBtn.style.display=rvFormPhotos.length>=3?'none':''}
+renderRvPhotos();
+document.getElementById('rvPhotoAdd').onclick=()=>{
+  const remaining=3-rvFormPhotos.length;if(remaining<=0)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+  inp.onchange=e=>{Array.from(e.target.files).slice(0,remaining).forEach(f=>{const reader=new FileReader();reader.onload=ev=>{
+    const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');const maxW=1200;let w=img.width,h=img.height;if(w>maxW){h=h*maxW/w;w=maxW}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);const resized=canvas.toDataURL('image/jpeg',0.85);rvFormPhotos.push(resized);rvNewPhotos.push(resized);renderRvPhotos()};img.src=ev.target.result};reader.readAsDataURL(f)})};inp.click()};
 document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(s=>{
 s.onmouseenter=()=>{const v=parseInt(s.dataset.val);document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach((ss,i)=>ss.classList.toggle('hover',i<v))};
 s.onmouseleave=()=>{document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(ss=>ss.classList.remove('hover'))};
@@ -714,9 +752,16 @@ document.getElementById('rvSubmitBtn').onclick=async()=>{
 if(!picked){document.getElementById('rvError').textContent=t('review.ratingRequired');return}
 const g=girls[idx];if(!g.reviews)g.reviews=[];
 const txt=document.getElementById('rvText').value.trim();
-if(existing){const rv=g.reviews.find(r=>r.user===existing.user);if(rv){rv.rating=picked;rv.text=txt;rv.ts=new Date().toISOString()}}
-else{g.reviews.push({user:loggedInUser,rating:picked,text:txt,ts:new Date().toISOString()})}
-if(await saveData()){showToast(existing?t('review.updated'):t('review.submitted'));renderReviews(idx)}};
+const submitBtn=document.getElementById('rvSubmitBtn');submitBtn.textContent=t('ui.saving');submitBtn.disabled=true;
+try{
+/* Upload new photos */
+const uploadedUrls=[];
+for(const b64 of rvNewPhotos){try{const url=await uploadReviewPhoto(b64);uploadedUrls.push(url)}catch(e){console.error('Review photo upload failed:',e)}}
+const finalPhotos=rvFormPhotos.filter(p=>!p.startsWith('data:')).concat(uploadedUrls);
+if(existing){const rv=g.reviews.find(r=>r.user===existing.user);if(rv){rv.rating=picked;rv.text=txt;rv.ts=new Date().toISOString();rv.photos=finalPhotos.length?finalPhotos:undefined}}
+else{const newRv={user:loggedInUser,rating:picked,text:txt,ts:new Date().toISOString()};if(finalPhotos.length)newRv.photos=finalPhotos;g.reviews.push(newRv)}
+if(await saveData()){showToast(existing?t('review.updated'):t('review.submitted'));renderReviews(idx)}
+}finally{submitBtn.textContent=existing?t('review.edit'):t('review.write');submitBtn.disabled=false}};
 const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display='none'}
 
 function showProfile(idx){safeRender('Profile',()=>{
@@ -747,11 +792,12 @@ const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</
 const isFav=g.name&&isFavorite(g.name);
 const favBtn=g.name&&loggedIn?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
 const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>${t('ui.share')}</button>`:'';
+const bookBtn=g.name?`<button class="profile-book-btn" id="profBookBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>${t('enquiry.bookBtn')}</button>`:'';
 const _backLabel={listPage:t('page.girls'),rosterPage:t('page.roster'),homePage:t('nav.home'),favoritesPage:t('page.favorites')}[profileReturnPage]||t('ui.back');
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${_backLabel}</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
-<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}${bookBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
@@ -759,12 +805,14 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
 document.getElementById('backBtn').onclick=()=>{const y=_savedScrollY||parseFloat(sessionStorage.getItem('ginza_scroll')||'0');showPage(profileReturnPage);requestAnimationFrame(()=>window.scrollTo(0,y))};
-if(_cd){_countdownInterval=setInterval(()=>{const el=document.getElementById('profCountdown');if(!el){clearInterval(_countdownInterval);return}const c=getAvailCountdown(g.name);if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}else{el.textContent='';clearInterval(_countdownInterval)}},30000)}
+if(_cd){startCountdownTick()}
 if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
 if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
 const profShare=document.getElementById('profShareBtn');
 if(profShare){profShare.onclick=async()=>{const url=window.location.origin+Router.pathForProfile(idx);if(navigator.share){try{await navigator.share({title:g.name+' - Ginza',text:g.name+' at Ginza Sydney',url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);showToast(t('ui.linkCopied'))}catch(e){const tmp=document.createElement('input');tmp.value=url;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');document.body.removeChild(tmp);showToast(t('ui.linkCopied'))}}}}
+const profBook=document.getElementById('profBookBtn');
+if(profBook){profBook.onclick=()=>openEnquiryForm(g.name,idx)}
 renderGallery(idx);renderReviews(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');const _prevPg=document.querySelector('.page.active');const _profPg=document.getElementById('profilePage');const _pec=['page-enter','slide-enter-right','slide-enter-left'];_profPg.classList.remove(..._pec);if(_prevPg&&_prevPg!==_profPg){_prevPg.classList.remove('active',..._pec);_prevPg.classList.add('slide-exit-left');const _onEx=()=>{_prevPg.classList.remove('slide-exit-left');_prevPg.removeEventListener('animationend',_onEx)};_prevPg.addEventListener('animationend',_onEx);setTimeout(()=>_prevPg.classList.remove('slide-exit-left'),400);void _profPg.offsetWidth;_profPg.classList.add('active','slide-enter-right')}else{allPages.forEach(p=>p.classList.remove('active',..._pec));void _profPg.offsetWidth;_profPg.classList.add('active','page-enter')}document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));setTimeout(()=>window.scrollTo(0,0),300)})}
 
 /* Profile Gallery */
@@ -904,23 +952,50 @@ loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){userDropdown.classList
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn'))userDropdown.classList.remove('open')});
 renderDropdown();
 
-/* Push notification toggle */
-const _pushBtn=document.getElementById('pushToggleBtn');
-const _pushLabel=document.getElementById('pushToggleLabel');
+/* Notification preferences */
+const _notifBtn=document.getElementById('notifToggleBtn');
+const _notifDropdown=document.getElementById('notifPrefsDropdown');
+const _notifPrefPush=document.getElementById('notifPrefPush');
+const _notifPrefEmail=document.getElementById('notifPrefEmail');
+
+function getNotifPrefs(){
+  if(!loggedIn||!loggedInUser)return{push:true,email:true};
+  const entry=CRED.find(c=>c.user===loggedInUser);
+  return entry&&entry.notifPrefs?entry.notifPrefs:{push:true,email:true};
+}
 
 async function updatePushToggle(){
-if(!_pushBtn||!('PushManager' in window)||!loggedIn){if(_pushBtn)_pushBtn.style.display='none';return}
-_pushBtn.style.display='';
-const sub=await getPushSubscription();
-_pushBtn.classList.toggle('active',!!sub);
-_pushLabel.textContent=sub?t('ui.pushDisable'):t('ui.pushEnable')}
+  if(!_notifBtn||!loggedIn){if(_notifBtn)_notifBtn.style.display='none';return}
+  _notifBtn.style.display='';
+  const prefs=getNotifPrefs();
+  if(_notifPrefPush)_notifPrefPush.checked=prefs.push;
+  if(_notifPrefEmail)_notifPrefEmail.checked=prefs.email;
+  if(_notifPrefPush&&!('PushManager' in window))_notifPrefPush.disabled=true;
+  const active=prefs.push||prefs.email;
+  _notifBtn.classList.toggle('active',active);
+}
 
-if(_pushBtn){_pushBtn.onclick=async()=>{
-_pushBtn.disabled=true;
-const sub=await getPushSubscription();
-if(sub){await unsubscribeFromPush();showToast(t('ui.pushOff'))}
-else{const newSub=await subscribeToPush();if(newSub)showToast(t('ui.pushOn'));else showToast(t('ui.pushDenied'),'error')}
-_pushBtn.disabled=false;updatePushToggle()}}
+async function saveNotifPrefs(){
+  const prefs={push:_notifPrefPush?_notifPrefPush.checked:true,email:_notifPrefEmail?_notifPrefEmail.checked:true};
+  if(prefs.push&&!(await getPushSubscription())){
+    const sub=await subscribeToPush();
+    if(!sub){prefs.push=false;if(_notifPrefPush)_notifPrefPush.checked=false;showToast(t('ui.pushDenied'),'error')}
+    else showToast(t('ui.pushOn'))
+  }else if(!prefs.push&&(await getPushSubscription())){
+    await unsubscribeFromPush();showToast(t('ui.pushOff'))
+  }
+  try{
+    await fetch(PROXY+'/update-notif-prefs',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username:loggedInUser,prefs})});
+    const entry=CRED.find(c=>c.user===loggedInUser);if(entry)entry.notifPrefs=prefs;
+    showToast(t('ui.notifSaved'))
+  }catch(e){showToast(t('ui.notifSaveError'),'error')}
+  updatePushToggle();
+}
+
+if(_notifBtn){_notifBtn.onclick=e=>{e.stopPropagation();_notifDropdown.classList.toggle('open')}}
+document.addEventListener('click',e=>{if(_notifDropdown&&!e.target.closest('#notifPrefsDropdown')&&!e.target.closest('#notifToggleBtn'))_notifDropdown.classList.remove('open')});
+if(_notifPrefPush)_notifPrefPush.onchange=()=>saveNotifPrefs();
+if(_notifPrefEmail)_notifPrefEmail.onchange=()=>saveNotifPrefs();
 
 /* Particles */
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}

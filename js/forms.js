@@ -74,37 +74,116 @@ document.getElementById('deleteConfirm').onclick=async()=>{if(deleteTarget>=0){c
 /* Init */
 function removeSkeletons(){const ids=['homeSkeleton','rosterSkeleton','girlsSkeleton','calSkeleton','rosterFilterSkeleton','girlsFilterSkeleton','favoritesSkeleton','valueTableSkeleton'];ids.forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('fade-out');setTimeout(()=>el.remove(),400)}})}
 
+/* === Enquiry Form === */
+let _eqDuration=45;
+let _eqGirlName='';
+let _eqLastSubmit=0;
+const EQ_THROTTLE=30000;
+
+function openEnquiryForm(girlName,girlIdx){
+  _eqGirlName=girlName;
+  const overlay=document.getElementById('enquiryOverlay');
+  document.getElementById('enquiryGirlName').textContent=girlName;
+  if(loggedIn&&loggedInUser){document.getElementById('eqName').value=loggedInUser;document.getElementById('eqEmail').value=loggedInEmail||'';document.getElementById('eqPhone').value=loggedInMobile||''}
+  else{document.getElementById('eqName').value='';document.getElementById('eqEmail').value='';document.getElementById('eqPhone').value=''}
+  const today=fmtDate(getAEDTDate());
+  const entry=getCalEntry(girlName,today);
+  if(entry&&entry.start){document.getElementById('eqDate').value=today;const now=getAEDTDate();const nowMins=now.getHours()*60+now.getMinutes();const[sh,sm]=entry.start.split(':').map(Number);if(nowMins<sh*60+sm)document.getElementById('eqTime').value=entry.start;else document.getElementById('eqTime').value=''}
+  else{document.getElementById('eqDate').value=today;document.getElementById('eqTime').value=''}
+  document.getElementById('eqMessage').value='';document.getElementById('eqError').textContent='';document.getElementById('eqWebsite').value='';
+  _eqDuration=45;document.querySelectorAll('.enquiry-dur-btn').forEach(btn=>{btn.classList.toggle('active',parseInt(btn.dataset.dur)===_eqDuration)});
+  document.getElementById('eqDate').min=today;
+  overlay.classList.add('open');applyLang()
+}
+
+document.getElementById('eqDurationOptions').onclick=e=>{const btn=e.target.closest('.enquiry-dur-btn');if(!btn)return;_eqDuration=parseInt(btn.dataset.dur);document.querySelectorAll('.enquiry-dur-btn').forEach(b=>{b.classList.toggle('active',parseInt(b.dataset.dur)===_eqDuration)})};
+document.getElementById('enquiryClose').onclick=()=>document.getElementById('enquiryOverlay').classList.remove('open');
+document.getElementById('enquiryCancel').onclick=()=>document.getElementById('enquiryOverlay').classList.remove('open');
+document.getElementById('enquiryOverlay').onclick=e=>{if(e.target===document.getElementById('enquiryOverlay'))e.target.classList.remove('open')};
+
+document.getElementById('enquirySubmit').onclick=async()=>{
+  const errEl=document.getElementById('eqError');errEl.textContent='';
+  if(document.getElementById('eqWebsite').value)return;
+  if(Date.now()-_eqLastSubmit<EQ_THROTTLE){errEl.textContent=t('enquiry.throttle');return}
+  const name=sanitize(document.getElementById('eqName').value);
+  const phone=document.getElementById('eqPhone').value.trim();
+  const email=document.getElementById('eqEmail').value.trim();
+  const date=document.getElementById('eqDate').value;
+  const time=document.getElementById('eqTime').value;
+  const message=sanitize(document.getElementById('eqMessage').value);
+  if(!name){document.getElementById('eqName').focus();errEl.textContent=t('enquiry.nameRequired');return}
+  if(!phone&&!email){errEl.textContent=t('enquiry.contactRequired');return}
+  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent=t('enquiry.emailInvalid');return}
+  const submitBtn=document.getElementById('enquirySubmit');submitBtn.textContent=t('enquiry.sending');submitBtn.style.pointerEvents='none';
+  try{
+    const payload={girlName:_eqGirlName,customerName:name,phone,email,date,time,duration:_eqDuration,message,lang:siteLanguage,ts:new Date().toISOString(),username:loggedInUser||null};
+    const r=await fetchWithRetry(PROXY+'/submit-enquiry',{method:'POST',headers:proxyHeaders(),body:JSON.stringify(payload)},{retries:1});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'Server error')}
+    _eqLastSubmit=Date.now();document.getElementById('enquiryOverlay').classList.remove('open');showToast(t('enquiry.success'))
+  }catch(e){errEl.textContent=t('enquiry.failed')}
+  finally{submitBtn.textContent=t('enquiry.submit');submitBtn.style.pointerEvents='auto'}
+};
+
 function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};return cal}
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
-/* Auto-refresh Available Now badges every 60s; re-fetch calendar every 5 min */
-let _refreshTick=0;
-setInterval(async()=>{
-_refreshTick++;
-if(_refreshTick%5===0){
+/* === Adaptive Polling Engine === */
+function getActivePageId(){const ap=document.querySelector('.page.active');return ap?ap.id:null}
+
+function getPollInterval(){
+  if(!_isTabVisible)return POLL_SLOW;
+  const page=getActivePageId();
+  if(page==='rosterPage'||page==='profilePage')return POLL_FAST;
+  return POLL_NORMAL;
+}
+
+function renderActivePage(){
   try{
-    const prevSha=calSha;
-    const freshCal=await loadCalData();
-    if(calSha&&calSha!==prevSha){
-      calData=normalizeCalData(freshCal);
-      updateCalCache();
-      const ap=document.querySelector('.page.active');
-      if(ap){const id=ap.id;if(id==='rosterPage')renderRoster();else if(id==='listPage')renderGrid();else if(id==='favoritesPage')renderFavoritesGrid();else if(id==='homePage')renderHome();else if(id==='profilePage'&&currentProfileIdx>=0)showProfile(currentProfileIdx)}
-    }
+    const id=getActivePageId();if(!id)return;
+    if(id==='rosterPage')renderRoster();
+    else if(id==='listPage')renderGrid();
+    else if(id==='favoritesPage')renderFavoritesGrid();
+    else if(id==='homePage')renderHome();
+    else if(id==='profilePage'&&currentProfileIdx>=0)showProfile(currentProfileIdx);
   }catch(e){/* silent */}
 }
-try{
-const activePage=document.querySelector('.page.active');
-if(!activePage)return;
-const id=activePage.id;
-if(id==='rosterPage'){renderRoster()}
-else if(id==='listPage'){renderGrid()}
-else if(id==='favoritesPage'){renderFavoritesGrid()}
-else if(id==='homePage'){renderHome()}
-else if(id==='profilePage'&&currentProfileIdx>=0){showProfile(currentProfileIdx)}
-}catch(e){/* silent */}
-},60000);
+
+async function pollTick(){
+  const changed=await refreshCalendar();
+  if(changed){
+    renderActivePage();
+    const indicator=document.getElementById('rosterLastUpdated');
+    if(indicator){indicator.classList.remove('updated-pulse');void indicator.offsetWidth;indicator.classList.add('updated-pulse')}
+  }else{
+    renderActivePage();
+  }
+  updateLastUpdatedDisplay();
+}
+
+function startAdaptivePolling(){
+  if(_pollInterval)clearInterval(_pollInterval);
+  const interval=getPollInterval();
+  _pollInterval=setInterval(pollTick,interval);
+}
+
+function startCountdownTick(){
+  if(_countdownTickInterval)clearInterval(_countdownTickInterval);
+  _countdownTickInterval=setInterval(()=>{
+    const el=document.getElementById('profCountdown');if(!el)return;
+    const g=girls[currentProfileIdx];if(!g||!g.name)return;
+    const c=getAvailCountdown(g.name);
+    if(c){el.textContent=t(c.type==='ends'?'avail.endsIn':'avail.startsIn').replace('{t}',c.str)}
+    else{el.textContent='';clearInterval(_countdownTickInterval)}
+  },POLL_COUNTDOWN);
+}
+
+function updateLastUpdatedDisplay(){
+  const el=document.getElementById('rosterLastUpdatedTime');
+  if(el&&_lastCalFetchDisplay)el.textContent=_lastCalFetchDisplay;
+}
+
+startAdaptivePolling();
 
 /* After data loads, resolve the current URL to show the right page */
 function fullRenderAndRoute(){
