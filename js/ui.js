@@ -263,7 +263,7 @@ if(id==='analyticsPage'){document.getElementById('navAnalytics').classList.add('
 if(id==='profileDbPage'){document.getElementById('navProfileDb').classList.add('active');if(typeof renderProfileDb==='function')renderProfileDb()}
 updateFilterToggle();
 if(_pagesWithFilters.includes(id))pushFiltersToURL();
-window.scrollTo(0,0)}
+window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0))}
 
 document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
 document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
@@ -742,7 +742,7 @@ document.getElementById('profileContent').innerHTML=`<button class="back-btn" id
 <div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
 ${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
-document.getElementById('backBtn').onclick=()=>{const y=_savedScrollY||parseFloat(sessionStorage.getItem('ginza_scroll')||'0');showPage(profileReturnPage);requestAnimationFrame(()=>window.scrollTo(0,y))};
+document.getElementById('backBtn').onclick=()=>{showPage(profileReturnPage)};
 if(_cd){startCountdownTick()}
 if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
 const profFav=document.getElementById('profFavBtn');
