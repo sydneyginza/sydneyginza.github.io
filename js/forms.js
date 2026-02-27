@@ -22,11 +22,9 @@ function openEnquiryForm(girlName,girlIdx){
   if(loggedIn&&loggedInUser){document.getElementById('eqName').value=loggedInUser;document.getElementById('eqEmail').value=loggedInEmail||'';document.getElementById('eqPhone').value=loggedInMobile||''}
   else{document.getElementById('eqName').value='';document.getElementById('eqEmail').value='';document.getElementById('eqPhone').value=''}
   const today=fmtDate(getAEDTDate());
-  const entry=getCalEntry(girlName,today);
-  if(entry&&entry.start){document.getElementById('eqDate').value=today;const now=getAEDTDate();const nowMins=now.getHours()*60+now.getMinutes();const[sh,sm]=entry.start.split(':').map(Number);if(nowMins<sh*60+sm)document.getElementById('eqTime').value=entry.start;else document.getElementById('eqTime').value=''}
-  else{document.getElementById('eqDate').value=today;document.getElementById('eqTime').value=''}
+  document.getElementById('eqDate').value='';document.getElementById('eqTime').value='';
   document.getElementById('eqMessage').value='';document.getElementById('eqError').textContent='';document.getElementById('eqWebsite').value='';
-  _eqDuration=45;document.querySelectorAll('.enquiry-dur-btn').forEach(btn=>{btn.classList.toggle('active',parseInt(btn.dataset.dur)===_eqDuration)});
+  _eqDuration=60;document.querySelectorAll('.enquiry-dur-btn').forEach(btn=>{btn.classList.toggle('active',parseInt(btn.dataset.dur)===_eqDuration)});
   document.getElementById('eqDate').min=today;
   overlay.classList.add('open');applyLang()
 }
