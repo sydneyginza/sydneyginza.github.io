@@ -7,5 +7,3 @@ crons = ["0 21 * * *"]  # 21:00 UTC = 8:00 AM AEDT
 
 # Secrets (set via dashboard or `wrangler secret put`):
 #   GITHUB_TOKEN        - GitHub personal access token
-#   RESEND_API_KEY      - Resend API key
-#   NOTIFICATION_FROM   - Sender address, e.g. "Ginza Empire <notifications@yourdomain.com>"

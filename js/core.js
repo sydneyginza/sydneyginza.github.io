@@ -570,61 +570,6 @@ function initOfflineDetection() {
   if (_isOffline) banner.classList.add('visible');
 }
 
-/* === Push Notifications === */
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const raw = atob(base64);
-  const arr = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-  return arr;
-}
-
-async function getPushSubscription() {
-  if (!('PushManager' in window)) return null;
-  const reg = await navigator.serviceWorker.ready;
-  return reg.pushManager.getSubscription();
-}
-
-async function subscribeToPush() {
-  if (!('PushManager' in window) || !('Notification' in window)) return null;
-  const perm = await Notification.requestPermission();
-  if (perm !== 'granted') return null;
-  const reg = await navigator.serviceWorker.ready;
-  /* Fetch VAPID public key from worker */
-  try {
-    const r = await fetch(PROXY + '/vapid-public-key');
-    if (!r.ok) return null;
-    const { key } = await r.json();
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(key)
-    });
-    /* Store subscription on server */
-    await fetch(PROXY + '/push-subscribe', {
-      method: 'POST',
-      headers: proxyHeaders(),
-      body: JSON.stringify({ username: loggedInUser, subscription: sub.toJSON() })
-    });
-    return sub;
-  } catch (e) { console.error('Push subscribe error:', e); return null; }
-}
-
-async function unsubscribeFromPush() {
-  const sub = await getPushSubscription();
-  if (sub) {
-    await sub.unsubscribe();
-    try {
-      await fetch(PROXY + '/push-unsubscribe', {
-        method: 'POST',
-        headers: proxyHeaders(),
-        body: JSON.stringify({ username: loggedInUser })
-      });
-    } catch (e) {}
-  }
-}
-
 /* === Lazy Loading === */
 const lazyObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {

@@ -879,61 +879,12 @@ else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
-async function checkFavoriteNotifications(username){
-try{const r=await fetch(PROXY+'/send-notification',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username})});
-if(r.ok){const d=await r.json();if(d.sent&&d.matchCount>0){showToast(d.matchCount===1?t('ui.favAvailOne'):t('ui.favAvailMany').replace('{count}',d.matchCount))}}}catch(e){}}
-
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());checkFavoriteNotifications(match.user);updatePushToggle();if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
+if(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}authOverlay.classList.remove('open');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);showToast('Signed in as '+match.user.toUpperCase());if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
 renderDropdown();
-
-/* Notification preferences */
-const _notifBtn=document.getElementById('notifToggleBtn');
-const _notifDropdown=document.getElementById('notifPrefsDropdown');
-const _notifPrefPush=document.getElementById('notifPrefPush');
-const _notifPrefEmail=document.getElementById('notifPrefEmail');
-
-function getNotifPrefs(){
-  if(!loggedIn||!loggedInUser)return{push:true,email:true};
-  const entry=CRED.find(c=>c.user===loggedInUser);
-  return entry&&entry.notifPrefs?entry.notifPrefs:{push:true,email:true};
-}
-
-async function updatePushToggle(){
-  if(!_notifBtn||!loggedIn){if(_notifBtn)_notifBtn.style.display='none';return}
-  _notifBtn.style.display='';
-  const prefs=getNotifPrefs();
-  if(_notifPrefPush)_notifPrefPush.checked=prefs.push;
-  if(_notifPrefEmail)_notifPrefEmail.checked=prefs.email;
-  if(_notifPrefPush&&!('PushManager' in window))_notifPrefPush.disabled=true;
-  const active=prefs.push||prefs.email;
-  _notifBtn.classList.toggle('active',active);
-}
-
-async function saveNotifPrefs(){
-  const prefs={push:_notifPrefPush?_notifPrefPush.checked:true,email:_notifPrefEmail?_notifPrefEmail.checked:true};
-  if(prefs.push&&!(await getPushSubscription())){
-    const sub=await subscribeToPush();
-    if(!sub){prefs.push=false;if(_notifPrefPush)_notifPrefPush.checked=false;showToast(t('ui.pushDenied'),'error')}
-    else showToast(t('ui.pushOn'))
-  }else if(!prefs.push&&(await getPushSubscription())){
-    await unsubscribeFromPush();showToast(t('ui.pushOff'))
-  }
-  try{
-    await fetch(PROXY+'/update-notif-prefs',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username:loggedInUser,prefs})});
-    const entry=CRED.find(c=>c.user===loggedInUser);if(entry)entry.notifPrefs=prefs;
-    showToast(t('ui.notifSaved'))
-  }catch(e){showToast(t('ui.notifSaveError'),'error')}
-  updatePushToggle();
-}
-
-if(_notifBtn){_notifBtn.onclick=e=>{e.stopPropagation();const o=_notifDropdown.classList.toggle('open');_notifBtn.setAttribute('aria-expanded',String(o))}}
-document.addEventListener('click',e=>{if(_notifDropdown&&!e.target.closest('#notifPrefsDropdown')&&!e.target.closest('#notifToggleBtn'))_notifDropdown.classList.remove('open')});
-if(_notifPrefPush)_notifPrefPush.onchange=()=>saveNotifPrefs();
-if(_notifPrefEmail)_notifPrefEmail.onchange=()=>saveNotifPrefs();
 
 /* ── Theme Toggle (Light/Dark) ── */
 const _themeToggleBtn=document.getElementById('themeToggleBtn');
