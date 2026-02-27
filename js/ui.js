@@ -308,10 +308,17 @@ let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><span
 avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?g.photos[0]:'';const cd=getAvailCountdown(g.name);const cdText=cd&&cd.type==='until_end'?cd.display:'';
 html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
 html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
-container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}});
+let _anwDidDrag=false;
+container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{if(_anwDidDrag)return;const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}});
 const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
 function _updateAnwArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
-arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateAnwArrows);_updateAnwArrows()}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateAnwArrows);
+/* Mouse drag to scroll */
+let _anwMdX=0,_anwMdSL=0,_anwMdActive=false;
+strip.addEventListener('mousedown',e=>{_anwMdActive=true;_anwDidDrag=false;_anwMdX=e.pageX;_anwMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_anwMdActive)return;if(Math.abs(e.pageX-_anwMdX)>5)_anwDidDrag=true;strip.scrollLeft=_anwMdSL-(e.pageX-_anwMdX)});
+document.addEventListener('mouseup',()=>{if(!_anwMdActive)return;_anwMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_anwDidDrag=false},0)});
+strip.style.cursor='grab';_updateAnwArrows()}
 
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
@@ -464,11 +471,18 @@ const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
 [prevIdx,nextIdx].forEach(pi=>{const pg=girls[pi];if(!pg||!pg.photos||!pg.photos.length)return;const src=pg.photos[0];if(!src||src.startsWith('data:'))return;const eid='pfetch-'+pi;if(!document.getElementById(eid)){const lk=document.createElement('link');lk.rel='prefetch';lk.as='image';lk.href=src;lk.id=eid;document.head.appendChild(lk)}});
 const arwL=document.createElement('button');arwL.className='pnav-arrow pnav-arrow-left';arwL.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';rail.appendChild(arwL);
 const strip=document.createElement('div');strip.className='pnav-strip';
-for(let di=0;di<total;di++){const realIdx=namedIndices[di];const g=girls[realIdx];const card=document.createElement('div');card.className='pnav-card'+(realIdx===idx?' active':'')+(g.hidden?' pnav-card-hidden':'');const photo=g.photos&&g.photos.length?g.photos[0]:'';card.innerHTML=`<div class="pnav-card-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:`<div class="pnav-card-placeholder">${(g.name||'?').charAt(0)}</div>`}</div><div class="pnav-card-name">${g.name||'?'}</div>`;card.onclick=()=>showProfileReplace(realIdx);strip.appendChild(card)}
+let _pnavDidDrag=false;
+for(let di=0;di<total;di++){const realIdx=namedIndices[di];const g=girls[realIdx];const card=document.createElement('div');card.className='pnav-card'+(realIdx===idx?' active':'')+(g.hidden?' pnav-card-hidden':'');const photo=g.photos&&g.photos.length?g.photos[0]:'';card.innerHTML=`<div class="pnav-card-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:`<div class="pnav-card-placeholder">${(g.name||'?').charAt(0)}</div>`}</div><div class="pnav-card-name">${g.name||'?'}</div>`;card.onclick=()=>{if(!_pnavDidDrag)showProfileReplace(realIdx)};strip.appendChild(card)}
 rail.appendChild(strip);
 const arwR=document.createElement('button');arwR.className='pnav-arrow pnav-arrow-right';arwR.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>';rail.appendChild(arwR);
 function _updatePnavArrows(){arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
 arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updatePnavArrows);
+/* Mouse drag to scroll */
+let _mdX=0,_mdSL=0,_mdActive=false;
+strip.addEventListener('mousedown',e=>{_mdActive=true;_pnavDidDrag=false;_mdX=e.pageX;_mdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_mdActive)return;if(Math.abs(e.pageX-_mdX)>5)_pnavDidDrag=true;strip.scrollLeft=_mdSL-(e.pageX-_mdX)});
+document.addEventListener('mouseup',()=>{if(!_mdActive)return;_mdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_pnavDidDrag=false},0)});
+strip.style.cursor='grab';
 const activeCard=strip.querySelector('.pnav-card.active');if(activeCard)setTimeout(()=>{activeCard.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});_updatePnavArrows()},50);else _updatePnavArrows()}
 
 /* OG / Twitter Meta Tag helpers */
