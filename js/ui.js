@@ -462,13 +462,14 @@ const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0
 const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
 const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
 [prevIdx,nextIdx].forEach(pi=>{const pg=girls[pi];if(!pg||!pg.photos||!pg.photos.length)return;const src=pg.photos[0];if(!src||src.startsWith('data:'))return;const eid='pfetch-'+pi;if(!document.getElementById(eid)){const lk=document.createElement('link');lk.rel='prefetch';lk.as='image';lk.href=src;lk.id=eid;document.head.appendChild(lk)}});
-const up=document.createElement('button');up.className='pnav-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>';up.onclick=()=>showProfileReplace(prevIdx);rail.appendChild(up);
-const dots=document.createElement('div');dots.className='pnav-dots';
-for(let di=0;di<total;di++){const realIdx=namedIndices[di];const d=document.createElement('button');d.className='pnav-dot'+(realIdx===idx?' active':'')+(girls[realIdx].hidden?' pnav-dot-hidden':'');const g=girls[realIdx];d.innerHTML=g.photos&&g.photos.length?`<div class="dot-inner"><img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}"></div>`:`<div class="dot-inner"><span class="dot-letter">${(g.name||'?').charAt(0)}</span></div>`;d.onclick=()=>showProfileReplace(realIdx);dots.appendChild(d)}
-rail.appendChild(dots);const ctr=document.createElement('div');ctr.className='pnav-counter';ctr.innerHTML=`<span>${safePos+1}</span> / ${total}`;rail.appendChild(ctr);
-const dn=document.createElement('button');dn.className='pnav-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>';dn.onclick=()=>showProfileReplace(nextIdx);rail.appendChild(dn);
-/* scroll active dot into view */
-const activeDot=dots.querySelector('.pnav-dot.active');if(activeDot)setTimeout(()=>activeDot.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}),50)}
+const arwL=document.createElement('button');arwL.className='pnav-arrow pnav-arrow-left';arwL.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';rail.appendChild(arwL);
+const strip=document.createElement('div');strip.className='pnav-strip';
+for(let di=0;di<total;di++){const realIdx=namedIndices[di];const g=girls[realIdx];const card=document.createElement('div');card.className='pnav-card'+(realIdx===idx?' active':'')+(g.hidden?' pnav-card-hidden':'');const photo=g.photos&&g.photos.length?g.photos[0]:'';card.innerHTML=`<div class="pnav-card-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:`<div class="pnav-card-placeholder">${(g.name||'?').charAt(0)}</div>`}</div><div class="pnav-card-name">${g.name||'?'}</div>`;card.onclick=()=>showProfileReplace(realIdx);strip.appendChild(card)}
+rail.appendChild(strip);
+const arwR=document.createElement('button');arwR.className='pnav-arrow pnav-arrow-right';arwR.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>';rail.appendChild(arwR);
+function _updatePnavArrows(){arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updatePnavArrows);
+const activeCard=strip.querySelector('.pnav-card.active');if(activeCard)setTimeout(()=>{activeCard.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});_updatePnavArrows()},50);else _updatePnavArrows()}
 
 /* OG / Twitter Meta Tag helpers */
 function updateOgMeta(g,idx){
