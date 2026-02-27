@@ -333,13 +333,24 @@ function renderRecentlyViewed(containerId='homeRecentlyViewed',returnPage='homeP
 const container=document.getElementById(containerId);if(!container)return;
 const rv=getRecentlyViewed();
 const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(v=>v&&(isAdmin()||!v.g.hidden));
-if(!valid.length){container.style.display='none';return}
+if(!valid.length){container.style.display='none';container.innerHTML='';return}
 container.style.display='';
 const clearId='rvClearBtn_'+containerId;
-let html=`<div class="rv-header"><div class="profile-desc-title">${t('rv.title')}</div><button class="rv-clear-btn" id="${clearId}">${t('rv.clear')}</button></div><div class="also-avail-strip">`;
-valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const thumb=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';html+=`<div class="also-avail-card" data-rv-idx="${idx}">${thumb}<div class="also-avail-name">${g.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}</div>`});
-html+='</div>';container.innerHTML=html;
-container.querySelectorAll('.also-avail-card').forEach(card=>{card.onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
+let html=`<div class="rv-header"><div class="avail-now-title rv-title">${t('rv.title')}</div><button class="rv-clear-btn" id="${clearId}">${t('rv.clear')}</button></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const photo=g.photos&&g.photos.length?g.photos[0]:'';
+html+=`<div class="avail-now-card" data-rv-idx="${idx}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${liveNow?'<span class="avail-now-dot rv-dot"></span>':''}</div>`});
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
+let _rvDidDrag=false;
+container.querySelectorAll('.avail-now-card').forEach(card=>{card.onclick=()=>{if(_rvDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateRvArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateRvArrows);
+/* Mouse drag to scroll */
+let _rvMdX=0,_rvMdSL=0,_rvMdActive=false;
+strip.addEventListener('mousedown',e=>{_rvMdActive=true;_rvDidDrag=false;_rvMdX=e.pageX;_rvMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_rvMdActive)return;if(Math.abs(e.pageX-_rvMdX)>5)_rvDidDrag=true;strip.scrollLeft=_rvMdSL-(e.pageX-_rvMdX)});
+document.addEventListener('mouseup',()=>{if(!_rvMdActive)return;_rvMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_rvDidDrag=false},0)});
+strip.style.cursor='grab';_updateRvArrows();
 const clearBtn=document.getElementById(clearId);if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed(containerId,returnPage)}}
 
 function renderNewGirls(){

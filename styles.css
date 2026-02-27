@@ -526,8 +526,10 @@ footer p{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--
 /* Recently Viewed */
 .home-recently-viewed{margin-bottom:40px;padding-top:20px}
 .rv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rv-title{color:rgba(255,255,255,0.85)}
 .rv-clear-btn{background:none;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 .rv-clear-btn:hover{border-color:#ff4444;color:#ff4444}
+.rv-dot{top:4px;right:4px}
 /* Google Maps Embed */
 .home-map{margin:20px 0 32px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .home-map iframe{display:block;width:100%;height:280px;filter:invert(0.9) hue-rotate(180deg)}
@@ -1179,6 +1181,9 @@ body.light-mode .anw-arrow:hover{border-color:#00cc66;color:#1a1a2e;background:r
 body.light-mode .avail-now-card{background:rgba(255,255,255,0.85);border-color:rgba(0,0,0,0.08)}
 body.light-mode .avail-now-card:hover{border-color:#00cc66}
 body.light-mode .anw-name{color:#1a1a2e}
+body.light-mode .rv-title{color:rgba(0,0,0,0.85)}
+body.light-mode .rv-clear-btn{border-color:rgba(0,0,0,0.1);color:rgba(0,0,0,0.5)}
+body.light-mode .rv-clear-btn:hover{border-color:#ff4444;color:#ff4444}
 body.light-mode .pnav-arrow{background:rgba(255,255,255,0.9);border-color:rgba(0,0,0,0.1);color:rgba(0,0,0,0.5)}
 body.light-mode .pnav-arrow:hover{border-color:var(--accent);color:#1a1a2e;background:rgba(180,74,255,0.08)}
 body.light-mode .pnav-card{background:rgba(255,255,255,0.85);border-color:rgba(0,0,0,0.08)}
