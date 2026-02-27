@@ -304,11 +304,14 @@ const avail=girls.filter(g=>!g.hidden&&isAvailableNow(g.name));
 if(!avail.length){container.style.display='none';container.innerHTML='';return}
 container.style.display='';
 const countLabel=avail.length===1?t('home.girlSingular'):t('home.girlPlural').replace('{n}',avail.length);
-let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><span class="avail-now-title">${countLabel} Available Now</span></div><div class="avail-now-strip">`;
+let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><span class="avail-now-title">${countLabel} Available Now</span></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
 avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?g.photos[0]:'';const cd=getAvailCountdown(g.name);const cdText=cd&&cd.type==='until_end'?cd.display:'';
 html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
-html+='</div>';container.innerHTML=html;
-container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}})}
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
+container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateAnwArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateAnwArrows);_updateAnwArrows()}
 
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
