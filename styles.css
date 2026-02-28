@@ -1293,6 +1293,11 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .bk-enq-out{background:transparent}
 .bk-enq-sel{background:rgba(255,220,80,.6);cursor:pointer}
 .bk-enq-he{border-right:1px solid rgba(255,255,255,.12)!important}
+.bk-enq-dur-bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 0 2px}
+.bk-enq-dur-btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:var(--text-muted);cursor:pointer;transition:all .2s}
+.bk-enq-dur-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,.08)}
+.bk-enq-dur-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,.15)}
+.bk-enq-dur-btn:disabled{opacity:.3;cursor:not-allowed}
 .bk-enq-hint{font-size:11px;color:var(--text-muted);text-align:center;opacity:.7}
 .bk-enq-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
 .bk-enq-actions-3{justify-content:space-between}

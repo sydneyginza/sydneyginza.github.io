@@ -63,7 +63,8 @@ document.getElementById('enquirySubmit').onclick=async()=>{
 
 /* === Booking Enquiry (Timeline Selection Popup) === */
 let _bkEnqIdx=-1;
-let _bkEnqSel=null; /* {date,startMin,endMin} */
+let _bkEnqSel=null;   /* {date,startMin,endMin} - set after start+duration chosen */
+let _bkEnqStart=null; /* {date,startMin} - set after clicking a start slot */
 let _bkEnqSubmitting=false;
 
 function openBookingEnquiry(girlIdx){
@@ -71,13 +72,14 @@ function openBookingEnquiry(girlIdx){
   if(existingBk){showToast('You already have a pending booking. Check your profile for status.','error');return}
   _bkEnqIdx=girlIdx;
   _bkEnqSel=null;
+  _bkEnqStart=null;
   renderBkEnqGrid();
   showBkEnqScreen(1);
   document.getElementById('bookingEnquiryOverlay').classList.add('open');
 }
 
 function closeBkEnq(){
-  _bkEnqIdx=-1;_bkEnqSel=null;
+  _bkEnqIdx=-1;_bkEnqSel=null;_bkEnqStart=null;
   document.getElementById('bookingEnquiryOverlay').classList.remove('open');
 }
 
@@ -112,11 +114,14 @@ function renderBkEnqGrid(){
     html+=`<tr><td class="bk-enq-date-col">${labelTxt}</td>`;
     slots.forEach(a=>{
       const inShift=e&&slotInRange(a,e.start,e.end);
-      const booked=inShift&&isSlotBooked(g.name,ds,a);
-      const sel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+      const past=inShift&&isSlotPastCutoff(ds,a);
+      const booked=inShift&&!past&&isSlotBooked(g.name,ds,a);
+      const inSel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+      const isStart=!_bkEnqSel&&_bkEnqStart&&ds===_bkEnqStart.date&&a===_bkEnqStart.startMin;
+      const sel=inSel||isStart;
       const end=hourEndSlots.has(a)?' bk-enq-he':'';
       let cls='bk-enq-slot';
-      if(!inShift)cls+=' bk-enq-out';
+      if(!inShift||past)cls+=' bk-enq-out';
       else if(sel)cls+=' bk-enq-sel';
       else if(booked)cls+=' bk-enq-booked';
       else cls+=' bk-enq-avail';
@@ -128,39 +133,63 @@ function renderBkEnqGrid(){
   if(!dates.length)html='<div class="empty-msg">No published dates with schedule.</div>';
   const wrap=document.getElementById('bkEnqGrid');
   wrap.innerHTML=html;
+  document.querySelectorAll('.bk-enq-dur-btn').forEach(b=>{b.disabled=true;b.classList.remove('active')});
   updateBkEnqReviewBtn();
-  if(dates.length)bindBkEnqDrag(wrap);
+  if(dates.length)bindBkEnqClick(wrap);
 }
 
-function bindBkEnqDrag(wrap){
-  const MIN_SLOTS=2,MAX_SLOTS=8;
-  let dragging=false,anchorDate=null,anchorMin=null;
-  function slotFromEl(el){if(!el||!el.dataset||!el.dataset.slot)return null;return{date:el.dataset.date,slotMin:parseInt(el.dataset.slot)}}
-  function computeSel(anchorMin,curMin,date){
-    const lo=Math.min(anchorMin,curMin);
-    const raw=Math.max(anchorMin,curMin)+15;
-    let endMin=Math.min(raw,lo+MAX_SLOTS*15);
-    if((endMin-lo)/15<MIN_SLOTS)endMin=lo+MIN_SLOTS*15;
-    return{date,startMin:lo,endMin};
+function nowAbsMin(){
+  const now=new Date(),h=now.getHours(),m=now.getMinutes();
+  return h<10?(h+24)*60+m:h*60+m;
+}
+
+function isSlotPastCutoff(dateStr,slotAbsMin){
+  const today=new Date().toISOString().slice(0,10);
+  if(dateStr!==today)return false;
+  return slotAbsMin<nowAbsMin()+60;
+}
+
+function getShiftEndMin(girlName,date){
+  const e=getCalEntry(girlName,date);
+  if(!e||!e.end||!e.start)return null;
+  const[eh,em]=e.end.split(':').map(Number);
+  const[sh,sm]=e.start.split(':').map(Number);
+  let endAbsMin=eh*60+em;
+  if(endAbsMin<=sh*60+sm)endAbsMin+=24*60;
+  return endAbsMin;
+}
+
+function updateDurationButtons(){
+  const g=girls[_bkEnqIdx];
+  document.querySelectorAll('.bk-enq-dur-btn').forEach(b=>b.classList.remove('active'));
+  if(!_bkEnqStart||!g){
+    document.querySelectorAll('.bk-enq-dur-btn').forEach(b=>{b.disabled=true});
+    return;
   }
-  wrap.addEventListener('mousedown',e=>{
-    const s=slotFromEl(e.target);
-    if(!s)return;
-    if(!e.target.classList.contains('bk-enq-avail')&&!e.target.classList.contains('bk-enq-sel'))return;
-    dragging=true;anchorDate=s.date;anchorMin=s.slotMin;
-    _bkEnqSel=computeSel(anchorMin,anchorMin,anchorDate);
-    renderBkEnqCells(wrap);e.preventDefault();
+  const{date,startMin}=_bkEnqStart;
+  const shiftEnd=getShiftEndMin(g.name,date);
+  document.querySelectorAll('.bk-enq-dur-btn').forEach(btn=>{
+    const dur=parseInt(btn.dataset.dur);
+    const endMin=startMin+dur;
+    const fitsShift=shiftEnd===null||endMin<=shiftEnd;
+    let hasConflict=false;
+    for(let s=startMin+15;s<endMin;s+=15){if(isSlotBooked(g.name,date,s)){hasConflict=true;break}}
+    btn.disabled=!fitsShift||hasConflict;
+    if(_bkEnqSel&&_bkEnqSel.date===date&&_bkEnqSel.startMin===startMin&&_bkEnqSel.endMin===endMin)btn.classList.add('active');
   });
-  wrap.addEventListener('mousemove',e=>{
-    if(!dragging)return;
-    const s=slotFromEl(e.target);
-    if(!s||s.date!==anchorDate)return;
-    _bkEnqSel=computeSel(anchorMin,s.slotMin,anchorDate);
+}
+
+function bindBkEnqClick(wrap){
+  wrap.addEventListener('click',e=>{
+    const el=e.target;
+    if(!el.dataset||!el.dataset.slot)return;
+    if(!el.classList.contains('bk-enq-avail')&&!el.classList.contains('bk-enq-sel'))return;
+    _bkEnqStart={date:el.dataset.date,startMin:parseInt(el.dataset.slot)};
+    _bkEnqSel=null;
     renderBkEnqCells(wrap);
+    updateDurationButtons();
+    updateBkEnqReviewBtn();
   });
-  const stopDrag=()=>{if(dragging){dragging=false;updateBkEnqReviewBtn()}};
-  document.addEventListener('mouseup',stopDrag,{once:false});
-  wrap._bkStopDrag=stopDrag;
 }
 
 function renderBkEnqCells(wrap){
@@ -169,11 +198,13 @@ function renderBkEnqCells(wrap){
     const a=parseInt(td.dataset.slot),ds=td.dataset.date;
     const e=getCalEntry(g.name,ds);
     const inShift=e&&slotInRange(a,e.start,e.end);
-    const booked=inShift&&isSlotBooked(g.name,ds,a);
-    const sel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+    const past=inShift&&isSlotPastCutoff(ds,a);
+    const booked=inShift&&!past&&isSlotBooked(g.name,ds,a);
+    const inSel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+    const isStart=!_bkEnqSel&&_bkEnqStart&&ds===_bkEnqStart.date&&a===_bkEnqStart.startMin;
     td.classList.remove('bk-enq-avail','bk-enq-booked','bk-enq-sel','bk-enq-out');
-    if(!inShift)td.classList.add('bk-enq-out');
-    else if(sel)td.classList.add('bk-enq-sel');
+    if(!inShift||past)td.classList.add('bk-enq-out');
+    else if(inSel||isStart)td.classList.add('bk-enq-sel');
     else if(booked)td.classList.add('bk-enq-booked');
     else td.classList.add('bk-enq-avail');
   });
@@ -236,6 +267,17 @@ document.getElementById('bkEnqReview').onclick=()=>{if(!_bkEnqSel)return;showBkE
 document.getElementById('bkEnqBack').onclick=()=>showBkEnqScreen(1);
 document.getElementById('bkEnqSubmit').onclick=submitBookingRequest;
 document.getElementById('bookingEnquiryOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('bookingEnquiryOverlay'))closeBkEnq()});
+document.querySelectorAll('.bk-enq-dur-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    if(!_bkEnqStart||btn.disabled)return;
+    const dur=parseInt(btn.dataset.dur);
+    _bkEnqSel={date:_bkEnqStart.date,startMin:_bkEnqStart.startMin,endMin:_bkEnqStart.startMin+dur};
+    document.querySelectorAll('.bk-enq-dur-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBkEnqCells(document.getElementById('bkEnqGrid'));
+    updateBkEnqReviewBtn();
+  };
+});
 
 function normalizeCalData(cal){if(!cal)return{};for(const n in cal){if(n==='_published'||n==='_bookings')continue;for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''}}return cal}
 
