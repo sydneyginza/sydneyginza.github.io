@@ -60,7 +60,7 @@ document.getElementById('enquirySubmit').onclick=async()=>{
   finally{submitBtn.textContent=t('enquiry.submit');submitBtn.style.pointerEvents='auto'}
 };
 
-function normalizeCalData(cal){if(!cal)return{};for(const n in cal)for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''};return cal}
+function normalizeCalData(cal){if(!cal)return{};for(const n in cal){if(n==='_published')continue;for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''}}return cal}
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 
