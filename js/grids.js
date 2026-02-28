@@ -291,15 +291,19 @@ function renderBookingsGrid(){
   const active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end}).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   if(!active.length){el.innerHTML='<div class="empty-msg">No girls scheduled.</div>';return}
   const slots=getBookingTimeSlots();
+  /* Group slots by hour for grouped header */
+  const hourGroups=[];
+  slots.forEach(a=>{const hKey=Math.floor(a/60);const last=hourGroups[hourGroups.length-1];if(last&&last.hKey===hKey){last.slots.push(a)}else{hourGroups.push({hKey,slots:[a]})}});
+  const hourEndSlots=new Set(hourGroups.map(g=>g.slots[g.slots.length-1]));
   let html='<div class="bk-table-wrap"><table class="bk-table"><thead><tr><th class="bk-name-col"></th>';
-  slots.forEach(a=>{html+=`<th class="bk-time-hdr">${fmtSlotTime(a)}</th>`});
+  hourGroups.forEach(({hKey,slots:hs})=>{const h=hKey%24;const label=h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm';html+=`<th class="bk-hour-hdr" colspan="${hs.length}">${label}</th>`});
   html+='</tr></thead><tbody>';
   active.forEach(g=>{
     const gi=girls.indexOf(g);
     const e=getCalEntry(g.name,bookingsDateFilter);
     const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
     html+=`<tr><td class="bk-name-col"><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div class="cal-name">${g.name}</div></div></td>`;
-    slots.forEach(a=>{const cls=slotInRange(a,e.start,e.end)?' bk-avail':'';html+=`<td class="bk-slot${cls}"></td>`});
+    slots.forEach(a=>{const cls=slotInRange(a,e.start,e.end)?' bk-avail':'';const end=hourEndSlots.has(a)?' bk-hour-end':'';html+=`<td class="bk-slot${cls}${end}"></td>`});
     html+='</tr>';
   });
   html+='</tbody></table></div>';
