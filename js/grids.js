@@ -100,21 +100,13 @@ return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(
 
 /* Roster */
 let bookingsDateFilter=null;
-const ROSTER_ADVANCE_KEY='ginza_roster_advance';
-function getRosterAdvanceDays(){try{const v=parseInt(localStorage.getItem(ROSTER_ADVANCE_KEY));return(v>=1&&v<=7)?v:7}catch(e){return 7}}
-function setRosterAdvanceDays(n){try{localStorage.setItem(ROSTER_ADVANCE_KEY,String(n))}catch(e){}}
-
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
-const advanceDays=getRosterAdvanceDays();
-const visibleDates=isAdmin()?dates:dates.slice(0,advanceDays);
-const availDates=visibleDates.filter(ds=>hasGirlsOnDate(ds));
+const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
-if(isAdmin()){const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const wrap=document.createElement('div');wrap.className='roster-advance-wrap';wrap.title='How many days ahead non-admin users can see';wrap.innerHTML=`<span class="roster-advance-label">Advance view</span><div class="roster-advance-btns" id="rosterAdvanceBtns">${[1,2,3,4,5,6,7].map(n=>`<button class="roster-advance-btn${n===advanceDays?' active':''}" data-days="${n}">${n}d</button>`).join('')}</div>`;fb.appendChild(wrap);setTimeout(()=>{const btns=document.getElementById('rosterAdvanceBtns');if(btns)btns.onclick=e=>{const btn=e.target.closest('.roster-advance-btn');if(!btn)return;const days=parseInt(btn.dataset.days);setRosterAdvanceDays(days);renderRosterFilters();renderRosterGrid()}},0)}
-
 /* Last Updated indicator + manual refresh */
 const uw=document.createElement('div');uw.className='roster-updated-wrap';uw.id='rosterLastUpdated';
 uw.innerHTML='<span class="roster-updated-label">'+t('roster.lastUpdated')+'</span><span class="roster-updated-time" id="rosterLastUpdatedTime">'+(_lastCalFetchDisplay||'--:--')+'</span><button class="roster-refresh-btn" id="rosterRefreshBtn" title="'+t('roster.refresh')+'"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>';
