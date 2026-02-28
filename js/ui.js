@@ -942,7 +942,7 @@ const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){con
 /* ── Seasonal / Event Themes ── */
 const SEASONAL_THEMES=[
   {id:'valentine',cls:'theme-valentine',match:(m,d)=>m===1&&d>=1&&d<=14,accent:'#ff4488',accent2:'#ff6fa8',icon:'\u2764\uFE0F',greetingKey:'season.valentine'},
-  {id:'sakura',cls:'theme-sakura',match:(m,d)=>(m===2&&d>=15)||(m===3&&d<=15),accent:'#f4a0b5',accent2:'#d4738a',icon:'\uD83C\uDF38',greetingKey:'season.sakura'},
+  {id:'sakura',cls:'theme-sakura',match:(m,d)=>(m===1&&d>=15)||(m===2&&d<=15),accent:'#f4a0b5',accent2:'#d4738a',icon:'\uD83C\uDF38',greetingKey:'season.sakura'},
   {id:'christmas',cls:'theme-christmas',match:(m,d)=>m===11&&d>=1&&d<=25,accent:'#cc1111',accent2:'#00aa44',icon:'\uD83C\uDF84',greetingKey:'season.christmas'},
   {id:'newyear',cls:'theme-newyear',match:(m,d)=>(m===11&&d>=26)||(m===0&&d<=7),accent:'#ffd700',accent2:'#ff6f00',icon:'\uD83C\uDF86',greetingKey:'season.newyear'}
 ];
