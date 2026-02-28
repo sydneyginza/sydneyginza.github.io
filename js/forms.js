@@ -19,8 +19,9 @@ function openEnquiryForm(girlName,girlIdx){
   _eqGirlName=girlName;
   const overlay=document.getElementById('enquiryOverlay');
   document.getElementById('enquiryGirlName').textContent=girlName;
-  if(loggedIn&&loggedInUser){document.getElementById('eqName').value=loggedInUser;document.getElementById('eqEmail').value=loggedInEmail||'';document.getElementById('eqPhone').value=loggedInMobile||''}
-  else{document.getElementById('eqName').value='';document.getElementById('eqEmail').value='';document.getElementById('eqPhone').value=''}
+  const _cf=document.getElementById('eqContactFields');
+  if(loggedIn&&loggedInUser){document.getElementById('eqName').value=loggedInUser;document.getElementById('eqEmail').value=loggedInEmail||'';document.getElementById('eqPhone').value=loggedInMobile||'';if(_cf)_cf.style.display='none'}
+  else{document.getElementById('eqName').value='';document.getElementById('eqEmail').value='';document.getElementById('eqPhone').value='';if(_cf)_cf.style.display=''}
   const today=fmtDate(getAEDTDate());
   document.getElementById('eqDate').value='';document.getElementById('eqTime').value='';
   document.getElementById('eqMessage').value='';document.getElementById('eqError').textContent='';document.getElementById('eqWebsite').value='';
@@ -44,8 +45,8 @@ document.getElementById('enquirySubmit').onclick=async()=>{
   const date=document.getElementById('eqDate').value;
   const time=document.getElementById('eqTime').value;
   const message=sanitize(document.getElementById('eqMessage').value);
-  if(!name){document.getElementById('eqName').focus();errEl.textContent=t('enquiry.nameRequired');return}
-  if(!phone&&!email){errEl.textContent=t('enquiry.contactRequired');return}
+  if(!loggedIn&&!name){document.getElementById('eqName').focus();errEl.textContent=t('enquiry.nameRequired');return}
+  if(!loggedIn&&!phone&&!email){errEl.textContent=t('enquiry.contactRequired');return}
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent=t('enquiry.emailInvalid');return}
   const submitBtn=document.getElementById('enquirySubmit');submitBtn.textContent=t('enquiry.sending');submitBtn.style.pointerEvents='none';
   try{
