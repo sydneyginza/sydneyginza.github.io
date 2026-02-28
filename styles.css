@@ -1254,7 +1254,7 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .admin-bk-edit-section{display:flex;flex-direction:column;gap:8px}
 .admin-bk-edit-fields{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .admin-bk-edit-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.admin-bk-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--text-primary);font-size:12px;padding:4px 8px;color-scheme:dark}
+.admin-bk-input{-webkit-appearance:none;appearance:none;background:var(--card-bg);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--text-primary);font-size:12px;padding:4px 8px;color-scheme:dark}
 
 /* ── My Profile — Booking Status Card ── */
 .mp-booking-hdr{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
