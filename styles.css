@@ -1241,7 +1241,7 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .cal-date-published .cal-day-name{color:rgba(0,255,127,0.7)}
 .cal-pub-btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text-muted);cursor:pointer;transition:all .2s;white-space:nowrap}
 .cal-pub-btn:hover{border-color:var(--accent);color:var(--accent)}
-.cal-pub-btn.published{background:rgba(180,74,255,.15);border-color:var(--accent);color:var(--accent)}
+.cal-pub-btn.published{background:rgba(0,255,127,.1);border-color:#00ff7f;color:#00ff7f;text-shadow:0 0 8px rgba(0,255,127,0.3)}
 
 /* ── Offline Banner ── */
 .offline-banner{position:fixed;top:70px;left:0;right:0;z-index:99;background:rgba(255,111,0,0.12);border-bottom:1px solid rgba(255,111,0,0.3);padding:8px 20px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,111,0,0.85);transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
