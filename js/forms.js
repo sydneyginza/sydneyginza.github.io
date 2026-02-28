@@ -16,6 +16,7 @@ let _eqLastSubmit=0;
 const EQ_THROTTLE=30000;
 
 function openEnquiryForm(girlName,girlIdx){
+  if(loggedIn){openBookingEnquiry(girlIdx);return}
   _eqGirlName=girlName;
   const overlay=document.getElementById('enquiryOverlay');
   document.getElementById('enquiryGirlName').textContent=girlName;
@@ -60,7 +61,181 @@ document.getElementById('enquirySubmit').onclick=async()=>{
   finally{submitBtn.textContent=t('enquiry.submit');submitBtn.style.pointerEvents='auto'}
 };
 
-function normalizeCalData(cal){if(!cal)return{};for(const n in cal){if(n==='_published')continue;for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''}}return cal}
+/* === Booking Enquiry (Timeline Selection Popup) === */
+let _bkEnqIdx=-1;
+let _bkEnqSel=null; /* {date,startMin,endMin} */
+let _bkEnqSubmitting=false;
+
+function openBookingEnquiry(girlIdx){
+  _bkEnqIdx=girlIdx;
+  _bkEnqSel=null;
+  renderBkEnqGrid();
+  showBkEnqScreen(1);
+  document.getElementById('bookingEnquiryOverlay').classList.add('open');
+}
+
+function closeBkEnq(){
+  _bkEnqIdx=-1;_bkEnqSel=null;
+  document.getElementById('bookingEnquiryOverlay').classList.remove('open');
+}
+
+function showBkEnqScreen(n){
+  document.getElementById('bkEnqS1').style.display=n===1?'':'none';
+  document.getElementById('bkEnqS2').style.display=n===2?'':'none';
+  if(n===2)renderBkEnqReview();
+}
+
+function renderBkEnqGrid(){
+  const g=girls[_bkEnqIdx];if(!g)return;
+  /* Set girl header */
+  const av=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="bk-enq-avatar-img" loading="lazy">`:`<span class="cal-letter">${g.name.charAt(0)}</span>`;
+  document.getElementById('bkEnqAvatar').innerHTML=av;
+  document.getElementById('bkEnqGName').textContent=g.name;
+  /* Get published dates where girl has a schedule */
+  const dates=getWeekDates().filter(ds=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end&&isDatePublished(ds)});
+  const slots=getBookingTimeSlots();
+  /* Group slots by hour */
+  const hourGroups=[];
+  slots.forEach(a=>{const hKey=Math.floor(a/60);const last=hourGroups[hourGroups.length-1];if(last&&last.hKey===hKey){last.slots.push(a)}else{hourGroups.push({hKey,slots:[a]})}});
+  const hourEndSlots=new Set(hourGroups.map(g=>g.slots[g.slots.length-1]));
+  /* Build table */
+  let html='<table class="bk-enq-table"><thead><tr><th class="bk-enq-date-col"></th>';
+  hourGroups.forEach(({hKey,slots:hs})=>{const h=hKey%24;const label=h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm';html+=`<th class="bk-enq-hour-hdr" colspan="${hs.length}">${label}</th>`});
+  html+='</tr></thead><tbody>';
+  const todayStr=dates[0];
+  dates.forEach(ds=>{
+    const f=dispDate(ds);
+    const labelTxt=ds===todayStr?'TODAY':f.day.toUpperCase()+' '+f.date.toUpperCase();
+    const e=getCalEntry(g.name,ds);
+    html+=`<tr><td class="bk-enq-date-col">${labelTxt}</td>`;
+    slots.forEach(a=>{
+      const inShift=e&&slotInRange(a,e.start,e.end);
+      const booked=inShift&&isSlotBooked(g.name,ds,a);
+      const sel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+      const end=hourEndSlots.has(a)?' bk-enq-he':'';
+      let cls='bk-enq-slot';
+      if(!inShift)cls+=' bk-enq-out';
+      else if(sel)cls+=' bk-enq-sel';
+      else if(booked)cls+=' bk-enq-booked';
+      else cls+=' bk-enq-avail';
+      html+=`<td class="${cls}${end}" data-date="${ds}" data-slot="${a}"></td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  if(!dates.length)html='<div class="empty-msg">No published dates with schedule.</div>';
+  const wrap=document.getElementById('bkEnqGrid');
+  wrap.innerHTML=html;
+  updateBkEnqReviewBtn();
+  if(dates.length)bindBkEnqDrag(wrap);
+}
+
+function bindBkEnqDrag(wrap){
+  const MIN_SLOTS=2,MAX_SLOTS=8;
+  let dragging=false,anchorDate=null,anchorMin=null;
+  function slotFromEl(el){if(!el||!el.dataset||!el.dataset.slot)return null;return{date:el.dataset.date,slotMin:parseInt(el.dataset.slot)}}
+  function computeSel(anchorMin,curMin,date){
+    const lo=Math.min(anchorMin,curMin);
+    const raw=Math.max(anchorMin,curMin)+15;
+    let endMin=Math.min(raw,lo+MAX_SLOTS*15);
+    if((endMin-lo)/15<MIN_SLOTS)endMin=lo+MIN_SLOTS*15;
+    return{date,startMin:lo,endMin};
+  }
+  wrap.addEventListener('mousedown',e=>{
+    const s=slotFromEl(e.target);
+    if(!s)return;
+    if(!e.target.classList.contains('bk-enq-avail')&&!e.target.classList.contains('bk-enq-sel'))return;
+    dragging=true;anchorDate=s.date;anchorMin=s.slotMin;
+    _bkEnqSel=computeSel(anchorMin,anchorMin,anchorDate);
+    renderBkEnqCells(wrap);e.preventDefault();
+  });
+  wrap.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const s=slotFromEl(e.target);
+    if(!s||s.date!==anchorDate)return;
+    _bkEnqSel=computeSel(anchorMin,s.slotMin,anchorDate);
+    renderBkEnqCells(wrap);
+  });
+  const stopDrag=()=>{if(dragging){dragging=false;updateBkEnqReviewBtn()}};
+  document.addEventListener('mouseup',stopDrag,{once:false});
+  wrap._bkStopDrag=stopDrag;
+}
+
+function renderBkEnqCells(wrap){
+  const g=girls[_bkEnqIdx];if(!g)return;
+  wrap.querySelectorAll('[data-slot]').forEach(td=>{
+    const a=parseInt(td.dataset.slot),ds=td.dataset.date;
+    const e=getCalEntry(g.name,ds);
+    const inShift=e&&slotInRange(a,e.start,e.end);
+    const booked=inShift&&isSlotBooked(g.name,ds,a);
+    const sel=_bkEnqSel&&ds===_bkEnqSel.date&&a>=_bkEnqSel.startMin&&a<_bkEnqSel.endMin;
+    td.classList.remove('bk-enq-avail','bk-enq-booked','bk-enq-sel','bk-enq-out');
+    if(!inShift)td.classList.add('bk-enq-out');
+    else if(sel)td.classList.add('bk-enq-sel');
+    else if(booked)td.classList.add('bk-enq-booked');
+    else td.classList.add('bk-enq-avail');
+  });
+}
+
+function updateBkEnqReviewBtn(){
+  const btn=document.getElementById('bkEnqReview');
+  if(btn)btn.disabled=!_bkEnqSel;
+}
+
+function renderBkEnqReview(){
+  const g=girls[_bkEnqIdx];if(!g||!_bkEnqSel)return;
+  const av=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="bk-enq-rev-photo" loading="lazy">`:`<div class="bk-enq-rev-photo bk-enq-rev-letter">${g.name.charAt(0)}</div>`;
+  document.getElementById('bkEnqProfilePane').innerHTML=`<div class="bk-enq-rev-profile">${av}<div class="bk-enq-rev-name">${g.name}</div></div>`;
+  const{date,startMin,endMin}=_bkEnqSel;
+  const f=dispDate(date);
+  const dur=endMin-startMin;
+  const durStr=dur>=60?(dur/60)+'hr'+(dur>60?'s':''):dur+' min';
+  document.getElementById('bkEnqDetailsPane').innerHTML=
+    `<div class="bk-enq-details">
+      <div class="bk-enq-rev-row"><span class="bk-enq-rev-label">Date</span><span>${f.day} ${f.date}</span></div>
+      <div class="bk-enq-rev-row"><span class="bk-enq-rev-label">Time</span><span>${fmtSlotTime(startMin)} – ${fmtSlotTime(endMin)}</span></div>
+      <div class="bk-enq-rev-row"><span class="bk-enq-rev-label">Duration</span><span>${durStr}</span></div>
+    </div>`;
+}
+
+async function submitBookingRequest(){
+  if(_bkEnqSubmitting||!_bkEnqSel)return;
+  _bkEnqSubmitting=true;
+  const btn=document.getElementById('bkEnqSubmit');
+  btn.textContent='Sending...';btn.style.pointerEvents='none';
+  if(!Array.isArray(calData._bookings))calData._bookings=[];
+  const booking={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2),
+    girlName:girls[_bkEnqIdx].name,
+    date:_bkEnqSel.date,
+    startMin:_bkEnqSel.startMin,
+    endMin:_bkEnqSel.endMin,
+    user:loggedInUser,
+    status:'pending',
+    ts:new Date().toISOString()
+  };
+  calData._bookings.push(booking);
+  const saved=await saveCalData();
+  if(saved){
+    closeBkEnq();
+    showToast('Booking request sent');
+    if(typeof renderBookingsGrid==='function')renderBookingsGrid();
+  }else{
+    calData._bookings.pop();
+    showToast('Failed to save booking','error');
+  }
+  btn.textContent='Request Booking';btn.style.pointerEvents='auto';
+  _bkEnqSubmitting=false;
+}
+
+document.getElementById('bkEnqCancel1').onclick=closeBkEnq;
+document.getElementById('bkEnqCancel2').onclick=closeBkEnq;
+document.getElementById('bkEnqReview').onclick=()=>{if(!_bkEnqSel)return;showBkEnqScreen(2)};
+document.getElementById('bkEnqBack').onclick=()=>showBkEnqScreen(1);
+document.getElementById('bkEnqSubmit').onclick=submitBookingRequest;
+document.getElementById('bookingEnquiryOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('bookingEnquiryOverlay'))closeBkEnq()});
+
+function normalizeCalData(cal){if(!cal)return{};for(const n in cal){if(n==='_published'||n==='_bookings')continue;for(const dt in cal[n])if(cal[n][dt]===true)cal[n][dt]={start:'',end:''}}return cal}
 
 function fullRender(){rosterDateFilter=fmtDate(getAEDTDate());renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge()}
 

@@ -1235,6 +1235,43 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .bk-hour-end{border-right:1px solid rgba(255,255,255,.12)!important}
 .bk-enquiry{background:rgba(255,220,100,.45)}
 .bk-confirmed{background:rgba(220,80,80,.45)}
+.bk-pending{background:rgba(255,220,80,.45)}
+
+/* ── Booking Enquiry Overlay ── */
+.bk-enq-panel{background:var(--card-bg);border-radius:12px;width:min(96vw,860px);max-height:90vh;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.bk-enq-hd{display:flex;flex-direction:column;gap:10px}
+.bk-enq-ginfo{display:flex;align-items:center;gap:12px}
+.bk-enq-avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--card-border)}
+.bk-enq-avatar-img{width:100%;height:100%;object-fit:cover}
+.bk-enq-gname{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px;color:var(--accent)}
+.bk-enq-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted)}
+.bk-enq-legend{display:flex;gap:16px;flex-wrap:wrap}
+.bk-leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
+.bk-leg{width:14px;height:14px;border-radius:3px;display:inline-block}
+.bk-leg-avail{background:rgba(130,200,120,.45)}
+.bk-leg-booked{background:rgba(220,80,80,.55)}
+.bk-leg-sel{background:rgba(255,220,80,.65)}
+.bk-enq-grid-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px}
+.bk-enq-table{border-collapse:collapse;min-width:max-content;font-size:11px;user-select:none}
+.bk-enq-date-col{position:sticky;left:0;background:var(--card-bg);z-index:2;min-width:100px;padding:6px 10px;white-space:nowrap;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;color:var(--text-muted);border-right:2px solid rgba(255,255,255,.1)}
+.bk-enq-hour-hdr{padding:4px 6px;color:var(--text-muted);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.08);white-space:nowrap}
+.bk-enq-slot{width:32px;height:36px;border:1px solid rgba(255,255,255,.05);cursor:default}
+.bk-enq-avail{background:rgba(130,200,120,.35);cursor:pointer}
+.bk-enq-avail:hover{background:rgba(130,200,120,.55)}
+.bk-enq-booked{background:rgba(220,80,80,.45);cursor:not-allowed}
+.bk-enq-out{background:transparent}
+.bk-enq-sel{background:rgba(255,220,80,.6);cursor:pointer}
+.bk-enq-he{border-right:1px solid rgba(255,255,255,.12)!important}
+.bk-enq-hint{font-size:11px;color:var(--text-muted);text-align:center;opacity:.7}
+.bk-enq-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.bk-enq-actions-3{justify-content:space-between}
+.bk-enq-rev-profile{display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,.03);border-radius:8px}
+.bk-enq-rev-photo{width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.bk-enq-rev-letter{background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:24px;font-family:'Orbitron',sans-serif;color:#000}
+.bk-enq-rev-name{font-family:'Orbitron',sans-serif;font-size:16px;letter-spacing:2px}
+.bk-enq-details{display:flex;flex-direction:column;gap:10px;padding:16px;background:rgba(255,255,255,.03);border-radius:8px}
+.bk-enq-rev-row{display:flex;justify-content:space-between;font-size:13px}
+.bk-enq-rev-label{color:var(--text-muted)}
 
 /* Calendar publish row */
 .cal-publish-row th{padding:8px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}

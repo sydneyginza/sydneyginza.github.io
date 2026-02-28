@@ -102,6 +102,7 @@ return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(
 let bookingsDateFilter=null;
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 function isDatePublished(ds){return Array.isArray(calData._published)&&calData._published.includes(ds)}
+function isSlotBooked(girlName,date,slotMin){if(!Array.isArray(calData._bookings))return false;return calData._bookings.some(b=>b.girlName===girlName&&b.date===date&&b.status==='pending'&&slotMin>=b.startMin&&slotMin<b.endMin)}
 async function togglePublishDate(ds){if(!Array.isArray(calData._published))calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
@@ -303,7 +304,7 @@ function renderBookingsGrid(){
     const e=getCalEntry(g.name,bookingsDateFilter);
     const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
     html+=`<tr><td class="bk-name-col"><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div class="cal-name">${g.name}</div></div></td>`;
-    slots.forEach(a=>{const cls=slotInRange(a,e.start,e.end)?' bk-avail':'';const end=hourEndSlots.has(a)?' bk-hour-end':'';html+=`<td class="bk-slot${cls}${end}"></td>`});
+    slots.forEach(a=>{const inShift=slotInRange(a,e.start,e.end);const pending=inShift&&isSlotBooked(g.name,bookingsDateFilter,a);const cls=pending?' bk-pending':inShift?' bk-avail':'';const end=hourEndSlots.has(a)?' bk-hour-end':'';html+=`<td class="bk-slot${cls}${end}"></td>`});
     html+='</tr>';
   });
   html+='</tbody></table></div>';
