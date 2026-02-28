@@ -341,12 +341,18 @@ function renderBookingsGrid(){
   observeLazy(el);
 }
 
-function minToTime(min){return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
-function timeToMin(t){const[h,m]=t.split(':');return parseInt(h)*60+parseInt(m)}
+function populateAdminStartSelect(){
+  const sel=document.getElementById('adminBkEditStart');
+  if(sel.options.length>0)return;
+  const opts=[];
+  for(let h=10;h<24;h++)for(let m=(h===10?30:0);m<60;m+=15){const abs=h*60+m;opts.push(`<option value="${abs}">${fmtSlotTime(abs)}</option>`)}
+  for(let h=0;h<=4;h++)for(let m=0;m<=(h===4?0:45);m+=15){const abs=(h+24)*60+m;opts.push(`<option value="${abs}">${fmtSlotTime(abs)}</option>`)}
+  sel.innerHTML=opts.join('');
+}
 function _adminBkCheckEdits(){
   if(!_adminBkOrig)return;
   const d=document.getElementById('adminBkEditDate').value;
-  const s=timeToMin(document.getElementById('adminBkEditStart').value||'00:00');
+  const s=parseInt(document.getElementById('adminBkEditStart').value||'0');
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const changed=(d!==_adminBkOrig.date||s!==_adminBkOrig.startMin||s+dur!==_adminBkOrig.endMin);
   document.getElementById('adminBkEdit').disabled=!changed;
@@ -376,7 +382,8 @@ function openAdminBookingPopup(booking){
   if(isApproved){
     _adminBkOrig={date:booking.date,startMin:booking.startMin,endMin:booking.endMin};
     document.getElementById('adminBkEditDate').value=booking.date;
-    document.getElementById('adminBkEditStart').value=minToTime(booking.startMin);
+    populateAdminStartSelect();
+    document.getElementById('adminBkEditStart').value=String(booking.startMin);
     const durEl=document.getElementById('adminBkEditDur');
     durEl.value=String(booking.endMin-booking.startMin);
     if(!durEl.value)durEl.value='60';
@@ -405,7 +412,7 @@ async function editBooking(){
   if(!_adminBkCurrent)return;
   const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
   const d=document.getElementById('adminBkEditDate').value;
-  const s=timeToMin(document.getElementById('adminBkEditStart').value);
+  const s=parseInt(document.getElementById('adminBkEditStart').value);
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
   bk.date=d;bk.startMin=s;bk.endMin=s+dur;
