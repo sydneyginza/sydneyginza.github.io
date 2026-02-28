@@ -1227,7 +1227,7 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 /* ── Bookings Timeline Table ── */
 .bk-table-wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch}
 .bk-table{border-collapse:collapse;min-width:max-content;font-size:11px}
-.bk-name-col{position:sticky;left:0;background:var(--bg);z-index:2;min-width:90px;max-width:130px;padding:6px 8px;font-weight:600;white-space:nowrap;border-right:2px solid rgba(255,255,255,.1)}
+.bk-name-col{position:sticky;left:0;background:var(--bg);z-index:2;min-width:160px;padding:6px 8px;white-space:nowrap;border-right:2px solid rgba(255,255,255,.1)}
 .bk-table thead .bk-name-col{background:var(--bg);z-index:3}
 .bk-time-hdr{padding:4px 3px;color:var(--text-muted);font-size:10px;text-align:center;min-width:38px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap}
 .bk-slot{width:38px;height:28px;border:1px solid rgba(255,255,255,.05)}

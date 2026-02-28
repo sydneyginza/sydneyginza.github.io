@@ -299,11 +299,16 @@ function renderBookingsGrid(){
   slots.forEach(a=>{html+=`<th class="bk-time-hdr">${fmtSlotTime(a)}</th>`});
   html+='</tr></thead><tbody>';
   active.forEach(g=>{
+    const gi=girls.indexOf(g);
     const e=getCalEntry(g.name,bookingsDateFilter);
-    html+=`<tr><td class="bk-name-col">${g.name}</td>`;
+    const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
+    html+=`<tr><td class="bk-name-col"><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div class="cal-name">${g.name}</div></div></td>`;
     slots.forEach(a=>{const cls=slotInRange(a,e.start,e.end)?' bk-avail':'';html+=`<td class="bk-slot${cls}"></td>`});
     html+='</tr>';
   });
-  html+='</tbody></table></div>';el.innerHTML=html;
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+  el.querySelectorAll('.cal-profile').forEach(p=>{p.onclick=()=>{profileReturnPage='bookingsPage';showProfile(parseInt(p.dataset.idx))}});
+  observeLazy(el);
 }
 
