@@ -715,6 +715,9 @@ const Router = (function() {
 
   /* Parse current URL and navigate to the right view */
   function resolve() {
+    /* Handle SPA redirect from 404.html */
+    const _spParam = new URLSearchParams(window.location.search).get('_sp');
+    if (_spParam) { history.replaceState(null, '', _spParam); }
     if(typeof queryToFilters==='function')queryToFilters();
     const path = window.location.pathname;
 
