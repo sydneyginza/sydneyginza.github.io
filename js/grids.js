@@ -313,9 +313,9 @@ function renderBookingsGrid(){
       const end=hourEndSlots.has(a)?' bk-hour-end':'';
       if(booking){
         const cls=booking.status==='approved'?' bk-approved':' bk-pending';
-        const n=Math.round((booking.endMin-booking.startMin)/30);
+        const n=Math.round((booking.endMin-booking.startMin)/15);
         const cs=n>1?` colspan="${n}"`:'';
-        for(let s=a+30;s<booking.endMin;s+=30)rowSkip.add(s);
+        for(let s=a+15;s<booking.endMin;s+=15)rowSkip.add(s);
         if(isAdmin()){
           html+=`<td class="bk-slot${cls} bk-admin-bk"${cs} data-bk-id="${booking.id}" title="${booking.user}"><span class="bk-user-lbl">${booking.user}</span></td>`;
         }else{
@@ -347,9 +347,9 @@ function _adminBkCheckEdits(){
   if(!_adminBkOrig)return;
   const d=document.getElementById('adminBkEditDate').value;
   const s=timeToMin(document.getElementById('adminBkEditStart').value||'00:00');
-  const e=timeToMin(document.getElementById('adminBkEditEnd').value||'00:00');
-  const changed=(d!==_adminBkOrig.date||s!==_adminBkOrig.startMin||e!==_adminBkOrig.endMin);
-  document.getElementById('adminBkEdit').disabled=!(changed&&e>s);
+  const dur=parseInt(document.getElementById('adminBkEditDur').value);
+  const changed=(d!==_adminBkOrig.date||s!==_adminBkOrig.startMin||s+dur!==_adminBkOrig.endMin);
+  document.getElementById('adminBkEdit').disabled=!changed;
 }
 
 let _adminBkCurrent=null,_adminBkOrig=null;
@@ -377,7 +377,9 @@ function openAdminBookingPopup(booking){
     _adminBkOrig={date:booking.date,startMin:booking.startMin,endMin:booking.endMin};
     document.getElementById('adminBkEditDate').value=booking.date;
     document.getElementById('adminBkEditStart').value=minToTime(booking.startMin);
-    document.getElementById('adminBkEditEnd').value=minToTime(booking.endMin);
+    const durEl=document.getElementById('adminBkEditDur');
+    durEl.value=String(booking.endMin-booking.startMin);
+    if(!durEl.value)durEl.value='60';
     document.getElementById('adminBkEdit').disabled=true;
   }
   document.getElementById('adminBkPopup').classList.add('open');
@@ -404,10 +406,9 @@ async function editBooking(){
   const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
   const d=document.getElementById('adminBkEditDate').value;
   const s=timeToMin(document.getElementById('adminBkEditStart').value);
-  const e=timeToMin(document.getElementById('adminBkEditEnd').value);
-  if(e<=s){showToast('End time must be after start','error');return}
+  const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
-  bk.date=d;bk.startMin=s;bk.endMin=e;
+  bk.date=d;bk.startMin=s;bk.endMin=s+dur;
   if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
   else{bk.date=prev.date;bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
 }
@@ -418,5 +419,5 @@ document.getElementById('adminBkReject').onclick=rejectBooking;
 document.getElementById('adminBkRejectApproved').onclick=rejectBooking;
 document.getElementById('adminBkEdit').onclick=editBooking;
 document.getElementById('adminBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminBkPopup'))document.getElementById('adminBkPopup').classList.remove('open')});
-['adminBkEditDate','adminBkEditStart','adminBkEditEnd'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
+['adminBkEditDate','adminBkEditStart','adminBkEditDur'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
 
