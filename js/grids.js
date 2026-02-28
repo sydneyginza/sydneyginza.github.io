@@ -305,16 +305,24 @@ function renderBookingsGrid(){
     const e=getCalEntry(g.name,bookingsDateFilter);
     const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
     html+=`<tr><td class="bk-name-col"><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div class="cal-name">${g.name}</div></div></td>`;
+    const rowSkip=new Set();
     slots.forEach(a=>{
+      if(rowSkip.has(a))return;
       const inShift=slotInRange(a,e.start,e.end);
       const booking=inShift?getSlotBooking(g.name,bookingsDateFilter,a):null;
-      const cls=booking?(booking.status==='approved'?' bk-approved':' bk-pending'):inShift?' bk-avail':'';
       const end=hourEndSlots.has(a)?' bk-hour-end':'';
-      if(booking&&isAdmin()){
-        const isFirst=a===booking.startMin;
-        const lbl=isFirst?`<span class="bk-user-lbl">${booking.user}</span>`:'';
-        html+=`<td class="bk-slot${cls}${end} bk-admin-bk" data-bk-id="${booking.id}" title="${booking.user}">${lbl}</td>`;
+      if(booking){
+        const cls=booking.status==='approved'?' bk-approved':' bk-pending';
+        const n=Math.round((booking.endMin-booking.startMin)/30);
+        const cs=n>1?` colspan="${n}"`:'';
+        for(let s=a+30;s<booking.endMin;s+=30)rowSkip.add(s);
+        if(isAdmin()){
+          html+=`<td class="bk-slot${cls} bk-admin-bk"${cs} data-bk-id="${booking.id}" title="${booking.user}"><span class="bk-user-lbl">${booking.user}</span></td>`;
+        }else{
+          html+=`<td class="bk-slot${cls}"${cs}></td>`;
+        }
       }else{
+        const cls=inShift?' bk-avail':'';
         html+=`<td class="bk-slot${cls}${end}"></td>`;
       }
     });
@@ -333,7 +341,18 @@ function renderBookingsGrid(){
   observeLazy(el);
 }
 
-let _adminBkCurrent=null;
+function minToTime(min){return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0')}
+function timeToMin(t){const[h,m]=t.split(':');return parseInt(h)*60+parseInt(m)}
+function _adminBkCheckEdits(){
+  if(!_adminBkOrig)return;
+  const d=document.getElementById('adminBkEditDate').value;
+  const s=timeToMin(document.getElementById('adminBkEditStart').value||'00:00');
+  const e=timeToMin(document.getElementById('adminBkEditEnd').value||'00:00');
+  const changed=(d!==_adminBkOrig.date||s!==_adminBkOrig.startMin||e!==_adminBkOrig.endMin);
+  document.getElementById('adminBkEdit').disabled=!(changed&&e>s);
+}
+
+let _adminBkCurrent=null,_adminBkOrig=null;
 function openAdminBookingPopup(booking){
   _adminBkCurrent=booking;
   const user=CRED.find(c=>c.user===booking.user)||{};
@@ -350,7 +369,17 @@ function openAdminBookingPopup(booking){
     `<div class="admin-bk-row"><span class="admin-bk-label">Time</span><span>${fmtSlotTime(booking.startMin)} \u2013 ${fmtSlotTime(booking.endMin)}</span></div>`+
     `<div class="admin-bk-row"><span class="admin-bk-label">Duration</span><span>${durStr}</span></div>`+
     `<div class="admin-bk-row"><span class="admin-bk-label">Status</span><span>${booking.status==='approved'?'Approved':'Pending Review'}</span></div>`;
-  document.getElementById('adminBkActions').style.display=booking.status==='pending'?'':'none';
+  const isApproved=booking.status==='approved';
+  document.getElementById('adminBkActionsPending').style.display=isApproved?'none':'';
+  document.getElementById('adminBkActionsApproved').style.display=isApproved?'':'none';
+  document.getElementById('adminBkEditSection').style.display=isApproved?'':'none';
+  if(isApproved){
+    _adminBkOrig={date:booking.date,startMin:booking.startMin,endMin:booking.endMin};
+    document.getElementById('adminBkEditDate').value=booking.date;
+    document.getElementById('adminBkEditStart').value=minToTime(booking.startMin);
+    document.getElementById('adminBkEditEnd').value=minToTime(booking.endMin);
+    document.getElementById('adminBkEdit').disabled=true;
+  }
   document.getElementById('adminBkPopup').classList.add('open');
 }
 
@@ -370,8 +399,24 @@ async function rejectBooking(){
   else{calData._bookings.splice(idx,0,removed);showToast('Failed to save','error')}
 }
 
+async function editBooking(){
+  if(!_adminBkCurrent)return;
+  const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
+  const d=document.getElementById('adminBkEditDate').value;
+  const s=timeToMin(document.getElementById('adminBkEditStart').value);
+  const e=timeToMin(document.getElementById('adminBkEditEnd').value);
+  if(e<=s){showToast('End time must be after start','error');return}
+  const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
+  bk.date=d;bk.startMin=s;bk.endMin=e;
+  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
+  else{bk.date=prev.date;bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
+}
+
 document.getElementById('adminBkClose').onclick=()=>document.getElementById('adminBkPopup').classList.remove('open');
 document.getElementById('adminBkApprove').onclick=approveBooking;
 document.getElementById('adminBkReject').onclick=rejectBooking;
+document.getElementById('adminBkRejectApproved').onclick=rejectBooking;
+document.getElementById('adminBkEdit').onclick=editBooking;
 document.getElementById('adminBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminBkPopup'))document.getElementById('adminBkPopup').classList.remove('open')});
+['adminBkEditDate','adminBkEditStart','adminBkEditEnd'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
 
