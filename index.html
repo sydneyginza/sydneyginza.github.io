@@ -38,7 +38,7 @@
   try{if(localStorage.getItem('ginza_theme')==='light')document.documentElement.classList.add('light-mode-preload')}catch(e){}
 </script>
 <style>@font-face{font-family:'Orbitron';font-style:normal;font-weight:400 900;font-display:swap;src:url('/fonts/orbitron-var-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/rajdhani-400-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/rajdhani-600-latin.woff2') format('woff2')}*{margin:0;padding:0;box-sizing:border-box}:root{--accent:#b44aff;--accent2:#ff6f00;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.04);--text:#e0e0e0;--text-dim:#888}body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06)}.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}.page{display:none;opacity:0}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}@keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}.skeleton-shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0.03) 80%);background-size:800px 100%;animation:skeletonShimmer 1.8s ease-in-out infinite}@keyframes skeletonShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.skeleton-card{background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}.skeleton-card .skel-img{width:100%;aspect-ratio:3/4}.skeleton-card .skel-info{padding:16px;display:flex;flex-direction:column;gap:8px}.skeleton-card .skel-line{height:12px;border-radius:2px}.skeleton-card .skel-line.w60{width:60%}.skeleton-card .skel-line.w40{width:40%}.skeleton-card .skel-line.w80{width:80%}.skeleton-fade{transition:opacity .4s ease;opacity:1}html.light-mode-preload body{background:#f5f5f8;color:#1a1a2e}html.light-mode-preload nav{background:rgba(245,245,248,0.92);border-bottom-color:rgba(0,0,0,0.08)}</style>
-<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-/fn6DlWb7BQw+BuoveCIRdFcuzyip5n1+N11fw/jwyyUjpzq/HIzq2QicdJHqnOD" crossorigin="anonymous">
+<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-SDQQerO76WGf1Ox4DMJ21EDJCkbv1YVWyL6q1YiPwbJ3q6uxiaXrCdCL+mhihE13" crossorigin="anonymous">
 <noscript><link rel="stylesheet" href="/styles.min.css" media="all"></noscript>
 <script type="application/ld+json">
 {
@@ -123,9 +123,9 @@
 <button class="nav-menu-btn" id="navMenuBtn" aria-expanded="false" aria-controls="navDropdown"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg><span data-i18n="nav.menu"></span></button>
 <div class="nav-dropdown" id="navDropdown">
 <a href="#" id="navHome" class="active"><span data-i18n="nav.home"></span></a>
+<a href="#" id="navFavorites" style="display:none"><span class="nav-fav-wrap"><span data-i18n="nav.favorites"></span><span class="nav-fav-badge" id="navFavBadge"></span></span></a>
 <a href="#" id="navRoster"><span data-i18n="nav.roster"></span></a>
 <a href="#" id="navGirls"><span data-i18n="nav.girls"></span></a>
-<a href="#" id="navFavorites" style="display:none"><span class="nav-fav-wrap"><span data-i18n="nav.favorites"></span><span class="nav-fav-badge" id="navFavBadge"></span></span></a>
 <a href="#" id="navValue"><span data-i18n="nav.rates"></span></a>
 <a href="#" id="navEmployment"><span data-i18n="nav.employment"></span></a>
 <a href="#" id="navCalendar" style="display:none"><span data-i18n="nav.calendar"></span></a>
@@ -508,7 +508,7 @@
 
 <footer><p data-i18n="footer.rights"></p><p class="footer-privacy" data-i18n="footer.privacy"></p></footer>
 
-<script src="/js/app.min.js" defer integrity="sha384-cZM6v72Ex+ES/UuWg/RU49oOlPsq8ivuKKvMRaO7kU2kkdrI79Vt+naQoD6iCEzp" crossorigin="anonymous"></script>
+<script src="/js/app.min.js" defer integrity="sha384-S07Axw08GwMqokJA6emowKkrfLfyxjKbwuwwUG7fRuv4z7E8coiKrDs4QXLBJA7F" crossorigin="anonymous"></script>
 <script src="/js/analytics.min.js" defer integrity="sha384-M6QY30zVpKUlHXeu6BuoPlXWYp1VMQYufbJlty9qQC+mWqGtd3GnnratRT1OplrW" crossorigin="anonymous"></script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
 
@@ -556,6 +556,36 @@
 </div>
 </div>
 
+<div class="modal-overlay" id="adminNewBkPopup" role="dialog" aria-modal="true">
+<div class="admin-bk-panel">
+<button class="modal-close" id="adminNewBkClose" aria-label="Close">&times;</button>
+<div class="admin-bk-title">Create Booking</div>
+<div class="admin-bk-section"><div class="admin-bk-section-hdr">Details</div><div class="admin-bk-info" id="adminNewBkInfo"></div></div>
+<div class="admin-bk-section">
+<div class="admin-bk-section-hdr">Duration</div>
+<div class="bk-enq-dur-bar" id="adminNewBkDurBar">
+<button class="bk-enq-dur-btn" data-dur="30" disabled>30 mins</button>
+<button class="bk-enq-dur-btn" data-dur="45" disabled>45 mins</button>
+<button class="bk-enq-dur-btn" data-dur="60" disabled>1 hr</button>
+<button class="bk-enq-dur-btn" data-dur="90" disabled>1 hr 30 mins</button>
+<button class="bk-enq-dur-btn" data-dur="105" disabled>1 hr 45 mins</button>
+<button class="bk-enq-dur-btn" data-dur="120" disabled>2 hrs</button>
+</div>
+</div>
+<div class="admin-bk-actions">
+<button class="btn btn-outline" id="adminNewBkCancel">Cancel</button>
+<button class="btn btn-success" id="adminNewBkSelectUser" disabled>Select User</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="adminUserSelectPopup" role="dialog" aria-modal="true">
+<div class="admin-bk-panel">
+<button class="modal-close" id="adminUserSelectClose" aria-label="Close">&times;</button>
+<div class="admin-bk-title">Select User</div>
+<input class="admin-user-search" id="adminUserSearch" type="text" placeholder="Search by name, email or mobile..." autocomplete="off">
+<div class="admin-user-list" id="adminUserList"></div>
+</div>
+</div>
 <div class="modal-overlay" id="adminBkPopup" role="dialog" aria-modal="true">
 <div class="admin-bk-panel">
 <button class="modal-close" id="adminBkClose" aria-label="Close">&times;</button>

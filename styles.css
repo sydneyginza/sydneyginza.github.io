@@ -1323,3 +1323,18 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .offline-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,111,0,0.7);animation:offlinePulse 2s infinite}
 @keyframes offlinePulse{0%,100%{opacity:1}50%{opacity:.4}}
 
+/* Admin available slot click (bookings grid) */
+.bk-admin-avail{cursor:pointer}
+.bk-admin-avail:hover{filter:brightness(1.4);background:rgba(80,200,120,.35)}
+/* Admin user select popup */
+.admin-user-search{width:100%;box-sizing:border-box;background:#16161e;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:#e0e0e0;font-size:13px;padding:8px 12px;outline:none;margin-bottom:10px}
+.admin-user-search:focus{border-color:var(--accent)}
+.admin-user-list{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.admin-user-item{display:flex;flex-direction:column;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);cursor:pointer;transition:all .2s}
+.admin-user-item:hover{border-color:var(--accent);background:rgba(180,74,255,.1)}
+.admin-user-item-name{font-size:13px;font-weight:600;color:#e0e0e0}
+.admin-user-item-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.admin-user-no-user{border-style:dashed;border-color:rgba(255,255,255,.12)}
+.admin-user-no-user:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.05)}
+/* btn-outline for cancel in admin create booking */
+.btn-outline{background:transparent;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.6)}.btn-outline:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.9)}

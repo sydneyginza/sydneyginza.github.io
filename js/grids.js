@@ -323,7 +323,11 @@ function renderBookingsGrid(){
         }
       }else{
         const cls=inShift?' bk-avail':'';
-        html+=`<td class="bk-slot${cls}${end}"></td>`;
+        if(isAdmin()&&inShift){
+          html+=`<td class="bk-slot bk-avail bk-admin-avail${end}" data-girl="${g.name}" data-date="${bookingsDateFilter}" data-slot="${a}"></td>`;
+        }else{
+          html+=`<td class="bk-slot${cls}${end}"></td>`;
+        }
       }
     });
     html+='</tr>';
@@ -336,6 +340,9 @@ function renderBookingsGrid(){
       td.addEventListener('mouseenter',()=>{const id=td.dataset.bkId;el.querySelectorAll(`[data-bk-id="${id}"]`).forEach(c=>c.classList.add('bk-hover'))});
       td.addEventListener('mouseleave',()=>{const id=td.dataset.bkId;el.querySelectorAll(`[data-bk-id="${id}"]`).forEach(c=>c.classList.remove('bk-hover'))});
       td.addEventListener('click',()=>{const bk=calData._bookings.find(b=>b.id===td.dataset.bkId);if(bk)openAdminBookingPopup(bk)});
+    });
+    el.querySelectorAll('.bk-admin-avail').forEach(td=>{
+      td.addEventListener('click',()=>openAdminNewBooking(td.dataset.girl,td.dataset.date,parseInt(td.dataset.slot)));
     });
   }
   observeLazy(el);
@@ -417,6 +424,69 @@ async function editBooking(){
   else{bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
 }
 
+/* === Admin Create Booking === */
+let _adminNewBkGirl=null,_adminNewBkDate=null,_adminNewBkStart=null,_adminNewBkSel=null;
+
+function openAdminNewBooking(girlName,date,slotMin){
+  _adminNewBkGirl=girlName;_adminNewBkDate=date;_adminNewBkStart=slotMin;_adminNewBkSel=null;
+  const f=dispDate(date);
+  document.getElementById('adminNewBkInfo').innerHTML=
+    `<div class="admin-bk-row"><span class="admin-bk-label">Girl</span><span>${girlName}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Date</span><span>${f.day} ${f.date}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Start</span><span>${fmtSlotTime(slotMin)}</span></div>`;
+  _adminNewBkUpdateDurs();
+  document.getElementById('adminNewBkSelectUser').disabled=true;
+  document.getElementById('adminNewBkPopup').classList.add('open');
+}
+
+function _adminNewBkUpdateDurs(){
+  const shiftEnd=getShiftEndMin(_adminNewBkGirl,_adminNewBkDate);
+  document.getElementById('adminNewBkDurBar').querySelectorAll('.bk-enq-dur-btn').forEach(btn=>{
+    const dur=parseInt(btn.dataset.dur);
+    const endMin=_adminNewBkStart+dur;
+    const fitsShift=shiftEnd===null||endMin<=shiftEnd;
+    let hasConflict=false;
+    for(let s=_adminNewBkStart+15;s<endMin;s+=15){if(isSlotBooked(_adminNewBkGirl,_adminNewBkDate,s)){hasConflict=true;break}}
+    btn.disabled=!fitsShift||hasConflict;
+    btn.classList.remove('active');
+  });
+}
+
+function openAdminUserSelect(){
+  document.getElementById('adminUserSearch').value='';
+  _renderAdminUserList('');
+  document.getElementById('adminUserSelectPopup').classList.add('open');
+}
+
+function _renderAdminUserList(query){
+  const q=query.trim().toLowerCase();
+  const users=Array.isArray(CRED)?[...CRED].sort((a,b)=>(a.user||'').localeCompare(b.user||'')):[];
+  const filtered=q?users.filter(c=>(c.user||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)||(c.mobile||'').toLowerCase().includes(q)):users;
+  const list=document.getElementById('adminUserList');
+  let html=`<div class="admin-user-item admin-user-no-user" data-user="__none__"><div class="admin-user-item-name">No User Advised</div><div class="admin-user-item-meta">Create booking without linking a user account</div></div>`;
+  filtered.forEach(c=>{
+    const meta=[c.email,c.mobile].filter(Boolean).join(' · ');
+    html+=`<div class="admin-user-item" data-user="${c.user}"><div class="admin-user-item-name">${c.user}</div><div class="admin-user-item-meta">${meta||'—'}</div></div>`;
+  });
+  list.innerHTML=html;
+  list.querySelectorAll('.admin-user-item').forEach(item=>{
+    item.addEventListener('click',()=>createAdminBooking(item.dataset.user==='__none__'?'No User Advised':item.dataset.user));
+  });
+}
+
+async function createAdminBooking(user){
+  if(!_adminNewBkSel||!_adminNewBkGirl)return;
+  if(!Array.isArray(calData._bookings))calData._bookings=[];
+  const booking={id:Date.now().toString(36)+Math.random().toString(36).slice(2),girlName:_adminNewBkGirl,date:_adminNewBkDate,startMin:_adminNewBkSel.startMin,endMin:_adminNewBkSel.endMin,user,status:'approved',ts:new Date().toISOString()};
+  calData._bookings.push(booking);
+  if(await saveCalData()){
+    saveBookingLog({type:'booking_admin_created',bookingId:booking.id,user:booking.user,girlName:booking.girlName,date:booking.date,startMin:booking.startMin,endMin:booking.endMin,status:'approved',by:loggedInUser});
+    document.getElementById('adminUserSelectPopup').classList.remove('open');
+    document.getElementById('adminNewBkPopup').classList.remove('open');
+    showToast('Booking created');renderBookingsGrid();
+  }else{calData._bookings.pop();showToast('Failed to save','error')}
+}
+
 document.getElementById('adminBkClose').onclick=()=>document.getElementById('adminBkPopup').classList.remove('open');
 document.getElementById('adminBkApprove').onclick=approveBooking;
 document.getElementById('adminBkReject').onclick=rejectBooking;
@@ -424,4 +494,20 @@ document.getElementById('adminBkRejectApproved').onclick=rejectBooking;
 document.getElementById('adminBkEdit').onclick=editBooking;
 document.getElementById('adminBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminBkPopup'))document.getElementById('adminBkPopup').classList.remove('open')});
 ['adminBkEditStart','adminBkEditDur'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
+document.getElementById('adminNewBkClose').onclick=()=>document.getElementById('adminNewBkPopup').classList.remove('open');
+document.getElementById('adminNewBkCancel').onclick=()=>document.getElementById('adminNewBkPopup').classList.remove('open');
+document.getElementById('adminNewBkSelectUser').onclick=openAdminUserSelect;
+document.getElementById('adminNewBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminNewBkPopup'))document.getElementById('adminNewBkPopup').classList.remove('open')});
+document.getElementById('adminUserSelectClose').onclick=()=>document.getElementById('adminUserSelectPopup').classList.remove('open');
+document.getElementById('adminUserSearch').addEventListener('input',e=>_renderAdminUserList(e.target.value));
+document.getElementById('adminUserSelectPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminUserSelectPopup'))document.getElementById('adminUserSelectPopup').classList.remove('open')});
+document.getElementById('adminNewBkDurBar').querySelectorAll('.bk-enq-dur-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.disabled)return;
+    document.getElementById('adminNewBkDurBar').querySelectorAll('.bk-enq-dur-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    _adminNewBkSel={startMin:_adminNewBkStart,endMin:_adminNewBkStart+parseInt(btn.dataset.dur)};
+    document.getElementById('adminNewBkSelectUser').disabled=false;
+  });
+});
 
