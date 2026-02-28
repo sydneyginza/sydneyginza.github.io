@@ -802,12 +802,12 @@ async function saveBookingLog(entry){
   const dateStr=new Date().toISOString().slice(0,10);
   const path=`${BKLP}/${dateStr}.json`;
   let existing=[],sha=null;
-  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;const parsed=dec(d.content);if(Array.isArray(parsed))existing=parsed;}}catch(_){}
+  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});console.log('[BKLog] GET status:',r.status);if(r.ok){const d=await r.json();sha=d.sha;console.log('[BKLog] sha:',sha);try{const parsed=dec(d.content);if(Array.isArray(parsed))existing=parsed;}catch(de){console.warn('[BKLog] dec failed:',de.message);}}}catch(ge){console.error('[BKLog] GET error:',ge);}
   if(existing.length>=1000)existing=existing.slice(existing.length-999);
   existing.push({ts:new Date().toISOString(),...entry});
   const body={message:'Log booking',content:enc(existing)};
   if(sha)body.sha=sha;
-  try{await fetch(`${DATA_API}/${path}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)})}catch(_){}
+  try{const pr=await fetch(`${DATA_API}/${path}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)});console.log('[BKLog] PUT status:',pr.status);if(!pr.ok){const t=await pr.text();console.error('[BKLog] PUT error body:',t);}}catch(pe){console.error('[BKLog] PUT error:',pe);}
 }
 
 /* === Activity Log === */
