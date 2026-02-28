@@ -102,7 +102,7 @@ return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(
 let bookingsDateFilter=null;
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 function isDatePublished(ds){return Array.isArray(calData._published)&&calData._published.includes(ds)}
-async function togglePublishDate(ds){if(!calData._published)calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
+async function togglePublishDate(ds){if(!Array.isArray(calData._published))calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
 const availDates=dates.filter(ds=>hasGirlsOnDate(ds)&&isDatePublished(ds));
@@ -288,7 +288,7 @@ function slotInRange(absMin,startStr,endStr){
 function renderBookingsGrid(){
   const el=document.getElementById('bookingsGrid');
   if(!bookingsDateFilter){el.innerHTML='';return}
-  const active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end});
+  const active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end}).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   if(!active.length){el.innerHTML='<div class="empty-msg">No girls scheduled.</div>';return}
   const slots=getBookingTimeSlots();
   let html='<div class="bk-table-wrap"><table class="bk-table"><thead><tr><th class="bk-name-col"></th>';
