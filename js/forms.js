@@ -157,7 +157,10 @@ girls=cachedGirls;
 const calFresh=!isCalCacheStale();
 calData=(calFresh&&cachedCal)?normalizeCalData(cachedCal):{};
 _calWasStale=!calFresh;
-fullRenderAndRoute();
+/* Render immediately from cache but defer routing until auth is loaded */
+if(typeof queryToFilters==='function')queryToFilters();
+fullRender();
+if(window.location.pathname==='/')history.replaceState({path:'/'},'Ginza Empire','/');
 removeSkeletons();
 renderedFromCache=true;
 }
@@ -207,6 +210,9 @@ removeSkeletons();
 fullRender();
 if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);
 }
+
+/* Resolve URL route now that auth is loaded (deferred from Phase 1 cache render) */
+if(renderedFromCache&&window.location.pathname!=='/')Router.resolve();
 
 /* Apply saved language preference */
 if(typeof applyLang==='function'){try{applyLang()}catch(e){}}
