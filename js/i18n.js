@@ -229,6 +229,7 @@ const LANG_DICT = {
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
     /* Admin nav */
     'nav.calendar':'Calendar',
+    'nav.bookings':'Bookings',
     'nav.analytics':'Analytics',
     'nav.profileDb':'Profile Database',
     'nav.menu':'Menu',
@@ -625,6 +626,7 @@ const LANG_DICT = {
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
     /* Admin nav */
     'nav.calendar':'カレンダー',
+    'nav.bookings':'予約管理',
     'nav.analytics':'アナリティクス',
     'nav.profileDb':'プロフィールDB',
     'nav.menu':'メニュー',
@@ -1021,6 +1023,7 @@ const LANG_DICT = {
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
     /* Admin nav */
     'nav.calendar':'캘린더',
+    'nav.bookings':'예약 관리',
     'nav.analytics':'분석',
     'nav.profileDb':'프로필 DB',
     'nav.menu':'메뉴',
@@ -1417,6 +1420,7 @@ const LANG_DICT = {
     'emp.addressHtml':'Mobile: <a href="tel:+61452572588">0452 572 588</a> (EMPLOYMENT Only)<br>Kakao talk: gloria8512 (한국어)<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="03646a6d7962606f766130323343646e626a6f2d606c6e">[email&#160;protected]</a><br>Line ID: kanako254(日本語)<br>Yuki <a href="tel:+61452572588">0452 572 588</a><br>KakaoTalk: summer190<br>Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f0fef9edf6f4fbe2f5a4a6a7d7f0faf6fefbb9f4f8fa">[email&#160;protected]</a> (Employment only)',
     /* Admin nav */
     'nav.calendar':'日历',
+    'nav.bookings':'预约管理',
     'nav.analytics':'分析',
     'nav.profileDb':'用户数据库',
     'nav.menu':'菜单',

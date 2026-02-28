@@ -99,6 +99,7 @@ el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHove
 return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid)})}
 
 /* Roster */
+let bookingsDateFilter=null;
 const ROSTER_ADVANCE_KEY='ginza_roster_advance';
 function getRosterAdvanceDays(){try{const v=parseInt(localStorage.getItem(ROSTER_ADVANCE_KEY));return(v>=1&&v<=7)?v:7}catch(e){return 7}}
 function setRosterAdvanceDays(n){try{localStorage.setItem(ROSTER_ADVANCE_KEY,String(n))}catch(e){}}
@@ -253,4 +254,56 @@ else{if(calData[n])delete calData[n][d];if(calPending[n])delete calPending[n][d]
 table.querySelectorAll('.cal-time-input').forEach(sel=>{sel.onchange=function(){const n=this.dataset.tname,d=this.dataset.tdate,f=this.dataset.field;if(!calData[n]||!calData[n][d])return;if(typeof calData[n][d]!=='object')calData[n][d]={start:'',end:''};calData[n][d][f]=this.value;const entry=calData[n][d];const w=table.querySelector(`[data-warn-name="${n}"][data-warn-date="${d}"]`);
 if(entry.start&&entry.end){this.classList.remove('invalid');if(calPending[n])delete calPending[n][d];if(w)w.textContent='';queueCalSave(this.closest('td'));showToast('Schedule saved')}
 else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!calPending[n])calPending[n]={};calPending[n][d]=true}}});})}
+
+/* === Bookings Page === */
+function renderBookingsFilters(){
+  const fb=document.getElementById('bookingsFilterBar');fb.innerHTML='';
+  const dates=getWeekDates();const today=dates[0];
+  const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
+  if(!bookingsDateFilter||!availDates.includes(bookingsDateFilter))bookingsDateFilter=availDates[0]||null;
+  availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');
+    b.className='filter-btn'+(ds===bookingsDateFilter?' date-active':'');
+    b.textContent=ds===today?t('ui.today'):f.day+' '+f.date;
+    b.onclick=()=>{bookingsDateFilter=ds;renderBookingsFilters();renderBookingsGrid()};
+    fb.appendChild(b)});
+}
+
+function getBookingTimeSlots(){
+  const s=[];
+  for(let h=10;h<24;h++)for(let m=(h===10?30:0);m<60;m+=15)s.push(h*60+m);
+  for(let h=0;h<=4;h++)for(let m=0;m<=(h===4?0:45);m+=15)s.push((h+24)*60+m);
+  return s;
+}
+
+function fmtSlotTime(absMin){
+  const h=Math.floor(absMin/60)%24,m=absMin%60;
+  const ap=h<12?'am':'pm',h12=h===0?12:h>12?h-12:h;
+  return h12+':'+String(m).padStart(2,'0')+ap;
+}
+
+function slotInRange(absMin,startStr,endStr){
+  if(!startStr||!endStr)return false;
+  const[sh,sm]=startStr.split(':').map(Number);const[eh,em]=endStr.split(':').map(Number);
+  const startMin=sh*60+sm;let endMin=eh*60+em;
+  if(endMin<=startMin)endMin+=24*60;
+  return absMin>=startMin&&absMin<endMin;
+}
+
+function renderBookingsGrid(){
+  const el=document.getElementById('bookingsGrid');
+  if(!bookingsDateFilter){el.innerHTML='';return}
+  const active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end});
+  if(!active.length){el.innerHTML='<div class="empty-msg">No girls scheduled.</div>';return}
+  const slots=getBookingTimeSlots();
+  let html='<div class="bk-table-wrap"><table class="bk-table"><thead><tr><th class="bk-name-col"></th>';
+  slots.forEach(a=>{html+=`<th class="bk-time-hdr">${fmtSlotTime(a)}</th>`});
+  html+='</tr></thead><tbody>';
+  active.forEach(g=>{
+    const e=getCalEntry(g.name,bookingsDateFilter);
+    html+=`<tr><td class="bk-name-col">${g.name}</td>`;
+    slots.forEach(a=>{const cls=slotInRange(a,e.start,e.end)?' bk-avail':'';html+=`<td class="bk-slot${cls}"></td>`});
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';el.innerHTML=html;
+}
 
