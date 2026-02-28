@@ -659,6 +659,8 @@ function observeCalEntrance(table) {
 }
 
 /* === URL Router (pushState / popstate) === */
+/* Handle SPA redirect from 404.html — must run before anything reads location */
+(function(){const sp=new URLSearchParams(window.location.search).get('_sp');if(sp)history.replaceState(null,'',sp)})();
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const Router = (function() {
   const PAGE_ROUTES = {
@@ -715,9 +717,6 @@ const Router = (function() {
 
   /* Parse current URL and navigate to the right view */
   function resolve() {
-    /* Handle SPA redirect from 404.html */
-    const _spParam = new URLSearchParams(window.location.search).get('_sp');
-    if (_spParam) { history.replaceState(null, '', _spParam); }
     if(typeof queryToFilters==='function')queryToFilters();
     const path = window.location.pathname;
 
