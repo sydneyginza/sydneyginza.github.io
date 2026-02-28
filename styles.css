@@ -1237,6 +1237,8 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 
 /* Calendar publish row */
 .cal-publish-row th{padding:8px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+.cal-date-published{color:#00ff7f!important;text-shadow:0 0 8px rgba(0,255,127,0.3)}
+.cal-date-published .cal-day-name{color:rgba(0,255,127,0.7)}
 .cal-pub-btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:5px 10px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text-muted);cursor:pointer;transition:all .2s;white-space:nowrap}
 .cal-pub-btn:hover{border-color:var(--accent);color:var(--accent)}
 .cal-pub-btn.published{background:rgba(180,74,255,.15);border-color:var(--accent);color:var(--accent)}
