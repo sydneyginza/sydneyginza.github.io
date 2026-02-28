@@ -351,10 +351,9 @@ function populateAdminStartSelect(){
 }
 function _adminBkCheckEdits(){
   if(!_adminBkOrig)return;
-  const d=document.getElementById('adminBkEditDate').value;
   const s=parseInt(document.getElementById('adminBkEditStart').value||'0');
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
-  const changed=(d!==_adminBkOrig.date||s!==_adminBkOrig.startMin||s+dur!==_adminBkOrig.endMin);
+  const changed=(s!==_adminBkOrig.startMin||s+dur!==_adminBkOrig.endMin);
   document.getElementById('adminBkEdit').disabled=!changed;
 }
 
@@ -381,7 +380,6 @@ function openAdminBookingPopup(booking){
   document.getElementById('adminBkEditSection').style.display=isApproved?'':'none';
   if(isApproved){
     _adminBkOrig={date:booking.date,startMin:booking.startMin,endMin:booking.endMin};
-    document.getElementById('adminBkEditDate').value=booking.date;
     populateAdminStartSelect();
     document.getElementById('adminBkEditStart').value=String(booking.startMin);
     const durEl=document.getElementById('adminBkEditDur');
@@ -411,13 +409,12 @@ async function rejectBooking(){
 async function editBooking(){
   if(!_adminBkCurrent)return;
   const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
-  const d=document.getElementById('adminBkEditDate').value;
   const s=parseInt(document.getElementById('adminBkEditStart').value);
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
-  bk.date=d;bk.startMin=s;bk.endMin=s+dur;
+  bk.startMin=s;bk.endMin=s+dur;
   if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
-  else{bk.date=prev.date;bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
+  else{bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
 }
 
 document.getElementById('adminBkClose').onclick=()=>document.getElementById('adminBkPopup').classList.remove('open');
@@ -426,5 +423,5 @@ document.getElementById('adminBkReject').onclick=rejectBooking;
 document.getElementById('adminBkRejectApproved').onclick=rejectBooking;
 document.getElementById('adminBkEdit').onclick=editBooking;
 document.getElementById('adminBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminBkPopup'))document.getElementById('adminBkPopup').classList.remove('open')});
-['adminBkEditDate','adminBkEditStart','adminBkEditDur'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
+['adminBkEditStart','adminBkEditDur'].forEach(id=>document.getElementById(id).addEventListener('change',_adminBkCheckEdits));
 
