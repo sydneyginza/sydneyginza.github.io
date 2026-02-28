@@ -1238,7 +1238,8 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .bk-pending{background:rgba(255,220,80,.45)}
 .bk-approved{background:rgba(220,80,80,.45)}
 .bk-hover{filter:brightness(1.5);cursor:pointer}
-.bk-user-lbl{display:block;font-size:8px;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:36px;line-height:26px;pointer-events:none}
+.bk-admin-bk{text-align:center}
+.bk-user-lbl{display:block;font-size:9px;color:rgba(255,255,255,.9);white-space:nowrap;line-height:26px;pointer-events:none;text-align:center}
 
 /* ── Admin Booking Popup ── */
 .admin-bk-panel{background:var(--card-bg);border-radius:12px;width:min(96vw,440px);padding:24px 28px;display:flex;flex-direction:column;gap:16px}
@@ -1254,7 +1255,8 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .admin-bk-edit-section{display:flex;flex-direction:column;gap:8px}
 .admin-bk-edit-fields{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .admin-bk-edit-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.admin-bk-input{-webkit-appearance:none;appearance:none;background:var(--card-bg);border:1px solid rgba(255,255,255,.12);border-radius:6px;color:var(--text-primary);font-size:12px;padding:4px 8px;color-scheme:dark}
+.admin-bk-input{-webkit-appearance:none;appearance:none;background:#16161e url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 8px center;background-size:10px;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:#e0e0e0;font-size:12px;padding:4px 24px 4px 8px;color-scheme:dark}
+.admin-bk-input option{background:#16161e;color:#e0e0e0}
 
 /* ── My Profile — Booking Status Card ── */
 .mp-booking-hdr{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
