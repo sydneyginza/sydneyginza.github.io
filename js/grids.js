@@ -102,7 +102,8 @@ return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(
 let bookingsDateFilter=null;
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 function isDatePublished(ds){return Array.isArray(calData._published)&&calData._published.includes(ds)}
-function isSlotBooked(girlName,date,slotMin){if(!Array.isArray(calData._bookings))return false;return calData._bookings.some(b=>b.girlName===girlName&&b.date===date&&b.status==='pending'&&slotMin>=b.startMin&&slotMin<b.endMin)}
+function isSlotBooked(girlName,date,slotMin){if(!Array.isArray(calData._bookings))return false;return calData._bookings.some(b=>b.girlName===girlName&&b.date===date&&(b.status==='pending'||b.status==='approved')&&slotMin>=b.startMin&&slotMin<b.endMin)}
+function getSlotBooking(girlName,date,slotMin){if(!Array.isArray(calData._bookings))return null;return calData._bookings.find(b=>b.girlName===girlName&&b.date===date&&slotMin>=b.startMin&&slotMin<b.endMin)||null}
 async function togglePublishDate(ds){if(!Array.isArray(calData._published))calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
@@ -304,12 +305,73 @@ function renderBookingsGrid(){
     const e=getCalEntry(g.name,bookingsDateFilter);
     const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
     html+=`<tr><td class="bk-name-col"><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div class="cal-name">${g.name}</div></div></td>`;
-    slots.forEach(a=>{const inShift=slotInRange(a,e.start,e.end);const pending=inShift&&isSlotBooked(g.name,bookingsDateFilter,a);const cls=pending?' bk-pending':inShift?' bk-avail':'';const end=hourEndSlots.has(a)?' bk-hour-end':'';html+=`<td class="bk-slot${cls}${end}"></td>`});
+    slots.forEach(a=>{
+      const inShift=slotInRange(a,e.start,e.end);
+      const booking=inShift?getSlotBooking(g.name,bookingsDateFilter,a):null;
+      const cls=booking?(booking.status==='approved'?' bk-approved':' bk-pending'):inShift?' bk-avail':'';
+      const end=hourEndSlots.has(a)?' bk-hour-end':'';
+      if(booking&&isAdmin()){
+        const isFirst=a===booking.startMin;
+        const lbl=isFirst?`<span class="bk-user-lbl">${booking.user}</span>`:'';
+        html+=`<td class="bk-slot${cls}${end} bk-admin-bk" data-bk-id="${booking.id}" title="${booking.user}">${lbl}</td>`;
+      }else{
+        html+=`<td class="bk-slot${cls}${end}"></td>`;
+      }
+    });
     html+='</tr>';
   });
   html+='</tbody></table></div>';
   el.innerHTML=html;
   el.querySelectorAll('.cal-profile').forEach(p=>{p.onclick=()=>{profileReturnPage='bookingsPage';showProfile(parseInt(p.dataset.idx))}});
+  if(isAdmin()){
+    el.querySelectorAll('.bk-admin-bk').forEach(td=>{
+      td.addEventListener('mouseenter',()=>{const id=td.dataset.bkId;el.querySelectorAll(`[data-bk-id="${id}"]`).forEach(c=>c.classList.add('bk-hover'))});
+      td.addEventListener('mouseleave',()=>{const id=td.dataset.bkId;el.querySelectorAll(`[data-bk-id="${id}"]`).forEach(c=>c.classList.remove('bk-hover'))});
+      td.addEventListener('click',()=>{const bk=calData._bookings.find(b=>b.id===td.dataset.bkId);if(bk)openAdminBookingPopup(bk)});
+    });
+  }
   observeLazy(el);
 }
+
+let _adminBkCurrent=null;
+function openAdminBookingPopup(booking){
+  _adminBkCurrent=booking;
+  const user=CRED.find(c=>c.user===booking.user)||{};
+  const f=dispDate(booking.date);
+  const dur=booking.endMin-booking.startMin;
+  const durStr=dur>=60?(dur/60)+'hr'+(dur>60?'s':''):dur+' min';
+  document.getElementById('adminBkUserInfo').innerHTML=
+    `<div class="admin-bk-row"><span class="admin-bk-label">Username</span><span>${booking.user}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Phone</span><span>${user.mobile||'—'}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Email</span><span>${user.email||'—'}</span></div>`;
+  document.getElementById('adminBkBookingInfo').innerHTML=
+    `<div class="admin-bk-row"><span class="admin-bk-label">Girl</span><span>${booking.girlName}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Date</span><span>${f.day} ${f.date}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Time</span><span>${fmtSlotTime(booking.startMin)} \u2013 ${fmtSlotTime(booking.endMin)}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Duration</span><span>${durStr}</span></div>`+
+    `<div class="admin-bk-row"><span class="admin-bk-label">Status</span><span>${booking.status==='approved'?'Approved':'Pending Review'}</span></div>`;
+  document.getElementById('adminBkActions').style.display=booking.status==='pending'?'':'none';
+  document.getElementById('adminBkPopup').classList.add('open');
+}
+
+async function approveBooking(){
+  if(!_adminBkCurrent)return;
+  const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
+  bk.status='approved';
+  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking approved');renderBookingsGrid()}
+  else{bk.status='pending';showToast('Failed to save','error')}
+}
+
+async function rejectBooking(){
+  if(!_adminBkCurrent)return;
+  const idx=calData._bookings.findIndex(b=>b.id===_adminBkCurrent.id);if(idx===-1)return;
+  const removed=calData._bookings.splice(idx,1)[0];
+  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking rejected');renderBookingsGrid()}
+  else{calData._bookings.splice(idx,0,removed);showToast('Failed to save','error')}
+}
+
+document.getElementById('adminBkClose').onclick=()=>document.getElementById('adminBkPopup').classList.remove('open');
+document.getElementById('adminBkApprove').onclick=approveBooking;
+document.getElementById('adminBkReject').onclick=rejectBooking;
+document.getElementById('adminBkPopup').addEventListener('click',e=>{if(e.target===document.getElementById('adminBkPopup'))document.getElementById('adminBkPopup').classList.remove('open')});
 

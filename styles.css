@@ -1236,6 +1236,20 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .bk-enquiry{background:rgba(255,220,100,.45)}
 .bk-confirmed{background:rgba(220,80,80,.45)}
 .bk-pending{background:rgba(255,220,80,.45)}
+.bk-approved{background:rgba(220,80,80,.45)}
+.bk-hover{filter:brightness(1.5);cursor:pointer}
+.bk-user-lbl{display:block;font-size:8px;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:36px;line-height:26px;pointer-events:none}
+
+/* ── Admin Booking Popup ── */
+.admin-bk-panel{background:var(--card-bg);border-radius:12px;width:min(96vw,440px);padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.admin-bk-title{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted)}
+.admin-bk-section{display:flex;flex-direction:column;gap:8px}
+.admin-bk-section-hdr{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);opacity:.7}
+.admin-bk-info{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.admin-bk-row{display:flex;justify-content:space-between;font-size:13px}
+.admin-bk-label{color:var(--text-muted)}
+.admin-bk-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.btn-success{background:rgba(0,200,100,.12);border-color:rgba(0,200,100,.6);color:rgba(0,220,110,.9)}.btn-success:hover{background:rgba(0,200,100,.22)}
 
 /* ── My Profile — Booking Status Card ── */
 .mp-booking-hdr{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
