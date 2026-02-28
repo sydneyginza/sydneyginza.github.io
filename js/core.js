@@ -670,7 +670,8 @@ const Router = (function() {
     employmentPage: '/employment',
     calendarPage:   '/calendar',
     analyticsPage:  '/analytics',
-    profileDbPage:  '/profile-database'
+    profileDbPage:  '/profile-database',
+    bookingsPage:   '/bookings'
   };
   const PATH_TO_PAGE = {};
   for (const id in PAGE_ROUTES) PATH_TO_PAGE[PAGE_ROUTES[id]] = id;
@@ -762,6 +763,13 @@ const Router = (function() {
         return true;
       }
       if (pageId === 'profileDbPage' && !isAdmin()) {
+        _suppressPush = true;
+        showPage('homePage');
+        _suppressPush = false;
+        replace('/', 'Ginza Empire');
+        return true;
+      }
+      if (pageId === 'bookingsPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
