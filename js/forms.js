@@ -67,9 +67,18 @@ let _bkEnqSel=null;   /* {date,startMin,endMin} - set after start+duration chose
 let _bkEnqStart=null; /* {date,startMin} - set after clicking a start slot */
 let _bkEnqSubmitting=false;
 
+function hasActiveFutureBooking(){
+  if(!Array.isArray(calData._bookings))return false;
+  const today=new Date().toISOString().slice(0,10);
+  const now=nowAbsMin();
+  return calData._bookings.some(b=>
+    b.user===loggedInUser&&
+    (b.status==='pending'||b.status==='approved')&&
+    (b.date>today||(b.date===today&&b.endMin>now))
+  );
+}
 function openBookingEnquiry(girlIdx){
-  const existingBk=Array.isArray(calData._bookings)&&calData._bookings.find(b=>b.user===loggedInUser&&b.status==='pending');
-  if(existingBk){showToast('You already have a pending booking. Check your profile for status.','error');return}
+  if(hasActiveFutureBooking()){showToast('You already have an active booking. Check your profile for status.','error');return}
   _bkEnqIdx=girlIdx;
   _bkEnqSel=null;
   _bkEnqStart=null;
@@ -233,6 +242,7 @@ function renderBkEnqReview(){
 
 async function submitBookingRequest(){
   if(_bkEnqSubmitting||!_bkEnqSel)return;
+  if(hasActiveFutureBooking()){showToast('You already have an active booking.','error');closeBkEnq();return}
   _bkEnqSubmitting=true;
   const btn=document.getElementById('bkEnqSubmit');
   btn.textContent='Sending...';btn.style.pointerEvents='none';

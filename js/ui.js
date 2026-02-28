@@ -803,7 +803,8 @@ document.getElementById('mpNewPass').value='';
 document.getElementById('mpConfirmPass').value='';
 document.getElementById('mpError').textContent='';
 const bkSec=document.getElementById('mpBookingSection');
-const myBk=Array.isArray(calData._bookings)&&calData._bookings.find(b=>b.user===loggedInUser&&(b.status==='pending'||b.status==='approved'));
+const _mpNow=new Date(),_mpH=_mpNow.getHours(),_mpM=_mpNow.getMinutes(),_mpNowMin=_mpH<10?(_mpH+24)*60+_mpM:_mpH*60+_mpM,_mpToday=_mpNow.toISOString().slice(0,10);
+const myBk=(Array.isArray(calData._bookings)&&calData._bookings.filter(b=>b.user===loggedInUser&&(b.status==='pending'||b.status==='approved')&&(b.date>_mpToday||(b.date===_mpToday&&b.endMin>_mpNowMin))).sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):a.startMin-b.startMin)[0])||null;
 if(myBk&&bkSec){
   const f=dispDate(myBk.date);
   const dur=myBk.endMin-myBk.startMin;
