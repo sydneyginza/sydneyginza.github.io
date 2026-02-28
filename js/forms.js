@@ -48,6 +48,8 @@ document.getElementById('enquirySubmit').onclick=async()=>{
   if(!loggedIn&&!name){document.getElementById('eqName').focus();errEl.textContent=t('enquiry.nameRequired');return}
   if(!loggedIn&&!phone&&!email){errEl.textContent=t('enquiry.contactRequired');return}
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){errEl.textContent=t('enquiry.emailInvalid');return}
+  if(!date){document.getElementById('eqDate').focus();errEl.textContent=t('enquiry.dateRequired');return}
+  if(!time){document.getElementById('eqTime').focus();errEl.textContent=t('enquiry.timeRequired');return}
   const submitBtn=document.getElementById('enquirySubmit');submitBtn.textContent=t('enquiry.sending');submitBtn.style.pointerEvents='none';
   try{
     const payload={girlName:_eqGirlName,customerName:name,phone,email,date,time,duration:_eqDuration,message,lang:siteLanguage,ts:new Date().toISOString(),username:loggedInUser||null};

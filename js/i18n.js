@@ -88,6 +88,8 @@ const LANG_DICT = {
     'enquiry.nameRequired':'Please enter your name.',
     'enquiry.contactRequired':'Please provide a phone number or email.',
     'enquiry.emailInvalid':'Please enter a valid email address.',
+    'enquiry.dateRequired':'Please select a preferred date.',
+    'enquiry.timeRequired':'Please select a preferred time.',
     'enquiry.throttle':'Please wait before submitting another enquiry.',
     'enquiry.signin':'{link} to make a booking enquiry',
     /* UI actions */
@@ -482,6 +484,8 @@ const LANG_DICT = {
     'enquiry.nameRequired':'お名前を入力してください。',
     'enquiry.contactRequired':'電話番号またはメールアドレスを入力してください。',
     'enquiry.emailInvalid':'正しいメールアドレスを入力してください。',
+    'enquiry.dateRequired':'希望日を選択してください。',
+    'enquiry.timeRequired':'希望時間を選択してください。',
     'enquiry.throttle':'少々お待ちください。',
     'enquiry.signin':'{link}して予約のお問い合わせをする',
     /* UI actions */
@@ -876,6 +880,8 @@ const LANG_DICT = {
     'enquiry.nameRequired':'이름을 입력해주세요.',
     'enquiry.contactRequired':'전화번호 또는 이메일을 입력해주세요.',
     'enquiry.emailInvalid':'유효한 이메일 주소를 입력해주세요.',
+    'enquiry.dateRequired':'희망 날짜를 선택해주세요.',
+    'enquiry.timeRequired':'희망 시간을 선택해주세요.',
     'enquiry.throttle':'잠시 후 다시 시도해주세요.',
     'enquiry.signin':'{link}하여 예약 문의하기',
     /* UI actions */
@@ -1270,6 +1276,8 @@ const LANG_DICT = {
     'enquiry.nameRequired':'请输入您的姓名。',
     'enquiry.contactRequired':'请提供电话号码或邮箱。',
     'enquiry.emailInvalid':'请输入有效的邮箱地址。',
+    'enquiry.dateRequired':'请选择首选日期。',
+    'enquiry.timeRequired':'请选择首选时间。',
     'enquiry.throttle':'请稍后再提交。',
     'enquiry.signin':'{link}以进行预约咨询',
     /* UI actions */
