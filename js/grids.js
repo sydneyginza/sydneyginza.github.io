@@ -255,7 +255,7 @@ else{this.classList.remove('invalid');if(w)w.textContent='Times required';if(!ca
 function renderBookingsFilters(){
   const fb=document.getElementById('bookingsFilterBar');fb.innerHTML='';
   const dates=getWeekDates();const today=dates[0];
-  const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
+  const availDates=dates.filter(ds=>hasGirlsOnDate(ds)&&isDatePublished(ds));
   if(!bookingsDateFilter||!availDates.includes(bookingsDateFilter))bookingsDateFilter=availDates[0]||null;
   availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');
     b.className='filter-btn'+(ds===bookingsDateFilter?' date-active':'');
