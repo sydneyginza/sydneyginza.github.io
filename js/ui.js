@@ -802,6 +802,22 @@ document.getElementById('mpMobile').value=entry.mobile||'';
 document.getElementById('mpNewPass').value='';
 document.getElementById('mpConfirmPass').value='';
 document.getElementById('mpError').textContent='';
+const bkSec=document.getElementById('mpBookingSection');
+const myBk=Array.isArray(calData._bookings)&&calData._bookings.find(b=>b.user===loggedInUser&&(b.status==='pending'||b.status==='approved'));
+if(myBk&&bkSec){
+  const f=dispDate(myBk.date);
+  const dur=myBk.endMin-myBk.startMin;
+  const durStr=dur>=60?(dur/60)+'hr'+(dur>60?'s':''):dur+' min';
+  document.getElementById('mpBookingCard').innerHTML=
+    '<div class="mp-bk-row"><span class="mp-bk-label">Girl</span><a class="mp-bk-girl-link" href="#">'+myBk.girlName+'</a></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Date</span><span>'+f.day+' '+f.date+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Time</span><span>'+fmtSlotTime(myBk.startMin)+' – '+fmtSlotTime(myBk.endMin)+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Duration</span><span>'+durStr+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Status</span><span class="mp-bk-status">'+(myBk.status==='approved'?'Approved':'Pending Review')+'</span></div>';
+  const _gl=document.getElementById('mpBookingCard').querySelector('.mp-bk-girl-link');
+  if(_gl){_gl.onclick=e=>{e.preventDefault();const _gi=girls.findIndex(f=>f.name&&f.name.trim().toLowerCase()===myBk.girlName.trim().toLowerCase());if(_gi!==-1){document.getElementById('myProfileOverlay').classList.remove('open');showProfile(_gi)}}}
+  bkSec.style.display='';
+}else if(bkSec){bkSec.style.display='none'}
 overlay.classList.add('open')}
 
 document.getElementById('myProfileClose').onclick=()=>document.getElementById('myProfileOverlay').classList.remove('open');

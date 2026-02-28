@@ -1264,6 +1264,7 @@ body.light-mode .compare-mobile-card{background:rgba(0,0,0,0.03);border-color:rg
 .mp-bk-row{display:flex;justify-content:space-between;font-size:12px}
 .mp-bk-label{color:var(--text-muted)}
 .mp-bk-status{color:rgba(255,200,50,.9);font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1px}
+.mp-bk-girl-link{color:var(--accent);text-decoration:none;font-weight:600}.mp-bk-girl-link:hover{text-decoration:underline}
 /* Profile DB — booking badge */
 .pdb-bk-badge{font-size:11px;color:rgba(255,200,50,.9);white-space:nowrap}
 
