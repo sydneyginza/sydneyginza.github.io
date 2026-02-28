@@ -67,6 +67,8 @@ let _bkEnqSel=null; /* {date,startMin,endMin} */
 let _bkEnqSubmitting=false;
 
 function openBookingEnquiry(girlIdx){
+  const existingBk=Array.isArray(calData._bookings)&&calData._bookings.find(b=>b.user===loggedInUser&&b.status==='pending');
+  if(existingBk){showToast('You already have a pending booking. Check your profile for status.','error');return}
   _bkEnqIdx=girlIdx;
   _bkEnqSel=null;
   renderBkEnqGrid();

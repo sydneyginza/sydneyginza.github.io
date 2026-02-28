@@ -1001,11 +1001,13 @@ if(_pdbRoleFilter&&c.role!==_pdbRoleFilter)return false;
 if(q){const u=(c.user||'').toLowerCase(),e=(c.email||'').toLowerCase(),m=(c.mobile||'').toLowerCase();if(!u.includes(q)&&!e.includes(q)&&!m.includes(q))return false}
 return true});
 /* Table */
-html+='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.role')+'</th><th></th></tr></thead><tbody>';
-if(!filtered.length){html+='<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:24px">'+t('pdb.noResults')+'</td></tr>'}
+html+='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.role')+'</th><th>Booking</th><th></th></tr></thead><tbody>';
+if(!filtered.length){html+='<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px">'+t('pdb.noResults')+'</td></tr>'}
 filtered.forEach(({c,i})=>{
 const isSelf=c.user===loggedInUser;
-html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td><td>'+(isSelf?'':'<button class="pdb-delete-btn" data-cred-idx="'+i+'" title="'+t('pdb.deleteUser')+'">&#x2715;</button>')+'</td></tr>'});
+const userBk=Array.isArray(calData._bookings)&&calData._bookings.find(b=>b.user===c.user&&b.status==='pending');
+const bkCell=userBk?'<span class="pdb-bk-badge">'+userBk.girlName+' &middot; '+dispDate(userBk.date).day+' '+dispDate(userBk.date).date+'</span>':'—';
+html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td><td>'+bkCell+'</td><td>'+(isSelf?'':'<button class="pdb-delete-btn" data-cred-idx="'+i+'" title="'+t('pdb.deleteUser')+'">&#x2715;</button>')+'</td></tr>'});
 html+='</tbody></table>';
 container.innerHTML=html;
 /* Bind search */
