@@ -799,7 +799,8 @@ const Router = (function() {
 
 /* === Booking Log === */
 async function saveBookingLog(entry){
-  const dateStr=new Date().toISOString().slice(0,10);
+  const _d=new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}));
+  const dateStr=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
   const path=`${BKLP}/${dateStr}.json`;
   let existing=[],sha=null;
   try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});console.log('[BKLog] GET status:',r.status);if(r.ok){const d=await r.json();sha=d.sha;console.log('[BKLog] sha:',sha);try{const parsed=dec(d.content);if(Array.isArray(parsed))existing=parsed;}catch(de){console.warn('[BKLog] dec failed:',de.message);}}}catch(ge){console.error('[BKLog] GET error:',ge);}
