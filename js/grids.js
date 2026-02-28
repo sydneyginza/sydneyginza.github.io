@@ -102,10 +102,10 @@ return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(
 let bookingsDateFilter=null;
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 function isDatePublished(ds){return Array.isArray(calData._published)&&calData._published.includes(ds)}
-async function togglePublishDate(ds){if(!calData._published)calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);await saveCalData();renderCalendar();renderRosterFilters();renderRosterGrid()}
+async function togglePublishDate(ds){if(!calData._published)calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
-const availDates=dates.filter(ds=>hasGirlsOnDate(ds)&&(isAdmin()||isDatePublished(ds)));
+const availDates=dates.filter(ds=>hasGirlsOnDate(ds)&&isDatePublished(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
