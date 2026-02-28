@@ -1140,10 +1140,10 @@ body.theme-valentine .seasonal-banner{border-color:#ff4488;background:rgba(255,6
 body.theme-sakura .seasonal-banner{border-color:#f4a0b5;background:rgba(244,160,181,0.08)}
 body.theme-christmas .seasonal-banner{border-color:#cc1111;background:rgba(204,17,17,0.08)}
 body.theme-newyear .seasonal-banner{border-color:#ffd700;background:rgba(255,215,0,0.08)}
-body.theme-valentine .logo{background:linear-gradient(135deg,#ff4488,#ff6fa8,#ff4488);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,68,136,0.4))}
-body.theme-sakura .logo{background:linear-gradient(135deg,#f4a0b5,#ffd1dc,#f4a0b5);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(244,160,181,0.4))}
-body.theme-christmas .logo{background:linear-gradient(135deg,#cc1111,#00aa44,#cc1111,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(204,17,17,0.4))}
-body.theme-newyear .logo{background:linear-gradient(135deg,#ffd700,#ff6f00,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,215,0,0.4))}
+body.theme-valentine .logo,body.theme-valentine .home-title{background:linear-gradient(135deg,#ff4488,#ff6fa8,#ff4488);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,68,136,0.4))}
+body.theme-sakura .logo,body.theme-sakura .home-title{background:linear-gradient(135deg,#f4a0b5,#ffd1dc,#f4a0b5);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(244,160,181,0.4))}
+body.theme-christmas .logo,body.theme-christmas .home-title{background:linear-gradient(135deg,#cc1111,#00aa44,#cc1111,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(204,17,17,0.4))}
+body.theme-newyear .logo,body.theme-newyear .home-title{background:linear-gradient(135deg,#ffd700,#ff6f00,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,215,0,0.4))}
 
 /* ── Available Now Widget ── */
 .home-avail-now{padding:0 40px;max-width:1400px;margin:0 auto 24px}
