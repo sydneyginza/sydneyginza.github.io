@@ -802,7 +802,7 @@ async function saveBookingLog(entry){
   const dateStr=new Date().toISOString().slice(0,10);
   const path=`${BKLP}/${dateStr}.json`;
   let existing=[],sha=null;
-  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;existing=dec(d.content)}}catch(_){}
+  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;const parsed=dec(d.content);if(Array.isArray(parsed))existing=parsed;}}catch(_){}
   if(existing.length>=1000)existing=existing.slice(existing.length-999);
   existing.push({ts:new Date().toISOString(),...entry});
   const body={message:'Log booking',content:enc(existing)};
