@@ -170,6 +170,9 @@ const[authData,freshData,freshCal]=await Promise.all([loadAuth(),loadData(),load
 
 if(authData&&authData.length)CRED=authData;else{CRED=[];showToast('Could not load auth','error')}
 
+/* Restore session from localStorage now that CRED is loaded */
+if(typeof tryRestoreSession==='function')tryRestoreSession();
+
 /* Compare and update girls if changed */
 let girlsChanged=false;
 if(freshData!==null){
