@@ -250,6 +250,7 @@ async function submitBookingRequest(){
   calData._bookings.push(booking);
   const saved=await saveCalData();
   if(saved){
+    saveBookingLog({type:'booking_created',bookingId:booking.id,user:booking.user,girlName:booking.girlName,date:booking.date,startMin:booking.startMin,endMin:booking.endMin,status:'pending'});
     closeBkEnq();
     showToast('Booking request sent');
     if(typeof renderBookingsGrid==='function')renderBookingsGrid();

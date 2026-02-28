@@ -394,7 +394,7 @@ async function approveBooking(){
   if(!_adminBkCurrent)return;
   const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
   bk.status='approved';
-  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking approved');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_approved',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:'approved',by:loggedInUser});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking approved');renderBookingsGrid()}
   else{bk.status='pending';showToast('Failed to save','error')}
 }
 
@@ -402,7 +402,7 @@ async function rejectBooking(){
   if(!_adminBkCurrent)return;
   const idx=calData._bookings.findIndex(b=>b.id===_adminBkCurrent.id);if(idx===-1)return;
   const removed=calData._bookings.splice(idx,1)[0];
-  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking rejected');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_rejected',bookingId:removed.id,user:removed.user,girlName:removed.girlName,date:removed.date,startMin:removed.startMin,endMin:removed.endMin,status:'rejected',by:loggedInUser});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking rejected');renderBookingsGrid()}
   else{calData._bookings.splice(idx,0,removed);showToast('Failed to save','error')}
 }
 
@@ -413,7 +413,7 @@ async function editBooking(){
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
   bk.startMin=s;bk.endMin=s+dur;
-  if(await saveCalData()){document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_edited',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:bk.status,by:loggedInUser,prev:{startMin:prev.startMin,endMin:prev.endMin}});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
   else{bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
 }
 

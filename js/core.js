@@ -10,7 +10,7 @@ const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', ALP = 'data/admin_log.json';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', ALP = 'data/admin_log.json', BKLP = 'data/logs_bookings';
 var loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, authSha = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 function isAdmin(){ return loggedIn && (loggedInRole === 'admin' || loggedInRole === 'owner') }
 var rosterHistory = {}, rosterHistorySha = null;
@@ -378,7 +378,7 @@ async function loadCalData() {
 async function saveCalData(retryOnConflict = true) {
   try {
     const vd = getWeekDates(), cl = {};
-    for (const n in calData) { if(n==='_published'){cl._published=Array.isArray(calData._published)?[...calData._published]:[];continue} if(n==='_bookings'){cl._bookings=Array.isArray(calData._bookings)?calData._bookings.map(b=>({...b})):[];continue} cl[n] = {}; for (const dt of vd) { if (calData[n] && calData[n][dt]) cl[n][dt] = calData[n][dt] } }
+    for (const n in calData) { if(n==='_published'){cl._published=Array.isArray(calData._published)?[...calData._published]:[];continue} if(n==='_bookings'){cl._bookings=Array.isArray(calData._bookings)?calData._bookings.filter(b=>vd.includes(b.date)).map(b=>({...b})):[];continue} cl[n] = {}; for (const dt of vd) { if (calData[n] && calData[n][dt]) cl[n][dt] = calData[n][dt] } }
     calData = cl;
     const body = { message: 'Update calendar', content: enc(calData) };
     if (calSha) body.sha = calSha;
@@ -796,6 +796,19 @@ const Router = (function() {
 
   return { PAGE_ROUTES, push, replace, resolve, pathForPage, pathForProfile, nameToSlug, slugToName, findGirlByName };
 })();
+
+/* === Booking Log === */
+async function saveBookingLog(entry){
+  const dateStr=new Date().toISOString().slice(0,10);
+  const path=`${BKLP}/${dateStr}.json`;
+  let existing=[],sha=null;
+  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;existing=dec(d.content)}}catch(_){}
+  if(existing.length>=1000)existing=existing.slice(existing.length-999);
+  existing.push({ts:new Date().toISOString(),...entry});
+  const body={message:'Log booking',content:enc(existing)};
+  if(sha)body.sha=sha;
+  try{await fetch(`${DATA_API}/${path}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)})}catch(_){}
+}
 
 /* === Activity Log === */
 async function logAdminAction(action,target,meta={}){
