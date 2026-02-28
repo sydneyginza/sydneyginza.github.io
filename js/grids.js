@@ -99,13 +99,20 @@ el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHove
 return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid)})}
 
 /* Roster */
+const ROSTER_ADVANCE_KEY='ginza_roster_advance';
+function getRosterAdvanceDays(){try{const v=parseInt(localStorage.getItem(ROSTER_ADVANCE_KEY));return(v>=1&&v<=7)?v:7}catch(e){return 7}}
+function setRosterAdvanceDays(n){try{localStorage.setItem(ROSTER_ADVANCE_KEY,String(n))}catch(e){}}
+
 function hasGirlsOnDate(ds){return girls.some(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end})}
 
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
-const availDates=dates.filter(ds=>hasGirlsOnDate(ds));
+const advanceDays=getRosterAdvanceDays();
+const visibleDates=isAdmin()?dates:dates.slice(0,advanceDays);
+const availDates=visibleDates.filter(ds=>hasGirlsOnDate(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
 availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
+if(isAdmin()){const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);const wrap=document.createElement('div');wrap.className='roster-advance-wrap';wrap.title='How many days ahead non-admin users can see';wrap.innerHTML=`<span class="roster-advance-label">Advance view</span><div class="roster-advance-btns" id="rosterAdvanceBtns">${[1,2,3,4,5,6,7].map(n=>`<button class="roster-advance-btn${n===advanceDays?' active':''}" data-days="${n}">${n}d</button>`).join('')}</div>`;fb.appendChild(wrap);setTimeout(()=>{const btns=document.getElementById('rosterAdvanceBtns');if(btns)btns.onclick=e=>{const btn=e.target.closest('.roster-advance-btn');if(!btn)return;const days=parseInt(btn.dataset.days);setRosterAdvanceDays(days);renderRosterFilters();renderRosterGrid()}},0)}
 
 /* Last Updated indicator + manual refresh */
 const uw=document.createElement('div');uw.className='roster-updated-wrap';uw.id='rosterLastUpdated';
@@ -203,7 +210,7 @@ function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(l
 
 function renderCalendar(){safeRender('Calendar',()=>{const fb=document.getElementById('calFilterBar');fb.innerHTML='';
 if(isAdmin()){const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
-const fg=applySharedFilters([...girls].filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const ts=dates[0];const tOpts=generateTimeOptions();
+const fg=applySharedFilters([...girls].filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const tOpts=generateTimeOptions();
 let html=`<thead><tr><th>${t('cal.profile')}</th>`;dates.forEach((ds,i)=>{const f=dispDate(ds);html+=`<th class="${i===0?'cal-today':''}" data-cal-col="${i+1}">${f.date}<span class="cal-day-name">${f.day}${i===0?` (${t('ui.today')})`:''}</span></th>`});html+='</tr></thead><tbody>';
 fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
 const bulkActions=isAdmin()?`<div class="cal-bulk-actions"><button class="cal-bulk-btn cal-bulk-all" data-bulk-name="${g.name}" title="Mark available all week">${t('cal.allWeek')}</button><button class="cal-bulk-btn cal-bulk-clear" data-bulk-name="${g.name}" title="Clear entire week">${t('cal.clear')}</button></div>`:'';
