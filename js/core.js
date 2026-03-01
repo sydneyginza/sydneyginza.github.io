@@ -215,24 +215,42 @@ function getFavCount() {
 
 /* === Recently Viewed === */
 const RV_KEY = 'ginza_recently_viewed';
-const RV_MAX = 20;
+const RV_MAX = 10;
+
+function _rvEntry() {
+  if (!loggedIn || !loggedInUser) return null;
+  return CRED.find(c => c.user === loggedInUser) || null;
+}
 
 function getRecentlyViewed() {
+  const entry = _rvEntry();
+  if (entry) return Array.isArray(entry.viewHistory) ? entry.viewHistory : [];
   try { const v = localStorage.getItem(RV_KEY); return v ? JSON.parse(v) : []; }
   catch (e) { return []; }
 }
 
 function addRecentlyViewed(name) {
   if (!name) return;
-  let rv = getRecentlyViewed();
-  rv = rv.filter(r => r.name !== name);
-  rv.unshift({ name: name, ts: Date.now() });
-  if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
-  try { localStorage.setItem(RV_KEY, JSON.stringify(rv)); } catch (e) {}
-  syncViewHistory();
+  const entry = _rvEntry();
+  if (entry) {
+    let rv = Array.isArray(entry.viewHistory) ? entry.viewHistory.slice() : [];
+    rv = rv.filter(r => r.name !== name);
+    rv.unshift({ name, ts: Date.now() });
+    if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
+    entry.viewHistory = rv;
+    syncViewHistory();
+  } else {
+    let rv = getRecentlyViewed();
+    rv = rv.filter(r => r.name !== name);
+    rv.unshift({ name, ts: Date.now() });
+    if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
+    try { localStorage.setItem(RV_KEY, JSON.stringify(rv)); } catch (e) {}
+  }
 }
 
 function clearRecentlyViewed() {
+  const entry = _rvEntry();
+  if (entry) { entry.viewHistory = []; syncViewHistory(); }
   try { localStorage.removeItem(RV_KEY); } catch (e) {}
 }
 
@@ -261,7 +279,7 @@ function syncViewHistory() {
   if (!loggedIn || !loggedInUser) return;
   clearTimeout(_viewHistorySyncTimer);
   _viewHistorySyncTimer = setTimeout(() => {
-    const rv = getRecentlyViewed().slice(0, 50);
+    const rv = getRecentlyViewed().slice(0, RV_MAX);
     fetch(PROXY + '/update-view-history', { method: 'POST', headers: proxyHeaders(), body: JSON.stringify({ username: loggedInUser, history: rv }) }).catch(() => {});
   }, 5000);
 }

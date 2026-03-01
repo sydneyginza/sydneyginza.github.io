@@ -313,7 +313,7 @@ export default {
         const users = authResult.content;
         const user = users.find(u => u.user === username);
         if (!user) return jsonResp({ error: 'user not found' }, 404);
-        user.viewHistory = history.slice(0, 50).map(h => ({ name: h.name, ts: h.ts }));
+        user.viewHistory = history.slice(0, 10).map(h => ({ name: h.name, ts: h.ts }));
         await ghPut(env, 'data/auth.json', users, authResult.sha, 'Update view history');
         return jsonResp({ success: true });
       } catch (e) { return jsonResp({ error: e.message }, 500); }
