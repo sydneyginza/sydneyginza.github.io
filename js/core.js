@@ -278,10 +278,7 @@ let _viewHistorySyncTimer = null;
 function syncViewHistory() {
   if (!loggedIn || !loggedInUser) return;
   clearTimeout(_viewHistorySyncTimer);
-  _viewHistorySyncTimer = setTimeout(() => {
-    const rv = getRecentlyViewed().slice(0, RV_MAX);
-    fetch(PROXY + '/update-view-history', { method: 'POST', headers: proxyHeaders(), body: JSON.stringify({ username: loggedInUser, history: rv }) }).catch(() => {});
-  }, 5000);
+  _viewHistorySyncTimer = setTimeout(() => { saveAuth(); }, 5000);
 }
 
 /* === API Functions (with retry) === */
