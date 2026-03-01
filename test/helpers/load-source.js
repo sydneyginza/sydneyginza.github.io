@@ -84,7 +84,7 @@ function createTestContext(files, overrides = {}) {
    'navMenuBtn', 'navDropdown', 'loginIconBtn', 'userDropdown', 'langBtn', 'langDropdown',
    'fabToggle', 'fabMenu', 'backToTop', 'lfUser', 'lfPass', 'lfError',
    'navFavorites', 'bnFavorites', 'navCalendar', 'navAnalytics',
-   'themeToggleBtn', 'themeIcon', 'notifToggleBtn', 'notifPrefsDropdown',
+   'notifToggleBtn', 'notifPrefsDropdown',
    'notifPrefPush', 'notifPrefEmail', 'cardHoverPreview',
    'gridResultsLive', 'homeSkeleton', 'homeSearchInput',
    'profilePage', 'calendarPage', 'kbHelpOverlay',
@@ -93,11 +93,6 @@ function createTestContext(files, overrides = {}) {
     el.id = id;
     elements[id] = el;
   });
-
-  // themeIcon needs a child path element
-  const themePathEl = createElement('path');
-  elements['themeIcon'].querySelector = (sel) => sel === 'path' ? themePathEl : null;
-  themePathEl.setAttribute = function(k, v) { this[k] = v; };
 
   const ctx = {
     window: {},

@@ -897,7 +897,7 @@ else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
-function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);if(match.themePref)applyTheme(match.themePref);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}}
+function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}}
 /* ── Welcome Back Popup ── */
 /* Respond to pings from other tabs so they know we're already open */
 const _welBc=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('ginza_wel'):null;
@@ -987,32 +987,6 @@ loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.c
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
 renderDropdown();
 
-/* ── Theme Toggle (Light/Dark) ── */
-const _themeToggleBtn=document.getElementById('themeToggleBtn');
-const _themeIcon=document.getElementById('themeIcon');
-const _sunPath='M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z';
-const _moonPath='M12 3a9 9 0 108.97 10.13.75.75 0 00-.93-.93A7.5 7.5 0 0112.87 3.07.75.75 0 0012 3z';
-function getStoredTheme(){
-  if(loggedIn){const entry=CRED.find(c=>c.user===loggedInUser);if(entry&&entry.themePref)return entry.themePref}
-  try{const v=localStorage.getItem('ginza_theme');if(v==='light'||v==='dark')return v}catch(e){}
-  return 'dark';
-}
-function applyTheme(theme){
-  const isLight=theme==='light';
-  document.body.classList.toggle('light-mode',isLight);
-  if(_themeIcon)_themeIcon.querySelector('path').setAttribute('d',isLight?_moonPath:_sunPath);
-  if(_themeToggleBtn)_themeToggleBtn.setAttribute('aria-label',isLight?t('theme.dark'):t('theme.light'));
-  try{localStorage.setItem('ginza_theme',theme)}catch(e){}
-}
-function toggleTheme(){
-  const next=document.body.classList.contains('light-mode')?'dark':'light';
-  applyTheme(next);
-  if(loggedIn&&loggedInUser){
-    fetch(PROXY+'/update-theme-pref',{method:'POST',headers:proxyHeaders(),body:JSON.stringify({username:loggedInUser,theme:next})}).catch(()=>{});
-  }
-}
-(function(){document.body.classList.add('no-transition');applyTheme(getStoredTheme());requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('no-transition')))})();
-if(_themeToggleBtn)_themeToggleBtn.onclick=toggleTheme;
 
 /* Particles */
 const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}

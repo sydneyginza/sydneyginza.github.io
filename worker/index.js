@@ -285,23 +285,6 @@ export default {
       });
     }
 
-    // Update theme preference
-    if (url.pathname === '/update-theme-pref' && request.method === 'POST') {
-      try {
-        const xrw = request.headers.get('X-Requested-With');
-        if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403);
-        const { username, theme } = await request.json();
-        if (!username || (theme !== 'light' && theme !== 'dark')) return jsonResp({ error: 'invalid' }, 400);
-        const authResult = await ghGet(env, 'data/auth.json');
-        const users = authResult.content;
-        const user = users.find(u => u.user === username);
-        if (!user) return jsonResp({ error: 'user not found' }, 404);
-        user.themePref = theme;
-        await ghPut(env, 'data/auth.json', users, authResult.sha, 'Update theme preference');
-        return jsonResp({ success: true });
-      } catch (e) { return jsonResp({ error: e.message }, 500); }
-    }
-
     // Update view history
     if (url.pathname === '/update-view-history' && request.method === 'POST') {
       try {
