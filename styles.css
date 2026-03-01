@@ -1145,6 +1145,15 @@ body.theme-sakura .logo,body.theme-sakura .home-title{background:linear-gradient
 body.theme-christmas .logo,body.theme-christmas .home-title{background:linear-gradient(135deg,#cc1111,#00aa44,#cc1111,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(204,17,17,0.4))}
 body.theme-newyear .logo,body.theme-newyear .home-title{background:linear-gradient(135deg,#ffd700,#ff6f00,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,215,0,0.4))}
 
+/* ── Welcome Back Popup ── */
+.welcome-greeting{font-family:'Orbitron',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.welcome-subtitle{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin:18px 0 10px;padding-left:4px}
+.welcome-empty{text-align:center;padding:20px 0}
+.welcome-empty-text{font-size:14px;color:var(--text-dim);margin-bottom:16px}
+#welcomeOverlay .avail-now-wrap{margin-bottom:4px}
+.anw-time{padding:0 10px 8px;font-size:10px;color:var(--text-dim);display:flex;align-items:center;gap:4px}
+.wel-dot{width:6px;height:6px;border-radius:50%;background:#00cc66;display:inline-block;flex-shrink:0}
+
 /* ── Available Now Widget ── */
 .home-avail-now{padding:0 40px;max-width:1400px;margin:0 auto 24px}
 .avail-now-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}

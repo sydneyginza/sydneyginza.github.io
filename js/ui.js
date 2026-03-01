@@ -901,9 +901,90 @@ else{CRED.pop()}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
 function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);if(match.themePref)applyTheme(match.themePref);if(match.viewHistory&&Array.isArray(match.viewHistory)){const local=getRecentlyViewed();const merged=new Map();match.viewHistory.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});const sorted=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,20);try{localStorage.setItem('ginza_recently_viewed',JSON.stringify(sorted))}catch(e){}}}
-function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){_applyLogin(match)}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
+/* ── Welcome Back Popup ── */
+/* Respond to pings from other tabs so they know we're already open */
+const _welBc=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('ginza_wel'):null;
+if(_welBc)_welBc.onmessage=e=>{if(e.data==='ping')_welBc.postMessage('pong')};
+
+function _isStillAvailToday(name){
+  if(isAvailableNow(name))return true;
+  const now=getAEDTDate();const entry=getCalEntry(name,fmtDate(now));
+  if(!entry||!entry.start||!entry.end)return false;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const [sh,sm]=entry.start.split(':').map(Number);
+  return nowMins<sh*60+sm;
+}
+function _welCardStrip(list){
+  const arwSvgL='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
+  const arwSvgR='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>';
+  let h=`<div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left">${arwSvgL}</button><div class="avail-now-strip">`;
+  list.forEach(({g,idx})=>{
+    const photo=g.photos&&g.photos.length?g.photos[0]:'';
+    const live=isAvailableNow(g.name);
+    const entry=getCalEntry(g.name,fmtDate(getAEDTDate()));
+    const time=entry?fmtTime12(entry.start)+' - '+fmtTime12(entry.end):'';
+    h+=`<div class="avail-now-card wel-card" data-idx="${idx}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${time?`<div class="anw-time">${live?'<span class="avail-now-dot wel-dot"></span> ':''}<span>${time}</span></div>`:''}</div>`;
+  });
+  h+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right">'+arwSvgR+'</button></div>';
+  return h;
+}
+function _welBindStrip(container){
+  container.querySelectorAll('.wel-card').forEach(c=>{c.onclick=()=>{const i=parseInt(c.dataset.idx);if(!isNaN(i)){_closeWelcome();profileReturnPage='homePage';showProfile(i)}}});
+  container.querySelectorAll('.avail-now-wrap').forEach(wrap=>{
+    const strip=wrap.querySelector('.avail-now-strip');if(!strip)return;
+    const arwL=wrap.querySelector('.anw-arrow-left'),arwR=wrap.querySelector('.anw-arrow-right');
+    function upd(){arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+    arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',upd);
+    let mdX=0,mdSL=0,mdActive=false,didDrag=false;
+    strip.addEventListener('mousedown',e=>{mdActive=true;didDrag=false;mdX=e.pageX;mdSL=strip.scrollLeft;strip.style.cursor='grabbing';e.preventDefault()});
+    document.addEventListener('mousemove',e=>{if(!mdActive)return;if(Math.abs(e.pageX-mdX)>5)didDrag=true;strip.scrollLeft=mdSL-(e.pageX-mdX)});
+    document.addEventListener('mouseup',()=>{if(!mdActive)return;mdActive=false;strip.style.cursor='';setTimeout(()=>{didDrag=false},0)});
+    strip.style.cursor='grab';upd();
+  });
+}
+function showWelcomePopup(){
+  const overlay=document.getElementById('welcomeOverlay');if(!overlay)return;
+  const greeting=t('welcome.back').replace('{0}',loggedInUser.toUpperCase());
+  let html=`<div class="welcome-greeting">${greeting}</div>`;
+  /* Section 1: Favourites available today (not finished) */
+  const favNames=getFavorites();
+  const favAvail=favNames.map(n=>{const i=girls.findIndex(g=>g.name===n);return i>=0?{g:girls[i],idx:i}:null}).filter(Boolean).filter(x=>(isAdmin()||!x.g.hidden)&&_isStillAvailToday(x.g.name));
+  if(favAvail.length){
+    html+=`<div class="welcome-subtitle">${t('welcome.favTitle')}</div>`+_welCardStrip(favAvail);
+  }
+  /* Section 2: Recently viewed available today (not finished), exclude already in favs */
+  const rv=getRecentlyViewed();
+  const rvAvail=rv.map(r=>{const i=girls.findIndex(g=>g.name===r.name);return i>=0?{g:girls[i],idx:i}:null}).filter(Boolean).filter(x=>(isAdmin()||!x.g.hidden)&&_isStillAvailToday(x.g.name)&&!favNames.includes(x.g.name));
+  if(rvAvail.length){
+    html+=`<div class="welcome-subtitle">${t('welcome.rvTitle')}</div>`+_welCardStrip(rvAvail);
+  }
+  /* Empty state if nothing to show */
+  if(!favAvail.length&&!rvAvail.length){
+    html+=`<div class="welcome-empty"><div class="welcome-empty-text">${t('welcome.noAvail')}</div><button class="empty-state-cta welcome-browse-btn">${t('welcome.browse')}</button></div>`;
+  }
+  document.getElementById('welcomeContent').innerHTML=html;
+  overlay.classList.add('open');
+  _welBindStrip(overlay);
+  const browseBtn=overlay.querySelector('.welcome-browse-btn');
+  if(browseBtn)browseBtn.onclick=()=>{_closeWelcome();showPage('listPage')};
+  document.getElementById('welcomeClose').onclick=_closeWelcome;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)_closeWelcome()});
+}
+function _closeWelcome(){const o=document.getElementById('welcomeOverlay');if(o)o.classList.remove('open')}
+
+/* Check if another tab is already open; if not, show welcome popup */
+function _welcomeIfOnlyTab(){
+  if(typeof BroadcastChannel==='undefined'){showWelcomePopup();return}
+  const bc=new BroadcastChannel('ginza_wel');
+  let replied=false;
+  bc.onmessage=()=>{replied=true};
+  bc.postMessage('ping');
+  setTimeout(()=>{bc.close();if(!replied)showWelcomePopup()},150);
+}
+
+function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){_applyLogin(match);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showToast('Signed in as '+match.user.toUpperCase())}
+if(match){const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showWelcomePopup()}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
