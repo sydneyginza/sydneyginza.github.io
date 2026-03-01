@@ -888,14 +888,11 @@ if(pass!==confirm){errEl.textContent=t('ui.passwordMismatch');return}
 errEl.textContent='';
 const btn=document.getElementById('suBtn');btn.textContent='CREATING...';btn.style.pointerEvents='none';
 try{
-const entry={user:u,pass,role:'member',email,mobile:mobile||undefined};
+const entry={user:u,pass,role:'member',email,mobile:mobile||undefined,status:'pending'};
 CRED.push(entry);
 if(await saveAuth()){
-loggedIn=true;loggedInUser=entry.user;loggedInRole='member';loggedInEmail=entry.email;loggedInMobile=entry.mobile||null;
-document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';
 authOverlay.classList.remove('open');
-renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();
-showToast(t('ui.accountCreated'));updatePushToggle()}
+showToast(t('ui.signupPending'),null,6000)}
 else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
@@ -982,9 +979,9 @@ function _welcomeIfOnlyTab(){
   setTimeout(()=>{bc.close();if(!replied)showWelcomePopup()},150);
 }
 
-function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){_applyLogin(match);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
+function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){if(match.status==='pending'){localStorage.removeItem('ginza_session');return}_applyLogin(match);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
-if(match){const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showWelcomePopup()}
+if(match){if(match.status==='pending'){document.getElementById('lfError').textContent=t('ui.pendingApproval');document.getElementById('lfPass').value='';return}const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showWelcomePopup()}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
 loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
 document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
