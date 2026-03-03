@@ -1144,10 +1144,10 @@ if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
       if(!_curRAF){_curRAF=true;requestAnimationFrame(_curLoop)}
     },{passive:true});
     document.addEventListener('mouseover',e=>{
-      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option'))_curRing.classList.add('hover');
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option')){_curDot.classList.add('hover');_curRing.classList.add('hover')}
     });
     document.addEventListener('mouseout',e=>{
-      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option'))_curRing.classList.remove('hover');
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option')){_curDot.classList.remove('hover');_curRing.classList.remove('hover')}
     });
     document.addEventListener('mouseleave',()=>{_curDot.classList.add('hidden');_curRing.classList.add('hidden')});
     document.addEventListener('mouseenter',()=>{_curDot.classList.remove('hidden');_curRing.classList.remove('hidden')});
