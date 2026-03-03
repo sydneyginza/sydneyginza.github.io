@@ -1227,6 +1227,31 @@ if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
   },{passive:true});
 }
 
+/* ── Card Hover Slideshow ── */
+function addCardSlideshow(el,g){
+  if(!g.photos||g.photos.length<2)return;
+  const imgWrap=el.querySelector('.card-img');if(!imgWrap)return;
+  const photos=g.photos;const len=photos.length;
+  let idx=0,timer=null;
+  const dots=document.createElement('div');dots.className='card-slide-dots';
+  for(let i=0;i<len;i++){const d=document.createElement('span');d.className='card-slide-dot'+(i===0?' active':'');dots.appendChild(d)}
+  imgWrap.appendChild(dots);
+  const thumb=imgWrap.querySelector('img.card-thumb');if(!thumb)return;
+  function show(i){
+    idx=i;thumb.src=photos[idx];thumb.classList.add('lazy-loaded');
+    dots.querySelectorAll('.card-slide-dot').forEach((d,di)=>d.classList.toggle('active',di===idx));
+  }
+  el.addEventListener('mouseenter',()=>{
+    if(el.classList.contains('card-flipped'))return;
+    idx=0;show(0);
+    timer=setInterval(()=>{show((idx+1)%len)},1500);
+  });
+  el.addEventListener('mouseleave',()=>{
+    clearInterval(timer);timer=null;
+    show(0);
+  });
+}
+
 /* ── Card Flip Preview ── */
 function addCardFlip(card,g){
   const flipBtn=document.createElement('button');
