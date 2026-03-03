@@ -350,7 +350,7 @@ const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
-ngList=getNewGirls();ngIdx=0;renderAvailNowWidget();renderNewGirls();
+ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();
 /* Scroll reveals for below-fold home sections */
 const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el));observeReveals(document.getElementById('homePage'))})}
 
@@ -601,7 +601,12 @@ if(!isNaN(ab)&&!isNaN(bb)&&Math.abs(ab-bb)<=2)score+=1;
 if(a.cup&&b.cup&&a.cup.trim().charAt(0).toUpperCase()===b.cup.trim().charAt(0).toUpperCase())score+=1;
 const aAvg=_avgRate(a),bAvg=_avgRate(b);
 if(aAvg>0&&bAvg>0&&Math.abs(aAvg-bAvg)/Math.max(aAvg,bAvg)<=0.2)score+=1;
-return score/5}
+const ah=parseFloat(a.height),bh=parseFloat(b.height);
+if(!isNaN(ah)&&!isNaN(bh)&&Math.abs(ah-bh)<=5)score+=1;
+if(a.exp&&b.exp&&a.exp===b.exp)score+=1;
+const al=Array.isArray(a.labels)?a.labels:[];const bl=Array.isArray(b.labels)?b.labels:[];
+if(al.length&&bl.length){const shared=al.filter(l=>bl.includes(l)).length;const union=new Set([...al,...bl]).size;if(shared/union>=0.8)score+=1}
+return score/8}
 
 function renderSimilarGirls(idx){
 const g=girls[idx];if(!g||!g.name)return;
@@ -784,7 +789,7 @@ const profBook=document.getElementById('profBookBtn');
 if(profBook){profBook.onclick=()=>openEnquiryForm(g.name,idx)}
 const profBookSignIn=document.getElementById('profBookSignIn');
 if(profBookSignIn){profBookSignIn.onclick=e=>{e.preventDefault();showAuthSignIn()}}
-renderGallery(idx);renderReviews(idx);renderAlsoAvailable(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');const _prevPg=document.querySelector('.page.active');const _profPg=document.getElementById('profilePage');const _pec=['page-enter','slide-enter-right','slide-enter-left'];_profPg.classList.remove(..._pec);if(_prevPg&&_prevPg!==_profPg){_prevPg.classList.remove('active',..._pec);_prevPg.classList.add('slide-exit-left');const _onEx=()=>{_prevPg.classList.remove('slide-exit-left');_prevPg.removeEventListener('animationend',_onEx)};_prevPg.addEventListener('animationend',_onEx);setTimeout(()=>_prevPg.classList.remove('slide-exit-left'),400);void _profPg.offsetWidth;_profPg.classList.add('active','slide-enter-right')}else{allPages.forEach(p=>p.classList.remove('active',..._pec));void _profPg.offsetWidth;_profPg.classList.add('active','page-enter')}document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));setTimeout(()=>window.scrollTo(0,0),300)})}
+renderGallery(idx);renderReviews(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');const _prevPg=document.querySelector('.page.active');const _profPg=document.getElementById('profilePage');const _pec=['page-enter','slide-enter-right','slide-enter-left'];_profPg.classList.remove(..._pec);if(_prevPg&&_prevPg!==_profPg){_prevPg.classList.remove('active',..._pec);_prevPg.classList.add('slide-exit-left');const _onEx=()=>{_prevPg.classList.remove('slide-exit-left');_prevPg.removeEventListener('animationend',_onEx)};_prevPg.addEventListener('animationend',_onEx);setTimeout(()=>_prevPg.classList.remove('slide-exit-left'),400);void _profPg.offsetWidth;_profPg.classList.add('active','slide-enter-right')}else{allPages.forEach(p=>p.classList.remove('active',..._pec));void _profPg.offsetWidth;_profPg.classList.add('active','page-enter')}document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));setTimeout(()=>window.scrollTo(0,0),300)})}
 
 /* Profile Gallery */
 let galIdx=0;
