@@ -325,11 +325,11 @@ strip.style.cursor='grab';_updateAnwArrows()}
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
-for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card';card.style.cursor='default';card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
+for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
 ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();renderRecentlyViewed();
 /* Scroll reveals for below-fold home sections */
-const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el))})}
+const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el));observeReveals(document.getElementById('homePage'))})}
 
 function renderRecentlyViewed(containerId='homeRecentlyViewed',returnPage='homePage'){
 const container=document.getElementById(containerId);if(!container)return;
@@ -1078,6 +1078,80 @@ if(!_isMobile){
       _mouseTicking=false;
     });
   },{passive:true});
+}
+
+/* ── 3D Card Tilt (desktop only) ── */
+if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  document.querySelectorAll('.girls-grid').forEach(grid=>{
+    grid.addEventListener('mousemove',e=>{
+      const card=e.target.closest('.girl-card');
+      if(!card||!card.classList.contains('card-entered'))return;
+      const rect=card.getBoundingClientRect();
+      const x=(e.clientX-rect.left)/rect.width;
+      const y=(e.clientY-rect.top)/rect.height;
+      const rotY=(x-0.5)*16;
+      const rotX=(0.5-y)*16;
+      card.style.transform='perspective(800px) rotateX('+rotX.toFixed(1)+'deg) rotateY('+rotY.toFixed(1)+'deg) translateY(-4px)';
+    },{passive:true});
+    grid.addEventListener('mouseleave',e=>{
+      grid.querySelectorAll('.girl-card.card-entered').forEach(c=>{c.style.transform=''});
+    },{passive:true});
+    grid.addEventListener('mouseout',e=>{
+      const card=e.target.closest('.girl-card');
+      if(card)card.style.transform='';
+    },{passive:true});
+  });
+}
+
+/* ── Section Reveals ── */
+const _revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('revealed');
+      _revealObserver.unobserve(entry.target);
+    }
+  });
+},{rootMargin:'50px 0px',threshold:0.1});
+function observeReveals(container){
+  if(!container)container=document;
+  container.querySelectorAll('.reveal:not(.revealed)').forEach(el=>_revealObserver.observe(el));
+}
+
+/* ── Custom Cursor (desktop only) ── */
+if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  const _curDot=document.getElementById('cursorDot');
+  const _curRing=document.getElementById('cursorRing');
+  if(_curDot&&_curRing){
+    document.body.classList.add('custom-cursor');
+    let _curX=0,_curY=0,_ringX=0,_ringY=0,_curRAF=false;
+    function _curLoop(){
+      _ringX+=(_curX-_ringX)*0.15;
+      _ringY+=(_curY-_ringY)*0.15;
+      _curRing.style.left=_ringX+'px';
+      _curRing.style.top=_ringY+'px';
+      if(Math.abs(_curX-_ringX)>0.1||Math.abs(_curY-_ringY)>0.1){
+        requestAnimationFrame(_curLoop);
+      }else{
+        _curRing.style.left=_curX+'px';
+        _curRing.style.top=_curY+'px';
+        _curRAF=false;
+      }
+    }
+    window.addEventListener('mousemove',e=>{
+      _curX=e.clientX;_curY=e.clientY;
+      _curDot.style.left=_curX+'px';
+      _curDot.style.top=_curY+'px';
+      if(!_curRAF){_curRAF=true;requestAnimationFrame(_curLoop)}
+    },{passive:true});
+    document.addEventListener('mouseover',e=>{
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option'))_curRing.classList.add('hover');
+    });
+    document.addEventListener('mouseout',e=>{
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option'))_curRing.classList.remove('hover');
+    });
+    document.addEventListener('mouseleave',()=>{_curDot.classList.add('hidden');_curRing.classList.add('hidden')});
+    document.addEventListener('mouseenter',()=>{_curDot.classList.remove('hidden');_curRing.classList.remove('hidden')});
+  }
 }
 
 /* ── Seasonal / Event Themes ── */
