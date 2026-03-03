@@ -12,7 +12,7 @@ let _countdownInterval=null;
 let compareSelected=[];
 const COMPARE_MAX=5;
 function isCompareSelected(name){return compareSelected.includes(name)}
-function toggleCompare(name){const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
+function toggleCompare(name){if(!loggedIn){showToast('Please log in to use compare','info');return false}const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
 function clearCompare(){compareSelected=[];updateCompareBar();updateCompareButtons()}
 function updateCompareBar(){const bar=document.getElementById('compareBar');if(!bar)return;const count=compareSelected.length;const prev=parseInt(bar.dataset.prevCount||'0');bar.dataset.prevCount=count;document.getElementById('compareBarCount').textContent=count;bar.classList.toggle('visible',count>0);if(count>prev&&count>0){bar.classList.remove('compare-pulse');void bar.offsetWidth;bar.classList.add('compare-pulse');setTimeout(()=>bar.classList.remove('compare-pulse'),600)}const openBtn=document.getElementById('compareOpen');if(openBtn){openBtn.disabled=count<2;openBtn.style.opacity=count<2?'.4':'1';openBtn.style.pointerEvents=count<2?'none':'auto'}}
 function updateCompareButtons(){const cnt=compareSelected.length;document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare';const badge=btn.querySelector('.compare-badge');if(badge){badge.textContent=cnt+'/'+COMPARE_MAX;badge.style.display=sel&&cnt>0?'':'none'}})}
@@ -440,6 +440,7 @@ function _compareBarHtml(val,min,max,rank){
   return `<div class="compare-bar-track"><div class="compare-bar-fill ${cls}" style="width:${pct}%"></div></div>`;
 }
 function openCompareModal(){
+if(!loggedIn){showToast('Please log in to use compare','info');return}
 if(compareSelected.length<2)return;
 const overlay=document.getElementById('compareOverlay'),grid=document.getElementById('compareGrid');
 if(!overlay||!grid)return;
@@ -895,6 +896,7 @@ document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('g
 const _tbwL=document.getElementById('themeBtnWrap');if(_tbwL)_tbwL.style.display='none';
 const _abwL=document.getElementById('ambientBtnWrap');if(_abwL)_abwL.style.display='none';
 if(typeof window._ambientStop==='function')window._ambientStop();
+clearCompare();closeCompareModal();
 applySeasonalTheme();document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
