@@ -431,10 +431,6 @@ select.form-input option{background:#111118;color:#fff}
 @keyframes floatDrift2{0%{opacity:0;transform:translate(0,100vh)}10%{opacity:var(--p-peak,0.5)}50%{transform:translate(-25px,45vh)}90%{opacity:var(--p-peak,0.5)}100%{opacity:0;transform:translate(-50px,-10vh)}}
 @keyframes floatDrift3{0%{opacity:0;transform:translate(0,100vh)}10%{opacity:var(--p-peak,0.5)}30%{transform:translate(15px,70vh)}70%{transform:translate(-15px,30vh)}90%{opacity:var(--p-peak,0.5)}100%{opacity:0;transform:translate(20px,-10vh)}}
 @keyframes floatDrift4{0%{opacity:0;transform:translate(0,100vh)}10%{opacity:var(--p-peak,0.5)}40%{transform:translate(-40px,55vh)}60%{transform:translate(20px,40vh)}90%{opacity:var(--p-peak,0.5)}100%{opacity:0;transform:translate(-30px,-10vh)}}
-/* Layer 3: Shooting Stars */
-.shooting-star{position:absolute;width:80px;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.8),transparent);border-radius:1px;opacity:0;will-change:transform,opacity;pointer-events:none;animation:shootingStar var(--ss-dur,1s) linear forwards}
-.shooting-star::before{content:'';position:absolute;left:0;top:-1px;width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px 2px rgba(255,255,255,0.6)}
-@keyframes shootingStar{0%{opacity:0;transform:translate(0,0) rotate(var(--ss-angle,-35deg))}5%{opacity:1}80%{opacity:0.6}100%{opacity:0;transform:translate(var(--ss-dist,600px),0) rotate(var(--ss-angle,-35deg))}}
 .loading-screen{position:fixed;inset:0;z-index:999;background:var(--bg-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s}
 .loading-screen.hidden{opacity:0;pointer-events:none}
 .loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
@@ -1095,7 +1091,7 @@ body{padding-bottom:60px}
 /* ── Skip Navigation & Accessibility ── */
 .skip-nav{position:absolute;top:-100px;left:16px;z-index:9999;background:var(--accent);color:#fff;padding:8px 16px;font-family:'Rajdhani',sans-serif;font-size:14px;letter-spacing:1px;text-decoration:none;transition:top .2s}
 .skip-nav:focus{top:8px}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}.particle,.bokeh-orb,.shooting-star{display:none}.girl-card{animation:none;opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}.particle,.bokeh-orb{display:none}.girl-card{animation:none;opacity:1;transform:none}}
 body.no-transition,body.no-transition *{transition:none !important}
 
 /* ── Seasonal Themes ── */

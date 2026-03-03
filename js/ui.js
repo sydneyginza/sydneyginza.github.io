@@ -1037,27 +1037,6 @@ for(let i=0;i<_pCount;i++){
   particlesEl.appendChild(p);
 }
 
-/* ── Shooting Stars ── */
-const _prefersReducedMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
-if(!_prefersReducedMotion){
-  function spawnShootingStar(){
-    const s=document.createElement('div');
-    s.className='shooting-star';
-    const angle=-25-Math.random()*25;
-    const dur=0.6+Math.random()*0.6;
-    const dist=400+Math.random()*400;
-    s.style.setProperty('--ss-angle',angle+'deg');
-    s.style.setProperty('--ss-dur',dur+'s');
-    s.style.setProperty('--ss-dist',dist+'px');
-    s.style.top=Math.random()*50+'%';
-    s.style.left=Math.random()*60+'%';
-    s.style.width=(60+Math.random()*60)+'px';
-    particlesEl.appendChild(s);
-    s.addEventListener('animationend',()=>s.remove());
-  }
-  setInterval(spawnShootingStar,12000);
-}
-
 /* ── Scroll Parallax ── */
 let _scrollTicking=false;
 window.addEventListener('scroll',()=>{
