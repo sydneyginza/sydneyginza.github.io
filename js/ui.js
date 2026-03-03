@@ -1407,11 +1407,17 @@ if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
     _playing=!_playing;
   }
   window._ambientToggle=_toggle;
-  window._ambientStop=()=>{if(_playing){_actx&&_actx.suspend();btn.classList.remove('amb-playing');clearTimeout(_schedTimer);_playing=false}};
+  window._ambientStop=()=>{
+    clearTimeout(_schedTimer);
+    _nodes.forEach(n=>{try{n.stop(0)}catch(e){}});_nodes.length=0;
+    if(_actx)_actx.suspend();
+    btn.classList.remove('amb-playing');
+    _playing=false;
+  };
   window._ambientSetSound=(id)=>{_currentSound=id;if(_actx)_switchSound(id);if(soundList)soundList.querySelectorAll('.amb-sound-opt').forEach(b=>b.classList.toggle('active',b.dataset.sound===id))};
   window._ambientStartOnGesture=()=>{
     if(_playing)return;
-    const _start=()=>{if(!_playing)_toggle(true)};
+    const _start=()=>{if(!_playing&&loggedIn)_toggle(true)};
     document.addEventListener('click',_start,{once:true,capture:true});
     document.addEventListener('touchstart',_start,{once:true,capture:true});
     document.addEventListener('keydown',_start,{once:true,capture:true});
