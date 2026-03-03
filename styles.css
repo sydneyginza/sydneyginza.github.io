@@ -661,7 +661,7 @@ tr:hover .cal-bulk-actions,.cal-bulk-actions:focus-within{opacity:1;pointer-even
 @media(max-width:768px){
 nav{padding:0 20px}.nav-menu-btn{padding:6px 12px;font-size:12px;gap:6px}.nav-dropdown{min-width:180px}
 .section{padding:60px 20px;padding-top:100px;padding-bottom:100px}
-.girls-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.girls-grid{grid-template-columns:repeat(auto-fill,minmax(160px,280px))}
 .profile-page{padding:80px 20px;padding-top:90px;padding-bottom:100px}
 .profile-filter-pane{display:none}
 .page-main-content{margin-right:0}
