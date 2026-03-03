@@ -1113,10 +1113,31 @@ body.theme-valentine .logo,body.theme-valentine .home-title{background:linear-gr
 body.theme-sakura .logo,body.theme-sakura .home-title{background:linear-gradient(135deg,#f4a0b5,#ffd1dc,#f4a0b5);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(244,160,181,0.4))}
 body.theme-christmas .logo,body.theme-christmas .home-title{background:linear-gradient(135deg,#cc1111,#00aa44,#cc1111,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(204,17,17,0.4))}
 body.theme-newyear .logo,body.theme-newyear .home-title{background:linear-gradient(135deg,#ffd700,#ff6f00,#ffd700);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 8px rgba(255,215,0,0.4))}
+body.theme-lunarnewyear .seasonal-banner{border-color:#cc0000;background:rgba(204,0,0,0.08)}
+body.theme-lunarnewyear .logo,body.theme-lunarnewyear .home-title{background:linear-gradient(135deg,#cc0000,#ffd700,#cc0000);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(204,0,0,0.4))}
+body.theme-autumn .seasonal-banner{border-color:#ff8f00;background:rgba(255,143,0,0.08)}
+body.theme-autumn .logo,body.theme-autumn .home-title{background:linear-gradient(135deg,#ff8f00,#880e4f,#ff8f00);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(255,143,0,0.4))}
+body.theme-summer .seasonal-banner{border-color:#00bcd4;background:rgba(0,188,212,0.08)}
+body.theme-summer .logo,body.theme-summer .home-title{background:linear-gradient(135deg,#00bcd4,#ff6f61,#00bcd4);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,188,212,0.4))}
+body.theme-halloween .seasonal-banner{border-color:#ff6f00;background:rgba(255,111,0,0.08)}
+body.theme-halloween .logo,body.theme-halloween .home-title{background:linear-gradient(135deg,#ff6f00,#39ff14,#ff6f00);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(255,111,0,0.4))}
 /* ── User Color Themes ── */
 body.theme-neonTokyo .logo,body.theme-neonTokyo .home-title{background:linear-gradient(135deg,#00d4ff,#ff2d7b,#00d4ff);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,212,255,0.4))}
 body.theme-emeraldNoir .logo,body.theme-emeraldNoir .home-title{background:linear-gradient(135deg,#00e676,#c0c0c0,#00e676);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,230,118,0.4))}
 body.theme-crimsonVelvet .logo,body.theme-crimsonVelvet .home-title{background:linear-gradient(135deg,#e63946,#d4a373,#e63946);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(230,57,70,0.4))}
+
+/* ── Time-of-Day Adaptive ── */
+body.tod-dusk::before{background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(255,143,0,0.07),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(255,111,0,0.06),transparent),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(201,149,44,0.05),transparent)}
+body.tod-dusk .bokeh-orb{opacity:0.025 !important}
+body.tod-latenight::before{background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(60,80,180,0.06),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(40,60,140,0.04),transparent),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(80,100,200,0.03),transparent)}
+body.tod-latenight .bokeh-orb{opacity:0.02 !important}
+body.tod-latenight .particle{filter:brightness(0.7)}
+
+/* ── VIP Mode (Logged-In) ── */
+body.vip-mode nav::after{height:2px;background:linear-gradient(90deg,transparent 0%,rgba(201,149,44,0.6) 15%,rgba(245,230,163,0.8) 30%,rgba(180,74,255,0.5) 50%,rgba(245,230,163,0.8) 70%,rgba(201,149,44,0.6) 85%,transparent 100%);background-size:200% 100%;animation:navGlow 4s ease infinite}
+body.vip-mode .girl-card{backdrop-filter:blur(12px);box-shadow:0 4px 30px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);background:rgba(255,255,255,0.08)}
+body.vip-mode .girl-card:hover{box-shadow:0 24px 70px rgba(180,74,255,0.2),0 0 0 1px rgba(180,74,255,0.15),inset 0 1px 0 rgba(255,255,255,0.08)}
+.vip-sparkle{position:absolute;border-radius:50%;background:#ffffff;opacity:0;will-change:transform;animation:floatDrift1 linear infinite}
 
 /* ── Welcome Back Popup ── */
 .welcome-greeting{font-family:'Orbitron',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}

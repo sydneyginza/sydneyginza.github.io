@@ -853,7 +853,7 @@ authOverlay.onclick=e=>{if(e.target===authOverlay)authOverlay.classList.remove('
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
 document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
-document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('ginza_session')}catch(_){}loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navFavorites').style.display='none';document.getElementById('bnFavorites').style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome()}}
+document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('ginza_session')}catch(_){}loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navFavorites').style.display='none';document.getElementById('bnFavorites').style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
 function showAuthSignIn(){
@@ -897,7 +897,11 @@ else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
-function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}}
+const _vipSparkles=[];
+function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
+/* VIP mode */
+document.body.classList.add('vip-mode');
+if(!_vipSparkles.length){const _spDrifts=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];for(let i=0;i<8;i++){const s=document.createElement('div');s.className='vip-sparkle particle';const sz=3+Math.random()*2;s.style.width=s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.background='#ffffff';s.style.setProperty('--p-peak','0.8');s.style.animationName=_spDrifts[Math.floor(Math.random()*_spDrifts.length)];s.style.animationDuration=(8+Math.random()*12)+'s';s.style.animationDelay=Math.random()*15+'s';particlesEl.appendChild(s);_vipSparkles.push(s)}}}
 /* ── Welcome Back Popup ── */
 /* Respond to pings from other tabs so they know we're already open */
 const _welBc=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('ginza_wel'):null;
@@ -1081,7 +1085,11 @@ const SEASONAL_THEMES=[
   {id:'valentine',cls:'theme-valentine',match:(m,d)=>m===1&&d>=1&&d<=14,accent:'#ff4488',accent2:'#ff6fa8',icon:'\u2764\uFE0F',greetingKey:'season.valentine'},
   {id:'sakura',cls:'theme-sakura',match:(m,d)=>(m===1&&d>=15)||(m===2&&d<=15),accent:'#f4a0b5',accent2:'#d4738a',icon:'\uD83C\uDF38',greetingKey:'season.sakura'},
   {id:'christmas',cls:'theme-christmas',match:(m,d)=>m===11&&d>=1&&d<=25,accent:'#cc1111',accent2:'#00aa44',icon:'\uD83C\uDF84',greetingKey:'season.christmas'},
-  {id:'newyear',cls:'theme-newyear',match:(m,d)=>(m===11&&d>=26)||(m===0&&d<=7),accent:'#ffd700',accent2:'#ff6f00',icon:'\uD83C\uDF86',greetingKey:'season.newyear'}
+  {id:'newyear',cls:'theme-newyear',match:(m,d)=>(m===11&&d>=26)||(m===0&&d<=7),accent:'#ffd700',accent2:'#ff6f00',icon:'\uD83C\uDF86',greetingKey:'season.newyear'},
+  {id:'lunarnewyear',cls:'theme-lunarnewyear',match:(m,d)=>m===0&&d>=8&&d<=31,accent:'#cc0000',accent2:'#ffd700',icon:'\uD83E\uDDE7',greetingKey:'season.lunarnewyear'},
+  {id:'autumn',cls:'theme-autumn',match:(m,d)=>(m===2&&d>=16)||m===3||m===4,accent:'#ff8f00',accent2:'#880e4f',icon:'\uD83C\uDF42',greetingKey:'season.autumn'},
+  {id:'summer',cls:'theme-summer',match:(m,d)=>m===5||m===6||m===7,accent:'#00bcd4',accent2:'#ff6f61',icon:'\uD83C\uDFD6\uFE0F',greetingKey:'season.summer'},
+  {id:'halloween',cls:'theme-halloween',match:(m,d)=>m===9,accent:'#ff6f00',accent2:'#39ff14',icon:'\uD83C\uDF83',greetingKey:'season.halloween'}
 ];
 let _activeSeason=null;
 function detectSeasonalTheme(){const d=getAEDTDate();const m=d.getMonth(),day=d.getDate();return SEASONAL_THEMES.find(th=>th.match(m,day))||null}
@@ -1098,6 +1106,16 @@ function applySeasonalTheme(){
   particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
 }
 function getSeasonalBanner(){if(!_activeSeason)return '';return `<div class="seasonal-banner"><span class="seasonal-icon">${_activeSeason.icon}</span> ${t(_activeSeason.greetingKey)}</div>`}
+
+/* ── Time-of-Day Adaptive ── */
+function applyTimeOfDay(){
+  const h=getAEDTDate().getHours();
+  document.body.classList.remove('tod-dusk','tod-latenight');
+  if(h>=18&&h<21)document.body.classList.add('tod-dusk');
+  else if(h>=2&&h<6)document.body.classList.add('tod-latenight');
+}
+applyTimeOfDay();
+setInterval(applyTimeOfDay,900000);
 
 /* ── User Color Themes ── */
 const COLOR_THEMES=[
