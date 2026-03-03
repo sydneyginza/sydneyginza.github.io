@@ -280,9 +280,6 @@ Router.push(Router.pathForPage(id),pageTitle);
 const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
 _activeFilterPaneId=paneMap[id]||null;
 document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));
-const _bnMap={homePage:'bnHome',rosterPage:'bnRoster',listPage:'bnGirls',favoritesPage:'bnFavorites'};
-document.querySelectorAll('.bottom-nav-item').forEach(b=>b.classList.remove('active'));
-const _bnId=_bnMap[id];if(_bnId){const _bn=document.getElementById(_bnId);if(_bn)_bn.classList.add('active')}
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
 if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
@@ -301,11 +298,6 @@ document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('home
 document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
 document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
 document.getElementById('navFavorites').onclick=e=>{e.preventDefault();showPage('favoritesPage')};
-/* Bottom nav */
-document.getElementById('bnHome').onclick=()=>showPage('homePage');
-document.getElementById('bnRoster').onclick=()=>showPage('rosterPage');
-document.getElementById('bnGirls').onclick=()=>showPage('listPage');
-document.getElementById('bnFavorites').onclick=()=>showPage('favoritesPage');
 document.getElementById('navValue').onclick=e=>{e.preventDefault();showPage('valuePage')};
 document.getElementById('navEmployment').onclick=e=>{e.preventDefault();showPage('employmentPage')};
 document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
@@ -337,7 +329,7 @@ const avail=girls.filter(g=>!g.hidden&&isAvailableNow(g.name));
 if(!avail.length){container.style.display='none';container.innerHTML='';return}
 container.style.display='';
 const countLabel=avail.length===1?t('home.girlSingular'):t('home.girlPlural').replace('{n}',avail.length);
-let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><span class="avail-now-title">${countLabel} Available Now</span></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><h2 class="logo" style="margin:0">${countLabel} Available Now</h2></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
 avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?g.photos[0]:'';const cd=getAvailCountdown(g.name);const cdText=cd&&cd.type==='until_end'?cd.display:'';
 html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
 html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
@@ -358,7 +350,7 @@ const c=document.getElementById('homeImages');c.innerHTML='';
 const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
 for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
 document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
-ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();renderRecentlyViewed();
+ngList=getNewGirls();ngIdx=0;renderAvailNowWidget();renderNewGirls();
 /* Scroll reveals for below-fold home sections */
 const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el));observeReveals(document.getElementById('homePage'))})}
 
@@ -387,18 +379,24 @@ strip.style.cursor='grab';_updateRvArrows();
 const clearBtn=document.getElementById(clearId);if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed(containerId,returnPage)}}
 
 function renderNewGirls(){
-const nav=document.getElementById('ngNav'),disp=document.getElementById('ngDisplay');nav.innerHTML='';disp.innerHTML='';
-if(!ngList.length){disp.innerHTML='<div class="ng-empty">No new girls this month</div>';return}
-if(ngIdx>=ngList.length)ngIdx=0;if(ngIdx<0)ngIdx=ngList.length-1;
-const up=document.createElement('button');up.className='ng-arrow';up.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>';up.onclick=()=>{ngIdx=(ngIdx-1+ngList.length)%ngList.length;renderNewGirls()};nav.appendChild(up);
-const dots=document.createElement('div');dots.className='ng-dots';const mx=3;let st=Math.max(0,ngIdx-Math.floor(mx/2)),en=Math.min(ngList.length,st+mx);if(en-st<mx)st=Math.max(0,en-mx);
-for(let i=st;i<en;i++){const dot=document.createElement('button');dot.className='ng-dot'+(i===ngIdx?' active':'');const g=ngList[i];dot.innerHTML=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name}">`:`<span>${g.name.charAt(0)}</span>`;dot.onclick=()=>{ngIdx=i;renderNewGirls()};dots.appendChild(dot)}
-nav.appendChild(dots);const ctr=document.createElement('div');ctr.className='ng-counter';ctr.innerHTML=`<span>${ngIdx+1}</span> / ${ngList.length}`;nav.appendChild(ctr);
-const dn=document.createElement('button');dn.className='ng-arrow';dn.innerHTML='<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';dn.onclick=()=>{ngIdx=(ngIdx+1)%ngList.length;renderNewGirls()};nav.appendChild(dn);
-const g=ngList[ngIdx],ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name}">`:'<div class="ng-placeholder"></div>';
-disp.innerHTML=`<div class="ng-card"><div class="ng-photo" data-idx="${ri}" style="cursor:pointer">${photo}</div><a class="ng-name" data-idx="${ri}">${g.name}</a></div>`;
-disp.querySelector('.ng-photo').onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(ri)};
-disp.querySelector('.ng-name').onclick=()=>{_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(ri)}}
+const container=document.getElementById('homeNewGirls');if(!container)return;
+if(!ngList.length){container.style.display='none';container.innerHTML='';return}
+container.style.display='';
+let html=`<h2 class="logo" style="margin-bottom:16px">${t('home.newGirls')}</h2><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+ngList.forEach(g=>{const ri=girls.indexOf(g);const liveNow=g.name&&isAvailableNow(g.name);const photo=g.photos&&g.photos.length?g.photos[0]:'';
+html+=`<div class="avail-now-card" data-ng-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${liveNow?'<span class="avail-now-dot rv-dot"></span>':''}</div>`});
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';
+container.innerHTML=html;
+let _ngDidDrag=false;
+container.querySelectorAll('.avail-now-card').forEach(card=>{card.onclick=()=>{if(_ngDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(parseInt(card.dataset.ngIdx))}});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateNgArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateNgArrows);
+let _ngMdX=0,_ngMdSL=0,_ngMdActive=false;
+strip.addEventListener('mousedown',e=>{_ngMdActive=true;_ngDidDrag=false;_ngMdX=e.pageX;_ngMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_ngMdActive)return;if(Math.abs(e.pageX-_ngMdX)>5)_ngDidDrag=true;strip.scrollLeft=_ngMdSL-(e.pageX-_ngMdX)});
+document.addEventListener('mouseup',()=>{if(!_ngMdActive)return;_ngMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_ngDidDrag=false},0)});
+strip.style.cursor='grab';_updateNgArrows()}
 
 /* Home Search Bar */
 (function(){const inp=document.getElementById('homeSearchInput'),btn=document.getElementById('homeSearchBtn');if(!inp||!btn)return;function doHomeSearch(){const q=inp.value.trim();if(!q)return;sharedFilters.nameSearch=q;showPage('listPage');inp.value=''}inp.addEventListener('keydown',e=>{if(e.key==='Enter')doHomeSearch()});btn.onclick=doHomeSearch})();
@@ -619,7 +617,7 @@ candidates.forEach(c=>{const o=c.g;const liveNow=isAvailableNow(o.name);const ca
 sec.appendChild(strip);document.getElementById('profileContent').appendChild(sec)}
 
 
-function updateFavBadge(){const b=document.getElementById('navFavBadge');const bb=document.getElementById('bnFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:'';if(bb)bb.textContent=c>0?c:''}
+function updateFavBadge(){const b=document.getElementById('navFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:''}
 
 function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
 
@@ -884,7 +882,7 @@ authOverlay.onclick=e=>{if(e.target===authOverlay)authOverlay.classList.remove('
 function renderDropdown(){
 if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
 document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
-document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('ginza_session')}catch(_){}loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navFavorites').style.display='none';document.getElementById('bnFavorites').style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
+document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('ginza_session')}catch(_){}loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
 function showAuthSignIn(){
@@ -929,7 +927,7 @@ else{CRED.pop()}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
 const _vipSparkles=[];
-function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';document.getElementById('bnFavorites').style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
+function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
 /* VIP mode */
 document.body.classList.add('vip-mode');
 if(!_vipSparkles.length){const _spDrifts=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];for(let i=0;i<8;i++){const s=document.createElement('div');s.className='vip-sparkle particle';const sz=3+Math.random()*2;s.style.width=s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.background='#ffffff';s.style.setProperty('--p-peak','0.8');s.style.animationName=_spDrifts[Math.floor(Math.random()*_spDrifts.length)];s.style.animationDuration=(8+Math.random()*12)+'s';s.style.animationDelay=Math.random()*15+'s';particlesEl.appendChild(s);_vipSparkles.push(s)}}}
@@ -1025,12 +1023,11 @@ renderDropdown();
 
 /* ── Particle System: Bokeh Orbs + Fine Particles ── */
 const particlesEl=document.getElementById('particles');
-const _isMobile=innerWidth<768;
 
 /* Layer 1: Bokeh Orbs */
 const ORB_COLORS=['#b44aff','#c9952c','#ff6f00','#f5e6a3'];
 const ORB_DRIFTS=['orbDrift1','orbDrift2','orbDrift3'];
-const _orbCount=_isMobile?5:8+Math.floor(Math.random()*5);
+const _orbCount=8+Math.floor(Math.random()*5);
 for(let i=0;i<_orbCount;i++){
   const o=document.createElement('div');
   o.className='bokeh-orb';
@@ -1055,7 +1052,7 @@ const DEPTHS=[
   {cls:'depth-mid',  sMin:1.5,sMax:2.5,peak:0.5,r:0.40},
   {cls:'depth-near', sMin:2.5,sMax:4,  peak:0.7,r:0.25}
 ];
-const _pCount=_isMobile?20:35+Math.floor(Math.random()*6);
+const _pCount=35+Math.floor(Math.random()*6);
 for(let i=0;i<_pCount;i++){
   const p=document.createElement('div');
   const ratio=i/_pCount;
@@ -1095,8 +1092,8 @@ window.addEventListener('scroll',()=>{
   });
 },{passive:true});
 
-/* ── Cursor-Reactive Orbs (desktop only) ── */
-if(!_isMobile){
+/* ── Cursor-Reactive Orbs ── */
+{
   let _mouseX=innerWidth/2,_mouseY=innerHeight/2,_mouseTicking=false;
   const _orbs=particlesEl.querySelectorAll('.bokeh-orb');
   window.addEventListener('mousemove',e=>{
@@ -1137,8 +1134,8 @@ function observeReveals(container){
   container.querySelectorAll('.reveal:not(.revealed)').forEach(el=>_revealObserver.observe(el));
 }
 
-/* ── Custom Cursor (desktop only) ── */
-if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+/* ── Custom Cursor ── */
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
   const _curDot=document.getElementById('cursorDot');
   const _curRing=document.getElementById('cursorRing');
   if(_curDot&&_curRing){
@@ -1214,8 +1211,8 @@ if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
   document.addEventListener('click',e=>{if(!btn.contains(e.target)&&volWrap)volWrap.classList.remove('open')});
 })();
 
-/* ── Dynamic Accent Trail (desktop only) ── */
-if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+/* ── Dynamic Accent Trail ── */
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
   let _trailThrottle=0;
   window.addEventListener('mousemove',e=>{
     const now=Date.now();if(now-_trailThrottle<40)return;_trailThrottle=now;
