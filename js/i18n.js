@@ -1702,6 +1702,7 @@ function setLanguage(lang) {
   if (!LANG_DICT[lang]) return;
   siteLanguage = lang;
   try { localStorage.setItem('ginza_lang', lang); } catch(e) {}
+  try { if(typeof setUserPref==='function'&&typeof loggedIn!=='undefined'&&loggedIn)setUserPref('lang',lang); } catch(e) {}
   applyLang();
   /* Re-render all JS-built content so it reflects the new language */
   try { if (typeof onFiltersChanged === 'function') onFiltersChanged(); } catch(e) {}

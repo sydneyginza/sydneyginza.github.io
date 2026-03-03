@@ -897,6 +897,7 @@ const _tbwL=document.getElementById('themeBtnWrap');if(_tbwL)_tbwL.style.display
 const _abwL=document.getElementById('ambientBtnWrap');if(_abwL)_abwL.style.display='none';
 if(typeof window._ambientStop==='function')window._ambientStop();
 clearCompare();closeCompareModal();
+if(typeof setLanguage==='function')setLanguage('en');
 applySeasonalTheme();document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
@@ -946,6 +947,9 @@ function _applyLogin(match,_isRestore=false){loggedIn=true;loggedInUser=match.us
 /* Show theme + sound buttons */
 const _tbw=document.getElementById('themeBtnWrap');if(_tbw)_tbw.style.display='';
 const _abw=document.getElementById('ambientBtnWrap');if(_abw)_abw.style.display='';
+/* Restore user language preference */
+const _savedLang=match.prefs&&match.prefs.lang;
+if(_savedLang&&typeof setLanguage==='function')setLanguage(_savedLang);
 /* Restore user theme preference */
 const _savedTheme=match.prefs&&match.prefs.theme;
 if(_savedTheme)applyColorTheme(_savedTheme);else applySeasonalTheme();
