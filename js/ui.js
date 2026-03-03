@@ -940,15 +940,16 @@ else{CRED.pop()}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
 
 const _vipSparkles=[];
-function _applyLogin(match){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';
+function _applyLogin(match,_isRestore=false){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';
 /* Show theme + sound buttons */
 const _tbw=document.getElementById('themeBtnWrap');if(_tbw)_tbw.style.display='';
 const _abw=document.getElementById('ambientBtnWrap');if(_abw)_abw.style.display='';
 /* Restore user theme preference */
 const _savedTheme=match.prefs&&match.prefs.theme;
 if(_savedTheme)applyColorTheme(_savedTheme);else applySeasonalTheme();
-/* Auto-play sound unless user previously disabled it */
-setTimeout(()=>{const off=match.prefs&&match.prefs.soundOff;if(!off&&typeof window._ambientToggle==='function')window._ambientToggle(true)},400);loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
+/* Sound: auto-play on fresh login; on restore wait for first user gesture */
+const _soundOff=match.prefs&&match.prefs.soundOff;
+if(!_soundOff){if(!_isRestore){setTimeout(()=>{if(typeof window._ambientToggle==='function')window._ambientToggle(true)},400)}else if(typeof window._ambientStartOnGesture==='function')window._ambientStartOnGesture()}loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
 /* VIP mode */
 document.body.classList.add('vip-mode');
 if(!_vipSparkles.length){const _spDrifts=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];for(let i=0;i<8;i++){const s=document.createElement('div');s.className='vip-sparkle particle';const sz=3+Math.random()*2;s.style.width=s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.background='#ffffff';s.style.setProperty('--p-peak','0.8');s.style.animationName=_spDrifts[Math.floor(Math.random()*_spDrifts.length)];s.style.animationDuration=(8+Math.random()*12)+'s';s.style.animationDelay=Math.random()*15+'s';particlesEl.appendChild(s);_vipSparkles.push(s)}}}
@@ -1033,7 +1034,7 @@ function _welcomeIfOnlyTab(){
   setTimeout(()=>{bc.close();if(!replied)showWelcomePopup()},150);
 }
 
-function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){if(match.status==='pending'){localStorage.removeItem('ginza_session');return}_applyLogin(match);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
+function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){if(match.status==='pending'){localStorage.removeItem('ginza_session');return}_applyLogin(match,true);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
 function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
 if(match){if(match.status==='pending'){document.getElementById('lfError').textContent=t('ui.pendingApproval');document.getElementById('lfPass').value='';return}const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showWelcomePopup()}
 else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
@@ -1226,8 +1227,10 @@ if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
       [587.33,523.25,440,392]        /* G:  D5 C5 A4 G4 */
     ];
     const CDUR=4.4,NDUR=CDUR/4;
-    _chordIdx=0;_nextTime=_actx.currentTime+0.1;
-    function _sched(){
+    _chordIdx=0;
+    window._ambSched=function _sched(){
+      /* Anchor _nextTime to live currentTime if stale or unset */
+      if(!_nextTime||_nextTime<_actx.currentTime)_nextTime=_actx.currentTime+0.15;
       while(_nextTime<_actx.currentTime+CDUR*2){
         const ci=_chordIdx%chords.length;
         const t=_nextTime;
@@ -1252,20 +1255,28 @@ if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
         });
         _chordIdx++;_nextTime+=CDUR;
       }
-      _schedTimer=setTimeout(_sched,1800);
-    }
-    _sched();
+      _schedTimer=setTimeout(window._ambSched,1800);
+    };
+    /* Do NOT call _sched() here — called after resume() resolves in _toggle */
   }
   function _toggle(silent){
     if(!_actx)_initAudio();
     if(_playing){_actx.suspend();btn.classList.remove('amb-playing');clearTimeout(_schedTimer);
       if(!silent&&loggedIn)setUserPref('soundOff',true)}
-    else{_actx.resume();btn.classList.add('amb-playing');
-      if(!silent&&loggedIn)setUserPref('soundOff',false)}
+    else{_playing=true;_actx.resume().then(()=>{if(_playing){clearTimeout(_schedTimer);window._ambSched&&window._ambSched()}});
+      btn.classList.add('amb-playing');
+      if(!silent&&loggedIn)setUserPref('soundOff',false);return}
     _playing=!_playing;
   }
   window._ambientToggle=_toggle;
   window._ambientStop=()=>{if(_playing){_actx&&_actx.suspend();btn.classList.remove('amb-playing');clearTimeout(_schedTimer);_playing=false}};
+  window._ambientStartOnGesture=()=>{
+    if(_playing)return;
+    const _start=()=>{if(!_playing)_toggle(true)};
+    document.addEventListener('click',_start,{once:true,capture:true});
+    document.addEventListener('touchstart',_start,{once:true,capture:true});
+    document.addEventListener('keydown',_start,{once:true,capture:true});
+  };
   btn.onclick=e=>{if(!e.target.closest('.amb-vol-wrap'))_toggle()};
   btn.addEventListener('contextmenu',e=>{e.preventDefault();volWrap.classList.toggle('open')});
   if(volSlider){volSlider.oninput=()=>{if(_masterGain)_masterGain.gain.value=parseFloat(volSlider.value)}}
