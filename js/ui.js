@@ -1086,6 +1086,8 @@ const SEASONAL_THEMES=[
 let _activeSeason=null;
 function detectSeasonalTheme(){const d=getAEDTDate();const m=d.getMonth(),day=d.getDate();return SEASONAL_THEMES.find(th=>th.match(m,day))||null}
 function applySeasonalTheme(){
+  let storedTheme;try{storedTheme=localStorage.getItem('ginza_theme')}catch(e){}
+  if(storedTheme&&storedTheme!=='default')return;
   _activeSeason=detectSeasonalTheme();
   SEASONAL_THEMES.forEach(th=>document.body.classList.remove(th.cls));
   if(!_activeSeason)return;
@@ -1096,7 +1098,66 @@ function applySeasonalTheme(){
   particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
 }
 function getSeasonalBanner(){if(!_activeSeason)return '';return `<div class="seasonal-banner"><span class="seasonal-icon">${_activeSeason.icon}</span> ${t(_activeSeason.greetingKey)}</div>`}
+
+/* ── User Color Themes ── */
+const COLOR_THEMES=[
+  {id:'default',cls:'',accent:null,accent2:null},
+  {id:'neonTokyo',cls:'theme-neonTokyo',accent:'#00d4ff',accent2:'#ff2d7b'},
+  {id:'midnightGold',cls:'theme-midnightGold',accent:'#b44aff',accent2:'#c9952c'},
+  {id:'emeraldNoir',cls:'theme-emeraldNoir',accent:'#00e676',accent2:'#c0c0c0'},
+  {id:'crimsonVelvet',cls:'theme-crimsonVelvet',accent:'#e63946',accent2:'#d4a373'}
+];
+const _themeBtn=document.getElementById('themeBtn');
+const _themeDropdown=document.getElementById('themeDropdown');
+
+function applyColorTheme(themeId){
+  COLOR_THEMES.forEach(th=>{if(th.cls)document.body.classList.remove(th.cls)});
+  SEASONAL_THEMES.forEach(th=>document.body.classList.remove(th.cls));
+  if(themeId==='default'){
+    try{localStorage.removeItem('ginza_theme')}catch(e){}
+    applySeasonalTheme();
+    _updateThemeActive('default');
+    return;
+  }
+  const theme=COLOR_THEMES.find(t=>t.id===themeId);
+  if(!theme)return;
+  document.body.classList.add(theme.cls);
+  document.documentElement.style.setProperty('--accent',theme.accent);
+  document.documentElement.style.setProperty('--accent2',theme.accent2);
+  particlesEl.querySelectorAll('.particle').forEach(p=>{p.style.background=Math.random()>0.5?theme.accent:theme.accent2});
+  particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?theme.accent:theme.accent2});
+  try{localStorage.setItem('ginza_theme',themeId)}catch(e){}
+  _updateThemeActive(themeId);
+}
+function _updateThemeActive(id){
+  _themeDropdown.querySelectorAll('.theme-option').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.theme===id);
+  });
+}
+
+/* Theme dropdown wiring */
+_themeBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  const o=_themeDropdown.classList.toggle('open');
+  _themeBtn.setAttribute('aria-expanded',String(o));
+});
+_themeDropdown.querySelectorAll('.theme-option').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    applyColorTheme(btn.dataset.theme);
+    _themeDropdown.classList.remove('open');
+    _themeBtn.setAttribute('aria-expanded','false');
+  });
+});
+document.addEventListener('click',function(e){
+  if(!_themeDropdown.contains(e.target)&&e.target!==_themeBtn){
+    _themeDropdown.classList.remove('open');
+    _themeBtn.setAttribute('aria-expanded','false');
+  }
+});
+
+/* Apply seasonal first, then restore user theme if saved */
 applySeasonalTheme();
+(function(){let saved;try{saved=localStorage.getItem('ginza_theme')}catch(e){}if(saved&&saved!=='default')applyColorTheme(saved)})();
 
 /* Filter Panel Toggle */
 let _activeFilterPaneId=null;
