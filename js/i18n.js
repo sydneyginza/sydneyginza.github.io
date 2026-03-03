@@ -62,6 +62,8 @@ const LANG_DICT = {
     'avail.finished':'Finished for the Day',
     'avail.endsIn':'Ends in {t}',
     'avail.startsIn':'Starts in {t}',
+    'avail.schedule':'Schedule',
+    'ui.viewProfile':'View Profile',
     /* Roster real-time */
     'roster.lastUpdated':'Updated',
     'roster.refresh':'Refresh',
@@ -477,6 +479,8 @@ const LANG_DICT = {
     'avail.finished':'本日の営業終了',
     'avail.endsIn':'あと{t}で終了',
     'avail.startsIn':'{t}後に開始',
+    'avail.schedule':'スケジュール',
+    'ui.viewProfile':'プロフィールを見る',
     /* Roster real-time */
     'roster.lastUpdated':'更新',
     'roster.refresh':'更新',
@@ -892,6 +896,8 @@ const LANG_DICT = {
     'avail.finished':'오늘 영업 종료',
     'avail.endsIn':'{t} 후 종료',
     'avail.startsIn':'{t} 후 시작',
+    'avail.schedule':'스케줄',
+    'ui.viewProfile':'프로필 보기',
     /* Roster real-time */
     'roster.lastUpdated':'업데이트',
     'roster.refresh':'새로고침',
@@ -1307,6 +1313,8 @@ const LANG_DICT = {
     'avail.finished':'今日已结束',
     'avail.endsIn':'{t}后结束',
     'avail.startsIn':'{t}后开始',
+    'avail.schedule':'时间表',
+    'ui.viewProfile':'查看资料',
     /* Roster real-time */
     'roster.lastUpdated':'更新于',
     'roster.refresh':'刷新',

@@ -7,7 +7,7 @@
 body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}
 body::before{content:'';position:fixed;inset:-10%;width:120%;height:120%;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(180,74,255,0.06),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(255,111,0,0.04),transparent),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(201,149,44,0.03),transparent);pointer-events:none;z-index:0;animation:atmosphereDrift 30s ease-in-out infinite}
 @keyframes atmosphereDrift{0%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,20px) scale(1.03)}50%{transform:translate(-20px,10px) scale(1.01)}75%{transform:translate(10px,-25px) scale(1.04)}100%{transform:translate(0,0) scale(1)}}
-nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:none}
+nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:none;transition:background .3s ease,backdrop-filter .3s ease,-webkit-backdrop-filter .3s ease,border-bottom .3s ease}
 nav::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(180,74,255,0.4) 20%,rgba(201,149,44,0.5) 50%,rgba(180,74,255,0.4) 80%,transparent 100%);background-size:200% 100%;animation:navGlow 8s ease infinite}
 @keyframes navGlow{0%{background-position:0% 0}50%{background-position:100% 0}100%{background-position:0% 0}}
 .logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}
@@ -110,8 +110,8 @@ nav::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:1px;ba
 .sort-dir-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);color:var(--text-dim);height:30px;display:inline-flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .3s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));padding:0 10px}
 .sort-dir-label{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:1.5px}
 .sort-dir-btn:hover{border-color:rgba(255,255,255,0.2);color:#fff}
-.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;perspective:800px}
-.girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid var(--border-subtle,rgba(255,255,255,0.1));overflow:hidden;transition:border-color .4s,box-shadow .4s,background .4s,transform .15s ease;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));opacity:0;transform:translateY(20px);animation:none;backdrop-filter:blur(8px);box-shadow:0 4px 24px rgba(0,0,0,0.3);transform-style:preserve-3d}
+.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.girl-card{position:relative;cursor:pointer;background:var(--bg-card);border:1px solid var(--border-subtle,rgba(255,255,255,0.1));overflow:hidden;transition:border-color .4s,box-shadow .4s,background .4s,transform .15s ease;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));opacity:0;transform:translateY(20px);animation:none;backdrop-filter:blur(8px);box-shadow:0 4px 24px rgba(0,0,0,0.3)}
 .girl-card.card-enter{animation:cardEnter .5s cubic-bezier(0.23,1,0.32,1) forwards;animation-delay:calc(var(--card-index,0) * 60ms)}
 .girl-card.card-entered{opacity:1;transform:translateY(0);transition:border-color .4s,box-shadow .4s,transform .4s}
 @keyframes cardEnter{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
@@ -1114,7 +1114,36 @@ body.custom-cursor .cursor-dot,body.custom-cursor .cursor-ring{display:block}
 body.custom-cursor,body.custom-cursor *{cursor:none !important}
 body.custom-cursor input,body.custom-cursor textarea,body.custom-cursor select{cursor:auto !important}
 .cursor-dot.hidden,.cursor-ring.hidden{opacity:0}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}.particle,.bokeh-orb{display:none}.girl-card{animation:none;opacity:1;transform:none}.reveal{opacity:1;transform:none}.cursor-dot,.cursor-ring{display:none !important}body::after{display:none}}
+/* ── Cursor Accent Trail ── */
+.cursor-trail{position:fixed;pointer-events:none;z-index:9997;border-radius:50%;background:var(--accent);opacity:0.7;animation:trailFade .5s ease forwards}
+@keyframes trailFade{0%{transform:translate(-50%,-50%) scale(1);opacity:0.7}100%{transform:translate(-50%,-50%) scale(0);opacity:0}}
+/* ── Ambient Sound Toggle ── */
+.amb-vol-wrap{position:absolute;top:calc(100% + 4px);right:0;background:rgba(14,12,22,0.97);border:1px solid rgba(255,255,255,0.12);padding:10px 12px;display:none;flex-direction:column;gap:6px;min-width:120px;z-index:300;backdrop-filter:blur(8px);clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
+.amb-vol-wrap.open{display:flex}
+.amb-vol-label{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase}
+.amb-vol-slider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.12);border-radius:2px;outline:none}
+.amb-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px rgba(180,74,255,0.4)}
+.amb-vol-slider::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
+#ambientBtn.amb-playing svg{filter:drop-shadow(0 0 4px var(--accent))}
+/* ── Card Quick-Info Flip Overlay ── */
+.card-flip-btn{position:absolute;bottom:10px;right:10px;z-index:4;width:28px;height:28px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;backdrop-filter:blur(4px);font-size:13px;transition:all .3s;opacity:0;pointer-events:none}
+.girl-card:hover .card-flip-btn{opacity:1;pointer-events:auto}
+.card-flip-btn:hover{color:var(--accent);border-color:var(--accent);background:rgba(0,0,0,0.8)}
+.card-back{position:absolute;inset:0;z-index:5;background:rgba(10,10,15,0.95);backdrop-filter:blur(12px);display:flex;flex-direction:column;justify-content:center;padding:20px 16px;opacity:0;transform:rotateY(90deg);transition:opacity .3s ease,transform .3s ease;pointer-events:none;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.girl-card.card-flipped .card-back{opacity:1;transform:rotateY(0deg);pointer-events:auto}
+.card-back-name{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:2px;color:#fff;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(180,74,255,0.3)}
+.card-back-row{display:flex;justify-content:space-between;font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:0.5px;padding:3px 0;color:var(--text)}
+.card-back-row span:first-child{color:var(--text-dim)}
+.card-back-row span:last-child{color:#fff}
+.card-back-divider{height:1px;background:rgba(255,255,255,0.08);margin:6px 0}
+.card-back-cta{margin-top:auto;padding-top:10px;font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;color:var(--accent);text-align:center;text-transform:uppercase}
+/* ── FLIP Grid Animations ── */
+.girl-card.flip-move{transition:transform .4s cubic-bezier(0.4,0,0.2,1),opacity .4s ease !important}
+.girl-card.flip-enter{animation:flipCardIn .4s cubic-bezier(0.23,1,0.32,1) forwards}
+.girl-card.flip-exit{animation:flipCardOut .3s ease forwards}
+@keyframes flipCardIn{from{opacity:0;transform:scale(0.85)}to{opacity:1;transform:scale(1)}}
+@keyframes flipCardOut{to{opacity:0;transform:scale(0.85)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}.particle,.bokeh-orb{display:none}.girl-card{animation:none;opacity:1;transform:none}.reveal{opacity:1;transform:none}.cursor-dot,.cursor-ring,.cursor-trail{display:none !important}body::after{display:none}}
 body.no-transition,body.no-transition *{transition:none !important}
 
 /* ── Seasonal Themes ── */

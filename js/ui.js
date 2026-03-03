@@ -218,16 +218,47 @@ bar.style.display='flex';
 chips.forEach(c=>{const ch=document.createElement('button');ch.className='active-filter-chip';ch.innerHTML=c.label+' <span class="chip-x">×</span>';ch.onclick=c.rm;bar.appendChild(ch)});
 const clr=document.createElement('button');clr.className='active-filter-chip chip-clear-all';clr.textContent=t('fp.clearAll');clr.onclick=()=>{clearAllFilters();onFiltersChanged()};bar.appendChild(clr);
 }
+function _captureGridPositions(gridEl){
+  if(!gridEl)return{};
+  const map={};
+  gridEl.querySelectorAll('.girl-card').forEach(c=>{
+    const name=c.querySelector('.card-name');
+    if(name&&name.textContent){const r=c.getBoundingClientRect();map[name.textContent.trim()]={left:r.left,top:r.top,width:r.width,height:r.height,el:c}}
+  });return map}
+function _animateFlip(gridEl,oldPos){
+  if(!gridEl||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  gridEl.querySelectorAll('.girl-card').forEach(c=>{
+    const name=c.querySelector('.card-name');
+    if(!name)return;
+    const key=name.textContent.trim();const prev=oldPos[key];
+    const cur=c.getBoundingClientRect();
+    if(prev){
+      const dx=prev.left-cur.left;const dy=prev.top-cur.top;
+      if(Math.abs(dx)>1||Math.abs(dy)>1){
+        c.style.transform='translate('+dx+'px,'+dy+'px)';c.style.transition='none';
+        requestAnimationFrame(()=>{c.classList.add('flip-move');c.style.transform='';c.style.transition='';
+          const onEnd=()=>{c.classList.remove('flip-move');c.removeEventListener('transitionend',onEnd)};
+          c.addEventListener('transitionend',onEnd)});
+      }
+    }else{c.classList.add('flip-enter');
+      const onEnd=()=>{c.classList.remove('flip-enter');c.removeEventListener('animationend',onEnd)};
+      c.addEventListener('animationend',onEnd)}
+    delete oldPos[key]});
+}
 function onFiltersChanged(){
 const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
 const cursorPos=hadFocus?document.activeElement.selectionStart:0;
 const focusPane=hadFocus?document.activeElement.closest('.filter-pane'):null;
 const focusPaneId=focusPane?focusPane.id:null;
+const _oldGrid=_captureGridPositions(document.getElementById('girlsGrid'));
+const _oldRoster=_captureGridPositions(document.getElementById('rosterGrid'));
 renderFilterPane('girlsFilterPane');
 renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
 renderFilterPane('profileFilterPane');
 renderFilters();renderGrid();renderRoster();
+_animateFlip(document.getElementById('girlsGrid'),_oldGrid);
+_animateFlip(document.getElementById('rosterGrid'),_oldRoster);
 updateFilterToggle();pushFiltersToURL();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
 if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
@@ -1041,13 +1072,25 @@ for(let i=0;i<_pCount;i++){
   particlesEl.appendChild(p);
 }
 
-/* ── Scroll Parallax ── */
+/* ── Scroll Parallax + Nav Glassmorphism ── */
 let _scrollTicking=false;
+const _navEl=document.querySelector('nav');
 window.addEventListener('scroll',()=>{
   if(_scrollTicking)return;
   _scrollTicking=true;
   requestAnimationFrame(()=>{
-    particlesEl.style.transform='translateY('+scrollY*0.05+'px)';
+    const sy=scrollY;
+    particlesEl.style.transform='translateY('+sy*0.05+'px)';
+    if(_navEl){
+      const t=Math.min(sy/300,1);
+      const bg=0.85+t*0.12;
+      const bl=20+t*16;
+      const bw=t*1;
+      _navEl.style.background='rgba(10,10,15,'+bg.toFixed(2)+')';
+      _navEl.style.backdropFilter='blur('+bl.toFixed(1)+'px)';
+      _navEl.style.webkitBackdropFilter='blur('+bl.toFixed(1)+'px)';
+      _navEl.style.borderBottom=bw>0.05?bw.toFixed(2)+'px solid rgba(255,255,255,'+((t*0.06).toFixed(3))+')':'none';
+    }
     _scrollTicking=false;
   });
 },{passive:true});
@@ -1078,29 +1121,6 @@ if(!_isMobile){
       _mouseTicking=false;
     });
   },{passive:true});
-}
-
-/* ── 3D Card Tilt (desktop only) ── */
-if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
-  document.querySelectorAll('.girls-grid').forEach(grid=>{
-    grid.addEventListener('mousemove',e=>{
-      const card=e.target.closest('.girl-card');
-      if(!card||!card.classList.contains('card-entered'))return;
-      const rect=card.getBoundingClientRect();
-      const x=(e.clientX-rect.left)/rect.width;
-      const y=(e.clientY-rect.top)/rect.height;
-      const rotY=(x-0.5)*16;
-      const rotX=(0.5-y)*16;
-      card.style.transform='perspective(800px) rotateX('+rotX.toFixed(1)+'deg) rotateY('+rotY.toFixed(1)+'deg) translateY(-4px)';
-    },{passive:true});
-    grid.addEventListener('mouseleave',e=>{
-      grid.querySelectorAll('.girl-card.card-entered').forEach(c=>{c.style.transform=''});
-    },{passive:true});
-    grid.addEventListener('mouseout',e=>{
-      const card=e.target.closest('.girl-card');
-      if(card)card.style.transform='';
-    },{passive:true});
-  });
 }
 
 /* ── Section Reveals ── */
@@ -1152,6 +1172,86 @@ if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
     document.addEventListener('mouseleave',()=>{_curDot.classList.add('hidden');_curRing.classList.add('hidden')});
     document.addEventListener('mouseenter',()=>{_curDot.classList.remove('hidden');_curRing.classList.remove('hidden')});
   }
+}
+
+/* ── Ambient Sound Toggle ── */
+(function(){
+  const btn=document.getElementById('ambientBtn');
+  const volWrap=document.getElementById('ambVolWrap');
+  const volSlider=document.getElementById('ambVolSlider');
+  if(!btn)return;
+  let _actx=null,_masterGain=null,_playing=false,_nodes=[];
+  function _initAudio(){
+    _actx=new(window.AudioContext||window.webkitAudioContext)();
+    _masterGain=_actx.createGain();
+    _masterGain.gain.value=parseFloat(volSlider?volSlider.value:0.3);
+    _masterGain.connect(_actx.destination);
+    const freqs=[55,82.5,110,165];
+    freqs.forEach(f=>{
+      const osc=_actx.createOscillator();osc.type='sine';osc.frequency.value=f;
+      const g=_actx.createGain();g.gain.value=f<100?0.18:0.06;
+      const flt=_actx.createBiquadFilter();flt.type='lowpass';flt.frequency.value=200;flt.Q.value=0.5;
+      osc.connect(flt);flt.connect(g);g.connect(_masterGain);osc.start();_nodes.push({osc,gain:g,flt});
+    });
+    const noise=_actx.createBufferSource();
+    const buf=_actx.createBuffer(1,_actx.sampleRate*2,_actx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.015;
+    noise.buffer=buf;noise.loop=true;
+    const nFlt=_actx.createBiquadFilter();nFlt.type='lowpass';nFlt.frequency.value=150;
+    const nGain=_actx.createGain();nGain.gain.value=0.4;
+    noise.connect(nFlt);nFlt.connect(nGain);nGain.connect(_masterGain);noise.start();
+    _nodes.push({osc:noise,gain:nGain,flt:nFlt});
+  }
+  function _toggle(){
+    if(!_actx)_initAudio();
+    if(_playing){_actx.suspend();btn.classList.remove('amb-playing')}
+    else{_actx.resume();btn.classList.add('amb-playing')}
+    _playing=!_playing;
+  }
+  btn.onclick=e=>{if(!e.target.closest('.amb-vol-wrap'))_toggle()};
+  btn.addEventListener('contextmenu',e=>{e.preventDefault();volWrap.classList.toggle('open')});
+  if(volSlider){volSlider.oninput=()=>{if(_masterGain)_masterGain.gain.value=parseFloat(volSlider.value)}}
+  document.addEventListener('click',e=>{if(!btn.contains(e.target)&&volWrap)volWrap.classList.remove('open')});
+})();
+
+/* ── Dynamic Accent Trail (desktop only) ── */
+if(!_isMobile&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  let _trailThrottle=0;
+  window.addEventListener('mousemove',e=>{
+    const now=Date.now();if(now-_trailThrottle<40)return;_trailThrottle=now;
+    const dot=document.createElement('div');dot.className='cursor-trail';
+    const size=3+Math.random()*3;
+    dot.style.cssText='width:'+size+'px;height:'+size+'px;left:'+e.clientX+'px;top:'+e.clientY+'px';
+    document.body.appendChild(dot);
+    setTimeout(()=>dot.remove(),500);
+  },{passive:true});
+}
+
+/* ── Card Flip Preview ── */
+function addCardFlip(card,g){
+  const flipBtn=document.createElement('button');
+  flipBtn.className='card-flip-btn';flipBtn.innerHTML='&#x2139;';flipBtn.title='Quick info';
+  flipBtn.onclick=e=>{e.stopPropagation();card.classList.toggle('card-flipped')};
+  const imgWrap=card.querySelector('.card-img');
+  if(imgWrap)imgWrap.appendChild(flipBtn);
+  const back=document.createElement('div');back.className='card-back';
+  const entry=getCalEntry(g.name,fmtDate(getAEDTDate()));
+  const liveNow=g.name&&isAvailableNow(g.name);
+  const availText=liveNow?t('avail.now'):(entry&&entry.start?fmtTime12(entry.start)+' - '+fmtTime12(entry.end):'—');
+  back.innerHTML='<div class="card-back-name">'+(g.name||'')+'</div>'
+    +'<div class="card-back-row"><span>'+t('field.age')+'</span><span>'+(g.age||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.body')+'</span><span>'+(g.body||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.height')+'</span><span>'+(g.height?g.height+' cm':'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.cup')+'</span><span>'+(g.cup||'—')+'</span></div>'
+    +'<div class="card-back-divider"></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates30')+'</span><span>'+(g.val1||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates45')+'</span><span>'+(g.val2||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates60')+'</span><span>'+(g.val3||'—')+'</span></div>'
+    +'<div class="card-back-divider"></div>'
+    +'<div class="card-back-row"><span>'+t('field.experience')+'</span><span>'+(g.exp||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+(liveNow?'🟢':'📅')+' '+t('avail.schedule')+'</span><span>'+availText+'</span></div>'
+    +'<div class="card-back-cta">'+t('ui.viewProfile')+' →</div>';
+  card.appendChild(back);
 }
 
 /* ── Seasonal / Event Themes ── */
