@@ -988,8 +988,114 @@ document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.
 renderDropdown();
 
 
-/* Particles */
-const particlesEl=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=Math.random()*10+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';particlesEl.appendChild(p)}
+/* ── Particle System: Bokeh Orbs + Fine Particles ── */
+const particlesEl=document.getElementById('particles');
+const _isMobile=innerWidth<768;
+
+/* Layer 1: Bokeh Orbs */
+const ORB_COLORS=['#b44aff','#c9952c','#ff6f00','#f5e6a3'];
+const ORB_DRIFTS=['orbDrift1','orbDrift2','orbDrift3'];
+const _orbCount=_isMobile?5:8+Math.floor(Math.random()*5);
+for(let i=0;i<_orbCount;i++){
+  const o=document.createElement('div');
+  o.className='bokeh-orb';
+  const sz=50+Math.random()*150;
+  o.style.width=o.style.height=sz+'px';
+  o.style.left=Math.random()*100+'%';
+  o.style.top=Math.random()*100+'%';
+  o.style.background=ORB_COLORS[Math.floor(Math.random()*ORB_COLORS.length)];
+  o.style.opacity=(0.03+Math.random()*0.05).toFixed(3);
+  o.style.filter='blur('+(30+Math.random()*30)+'px)';
+  o.style.animationName=ORB_DRIFTS[Math.floor(Math.random()*ORB_DRIFTS.length)];
+  o.style.animationDuration=(30+Math.random()*30)+'s';
+  o.style.animationDelay=Math.random()*20+'s';
+  particlesEl.appendChild(o);
+}
+
+/* Layer 2: Fine Particles (3 depth layers) */
+const P_COLORS=['#b44aff','#c9952c','#ffffff'];
+const P_DRIFTS=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];
+const DEPTHS=[
+  {cls:'depth-far',  sMin:1,sMax:1.5,peak:0.3,r:0.35},
+  {cls:'depth-mid',  sMin:1.5,sMax:2.5,peak:0.5,r:0.40},
+  {cls:'depth-near', sMin:2.5,sMax:4,  peak:0.7,r:0.25}
+];
+const _pCount=_isMobile?20:35+Math.floor(Math.random()*6);
+for(let i=0;i<_pCount;i++){
+  const p=document.createElement('div');
+  const ratio=i/_pCount;
+  const d=ratio<DEPTHS[0].r?DEPTHS[0]:ratio<DEPTHS[0].r+DEPTHS[1].r?DEPTHS[1]:DEPTHS[2];
+  p.className='particle '+d.cls;
+  const sz=d.sMin+Math.random()*(d.sMax-d.sMin);
+  p.style.width=p.style.height=sz+'px';
+  p.style.left=Math.random()*100+'%';
+  p.style.background=P_COLORS[Math.floor(Math.random()*P_COLORS.length)];
+  p.style.setProperty('--p-peak',String(d.peak));
+  p.style.animationName=P_DRIFTS[Math.floor(Math.random()*P_DRIFTS.length)];
+  p.style.animationDuration=(8+Math.random()*12)+'s';
+  p.style.animationDelay=Math.random()*15+'s';
+  particlesEl.appendChild(p);
+}
+
+/* ── Shooting Stars ── */
+const _prefersReducedMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
+if(!_prefersReducedMotion){
+  function spawnShootingStar(){
+    const s=document.createElement('div');
+    s.className='shooting-star';
+    const angle=-25-Math.random()*25;
+    const dur=0.6+Math.random()*0.6;
+    const dist=400+Math.random()*400;
+    s.style.setProperty('--ss-angle',angle+'deg');
+    s.style.setProperty('--ss-dur',dur+'s');
+    s.style.setProperty('--ss-dist',dist+'px');
+    s.style.top=Math.random()*50+'%';
+    s.style.left=Math.random()*60+'%';
+    s.style.width=(60+Math.random()*60)+'px';
+    particlesEl.appendChild(s);
+    s.addEventListener('animationend',()=>s.remove());
+  }
+  setInterval(spawnShootingStar,12000);
+}
+
+/* ── Scroll Parallax ── */
+let _scrollTicking=false;
+window.addEventListener('scroll',()=>{
+  if(_scrollTicking)return;
+  _scrollTicking=true;
+  requestAnimationFrame(()=>{
+    particlesEl.style.transform='translateY('+scrollY*0.05+'px)';
+    _scrollTicking=false;
+  });
+},{passive:true});
+
+/* ── Cursor-Reactive Orbs (desktop only) ── */
+if(!_isMobile){
+  let _mouseX=innerWidth/2,_mouseY=innerHeight/2,_mouseTicking=false;
+  const _orbs=particlesEl.querySelectorAll('.bokeh-orb');
+  window.addEventListener('mousemove',e=>{
+    _mouseX=e.clientX;_mouseY=e.clientY;
+    if(_mouseTicking)return;
+    _mouseTicking=true;
+    requestAnimationFrame(()=>{
+      _orbs.forEach((orb,i)=>{
+        const rect=orb.getBoundingClientRect();
+        const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+        const dx=_mouseX-cx,dy=_mouseY-cy;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const maxDist=400;
+        if(dist<maxDist){
+          const strength=(1-dist/maxDist)*(15+i%3*5);
+          const ox=-dx/dist*strength,oy=-dy/dist*strength;
+          orb.style.translate=ox.toFixed(1)+'px '+oy.toFixed(1)+'px';
+        }else{
+          orb.style.translate='0px 0px';
+        }
+      });
+      _mouseTicking=false;
+    });
+  },{passive:true});
+}
 
 /* ── Seasonal / Event Themes ── */
 const SEASONAL_THEMES=[
@@ -1008,6 +1114,7 @@ function applySeasonalTheme(){
   document.documentElement.style.setProperty('--accent',_activeSeason.accent);
   document.documentElement.style.setProperty('--accent2',_activeSeason.accent2);
   particlesEl.querySelectorAll('.particle').forEach(p=>{p.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
+  particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
 }
 function getSeasonalBanner(){if(!_activeSeason)return '';return `<div class="seasonal-banner"><span class="seasonal-icon">${_activeSeason.icon}</span> ${t(_activeSeason.greetingKey)}</div>`}
 applySeasonalTheme();

@@ -23,7 +23,7 @@ function createTestContext(files, overrides = {}) {
     id: '',
     innerHTML: '',
     textContent: '',
-    style: {},
+    style: { setProperty(){}, getPropertyValue(){ return ''; } },
     dataset: {},
     children: [],
     classList: {
