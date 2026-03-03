@@ -213,6 +213,22 @@ function getFavCount() {
   return girls.filter(g => g.name && favs.includes(g.name)).length;
 }
 
+/* === User Preferences (stored in auth.json per user) === */
+function getUserPref(key, defaultVal = null) {
+  if (!loggedIn || !loggedInUser) return defaultVal;
+  const entry = CRED.find(c => c.user === loggedInUser);
+  return entry && entry.prefs && key in entry.prefs ? entry.prefs[key] : defaultVal;
+}
+
+function setUserPref(key, value) {
+  if (!loggedIn || !loggedInUser) return;
+  const entry = CRED.find(c => c.user === loggedInUser);
+  if (!entry) return;
+  if (!entry.prefs) entry.prefs = {};
+  entry.prefs[key] = value;
+  saveAuth();
+}
+
 /* === Recently Viewed === */
 const RV_KEY = 'ginza_recently_viewed';
 const RV_MAX = 10;

@@ -982,7 +982,8 @@ body.custom-cursor input,body.custom-cursor textarea,body.custom-cursor select{c
 .amb-vol-slider{-webkit-appearance:none;width:100%;height:3px;background:rgba(255,255,255,0.12);border-radius:2px;outline:none}
 .amb-vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 6px rgba(180,74,255,0.4)}
 .amb-vol-slider::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
-#ambientBtn.amb-playing svg{filter:drop-shadow(0 0 4px var(--accent))}
+#ambientBtn.amb-playing{color:var(--accent);border-color:var(--accent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 40%,transparent)}
+#ambientBtn.amb-playing svg{filter:drop-shadow(0 0 5px var(--accent))}
 /* ── Card Quick-Info Flip Overlay ── */
 .card-flip-btn{position:absolute;bottom:10px;right:10px;z-index:4;width:28px;height:28px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;backdrop-filter:blur(4px);font-size:13px;transition:all .3s;opacity:0;pointer-events:none}
 .girl-card:hover .card-flip-btn{opacity:1;pointer-events:auto}
