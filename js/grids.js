@@ -5,14 +5,7 @@ let rosterAvailFilter=null; /* null | 'now' | 'later' | 'finished' */
 
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
-/* Inline name search */
-const sw=document.createElement('div');sw.className='inline-search-wrap';
-const si=document.createElement('input');si.type='text';si.className='inline-search-input';si.setAttribute('placeholder',t('ui.search'));si.setAttribute('aria-label',t('ui.search'));si.value=sharedFilters.nameSearch||'';
-let _sTimer;si.oninput=()=>{clearTimeout(_sTimer);_sTimer=setTimeout(()=>{sharedFilters.nameSearch=si.value;renderGrid();renderRoster();renderFavoritesGrid();renderActiveFilterChips();pushFiltersToURL()},200)};
-sw.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="opacity:.4;flex-shrink:0"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
-sw.appendChild(si);fb.appendChild(sw);
 /* Sort dropdown */
-const sep=document.createElement('div');sep.className='filter-sep';fb.appendChild(sep);
 const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')},{key:'lastSeen',label:t('sort.lastSeen')}];
 const activeLabel=sorts.find(s=>s.key===gridSort)?.label||sorts[0].label;
 const wrap=document.createElement('div');wrap.className='sort-dropdown-wrap';
