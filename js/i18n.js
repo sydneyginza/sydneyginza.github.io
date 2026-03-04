@@ -273,6 +273,7 @@ const LANG_DICT = {
     'sort.height':'Height',
     'sort.cup':'Cup',
     'sort.lastSeen':'Last Seen',
+    'sort.sortBy':'Sort',
     /* Date & time */
     'ui.today':'Today',
     'date.sun':'Sun','date.mon':'Mon','date.tue':'Tue','date.wed':'Wed','date.thu':'Thu','date.fri':'Fri','date.sat':'Sat',
@@ -690,6 +691,7 @@ const LANG_DICT = {
     'sort.height':'身長',
     'sort.cup':'カップ',
     'sort.lastSeen':'最終確認',
+    'sort.sortBy':'並替',
     /* Date & time */
     'ui.today':'今日',
     'date.sun':'日','date.mon':'月','date.tue':'火','date.wed':'水','date.thu':'木','date.fri':'金','date.sat':'土',
@@ -1107,6 +1109,7 @@ const LANG_DICT = {
     'sort.height':'키',
     'sort.cup':'컵',
     'sort.lastSeen':'마지막 확인',
+    'sort.sortBy':'정렬',
     /* Date & time */
     'ui.today':'오늘',
     'date.sun':'일','date.mon':'월','date.tue':'화','date.wed':'수','date.thu':'목','date.fri':'금','date.sat':'토',
@@ -1524,6 +1527,7 @@ const LANG_DICT = {
     'sort.height':'身高',
     'sort.cup':'罩杯',
     'sort.lastSeen':'最近所见',
+    'sort.sortBy':'排序',
     /* Date & time */
     'ui.today':'今天',
     'date.sun':'周日','date.mon':'周一','date.tue':'周二','date.wed':'周三','date.thu':'周四','date.fri':'周五','date.sat':'周六',
