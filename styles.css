@@ -937,8 +937,7 @@ tr:hover .cal-bulk-actions,.cal-bulk-actions:focus-within{opacity:1;pointer-even
 .pdb-role-select option{background:#111118;color:#fff}
 .pdb-delete-btn{background:none;border:1px solid rgba(255,70,70,0.2);color:rgba(255,70,70,0.5);font-size:14px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
 .pdb-delete-btn:hover{background:rgba(255,70,70,0.1);border-color:rgba(255,70,70,0.5);color:#ff4646}
-/* ── Sticky Filter Wrap + Active Filter Chips ── */
-#listPage .sticky-filter-wrap,#rosterPage .sticky-filter-wrap{position:sticky;top:70px;z-index:99;background:var(--bg-dark);border-bottom:1px solid rgba(255,255,255,0.04)}
+/* ── Filter Wrap + Active Filter Chips ── */
 .active-filter-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 10px;align-items:center}
 .active-filter-chip{background:rgba(180,74,255,0.12);border:1px solid rgba(180,74,255,0.3);color:rgba(255,255,255,0.75);font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;padding:3px 10px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .active-filter-chip:hover{background:rgba(180,74,255,0.22);color:#fff}
@@ -1317,7 +1316,6 @@ body.mobile-lite.vip-mode .girl-card{backdrop-filter:none;-webkit-backdrop-filte
   .profile-action-row{flex-wrap:wrap;gap:8px}
   /* Filter pane: full width overlay */
   .filter-pane{width:100%;right:0;left:0;top:56px}
-  #listPage .sticky-filter-wrap,#rosterPage .sticky-filter-wrap{top:56px}
   /* Home images */
   .home-images{flex-direction:column;align-items:center;gap:10px}
   .home-img-card{width:100%;max-width:320px;height:auto;aspect-ratio:3/4}
