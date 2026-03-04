@@ -299,6 +299,11 @@ function getActivePageId(){const ap=document.querySelector('.page.active');retur
 
 function getPollInterval(){
   if(!_isTabVisible)return POLL_SLOW;
+  if(IS_MOBILE_LITE){
+    const page=getActivePageId();
+    if(page==='rosterPage'||page==='profilePage')return POLL_NORMAL;
+    return POLL_SLOW;
+  }
   const page=getActivePageId();
   if(page==='rosterPage'||page==='profilePage')return POLL_FAST;
   return POLL_NORMAL;

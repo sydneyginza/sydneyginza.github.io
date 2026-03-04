@@ -17,6 +17,15 @@ var rosterHistory = {}, rosterHistorySha = null;
 var girls = [];
 var GT = true;
 
+/* === Mobile Lite Detection === */
+const IS_MOBILE_LITE = (function(){
+  const narrow = window.innerWidth <= 768;
+  const touchPrimary = matchMedia('(pointer: coarse)').matches;
+  const mobileUA = /Android|iPhone|iPod|webOS|BlackBerry|Opera Mini/i.test(navigator.userAgent);
+  return (narrow && touchPrimary) || (narrow && mobileUA);
+})();
+if (IS_MOBILE_LITE) document.body.classList.add('mobile-lite');
+
 /* === Screen Reader Announcer === */
 function announce(msg){const el=document.getElementById('a11yAnnouncer');if(el){el.textContent='';requestAnimationFrame(()=>el.textContent=msg)}}
 
@@ -616,7 +625,7 @@ const lazyObserver = new IntersectionObserver((entries) => {
       lazyObserver.unobserve(img);
     }
   });
-}, { rootMargin: '200px 0px', threshold: 0.01 });
+}, { rootMargin: IS_MOBILE_LITE ? '100px 0px' : '200px 0px', threshold: 0.01 });
 
 function observeLazy(container) {
   if (!container) return;
@@ -664,7 +673,7 @@ const entranceObserver = new IntersectionObserver((entries) => {
 function observeEntrance(container) {
   if (!container) return;
   container.querySelectorAll('.girl-card').forEach((card, i) => {
-    card.style.setProperty('--card-index', Math.min(i, 8));
+    card.style.setProperty('--card-index', IS_MOBILE_LITE ? 0 : Math.min(i, 8));
     entranceObserver.observe(card);
   });
 }

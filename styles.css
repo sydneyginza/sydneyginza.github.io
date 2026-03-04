@@ -1220,3 +1220,129 @@ body.vip-mode .girl-card:hover{box-shadow:0 24px 70px rgba(180,74,255,0.2),0 0 0
 .btn-outline{background:transparent;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.6)}.btn-outline:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.9)}
 /* ── Nav responsive (small screens) ── */
 @media(max-width:600px){nav{padding:0 16px}.nav-right{gap:10px}.nav-menu-btn span{display:none}.logo{font-size:18px;letter-spacing:3px}}
+
+/* ===================================================================
+   MOBILE LITE — Performance Overrides
+   =================================================================== */
+body.mobile-lite::before{animation:none !important}
+body.mobile-lite nav::after{animation:none !important;background-position:50% 0}
+body.mobile-lite .logo,body.mobile-lite .home-title{animation:none !important;background-position:50% 50%}
+body.mobile-lite .announce-ticker-track{animation:none !important}
+body.mobile-lite .avail-now-dot{animation:none;box-shadow:0 0 6px rgba(0,255,127,0.4)}
+body.mobile-lite .particle,body.mobile-lite .bokeh-orb,body.mobile-lite .vip-sparkle{display:none !important}
+body.mobile-lite .cursor-dot,body.mobile-lite .cursor-ring,body.mobile-lite .cursor-trail{display:none !important}
+body.mobile-lite .girl-card{animation:none;opacity:1;transform:none}
+body.mobile-lite .girl-card.card-enter{animation:cardEnter .3s ease forwards;animation-delay:0ms}
+/* backdrop-filter removal — opaque fallbacks */
+body.mobile-lite nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,10,15,0.97)}
+body.mobile-lite .girl-card{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .card-fav,body.mobile-lite .card-compare,body.mobile-lite .card-flip-btn{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(0,0,0,0.7)}
+body.mobile-lite .gallery-main-arrow,body.mobile-lite .gallery-counter,body.mobile-lite .gallery-zoom-hint{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .compare-bar{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(12,10,18,0.98)}
+body.mobile-lite .lightbox-overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .modal-overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .filter-pane{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(12,10,18,0.99)}
+body.mobile-lite .filter-toggle{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .profile-stat{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .card-back{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(10,10,15,0.98)}
+body.mobile-lite .back-to-top{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(12,10,18,0.95)}
+body.mobile-lite .lang-select-drop,body.mobile-lite .amb-vol-wrap,body.mobile-lite #cardHoverPreview{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite .copy-time-modal,body.mobile-lite .copy-day-modal,body.mobile-lite .bulk-time-modal{backdrop-filter:none;-webkit-backdrop-filter:none}
+body.mobile-lite.vip-mode .girl-card{backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* ===================================================================
+   TABLET LAYOUT (max-width: 768px)
+   =================================================================== */
+@media(max-width:768px){
+  .section{padding:80px 20px;padding-top:90px}
+  .home-section{padding:90px 20px 60px}
+  .section-header{margin-bottom:32px;gap:12px}
+  .girls-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .profile-layout{grid-template-columns:1fr;gap:24px}
+  .profile-stats{grid-template-columns:repeat(2,1fr);gap:12px}
+  .filter-bar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:8px;padding-bottom:4px}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .sort-btn{white-space:nowrap;flex-shrink:0;font-size:11px;padding:6px 10px}
+  nav{height:60px}
+  .logo{font-size:20px;letter-spacing:3px}
+  .home-images{gap:12px}
+  .home-img-card{width:calc(50% - 6px);height:auto;aspect-ratio:3/4}
+  .an-two-col{grid-template-columns:1fr}
+  .an-top5{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ===================================================================
+   PHONE LAYOUT (max-width: 480px)
+   =================================================================== */
+@media(max-width:480px){
+  .section{padding:70px 12px;padding-top:80px}
+  .home-section{padding:80px 12px 40px}
+  .section-header{margin-bottom:20px;flex-direction:column;align-items:flex-start}
+  .section-title{font-size:clamp(22px,6vw,32px);letter-spacing:2px}
+  /* Single column grid */
+  .girls-grid{grid-template-columns:1fr;gap:10px}
+  /* Compact horizontal card layout */
+  .girl-card{display:flex;flex-direction:row;clip-path:none;border-radius:8px}
+  .girl-card .card-img{width:100px;min-width:100px;aspect-ratio:auto;height:130px;border-radius:8px 0 0 8px}
+  .girl-card .card-img::after{display:none}
+  .girl-card .card-info{padding:10px 12px;flex:1;display:flex;flex-direction:column;justify-content:center}
+  .girl-card .card-name{font-size:12px;letter-spacing:1px}
+  .girl-card .card-country{font-size:11px}
+  .girl-card .card-avail,.girl-card .card-coming,.girl-card .card-last-seen{font-size:10px;margin-top:4px}
+  .girl-card .card-hover-line{display:none}
+  /* Touch targets */
+  .card-fav,.card-compare,.card-flip-btn{width:40px;height:40px;font-size:16px}
+  .nav-menu-btn{min-height:44px;padding:8px 12px}
+  .sort-btn{min-height:36px;padding:6px 12px}
+  .login-icon-btn{min-width:44px;min-height:44px}
+  /* Nav */
+  nav{padding:0 12px;height:56px}
+  .logo{font-size:16px;letter-spacing:2px}
+  .nav-right{gap:6px}
+  .nav-menu-btn span{display:none}
+  /* Profile */
+  .profile-layout{grid-template-columns:1fr;gap:16px}
+  .profile-stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .profile-stat{padding:12px;clip-path:none;border-radius:6px}
+  .profile-name{font-size:clamp(20px,6vw,28px)}
+  .profile-meta{flex-wrap:wrap;font-size:12px;gap:4px}
+  .profile-action-row{flex-wrap:wrap;gap:8px}
+  /* Filter pane: full width overlay */
+  .filter-pane{width:100%;right:0;left:0;top:56px}
+  #listPage .sticky-filter-wrap{top:56px}
+  /* Home images */
+  .home-images{flex-direction:column;align-items:center;gap:10px}
+  .home-img-card{width:100%;max-width:320px;height:auto;aspect-ratio:3/4}
+  /* Forms */
+  .form-row{grid-template-columns:1fr;gap:12px}
+  .form-row.triple{grid-template-columns:1fr}
+  .form-modal{max-height:90vh;width:95%;margin:16px;padding:24px}
+  /* Compare bar */
+  .compare-bar{width:calc(100% - 24px);left:12px;transform:none;clip-path:none;border-radius:8px}
+  /* Lightbox */
+  .lightbox-nav{width:44px;height:44px}
+  /* Back to top */
+  .back-to-top{bottom:16px;left:16px;padding:8px 12px;font-size:9px}
+  /* Welcome overlay */
+  .welcome-overlay .welcome-card{width:95%}
+  /* Analytics */
+  .an-summary{grid-template-columns:1fr 1fr}
+  .an-top5{grid-template-columns:repeat(2,1fr)}
+  .an-heatmap-inner{overflow-x:auto}
+  /* Calendar */
+  .cal-table th,.cal-table td{padding:8px 6px;font-size:11px}
+  /* Typography */
+  body{font-size:15px}
+}
+
+/* ===================================================================
+   EXTRA-NARROW PHONES (max-width: 360px)
+   =================================================================== */
+@media(max-width:360px){
+  .girls-grid{gap:8px}
+  .girl-card .card-img{width:80px;min-width:80px;height:110px}
+  .girl-card .card-name{font-size:11px}
+  nav{padding:0 8px}
+  .logo{font-size:14px;letter-spacing:1px}
+  .section{padding:70px 8px;padding-top:76px}
+}
