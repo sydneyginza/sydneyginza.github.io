@@ -10,11 +10,10 @@ const SITE_REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', VP = 'data/vacation.json', ALP = 'data/admin_log.json', BKLP = 'data/logs_bookings';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', CP = 'data/config.json', RHP = 'data/roster_history.json', ALP = 'data/admin_log.json', BKLP = 'data/logs_bookings';
 var loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, authSha = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 function isAdmin(){ return loggedIn && (loggedInRole === 'admin' || loggedInRole === 'owner') }
 var rosterHistory = {}, rosterHistorySha = null;
-var vacationData = {}, vacationSha = null;
 var girls = [];
 var GT = true;
 
@@ -464,23 +463,6 @@ async function saveRosterHistory(){
 }
 function getLastRostered(name){return rosterHistory[name]||null}
 
-/* === Vacation Data === */
-async function loadVacationData(){
-  try{
-    const r=await fetchWithRetry(`${DATA_API}/${VP}`,{headers:proxyHeaders()});
-    if(r.ok){const d=await r.json();vacationSha=d.sha;vacationData=dec(d.content)||{};return}
-    if(r.status===404){vacationSha=null;vacationData={}}
-  }catch(_){}
-}
-async function saveVacationData(){
-  try{
-    const body={message:'Update vacation',content:enc(vacationData)};
-    if(vacationSha)body.sha=vacationSha;
-    const r=await fetchWithRetry(`${DATA_API}/${VP}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)});
-    if(r.ok)vacationSha=(await r.json()).content.sha;
-  }catch(_){}
-}
-
 async function uploadToGithub(b64, name, fn) {
   const safe = name.replace(/[^a-zA-Z0-9_-]/g, '_');
   const path = `Images/${safe}/${fn}`;
@@ -731,8 +713,7 @@ const Router = (function() {
     calendarPage:   '/calendar',
     analyticsPage:  '/analytics',
     profileDbPage:  '/profile-database',
-    bookingsPage:   '/bookings',
-    vacationPage:   '/vacation'
+    bookingsPage:   '/bookings'
   };
   const PATH_TO_PAGE = {};
   for (const id in PAGE_ROUTES) PATH_TO_PAGE[PAGE_ROUTES[id]] = id;
@@ -831,13 +812,6 @@ const Router = (function() {
         return true;
       }
       if (pageId === 'bookingsPage' && !isAdmin()) {
-        _suppressPush = true;
-        showPage('homePage');
-        _suppressPush = false;
-        replace('/', 'Ginza Empire');
-        return true;
-      }
-      if (pageId === 'vacationPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;

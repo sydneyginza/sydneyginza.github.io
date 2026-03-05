@@ -5,6 +5,17 @@ let rosterAvailFilter=null; /* null | 'now' | 'later' | 'finished' */
 
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
+/* Sort dropdown */
+const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')},{key:'lastSeen',label:t('sort.lastSeen')}];
+const activeLabel=sorts.find(s=>s.key===gridSort)?.label||sorts[0].label;
+const wrap=document.createElement('div');wrap.className='sort-dropdown-wrap';
+const trigger=document.createElement('button');trigger.className='sort-dropdown-btn';trigger.innerHTML=t('sort.sortBy')+': <span class="sort-dropdown-active">'+activeLabel+'</span> <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" class="sort-dropdown-chevron"><path d="M7 10l5 5 5-5z"/></svg>';
+const menu=document.createElement('div');menu.className='sort-dropdown-menu';
+sorts.forEach(s=>{const item=document.createElement('button');item.className='sort-dropdown-item'+(gridSort===s.key?' active':'');item.textContent=s.label;item.onclick=e=>{e.stopPropagation();if(gridSort===s.key){gridSortDir=gridSortDir==='asc'?'desc':'asc'}else{gridSort=s.key;gridSortDir=(s.key==='newest'||s.key==='lastSeen')?'desc':'asc'}_persistSort();menu.classList.remove('open');trigger.classList.remove('open');renderFilters();renderGrid();renderRoster();renderFavoritesGrid();pushFiltersToURL()};menu.appendChild(item)});
+trigger.onclick=e=>{e.stopPropagation();const isOpen=menu.classList.toggle('open');trigger.classList.toggle('open',isOpen);if(isOpen){const rect=trigger.getBoundingClientRect();menu.style.top=rect.bottom+4+'px';menu.style.left=rect.left+'px';const _close=ev=>{if(!wrap.contains(ev.target)){menu.classList.remove('open');trigger.classList.remove('open');document.removeEventListener('click',_close)}};setTimeout(()=>document.addEventListener('click',_close),0)}};
+wrap.appendChild(trigger);document.body.appendChild(menu);fb.appendChild(wrap);
+const dirBtn=document.createElement('button');dirBtn.className='sort-dir-btn';dirBtn.title=gridSortDir==='asc'?'Ascending':'Descending';dirBtn.innerHTML=gridSortDir==='asc'?'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg><span class="sort-dir-label">ASC</span>':'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg><span class="sort-dir-label">DESC</span>';dirBtn.onclick=()=>{gridSortDir=gridSortDir==='asc'?'desc':'asc';_persistSort();renderFilters();renderGrid();renderRoster();renderFavoritesGrid();pushFiltersToURL()};fb.appendChild(dirBtn);
+if(hasActiveFilters()){const sep3=document.createElement('div');sep3.className='filter-sep';fb.appendChild(sep3);const clr=document.createElement('button');clr.className='filter-btn clear-filters-btn';clr.innerHTML='&#10005; Clear';clr.onclick=()=>{clearAllFilters();onFiltersChanged()};fb.appendChild(clr)}
 if(isAdmin()){const ab=document.createElement('button');ab.className='add-btn';ab.innerHTML='+ '+t('ui.addGirl');ab.onclick=()=>openForm();fb.appendChild(ab)}}
 
 function renderAvailNowBar(){
@@ -62,29 +73,28 @@ if(!filtered.length&&hasActiveFilters()){grid.innerHTML=`<div class="fav-empty">
 filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card'+(g.hidden?' card-hidden':'');
 const hideIcon=g.hidden?'&#x1F441;':'&#x1F6AB;';const hideTitle=g.hidden?t('ui.showGirl'):t('ui.hideGirl');
 const act=isAdmin()?`<div class="card-actions"><button class="card-action-btn hide-toggle${g.hidden?' active':''}" title="${hideTitle}" data-idx="${ri}">${hideIcon}</button><button class="card-action-btn edit" title="Edit" data-idx="${ri}">&#x270E;</button><button class="card-action-btn delete" title="Delete" data-idx="${ri}">&#x2715;</button></div>`:'';
-const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name,g.thumbColor):'<div class="silhouette"></div>';const _vacToday=g.name&&_isOnVacation(g.name,ts);const entry=_vacToday?null:getCalEntry(g.name,ts);
-const liveNow=!_vacToday&&g.name&&isAvailableNow(g.name);
+const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name,g.thumbColor):'<div class="silhouette"></div>';const entry=getCalEntry(g.name,ts);
+const liveNow=g.name&&isAvailableNow(g.name);
 const now=getAEDTDate();
 const _todayShiftEnded=entry&&entry.start&&entry.end&&!liveNow&&(()=>{const nm=now.getHours()*60+now.getMinutes();const[eh,em]=entry.end.split(':').map(Number);const[sh,sm]=entry.start.split(':').map(Number);return eh*60+em>sh*60+sm&&nm>=eh*60+em})();
-const _gcd=!_vacToday&&g.name?getAvailCountdown(g.name):null;
+const _gcd=g.name?getAvailCountdown(g.name):null;
 const _gcdText=_gcd?(' <span style="opacity:.65;font-size:.85em">·</span> '+(_gcd.type==='ends'?t('avail.endsIn'):t('avail.startsIn')).replace('{t}',_gcd.str)):'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span><span>${t('avail.now')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</span></div>`:(!_todayShiftEnded&&entry&&entry.start&&entry.end?`<div class="card-avail">${t('avail.laterToday')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:'');
 /* Last-seen / coming-up label when not available today */
 let schedLabel='';
 if(!avail&&g.name){
   const wdates=getWeekDates();
-  const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);
+  const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);
   if(upcoming){const dayName=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?` (${fmtTime12(upEnt.start)} - ${fmtTime12(upEnt.end)})`:'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?` <span style="opacity:.65;font-size:.85em">·</span> `+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}${timeStr}${comingCd}</div>`}
   else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
 }
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
-const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}${act}</div><div class="card-info"><div class="card-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}${isAdmin()&&g.lastModified?`<div style="font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:1px;margin-top:2px">${daysAgo(g.lastModified)}</div>`:''}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}${act}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}${isAdmin()&&g.lastModified?`<div style="font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:1px;margin-top:2px">${daysAgo(g.lastModified)}</div>`:''}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
 el.onclick=e=>{if(e.target.closest('.card-action-btn')||e.target.closest('.card-fav')||e.target.closest('.card-compare')||e.target.closest('.card-flip-btn'))return;if(el.classList.contains('card-flipped')){el.classList.remove('card-flipped');return}_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='listPage';showProfile(ri)};
 if(isAdmin()){el.querySelector('.hide-toggle').onclick=async e=>{e.stopPropagation();g.hidden=!g.hidden;if(await saveData()){renderGrid();renderRoster();renderHome();showToast(g.hidden?t('ui.girlHidden'):t('ui.girlVisible'))}};el.querySelector('.edit').onclick=e=>{e.stopPropagation();openForm(ri)};el.querySelector('.delete').onclick=e=>{e.stopPropagation();openDelete(ri)}}
-el.addEventListener('mouseenter',()=>{clearTimeout(_hoverTimer);_hoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});
+el.addEventListener('mouseenter',()=>{clearTimeout(_hoverTimer);_hoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});
 el.addEventListener('mouseleave',()=>{clearTimeout(_hoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
 el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});
 return el});if(card)grid.appendChild(card)});bindCardFavs(grid);bindCardCompare(grid);observeLazy(grid);observeEntrance(grid)})}
@@ -113,7 +123,7 @@ renderAvailNowBar()}
 function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';
 if(!rosterDateFilter){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsWeek')}</div>`;return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
-let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end&&!_isOnVacation(g.name,ds)});
+let filtered=[...girls].filter(g=>{const e=getCalEntry(g.name,ds);return e&&e.start&&e.end});
 if(!isAdmin())filtered=filtered.filter(g=>!g.hidden);
 filtered=applySharedFilters(filtered);
 if(!loggedIn)filtered=filtered.filter(g=>g.name&&String(g.name).trim().length>0);
@@ -128,11 +138,10 @@ const _todayShiftEnded=isToday&&entry&&entry.start&&entry.end&&!liveNow&&(()=>{c
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span><span>${t('avail.now')}${timeStr}</span></div>`:(_todayShiftEnded?`<div class="card-avail card-avail-finished">${t('avail.finished')}</div>`:(isToday?`<div class="card-avail">${t('avail.laterToday')}${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`));
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
-const _rVacCd=_vacCountdownLabel(g.name,ts);const _rVacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_rVacCd?`<span class="vac-lastdays">${_rVacCd}</span>`:'');const _rNewBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}${_rVacBadge}${_rNewBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
-el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare')||e.target.closest('.card-flip-btn'))return;if(el.classList.contains('card-flipped')){el.classList.remove('card-flipped');return}_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='rosterPage';showProfile(ri)};el.addEventListener('mouseenter',()=>{clearTimeout(_rosterHoverTimer);_rosterHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}${_rVacBadge}${_rNewBadge}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});el.addEventListener('mouseleave',()=>{clearTimeout(_rosterHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg);renderAvailNowBar()})}
+el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare')||e.target.closest('.card-flip-btn'))return;if(el.classList.contains('card-flipped')){el.classList.remove('card-flipped');return}_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='rosterPage';showProfile(ri)};el.addEventListener('mouseenter',()=>{clearTimeout(_rosterHoverTimer);_rosterHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});el.addEventListener('mouseleave',()=>{clearTimeout(_rosterHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg);renderAvailNowBar()})}
 function renderRoster(){renderRosterFilters();renderRosterGrid()}
 
 /* Favorites Grid */
@@ -140,32 +149,30 @@ function renderFavoritesGrid(){safeRender('Favorites Grid',()=>{const fg=documen
 const favs=getFavorites();const ts=fmtDate(getAEDTDate());
 let filtered=girls.filter(g=>g.name&&favs.includes(g.name));
 if(!isAdmin())filtered=filtered.filter(g=>!g.hidden);
-filtered=applySharedFilters(filtered);
 applySortOrder(filtered);
 if(!filtered.length){fg.innerHTML=`<div class="fav-empty"><div class="fav-empty-icon">&hearts;</div><div class="fav-empty-text">${t('ui.favEmpty')}</div><button class="empty-state-cta" onclick="showPage('listPage');Router.push('/girls')">${t('ui.favBrowse')}</button></div>`;return}
 let _favHoverTimer;filtered.forEach((g,fi)=>{const card=safeCardRender(g,fi,()=>{const ri=girls.indexOf(g);const el=document.createElement('div');el.className='girl-card';
 const img=g.photos&&g.photos.length?lazyThumb(g.photos[0],'card-thumb',g.name,g.thumbColor):'<div class="silhouette"></div>';
-const _vacToday=g.name&&_isOnVacation(g.name,ts);const entry=_vacToday?null:getCalEntry(g.name,ts);
-const liveNow=!_vacToday&&g.name&&isAvailableNow(g.name);
+const entry=getCalEntry(g.name,ts);
+const liveNow=g.name&&isAvailableNow(g.name);
 const now=getAEDTDate();
 const _todayShiftEnded=entry&&entry.start&&entry.end&&!liveNow&&(()=>{const nm=now.getHours()*60+now.getMinutes();const[eh,em]=entry.end.split(':').map(Number);const[sh,sm]=entry.start.split(':').map(Number);return eh*60+em>sh*60+sm&&nm>=eh*60+em})();
-const _gcd=!_vacToday&&g.name?getAvailCountdown(g.name):null;
+const _gcd=g.name?getAvailCountdown(g.name):null;
 const _gcdText=_gcd?(' <span style="opacity:.65;font-size:.85em">·</span> '+(_gcd.type==='ends'?t('avail.endsIn'):t('avail.startsIn')).replace('{t}',_gcd.str)):'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span><span>${t('avail.now')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</span></div>`:(!_todayShiftEnded&&entry&&entry.start&&entry.end?`<div class="card-avail">${t('avail.laterToday')} (${fmtTime12(entry.start)} - ${fmtTime12(entry.end)})${_gcdText}</div>`:'');
 let schedLabel='';
 if(!avail&&g.name){
   const wdates=getWeekDates();
-  const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);
+  const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);
   if(upcoming){const dayName=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?` (${fmtTime12(upEnt.start)} - ${fmtTime12(upEnt.end)})`:'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?` <span style="opacity:.65;font-size:.85em">·</span> `+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}${timeStr}${comingCd}</div>`}
   else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
 }
 const fav=cardFavBtn(g.name);const cmp=cardCompareBtn(g.name);
-const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
-el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
+el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
 el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare')||e.target.closest('.card-flip-btn'))return;if(el.classList.contains('card-flipped')){el.classList.remove('card-flipped');return}_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='favoritesPage';showProfile(ri)};
-el.addEventListener('mouseenter',()=>{clearTimeout(_favHoverTimer);_favHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});
+el.addEventListener('mouseenter',()=>{clearTimeout(_favHoverTimer);_favHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});
 el.addEventListener('mouseleave',()=>{clearTimeout(_favHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
 el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});
 return el});if(card)fg.appendChild(card)});
@@ -216,14 +223,13 @@ function generateTimeOptions(){const o=['<option value="">--:--</option>'];for(l
 
 function renderCalendar(){safeRender('Calendar',()=>{const fb=document.getElementById('calFilterBar');fb.innerHTML='';
 if(isAdmin()){const cpb=document.createElement('button');cpb.className='add-btn';cpb.innerHTML='&#x2398; Copy Day';cpb.onclick=()=>openCopyDayModal();fb.appendChild(cpb)}
-const fg=applySortOrder(applySharedFilters([...girls].filter(g=>g.name&&String(g.name).trim().length>0)));const table=document.getElementById('calTable');const dates=getWeekDates();const tOpts=generateTimeOptions();
+const fg=applySharedFilters([...girls].filter(g=>g.name&&String(g.name).trim().length>0)).sort((a,b)=>(a.name||'').trim().toLowerCase().localeCompare((b.name||'').trim().toLowerCase()));const table=document.getElementById('calTable');const dates=getWeekDates();const tOpts=generateTimeOptions();
 let html=`<thead>`;if(isAdmin()){html+=`<tr class="cal-publish-row"><th></th>`;dates.forEach(ds=>{const pub=isDatePublished(ds);html+=`<th><button class="cal-pub-btn${pub?' published':''}" data-pub-date="${ds}">${pub?'PUBLISHED':'UNPUBLISHED'}</button></th>`});html+=`</tr>`}html+=`<tr><th>${t('cal.profile')}</th>`;dates.forEach((ds,i)=>{const f=dispDate(ds);const pub=isDatePublished(ds);html+=`<th class="${i===0?'cal-today':''}${pub?' cal-date-published':''}" data-cal-col="${i+1}">${f.date}<span class="cal-day-name">${f.day}${i===0?` (${t('ui.today')})`:''}</span></th>`});html+='</tr></thead><tbody>';
 fg.forEach(g=>{const gi=girls.indexOf(g);const av=g.photos&&g.photos.length?lazyCalAvatar(g.photos[0],g.name):`<span class="cal-letter">${g.name.charAt(0)}</span>`;
 const bulkActions=isAdmin()?`<div class="cal-bulk-actions"><button class="cal-bulk-btn cal-bulk-all" data-bulk-name="${g.name}" title="Mark available all week">${t('cal.allWeek')}</button><button class="cal-bulk-btn cal-bulk-clear" data-bulk-name="${g.name}" title="Clear entire week">${t('cal.clear')}</button></div>`:'';
 html+=`<tr><td><div class="cal-profile" data-idx="${gi}"><div class="cal-avatar">${av}</div><div><div class="cal-name">${g.name}</div>${bulkActions}</div></div></td>`;
-dates.forEach((ds,di)=>{const entry=getCalEntry(g.name,ds);const vac=_isOnVacation(g.name,ds);const ck=(!vac&&entry)?'checked':'';const sh=!vac&&!!entry;
-if(vac){html+=`<td class="${di===0?'cal-today':''} cal-vacation-cell" data-cal-col="${di+1}"><div class="cal-cell-inner"><span class="cal-vac-label">${t('nav.vacation')}</span></div></td>`}
-else{html+=`<td class="${di===0?'cal-today':''}" data-cal-col="${di+1}"><div class="cal-cell-inner"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${ck}><div class="cal-time-wrap" style="display:${sh?'flex':'none'}" data-time-name="${g.name}" data-time-date="${ds}"><div class="cal-time-row"><label>Start</label><select class="cal-time-input" data-field="start" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-row"><label>End</label><select class="cal-time-input" data-field="end" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-warn" data-warn-name="${g.name}" data-warn-date="${ds}"></div></div></div></td>`}});html+='</tr>'});html+='</tbody>';table.innerHTML=html;observeLazy(table);observeCalEntrance(table);
+dates.forEach((ds,di)=>{const entry=getCalEntry(g.name,ds);const ck=entry?'checked':'';const sh=!!entry;
+html+=`<td class="${di===0?'cal-today':''}" data-cal-col="${di+1}"><div class="cal-cell-inner"><input type="checkbox" class="cal-check" data-name="${g.name}" data-date="${ds}" ${ck}><div class="cal-time-wrap" style="display:${sh?'flex':'none'}" data-time-name="${g.name}" data-time-date="${ds}"><div class="cal-time-row"><label>Start</label><select class="cal-time-input" data-field="start" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-row"><label>End</label><select class="cal-time-input" data-field="end" data-tname="${g.name}" data-tdate="${ds}">${tOpts}</select></div><div class="cal-time-warn" data-warn-name="${g.name}" data-warn-date="${ds}"></div></div></div></td>`});html+='</tr>'});html+='</tbody>';table.innerHTML=html;observeLazy(table);observeCalEntrance(table);
 /* Mobile day nav */
 {const mn=document.getElementById('calMobileNav');if(mn){mn.innerHTML='<div class="cal-mobile-nav"><button class="cal-mobile-btn" id="calMobilePrev">&#8249;</button><div class="cal-mobile-label" id="calMobileDayLabel"></div><button class="cal-mobile-btn" id="calMobileNext">&#8250;</button></div>';const pd=document.getElementById('calMobilePrev'),nd=document.getElementById('calMobileNext');if(pd)pd.onclick=()=>{if(calMobileDay>0){calMobileDay--;updateMobileCalView(table,dates)}};if(nd)nd.onclick=()=>{if(calMobileDay<6){calMobileDay++;updateMobileCalView(table,dates)}};updateMobileCalView(table,dates)}}
 
@@ -300,9 +306,7 @@ function slotInRange(absMin,startStr,endStr){
 function renderBookingsGrid(){
   const el=document.getElementById('bookingsGrid');
   if(!bookingsDateFilter){el.innerHTML='';return}
-  let active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end&&!_isOnVacation(g.name,bookingsDateFilter)});
-  active=applySharedFilters(active);
-  applySortOrder(active);
+  const active=girls.filter(g=>{const e=getCalEntry(g.name,bookingsDateFilter);return e&&e.start&&e.end}).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   if(!active.length){el.innerHTML='<div class="empty-msg">No girls scheduled.</div>';return}
   const slots=getBookingTimeSlots();
   /* Group slots by hour for grouped header */
@@ -522,131 +526,4 @@ document.getElementById('adminNewBkDurBar').querySelectorAll('.bk-enq-dur-btn').
     document.getElementById('adminNewBkSelectUser').disabled=false;
   });
 });
-
-function _isOnVacation(name,dateStr){
-  const v=vacationData[name];
-  if(!v||!v.start||!v.end)return false;
-  return dateStr>=v.start&&dateStr<=v.end;
-}
-
-function _isVacReturnDay(name,dateStr){
-  const v=vacationData[name];
-  if(!v||!v.end)return false;
-  const d=new Date(v.end);
-  const dayAfter=new Date(d);dayAfter.setDate(d.getDate()+1);
-  const cutoff=new Date(d);cutoff.setDate(d.getDate()+4);
-  return dateStr>=dayAfter.toISOString().slice(0,10)&&dateStr<cutoff.toISOString().slice(0,10);
-}
-
-function _vacCountdownLabel(name,dateStr){
-  const v=vacationData[name];
-  if(!v||!v.start)return '';
-  const s=new Date(v.start);
-  const t=new Date(dateStr);
-  const diff=Math.round((s-t)/864e5);
-  if(diff===1)return 'Last Day!';
-  if(diff===2)return 'Last 2 Days!';
-  if(diff===3)return 'Last 3 Days!';
-  return '';
-}
-
-function _isNewGirl(g){
-  if(!g||!g.startDate)return false;
-  const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);
-  const sd=new Date(g.startDate+'T00:00:00');
-  return sd>=cutoff&&sd<=now;
-}
-
-function _clearCalForVacation(name,vacStart,vacEnd){
-  if(!calData[name])return;
-  let changed=false;
-  const dates=getWeekDates();
-  dates.forEach(ds=>{
-    if(ds>=vacStart&&ds<=vacEnd&&calData[name][ds]){
-      delete calData[name][ds];changed=true;
-    }
-  });
-  if(changed){saveCalData();renderCalendar();renderRoster()}
-}
-
-/* === Vacation Table === */
-function renderVacationTable(){
-  const el=document.getElementById('vacationGrid');if(!el)return;
-  const today=fmtDate(getAEDTDate());
-  /* Auto-clear expired vacations (keep 3 days after end for Come Back! label) */
-  let changed=false;
-  for(const name in vacationData){
-    if(vacationData[name]&&vacationData[name].end){
-      const _endD=new Date(vacationData[name].end+'T00:00:00');_endD.setDate(_endD.getDate()+4);
-      const _cutoff=_endD.toISOString().slice(0,10);
-      if(today>=_cutoff){delete vacationData[name];changed=true;}
-    }
-  }
-  if(changed)saveVacationData();
-  /* Get all girls sorted, apply shared filters */
-  const allGirls=applySortOrder(applySharedFilters(girls.filter(g=>g.name))).map(g=>g.name);
-  if(!allGirls.length){el.innerHTML='<div class="empty-msg">No girls found.</div>';return}
-  let html='<div class="vac-table-wrap"><table class="vac-table"><thead><tr><th class="vac-name-col">Name</th><th class="vac-date-col">Start Date</th><th class="vac-date-col">End Date</th><th class="vac-clear-col"></th></tr></thead><tbody>';
-  allGirls.forEach(name=>{
-    const v=vacationData[name]||{};
-    const startVal=v.start||'';
-    const endVal=v.end||'';
-    const minEnd=startVal?_vacMinEnd(startVal):'';
-    const hasDates=startVal||endVal;
-    html+=`<tr><td class="vac-name-col">${name}</td>`;
-    html+=`<td class="vac-date-col"><input type="date" class="vac-date-input" data-girl="${name}" data-field="start" value="${startVal}" min="${today}"></td>`;
-    html+=`<td class="vac-date-col"><input type="date" class="vac-date-input" data-girl="${name}" data-field="end" value="${endVal}"${startVal?` min="${minEnd}"`:'  disabled'}></td>`;
-    html+=`<td class="vac-clear-col">${hasDates?`<button class="vac-clear-btn" data-girl="${name}" title="Clear">&times;</button>`:''}</td>`;
-    html+='</tr>';
-  });
-  html+='</tbody></table></div>';
-  el.innerHTML=html;
-  /* Bind date change handlers */
-  el.querySelectorAll('.vac-date-input').forEach(inp=>{
-    inp.addEventListener('change',_onVacDateChange);
-  });
-  el.querySelectorAll('.vac-clear-btn').forEach(btn=>{
-    btn.onclick=()=>{const name=btn.dataset.girl;delete vacationData[name];saveVacationData();showToast('Vacation cleared');renderVacationTable()};
-  });
-}
-
-function _vacMinEnd(startStr){
-  const d=new Date(startStr);d.setDate(d.getDate()+8);
-  return d.toISOString().slice(0,10);
-}
-
-function _onVacDateChange(e){
-  const inp=e.target;
-  const name=inp.dataset.girl;
-  const field=inp.dataset.field;
-  const row=inp.closest('tr');
-  const startInp=row.querySelector('[data-field="start"]');
-  const endInp=row.querySelector('[data-field="end"]');
-
-  if(field==='start'){
-    if(inp.value){
-      endInp.disabled=false;
-      endInp.min=_vacMinEnd(inp.value);
-      /* Clear end if it no longer satisfies minimum */
-      if(endInp.value&&endInp.value<_vacMinEnd(inp.value)){endInp.value=''}
-    }else{
-      endInp.disabled=true;endInp.value='';
-      delete vacationData[name];saveVacationData();showToast('Vacation cleared');
-      return;
-    }
-  }
-
-  if(field==='end'&&!inp.value)return;
-
-  /* Auto-save when both dates are populated */
-  if(startInp.value&&endInp.value){
-    if(!vacationData[name])vacationData[name]={};
-    vacationData[name].start=startInp.value;
-    vacationData[name].end=endInp.value;
-    saveVacationData();
-    /* Remove calendar availability within vacation range */
-    _clearCalForVacation(name,startInp.value,endInp.value);
-    showToast('Vacation saved');
-  }
-}
 

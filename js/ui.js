@@ -79,20 +79,6 @@ const cups=[...new Set(namedGirls.map(g=>g.cup).filter(Boolean))].sort();
 const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
 const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
 
-/* Sort section at top of filter pane */
-{const sec=document.createElement('div');sec.className='fp-section';
-const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')},{key:'lastSeen',label:t('sort.lastSeen')}];
-const dirLabel=gridSortDir==='asc'?'ASC ↑':'DESC ↓';
-sec.innerHTML=`<div class="fp-sort-header"><div class="fp-title">${t('sort.sortBy')}</div><button class="fp-sort-dir-btn">${dirLabel}</button></div><div class="fp-options fp-sort-options"></div>`;
-pane.appendChild(sec);
-sec.querySelector('.fp-sort-dir-btn').onclick=()=>{gridSortDir=gridSortDir==='asc'?'desc':'asc';_persistSort();onFiltersChanged()};
-const wrap=sec.querySelector('.fp-sort-options');
-sorts.forEach(s=>{const btn=document.createElement('button');btn.className='fp-option'+(gridSort===s.key?' active':'');
-btn.innerHTML=`<span class="fp-check">${gridSort===s.key?'✓':''}</span>${s.label}`;
-btn.onclick=()=>{if(gridSort===s.key){gridSortDir=gridSortDir==='asc'?'desc':'asc'}else{gridSort=s.key;gridSortDir=(s.key==='newest'||s.key==='lastSeen')?'desc':'asc'}_persistSort();onFiltersChanged()};
-wrap.appendChild(btn)});
-pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
-
 /* Profiles search */
 if(namedGirls.length){
 const sec=document.createElement('div');sec.className='fp-section';
@@ -101,7 +87,7 @@ pane.appendChild(sec);
 const searchInp=sec.querySelector('[data-role="name-search"]');
 searchInp.value=sharedFilters.nameSearch||'';
 let debounce;
-searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();onFiltersChanged()},300)});
+searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();renderFilters();renderGrid();renderRoster();if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();document.querySelectorAll('[data-role="name-search"]').forEach(inp=>{if(inp!==searchInp){inp.value=sharedFilters.nameSearch}})},300)});
 pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
 
 /* Rating */
@@ -270,20 +256,14 @@ renderFilterPane('girlsFilterPane');
 renderFilterPane('rosterFilterPane');
 renderFilterPane('calFilterPane');
 renderFilterPane('profileFilterPane');
-renderFilterPane('favoritesFilterPane');
-renderFilterPane('bookingsFilterPane');
-renderFilterPane('vacationFilterPane');
 renderFilters();renderGrid();renderRoster();
 _animateFlip(document.getElementById('girlsGrid'),_oldGrid);
 _animateFlip(document.getElementById('rosterGrid'),_oldRoster);
 updateFilterToggle();pushFiltersToURL();
 if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
-if(document.getElementById('favoritesPage').classList.contains('active'))renderFavoritesGrid();
-if(document.getElementById('bookingsPage').classList.contains('active'))renderBookingsGrid();
-if(document.getElementById('vacationPage').classList.contains('active'))renderVacationTable();
 if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
 if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}};renderActiveFilterChips()}
-const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','analyticsPage','profileDbPage','bookingsPage','vacationPage','profilePage'].map(id=>document.getElementById(id));
+const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','analyticsPage','profileDbPage','bookingsPage','profilePage'].map(id=>document.getElementById(id));
 
 function showPage(id){
 resetOgMeta();if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
@@ -291,26 +271,25 @@ const prev=document.querySelector('.page.active');const next=document.getElement
 closeFilterPanel();
 _kbFocusedCardIdx=-1;document.querySelectorAll('.girl-card.kb-focused').forEach(c=>c.classList.remove('kb-focused'));
 /* URL routing & dynamic title */
-const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database',bookingsPage:'Ginza Empire – Bookings',vacationPage:'Ginza Empire – Vacation'};
+const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database',bookingsPage:'Ginza Empire – Bookings'};
 const pageTitle=titleMap[id]||'Ginza Empire';
 document.title=pageTitle;
 announce(pageTitle.replace('Ginza Empire – ','').replace('Ginza Empire','Home'));
 Router.push(Router.pathForPage(id),pageTitle);
 /* Determine which filter pane is active for this page */
-const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane',favoritesPage:'favoritesFilterPane',bookingsPage:'bookingsFilterPane',vacationPage:'vacationFilterPane'};
+const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane'};
 _activeFilterPaneId=paneMap[id]||null;
 document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));
 if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
 if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
 if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
-if(id==='favoritesPage'){document.getElementById('navFavorites').classList.add('active');renderFilterPane('favoritesFilterPane');renderFavoritesGrid()}
+if(id==='favoritesPage'){document.getElementById('navFavorites').classList.add('active');renderFavoritesGrid()}
 if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
 if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
 if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
 if(id==='analyticsPage'){document.getElementById('navAnalytics').classList.add('active');if(typeof renderAnalytics==='function')renderAnalytics()}
 if(id==='profileDbPage'){document.getElementById('navProfileDb').classList.add('active');if(typeof renderProfileDb==='function')renderProfileDb()}
-if(id==='bookingsPage'){document.getElementById('navBookings').classList.add('active');renderFilterPane('bookingsFilterPane');renderBookingsFilters();renderBookingsGrid()}
-if(id==='vacationPage'){document.getElementById('navVacation').classList.add('active');renderFilterPane('vacationFilterPane');renderVacationTable()}
+if(id==='bookingsPage'){document.getElementById('navBookings').classList.add('active');renderBookingsFilters();renderBookingsGrid()}
 updateFilterToggle();
 if(_pagesWithFilters.includes(id))pushFiltersToURL();
 window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0))}
@@ -325,7 +304,6 @@ document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('
 document.getElementById('navAnalytics').onclick=e=>{e.preventDefault();showPage('analyticsPage')};
 document.getElementById('navProfileDb').onclick=e=>{e.preventDefault();showPage('profileDbPage')};
 document.getElementById('navBookings').onclick=e=>{e.preventDefault();showPage('bookingsPage')};
-document.getElementById('navVacation').onclick=e=>{e.preventDefault();showPage('vacationPage')};
 
 /* Nav Dropdown Menu Toggle */
 const navMenuBtn=document.getElementById('navMenuBtn');
@@ -356,11 +334,7 @@ avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.lengt
 html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
 html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
 let _anwDidDrag=false;
-let _anwHoverTimer;
-container.querySelectorAll('.avail-now-card').forEach(c=>{const idx=parseInt(c.dataset.idx);const _g=!isNaN(idx)?girls[idx]:null;c.onclick=()=>{if(_anwDidDrag)return;if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}};
-c.addEventListener('mouseenter',()=>{if(!_g)return;clearTimeout(_anwHoverTimer);_anwHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const ts=fmtDate(getAEDTDate());const _vacCd=_vacCountdownLabel(_g.name,ts);const _vacBdg=_isVacReturnDay(_g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBdg=_isNewGirl(_g)?'<span class="new-badge">New!</span>':'';const _liveNow=_g.name&&isAvailableNow(_g.name);const _entry=getCalEntry(_g.name,ts);const _timeStr=_entry&&_entry.start&&_entry.end?fmtTime12(_entry.start)+' - '+fmtTime12(_entry.end):'';const _availHtml=_liveNow&&_timeStr?t('avail.now')+' ('+_timeStr+')':(_timeStr?_timeStr:'');const _availCls=_liveNow?'chp-avail chp-avail-live':'chp-avail';prev.innerHTML=`<div class="chp-name">${_g.name||''}${_vacBdg}${_newBdg}</div><div class="chp-country">${Array.isArray(_g.country)?_g.country.join(', '):(_g.country||'')}</div>${_g.special?'<div class="chp-special">'+_g.special+'</div>':''}${cardRatingHtml(_g)?'<div class="chp-rating">'+cardRatingHtml(_g)+'</div>':''}${_availHtml?'<div class="'+_availCls+'">'+_availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${_g.age||'\u2014'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${_g.body||'\u2014'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${_g.height?_g.height+' cm':'\u2014'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${_g.cup||'\u2014'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${_g.val1||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${_g.val2||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${_g.val3||'\u2014'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${_g.exp||'\u2014'}</span></div></div>`;prev.classList.add('visible')},180)});
-c.addEventListener('mouseleave',()=>{clearTimeout(_anwHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
-c.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'})});
+container.querySelectorAll('.avail-now-card').forEach(c=>c.onclick=()=>{if(_anwDidDrag)return;const idx=parseInt(c.dataset.idx);if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}});
 const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
 function _updateAnwArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
 arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateAnwArrows);
@@ -414,11 +388,7 @@ html+=`<div class="avail-now-card" data-ng-idx="${ri}"><div class="anw-photo">${
 html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';
 container.innerHTML=html;
 let _ngDidDrag=false;
-let _ngHoverTimer;
-container.querySelectorAll('.avail-now-card').forEach(card=>{const idx=parseInt(card.dataset.ngIdx);const _g=!isNaN(idx)?girls[idx]:null;card.onclick=()=>{if(_ngDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(idx)};
-card.addEventListener('mouseenter',()=>{if(!_g)return;clearTimeout(_ngHoverTimer);_ngHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const ts=fmtDate(getAEDTDate());const _vacCd=_vacCountdownLabel(_g.name,ts);const _vacBdg=_isVacReturnDay(_g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBdg=_isNewGirl(_g)?'<span class="new-badge">New!</span>':'';const _liveNow=_g.name&&isAvailableNow(_g.name);const _entry=getCalEntry(_g.name,ts);const _timeStr=_entry&&_entry.start&&_entry.end?fmtTime12(_entry.start)+' - '+fmtTime12(_entry.end):'';const _availHtml=_liveNow&&_timeStr?t('avail.now')+' ('+_timeStr+')':(_timeStr?_timeStr:'');const _availCls=_liveNow?'chp-avail chp-avail-live':'chp-avail';prev.innerHTML=`<div class="chp-name">${_g.name||''}${_vacBdg}${_newBdg}</div><div class="chp-country">${Array.isArray(_g.country)?_g.country.join(', '):(_g.country||'')}</div>${_g.special?'<div class="chp-special">'+_g.special+'</div>':''}${cardRatingHtml(_g)?'<div class="chp-rating">'+cardRatingHtml(_g)+'</div>':''}${_availHtml?'<div class="'+_availCls+'">'+_availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${_g.age||'\u2014'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${_g.body||'\u2014'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${_g.height?_g.height+' cm':'\u2014'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${_g.cup||'\u2014'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${_g.val1||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${_g.val2||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${_g.val3||'\u2014'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${_g.exp||'\u2014'}</span></div></div>`;prev.classList.add('visible')},180)});
-card.addEventListener('mouseleave',()=>{clearTimeout(_ngHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
-card.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'})});
+container.querySelectorAll('.avail-now-card').forEach(card=>{card.onclick=()=>{if(_ngDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(parseInt(card.dataset.ngIdx))}});
 const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
 function _updateNgArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
 arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateNgArrows);
@@ -778,13 +748,13 @@ const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
 document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
 const admin=isAdmin()?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">${t('ui.edit')}</button><button class="btn btn-danger" id="profDelete">${t('ui.delete')}</button></div>`:'';
-const now=getAEDTDate();const ts=fmtDate(now);const _profVac=g.name&&_isOnVacation(g.name,ts);const entry=_profVac?null:getCalEntry(g.name,ts);
-const liveNow=!_profVac&&g.name&&isAvailableNow(g.name);
+const now=getAEDTDate();const ts=fmtDate(now);const entry=getCalEntry(g.name,ts);
+const liveNow=g.name&&isAvailableNow(g.name);
 const _todayShiftEnded=entry&&entry.start&&entry.end&&!liveNow&&(()=>{const nm=now.getHours()*60+now.getMinutes();const[eh,em]=entry.end.split(':').map(Number);const[sh,sm]=entry.start.split(':').map(Number);return eh*60+em>sh*60+sm&&nm>=eh*60+em})();
 let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>'+t('avail.now')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
 else if(entry&&entry.start&&entry.end&&!_todayShiftEnded)availHtml='<span class="dim">|</span><span style="color:#ffcc44;font-weight:600">'+t('avail.laterToday')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
-else{const wdates=getWeekDates();const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);if(upcoming){const dn=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?' ('+fmtTime12(upEnt.start)+' - '+fmtTime12(upEnt.end)+')':'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?' · '+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';availHtml='<span class="dim">|</span><span class="profile-avail-coming">'+t('avail.coming')+' '+dn+timeStr+comingCd+'</span>'}else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';availHtml='<span class="dim">|</span><span class="profile-avail-last">'+t('avail.lastSeen')+' '+rel+'</span>'}}}
-const _cd=!_profVac&&g.name?getAvailCountdown(g.name):null;
+else{const wdates=getWeekDates();const upcoming=wdates.find(dt=>dt>ts&&(getCalEntry(g.name,dt)||{}).start);if(upcoming){const dn=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?' ('+fmtTime12(upEnt.start)+' - '+fmtTime12(upEnt.end)+')':'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?' · '+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';availHtml='<span class="dim">|</span><span class="profile-avail-coming">'+t('avail.coming')+' '+dn+timeStr+comingCd+'</span>'}else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';availHtml='<span class="dim">|</span><span class="profile-avail-last">'+t('avail.lastSeen')+' '+rel+'</span>'}}}
+const _cd=g.name?getAvailCountdown(g.name):null;
 if(_cd){const _cdKey=_cd.type==='ends'?'avail.endsIn':'avail.startsIn';availHtml+='<span class="dim"> · </span><span id="profCountdown">'+t(_cdKey).replace('{t}',_cd.str)+'</span>'}
 const rvs=g.reviews||[];const rvAvg=rvs.length?rvs.reduce((s,r)=>s+r.rating,0)/rvs.length:0;
 const ratingHtml=rvs.length?'<span class="dim">|</span><span class="profile-rating-summary">'+renderStarsStatic(Math.round(rvAvg))+'<span class="profile-rating-num">'+rvAvg.toFixed(1)+' / 5</span><span class="profile-rating-count">('+rvs.length+')</span></span>':'';
@@ -797,13 +767,12 @@ const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</
 const isFav=g.name&&isFavorite(g.name);
 const favBtn=g.name&&loggedIn?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
 const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>${t('ui.share')}</button>`:'';
-const _onVac=g.name&&_isOnVacation(g.name,ts);
-const bookBtn=g.name&&!_onVac?(loggedIn?`<button class="profile-book-btn" id="profBookBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>${t('enquiry.bookBtn')}</button>`:`<div class="review-signin">${t('enquiry.signin').replace('{link}','<a href="#" id="profBookSignIn">'+t('ui.signIn')+'</a>')}</div>`):'';
+const bookBtn=g.name?(loggedIn?`<button class="profile-book-btn" id="profBookBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>${t('enquiry.bookBtn')}</button>`:`<div class="review-signin">${t('enquiry.signin').replace('{link}','<a href="#" id="profBookSignIn">'+t('ui.signIn')+'</a>')}</div>`):'';
 const _backLabel={listPage:t('page.girls'),rosterPage:t('page.roster'),homePage:t('nav.home'),favoritesPage:t('page.favorites')}[profileReturnPage]||t('ui.back');
 document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${_backLabel}</button>
 <div class="profile-nav-rail" id="profileNavRail"></div>
 <div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
-<div class="profile-details"><div class="profile-name">${g.name}${(()=>{if(_isVacReturnDay(g.name,ts))return'<span class="vac-comeback">Come Back!</span>';const _vcd=_vacCountdownLabel(g.name,ts);return _vcd?`<span class="vac-lastdays">${_vcd}</span>`:'';})()}${_isNewGirl(g)?'<span class="new-badge">New!</span>':''}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}${bookBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
+<div class="profile-details"><div class="profile-name">${g.name}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}${bookBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
 <div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
 <div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
 <div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
@@ -929,7 +898,7 @@ const _abwL=document.getElementById('ambientBtnWrap');if(_abwL)_abwL.style.displ
 if(typeof window._ambientStop==='function')window._ambientStop();
 clearCompare();closeCompareModal();
 if(typeof setLanguage==='function')setLanguage('en');
-applySeasonalTheme();document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.getElementById('navVacation').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active')||document.getElementById('vacationPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
+applySeasonalTheme();document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
 else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
 
 function showAuthSignIn(){
@@ -989,7 +958,7 @@ const _ambSound=match.prefs&&match.prefs.ambSound;
 if(_ambSound&&typeof window._ambientSetSound==='function')window._ambientSetSound(_ambSound);
 /* Sound: auto-play on fresh login; on restore wait for first user gesture */
 const _soundOff=match.prefs&&match.prefs.soundOff;
-if(!_soundOff){if(!_isRestore){setTimeout(()=>{if(typeof window._ambientToggle==='function')window._ambientToggle(true)},400)}else if(typeof window._ambientStartOnGesture==='function')window._ambientStartOnGesture()}loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navVacation').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
+if(!_soundOff){if(!_isRestore){setTimeout(()=>{if(typeof window._ambientToggle==='function')window._ambientToggle(true)},400)}else if(typeof window._ambientStartOnGesture==='function')window._ambientStartOnGesture()}loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
 /* VIP mode */
 document.body.classList.add('vip-mode');
 if(!IS_MOBILE_LITE&&!_vipSparkles.length){const _spDrifts=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];for(let i=0;i<8;i++){const s=document.createElement('div');s.className='vip-sparkle particle';const sz=3+Math.random()*2;s.style.width=s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.background='#ffffff';s.style.setProperty('--p-peak','0.8');s.style.animationName=_spDrifts[Math.floor(Math.random()*_spDrifts.length)];s.style.animationDuration=(8+Math.random()*12)+'s';s.style.animationDelay=Math.random()*15+'s';particlesEl.appendChild(s);_vipSparkles.push(s)}}}
@@ -1638,7 +1607,7 @@ applySeasonalTheme();
 let _activeFilterPaneId=null;
 const _filterToggle=document.getElementById('filterToggle');
 const _filterBackdrop=document.getElementById('filterBackdrop');
-const _pagesWithFilters=['rosterPage','listPage','calendarPage','profilePage','favoritesPage','bookingsPage','vacationPage'];
+const _pagesWithFilters=['rosterPage','listPage','calendarPage','profilePage'];
 
 function updateFilterToggle(){
 const hasPage=_pagesWithFilters.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});
@@ -1653,7 +1622,7 @@ function openFilterPanel(){
 if(!_activeFilterPaneId)return;
 const pane=document.getElementById(_activeFilterPaneId);if(!pane)return;
 /* Hide all panes first */
-['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane','favoritesFilterPane','bookingsFilterPane','vacationFilterPane'].forEach(fp=>{
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
 const el=document.getElementById(fp);if(el)el.classList.remove('open')});
 /* Ensure content is rendered */
 renderFilterPane(_activeFilterPaneId);
@@ -1664,7 +1633,7 @@ _filterToggle.setAttribute('aria-expanded','true');
 }
 
 function closeFilterPanel(){
-['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane','favoritesFilterPane','bookingsFilterPane','vacationFilterPane'].forEach(fp=>{
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane'].forEach(fp=>{
 const el=document.getElementById(fp);if(el)el.classList.remove('open')});
 _filterToggle.classList.remove('open');
 _filterBackdrop.classList.remove('open');
