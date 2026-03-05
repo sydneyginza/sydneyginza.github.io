@@ -30,7 +30,8 @@ const BUNDLE_B = 'js/analytics.js';
 const BUNDLE_C = 'js/admin.js';
 
 function sriHash(file) {
-  const content = fs.readFileSync(file);
+  // Normalize to LF so the hash matches what GitHub Pages serves
+  const content = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
   return 'sha384-' + crypto.createHash('sha384').update(content).digest('base64');
 }
 
