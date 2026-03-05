@@ -244,6 +244,7 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'Calendar',
     'nav.bookings':'Bookings',
+    'nav.vacation':'Vacation',
     'nav.analytics':'Analytics',
     'nav.profileDb':'Profile Database',
     'nav.menu':'Menu',
@@ -662,6 +663,7 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'カレンダー',
     'nav.bookings':'予約管理',
+    'nav.vacation':'休暇',
     'nav.analytics':'アナリティクス',
     'nav.profileDb':'プロフィールDB',
     'nav.menu':'メニュー',
@@ -1080,6 +1082,7 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'캘린더',
     'nav.bookings':'예약 관리',
+    'nav.vacation':'휴가',
     'nav.analytics':'분석',
     'nav.profileDb':'프로필 DB',
     'nav.menu':'메뉴',
@@ -1498,6 +1501,7 @@ const LANG_DICT = {
     /* Admin nav */
     'nav.calendar':'日历',
     'nav.bookings':'预约管理',
+    'nav.vacation':'假期',
     'nav.analytics':'分析',
     'nav.profileDb':'用户数据库',
     'nav.menu':'菜单',
