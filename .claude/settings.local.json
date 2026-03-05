@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openssl dgst -sha384 -binary styles.min.css)",
+      "Bash(openssl base64 -A)",
+      "Bash(openssl dgst -sha384 -binary js/app.min.js)",
+      "Bash(openssl dgst -sha384 -binary js/analytics.min.js)"
+    ]
+  }
+}
