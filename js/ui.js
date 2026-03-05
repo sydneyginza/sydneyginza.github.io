@@ -1,0 +1,1729 @@
+/* === UI: Nav, Auth, Particles, Home, Lightbox, Profile === */
+let currentProfileIdx=0;
+let rosterDateFilter=null;var calPending={};
+let gridSort='name',gridSortDir='asc';
+try{const _ss=localStorage.getItem('ginza_sort');if(_ss){const _sp=JSON.parse(_ss);if(_sp.s)gridSort=_sp.s;if(_sp.d)gridSortDir=_sp.d}}catch(e){}
+function _persistSort(){try{localStorage.setItem('ginza_sort',JSON.stringify({s:gridSort,d:gridSortDir}))}catch(e){}}
+let ngIdx=0,ngList=[];
+let _savedScrollY=0;
+let _countdownInterval=null;
+
+/* ── Compare Feature State ── */
+let compareSelected=[];
+const COMPARE_MAX=5;
+function isCompareSelected(name){return compareSelected.includes(name)}
+function toggleCompare(name){if(!loggedIn){showToast('Please log in to use compare','info');return false}const idx=compareSelected.indexOf(name);if(idx>=0){compareSelected.splice(idx,1)}else{if(compareSelected.length>=COMPARE_MAX){showToast('Maximum '+COMPARE_MAX+' girls for comparison','error');return false}compareSelected.push(name)}updateCompareBar();updateCompareButtons();return true}
+function clearCompare(){compareSelected=[];updateCompareBar();updateCompareButtons()}
+function updateCompareBar(){const bar=document.getElementById('compareBar');if(!bar)return;const count=compareSelected.length;const prev=parseInt(bar.dataset.prevCount||'0');bar.dataset.prevCount=count;document.getElementById('compareBarCount').textContent=count;bar.classList.toggle('visible',count>0);if(count>prev&&count>0){bar.classList.remove('compare-pulse');void bar.offsetWidth;bar.classList.add('compare-pulse');setTimeout(()=>bar.classList.remove('compare-pulse'),600)}const openBtn=document.getElementById('compareOpen');if(openBtn){openBtn.disabled=count<2;openBtn.style.opacity=count<2?'.4':'1';openBtn.style.pointerEvents=count<2?'none':'auto'}}
+function updateCompareButtons(){const cnt=compareSelected.length;document.querySelectorAll('.card-compare').forEach(btn=>{const name=btn.dataset.compareName;const sel=compareSelected.includes(name);btn.classList.toggle('active',sel);btn.title=sel?'Remove from compare':'Add to compare';const badge=btn.querySelector('.compare-badge');if(badge){badge.textContent=cnt+'/'+COMPARE_MAX;badge.style.display=sel&&cnt>0?'':'none'}})}
+
+/* ── Shared Filter State (resets on refresh) ── */
+let sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[]};
+
+function applySharedFilters(list){
+let f=list;
+if(sharedFilters.nameSearch){const q=sharedFilters.nameSearch.toLowerCase();f=f.filter(g=>g.name&&g.name.toLowerCase().includes(q))}
+if(sharedFilters.country.length)f=f.filter(g=>{const gc=g.country;if(Array.isArray(gc))return sharedFilters.country.every(c=>gc.includes(c));return sharedFilters.country.length===1&&sharedFilters.country.includes(gc)});
+if(sharedFilters.ageMin!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v>=sharedFilters.ageMin});
+if(sharedFilters.ageMax!=null)f=f.filter(g=>{const v=parseFloat(g.age);return !isNaN(v)&&v<=sharedFilters.ageMax});
+if(sharedFilters.bodyMin!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v>=sharedFilters.bodyMin});
+if(sharedFilters.bodyMax!=null)f=f.filter(g=>{const v=parseFloat(g.body);return !isNaN(v)&&v<=sharedFilters.bodyMax});
+if(sharedFilters.heightMin!=null)f=f.filter(g=>{const v=parseFloat(g.height);return !isNaN(v)&&v>=sharedFilters.heightMin});
+if(sharedFilters.heightMax!=null)f=f.filter(g=>{const v=parseFloat(g.height);return !isNaN(v)&&v<=sharedFilters.heightMax});
+if(sharedFilters.cupSize)f=f.filter(g=>g.cup&&g.cup.toUpperCase().includes(sharedFilters.cupSize.toUpperCase()));
+if(sharedFilters.val1Min!=null)f=f.filter(g=>{const v=parseFloat(g.val1);return !isNaN(v)&&v>=sharedFilters.val1Min});
+if(sharedFilters.val1Max!=null)f=f.filter(g=>{const v=parseFloat(g.val1);return !isNaN(v)&&v<=sharedFilters.val1Max});
+if(sharedFilters.val2Min!=null)f=f.filter(g=>{const v=parseFloat(g.val2);return !isNaN(v)&&v>=sharedFilters.val2Min});
+if(sharedFilters.val2Max!=null)f=f.filter(g=>{const v=parseFloat(g.val2);return !isNaN(v)&&v<=sharedFilters.val2Max});
+if(sharedFilters.val3Min!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v>=sharedFilters.val3Min});
+if(sharedFilters.val3Max!=null)f=f.filter(g=>{const v=parseFloat(g.val3);return !isNaN(v)&&v<=sharedFilters.val3Max});
+if(sharedFilters.labels.length)f=f.filter(g=>g.labels&&sharedFilters.labels.every(l=>g.labels.includes(l)));
+if(sharedFilters.experience)f=f.filter(g=>g.exp===sharedFilters.experience);
+if(sharedFilters.ratingMin!=null)f=f.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=sharedFilters.ratingMin});
+return f}
+
+function hasActiveFilters(){return !!(sharedFilters.nameSearch||sharedFilters.country.length||sharedFilters.ageMin!=null||sharedFilters.ageMax!=null||sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null||sharedFilters.heightMin!=null||sharedFilters.heightMax!=null||sharedFilters.cupSize||sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null||sharedFilters.experience||sharedFilters.ratingMin!=null||sharedFilters.labels.length)}
+function countActiveFilters(){let n=0;if(sharedFilters.nameSearch)n++;if(sharedFilters.country.length)n++;if(sharedFilters.ageMin!=null||sharedFilters.ageMax!=null)n++;if(sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null)n++;if(sharedFilters.heightMin!=null||sharedFilters.heightMax!=null)n++;if(sharedFilters.cupSize)n++;if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null||sharedFilters.val2Min!=null||sharedFilters.val2Max!=null||sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)n++;if(sharedFilters.experience)n++;if(sharedFilters.ratingMin!=null)n++;if(sharedFilters.labels.length)n++;return n}
+
+function clearAllFilters(){sharedFilters={nameSearch:'',country:[],ageMin:null,ageMax:null,bodyMin:null,bodyMax:null,heightMin:null,heightMax:null,cupSize:null,val1Min:null,val1Max:null,val2Min:null,val2Max:null,val3Min:null,val3Max:null,experience:null,ratingMin:null,labels:[]}}
+
+function filtersToQuery(){const p=new URLSearchParams();if(sharedFilters.nameSearch)p.set('search',sharedFilters.nameSearch);if(sharedFilters.country.length)p.set('country',sharedFilters.country.join(','));if(sharedFilters.ageMin!=null)p.set('ageMin',sharedFilters.ageMin);if(sharedFilters.ageMax!=null)p.set('ageMax',sharedFilters.ageMax);if(sharedFilters.bodyMin!=null)p.set('bodyMin',sharedFilters.bodyMin);if(sharedFilters.bodyMax!=null)p.set('bodyMax',sharedFilters.bodyMax);if(sharedFilters.heightMin!=null)p.set('heightMin',sharedFilters.heightMin);if(sharedFilters.heightMax!=null)p.set('heightMax',sharedFilters.heightMax);if(sharedFilters.cupSize)p.set('cup',sharedFilters.cupSize);if(sharedFilters.val1Min!=null)p.set('v1Min',sharedFilters.val1Min);if(sharedFilters.val1Max!=null)p.set('v1Max',sharedFilters.val1Max);if(sharedFilters.val2Min!=null)p.set('v2Min',sharedFilters.val2Min);if(sharedFilters.val2Max!=null)p.set('v2Max',sharedFilters.val2Max);if(sharedFilters.val3Min!=null)p.set('v3Min',sharedFilters.val3Min);if(sharedFilters.val3Max!=null)p.set('v3Max',sharedFilters.val3Max);if(sharedFilters.experience)p.set('exp',sharedFilters.experience);if(sharedFilters.labels.length)p.set('labels',sharedFilters.labels.join(','));if(sharedFilters.ratingMin!=null)p.set('rating',sharedFilters.ratingMin);if(gridSort!=='name')p.set('sort',gridSort);if(gridSortDir!=='asc')p.set('sortDir',gridSortDir);return p}
+
+function queryToFilters(){const p=new URLSearchParams(window.location.search);if(p.has('search'))sharedFilters.nameSearch=p.get('search');if(p.has('country'))sharedFilters.country=p.get('country').split(',').filter(Boolean);if(p.has('ageMin')){const v=parseFloat(p.get('ageMin'));if(!isNaN(v))sharedFilters.ageMin=v}if(p.has('ageMax')){const v=parseFloat(p.get('ageMax'));if(!isNaN(v))sharedFilters.ageMax=v}if(p.has('bodyMin')){const v=parseFloat(p.get('bodyMin'));if(!isNaN(v))sharedFilters.bodyMin=v}if(p.has('bodyMax')){const v=parseFloat(p.get('bodyMax'));if(!isNaN(v))sharedFilters.bodyMax=v}if(p.has('heightMin')){const v=parseFloat(p.get('heightMin'));if(!isNaN(v))sharedFilters.heightMin=v}if(p.has('heightMax')){const v=parseFloat(p.get('heightMax'));if(!isNaN(v))sharedFilters.heightMax=v}if(p.has('cup'))sharedFilters.cupSize=p.get('cup');if(p.has('v1Min')){const v=parseFloat(p.get('v1Min'));if(!isNaN(v))sharedFilters.val1Min=v}if(p.has('v1Max')){const v=parseFloat(p.get('v1Max'));if(!isNaN(v))sharedFilters.val1Max=v}if(p.has('v2Min')){const v=parseFloat(p.get('v2Min'));if(!isNaN(v))sharedFilters.val2Min=v}if(p.has('v2Max')){const v=parseFloat(p.get('v2Max'));if(!isNaN(v))sharedFilters.val2Max=v}if(p.has('v3Min')){const v=parseFloat(p.get('v3Min'));if(!isNaN(v))sharedFilters.val3Min=v}if(p.has('v3Max')){const v=parseFloat(p.get('v3Max'));if(!isNaN(v))sharedFilters.val3Max=v}if(p.has('exp'))sharedFilters.experience=p.get('exp');if(p.has('labels'))sharedFilters.labels=p.get('labels').split(',').filter(Boolean);if(p.has('rating')){const v=parseFloat(p.get('rating'));if(!isNaN(v))sharedFilters.ratingMin=v}if(p.has('sort')){const VALID=['name','newest','age','body','height','cup','lastSeen'];const s=p.get('sort');if(VALID.includes(s))gridSort=s}if(p.has('sortDir')){const d=p.get('sortDir');if(d==='asc'||d==='desc')gridSortDir=d}}
+
+function pushFiltersToURL(){const q=filtersToQuery();const qs=q.toString();const newUrl=window.location.pathname+(qs?'?'+qs:'');history.replaceState({path:window.location.pathname},document.title,newUrl)}
+
+function getDataRange(field,prefix){
+const namedOnly=girls.filter(g=>g.name&&String(g.name).trim().length>0);
+const nums=namedOnly.map(g=>parseFloat(g[field])).filter(n=>!isNaN(n)&&n>0);
+if(!nums.length)return{min:'Min',max:'Max',rawMin:null,rawMax:null};
+const p=prefix||'';
+return{min:p+Math.min(...nums),max:p+Math.max(...nums),rawMin:Math.min(...nums),rawMax:Math.max(...nums)}}
+
+function makeRangeSection(title,minKey,maxKey,dataField,prefix){
+const sec=document.createElement('div');sec.className='fp-section';
+const r=getDataRange(dataField,prefix);
+const minVal=sharedFilters[minKey]!=null?sharedFilters[minKey]:(r.rawMin!=null?r.rawMin:'');
+const maxVal=sharedFilters[maxKey]!=null?sharedFilters[maxKey]:(r.rawMax!=null?r.rawMax:'');
+const minAttr=r.rawMin!=null?` min="${r.rawMin}"`:'';
+const maxAttr=r.rawMax!=null?` max="${r.rawMax}"`:'';
+sec.innerHTML=`<div class="fp-title">${title}</div><div class="fp-range"><div class="fp-range-row"><input class="fp-range-input" type="number" placeholder="${r.min}" data-fkey="${minKey}" data-default="${r.rawMin!=null?r.rawMin:''}"${minAttr}${maxAttr} value="${minVal}"><span class="fp-range-sep">${t('fp.rangeSep')}</span><input class="fp-range-input" type="number" placeholder="${r.max}" data-fkey="${maxKey}" data-default="${r.rawMax!=null?r.rawMax:''}"${minAttr}${maxAttr} value="${maxVal}"></div></div>`;
+return sec}
+
+function renderFilterPane(containerId){
+const pane=document.getElementById(containerId);if(!pane)return;
+pane.innerHTML='';
+const namedGirls=girls.filter(g=>g.name&&String(g.name).trim().length>0);
+const countries=[...new Set(namedGirls.flatMap(g=>Array.isArray(g.country)?g.country:[g.country]).filter(Boolean))].sort();
+const cups=[...new Set(namedGirls.map(g=>g.cup).filter(Boolean))].sort();
+const exps=[...new Set(namedGirls.map(g=>g.exp).filter(Boolean))].sort();
+const labels=[...new Set(namedGirls.flatMap(g=>g.labels||[]).filter(Boolean))].sort();
+
+/* Sort section at top of filter pane */
+{const sec=document.createElement('div');sec.className='fp-section';
+const sorts=[{key:'name',label:t('sort.name')},{key:'newest',label:t('sort.dateAdded')},{key:'age',label:t('sort.age')},{key:'body',label:t('sort.size')},{key:'height',label:t('sort.height')},{key:'cup',label:t('sort.cup')},{key:'lastSeen',label:t('sort.lastSeen')}];
+const dirLabel=gridSortDir==='asc'?'ASC ↑':'DESC ↓';
+sec.innerHTML=`<div class="fp-sort-header"><div class="fp-title">${t('sort.sortBy')}</div><button class="fp-sort-dir-btn">${dirLabel}</button></div><div class="fp-options fp-sort-options"></div>`;
+pane.appendChild(sec);
+sec.querySelector('.fp-sort-dir-btn').onclick=()=>{gridSortDir=gridSortDir==='asc'?'desc':'asc';_persistSort();onFiltersChanged()};
+const wrap=sec.querySelector('.fp-sort-options');
+sorts.forEach(s=>{const btn=document.createElement('button');btn.className='fp-option'+(gridSort===s.key?' active':'');
+btn.innerHTML=`<span class="fp-check">${gridSort===s.key?'✓':''}</span>${s.label}`;
+btn.onclick=()=>{if(gridSort===s.key){gridSortDir=gridSortDir==='asc'?'desc':'asc'}else{gridSort=s.key;gridSortDir=(s.key==='newest'||s.key==='lastSeen')?'desc':'asc'}_persistSort();onFiltersChanged()};
+wrap.appendChild(btn)});
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
+
+/* Profiles search */
+if(namedGirls.length){
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.search')}</div><input class="fp-range-input" type="text" data-role="name-search" placeholder="${t('ui.search')}" style="text-align:left;padding:6px 10px;width:100%">`;
+pane.appendChild(sec);
+const searchInp=sec.querySelector('[data-role="name-search"]');
+searchInp.value=sharedFilters.nameSearch||'';
+let debounce;
+searchInp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(()=>{sharedFilters.nameSearch=searchInp.value.trim();onFiltersChanged()},300)});
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}))}
+
+/* Rating */
+{pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.rating')}</div><div class="fp-rating-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-rating-options');
+for(let star=5;star>=1;star--){
+const btn=document.createElement('button');btn.className='fp-option fp-rating-opt'+(sharedFilters.ratingMin===star?' active':'');
+const cnt=namedGirls.filter(g=>{const rvs=g.reviews||[];if(!rvs.length)return false;const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;return avg>=star}).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.ratingMin===star?'✓':''}</span><span class="fp-rating-stars">${renderStarsStatic(star)}</span><span class="fp-rating-label">& up</span><span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.ratingMin=sharedFilters.ratingMin===star?null:star;onFiltersChanged()};
+wrap.appendChild(btn)}}
+
+/* Country */
+if(countries.length){
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.country')}</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+countries.forEach(c=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.country.includes(c)?' active':'');
+const cnt=namedGirls.filter(g=>{const gc=g.country;return Array.isArray(gc)?gc.includes(c):gc===c}).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.country.includes(c)?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{if(sharedFilters.country.includes(c))sharedFilters.country=sharedFilters.country.filter(x=>x!==c);else sharedFilters.country.push(c);onFiltersChanged()};
+wrap.appendChild(btn)})}
+
+/* Age */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.age'),'ageMin','ageMax','age'));
+
+/* Body Size */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.bodySize'),'bodyMin','bodyMax','body'));
+
+/* Height */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.height'),'heightMin','heightMax','height'));
+
+/* Cup Size */
+if(cups.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.cupSize')}</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+cups.forEach(c=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.cupSize===c?' active':'');
+const cnt=namedGirls.filter(g=>g.cup===c).length;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.cupSize===c?'✓':''}</span>${c}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.cupSize=sharedFilters.cupSize===c?null:c;onFiltersChanged()};
+wrap.appendChild(btn)})}
+
+/* Rates 30 mins */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.rates30'),'val1Min','val1Max','val1','$'));
+
+/* Rates 45 mins */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.rates45'),'val2Min','val2Max','val2','$'));
+
+/* Rates 60 mins */
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+pane.appendChild(makeRangeSection(t('fp.rates60'),'val3Min','val3Max','val3','$'));
+
+/* Experience */
+if(exps.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.experience')}</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+exps.forEach(e=>{
+const btn=document.createElement('button');btn.className='fp-option'+(sharedFilters.experience===e?' active':'');
+const cnt=namedGirls.filter(g=>g.exp===e).length;
+const eLabel=e==='Experienced'?t('exp.experienced'):e==='Inexperienced'?t('exp.inexperienced'):e;
+btn.innerHTML=`<span class="fp-check">${sharedFilters.experience===e?'✓':''}</span>${eLabel}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{sharedFilters.experience=sharedFilters.experience===e?null:e;onFiltersChanged()};
+wrap.appendChild(btn)})}
+
+/* Labels */
+if(labels.length){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const sec=document.createElement('div');sec.className='fp-section';
+sec.innerHTML=`<div class="fp-title">${t('fp.labels')}</div><div class="fp-options"></div>`;
+pane.appendChild(sec);
+const wrap=sec.querySelector('.fp-options');
+labels.forEach(l=>{
+const isActive=sharedFilters.labels.includes(l);
+const btn=document.createElement('button');btn.className='fp-option'+(isActive?' active':'');
+const cnt=namedGirls.filter(g=>g.labels&&g.labels.includes(l)).length;
+btn.innerHTML=`<span class="fp-check">${isActive?'✓':''}</span>${l}<span class="fp-count">${cnt}</span>`;
+btn.onclick=()=>{if(isActive)sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);else sharedFilters.labels.push(l);onFiltersChanged()};
+wrap.appendChild(btn)})}
+
+/* Clear */
+if(hasActiveFilters()){
+pane.appendChild(Object.assign(document.createElement('div'),{className:'fp-divider'}));
+const clr=document.createElement('button');clr.className='fp-clear';clr.textContent=t('fp.clearAll');
+clr.onclick=()=>{clearAllFilters();onFiltersChanged()};
+pane.appendChild(clr)}
+
+/* Bind range inputs */
+pane.querySelectorAll('.fp-range-input').forEach(inp=>{
+let debounce;
+function clampAndApply(){const key=inp.dataset.fkey;let val=inp.value.trim();if(val===''){sharedFilters[key]=null}else{let num=parseFloat(val);if(isNaN(num)){sharedFilters[key]=null;return}const lo=inp.hasAttribute('min')?parseFloat(inp.min):null;const hi=inp.hasAttribute('max')?parseFloat(inp.max):null;if(lo!=null&&num<lo){num=lo;inp.value=num}if(hi!=null&&num>hi){num=hi;inp.value=num}const def=inp.dataset.default;sharedFilters[key]=(def!==''&&num===parseFloat(def))?null:num}onFiltersChanged()}
+inp.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(clampAndApply,400)});
+inp.addEventListener('blur',clampAndApply)})}
+function renderActiveFilterChips(){
+const bar=document.getElementById('activeFilterChips');if(!bar)return;
+const chips=[];
+if(sharedFilters.nameSearch)chips.push({label:'🔍 '+sharedFilters.nameSearch,rm:()=>{sharedFilters.nameSearch='';onFiltersChanged()}});
+sharedFilters.country.forEach(c=>chips.push({label:c,rm:()=>{sharedFilters.country=sharedFilters.country.filter(x=>x!==c);onFiltersChanged()}}));
+if(sharedFilters.ageMin!=null||sharedFilters.ageMax!=null)chips.push({label:'Age '+(sharedFilters.ageMin??'')+'–'+(sharedFilters.ageMax??''),rm:()=>{sharedFilters.ageMin=null;sharedFilters.ageMax=null;onFiltersChanged()}});
+if(sharedFilters.bodyMin!=null||sharedFilters.bodyMax!=null)chips.push({label:'Body '+(sharedFilters.bodyMin??'')+'–'+(sharedFilters.bodyMax??''),rm:()=>{sharedFilters.bodyMin=null;sharedFilters.bodyMax=null;onFiltersChanged()}});
+if(sharedFilters.heightMin!=null||sharedFilters.heightMax!=null)chips.push({label:'Height '+(sharedFilters.heightMin??'')+'–'+(sharedFilters.heightMax??''),rm:()=>{sharedFilters.heightMin=null;sharedFilters.heightMax=null;onFiltersChanged()}});
+if(sharedFilters.cupSize)chips.push({label:'Cup '+sharedFilters.cupSize,rm:()=>{sharedFilters.cupSize=null;onFiltersChanged()}});
+if(sharedFilters.val1Min!=null||sharedFilters.val1Max!=null)chips.push({label:'30min '+(sharedFilters.val1Min??'')+'–'+(sharedFilters.val1Max??''),rm:()=>{sharedFilters.val1Min=null;sharedFilters.val1Max=null;onFiltersChanged()}});
+if(sharedFilters.val2Min!=null||sharedFilters.val2Max!=null)chips.push({label:'45min '+(sharedFilters.val2Min??'')+'–'+(sharedFilters.val2Max??''),rm:()=>{sharedFilters.val2Min=null;sharedFilters.val2Max=null;onFiltersChanged()}});
+if(sharedFilters.val3Min!=null||sharedFilters.val3Max!=null)chips.push({label:'60min '+(sharedFilters.val3Min??'')+'–'+(sharedFilters.val3Max??''),rm:()=>{sharedFilters.val3Min=null;sharedFilters.val3Max=null;onFiltersChanged()}});
+if(sharedFilters.experience)chips.push({label:sharedFilters.experience,rm:()=>{sharedFilters.experience=null;onFiltersChanged()}});
+if(sharedFilters.ratingMin!=null)chips.push({label:'★ '+sharedFilters.ratingMin+'+ stars',rm:()=>{sharedFilters.ratingMin=null;onFiltersChanged()}});
+sharedFilters.labels.forEach(l=>chips.push({label:l,rm:()=>{sharedFilters.labels=sharedFilters.labels.filter(x=>x!==l);onFiltersChanged()}}));
+bar.innerHTML='';
+if(!chips.length){bar.style.display='none';return}
+bar.style.display='flex';
+chips.forEach(c=>{const ch=document.createElement('button');ch.className='active-filter-chip';ch.innerHTML=c.label+' <span class="chip-x">×</span>';ch.onclick=c.rm;bar.appendChild(ch)});
+const clr=document.createElement('button');clr.className='active-filter-chip chip-clear-all';clr.textContent=t('fp.clearAll');clr.onclick=()=>{clearAllFilters();onFiltersChanged()};bar.appendChild(clr);
+}
+function _captureGridPositions(gridEl){
+  if(!gridEl)return{};
+  const map={};
+  gridEl.querySelectorAll('.girl-card').forEach(c=>{
+    const name=c.querySelector('.card-name');
+    if(name&&name.textContent){const r=c.getBoundingClientRect();map[name.textContent.trim()]={left:r.left,top:r.top,width:r.width,height:r.height,el:c}}
+  });return map}
+function _animateFlip(gridEl,oldPos){
+  if(!gridEl||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  gridEl.querySelectorAll('.girl-card').forEach(c=>{
+    const name=c.querySelector('.card-name');
+    if(!name)return;
+    const key=name.textContent.trim();const prev=oldPos[key];
+    const cur=c.getBoundingClientRect();
+    if(prev){
+      const dx=prev.left-cur.left;const dy=prev.top-cur.top;
+      if(Math.abs(dx)>1||Math.abs(dy)>1){
+        c.style.transform='translate('+dx+'px,'+dy+'px)';c.style.transition='none';
+        requestAnimationFrame(()=>{c.classList.add('flip-move');c.style.transform='';c.style.transition='';
+          const onEnd=()=>{c.classList.remove('flip-move');c.removeEventListener('transitionend',onEnd)};
+          c.addEventListener('transitionend',onEnd)});
+      }
+    }else{c.classList.add('flip-enter');
+      const onEnd=()=>{c.classList.remove('flip-enter');c.removeEventListener('animationend',onEnd)};
+      c.addEventListener('animationend',onEnd)}
+    delete oldPos[key]});
+}
+function onFiltersChanged(){
+const hadFocus=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.role==='name-search';
+const cursorPos=hadFocus?document.activeElement.selectionStart:0;
+const focusPane=hadFocus?document.activeElement.closest('.filter-pane'):null;
+const focusPaneId=focusPane?focusPane.id:null;
+const _oldGrid=_captureGridPositions(document.getElementById('girlsGrid'));
+const _oldRoster=_captureGridPositions(document.getElementById('rosterGrid'));
+renderFilterPane('girlsFilterPane');
+renderFilterPane('rosterFilterPane');
+renderFilterPane('calFilterPane');
+renderFilterPane('profileFilterPane');
+renderFilterPane('favoritesFilterPane');
+renderFilterPane('bookingsFilterPane');
+renderFilterPane('vacationFilterPane');
+renderFilters();renderGrid();renderRoster();
+_animateFlip(document.getElementById('girlsGrid'),_oldGrid);
+_animateFlip(document.getElementById('rosterGrid'),_oldRoster);
+updateFilterToggle();pushFiltersToURL();
+if(document.getElementById('calendarPage').classList.contains('active'))renderCalendar();
+if(document.getElementById('favoritesPage').classList.contains('active'))renderFavoritesGrid();
+if(document.getElementById('bookingsPage').classList.contains('active'))renderBookingsGrid();
+if(document.getElementById('vacationPage').classList.contains('active'))renderVacationTable();
+if(document.getElementById('profilePage').classList.contains('active')){const fi=getNamedGirlIndices();if(fi.length){if(!fi.includes(currentProfileIdx))showProfile(fi[0]);else{renderProfileNav(currentProfileIdx)}}else{document.getElementById('profileContent').innerHTML='<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div class="empty-msg">No profiles match the current filters</div>';document.getElementById('backBtn').onclick=()=>{if(window.history.length>1){window.history.back()}else{showPage(profileReturnPage)}}}}
+if(focusPaneId){const restored=document.getElementById(focusPaneId);if(restored){const inp=restored.querySelector('[data-role="name-search"]');if(inp){inp.focus();inp.setSelectionRange(cursorPos,cursorPos)}}};renderActiveFilterChips()}
+const allPages=['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','calendarPage','analyticsPage','profileDbPage','bookingsPage','vacationPage','profilePage'].map(id=>document.getElementById(id));
+
+function showPage(id){
+resetOgMeta();if(document.getElementById('calendarPage').classList.contains('active')&&id!=='calendarPage'){flushCalSave();let s=false;for(const n in calPending)for(const dt in calPending[n])if(calPending[n][dt]&&calData[n]&&calData[n][dt]){delete calData[n][dt];s=true}if(s){saveCalData();renderRoster();renderGrid()}calPending={}}
+const prev=document.querySelector('.page.active');const next=document.getElementById(id);const _ec=['page-enter','slide-enter-right','slide-enter-left'];next.classList.remove(..._ec);if(prev&&prev!==next){const fromProfile=prev.id==='profilePage';const exitCls=fromProfile?'slide-exit-right':'page-exit';const enterCls=fromProfile?'slide-enter-left':'page-enter';prev.classList.remove('active',..._ec);prev.classList.add(exitCls);const onDone=()=>{prev.classList.remove(exitCls);prev.removeEventListener('animationend',onDone)};prev.addEventListener('animationend',onDone);setTimeout(()=>{prev.classList.remove(exitCls)},400);void next.offsetWidth;next.classList.add(enterCls)}else{allPages.forEach(p=>p.classList.remove('active',..._ec));next.classList.add('page-enter')}next.classList.add('active');
+closeFilterPanel();
+_kbFocusedCardIdx=-1;document.querySelectorAll('.girl-card.kb-focused').forEach(c=>c.classList.remove('kb-focused'));
+/* URL routing & dynamic title */
+const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database',bookingsPage:'Ginza Empire – Bookings',vacationPage:'Ginza Empire – Vacation'};
+const pageTitle=titleMap[id]||'Ginza Empire';
+document.title=pageTitle;
+announce(pageTitle.replace('Ginza Empire – ','').replace('Ginza Empire','Home'));
+Router.push(Router.pathForPage(id),pageTitle);
+/* Determine which filter pane is active for this page */
+const paneMap={rosterPage:'rosterFilterPane',listPage:'girlsFilterPane',calendarPage:'calFilterPane',profilePage:'profileFilterPane',favoritesPage:'favoritesFilterPane',bookingsPage:'bookingsFilterPane',vacationPage:'vacationFilterPane'};
+_activeFilterPaneId=paneMap[id]||null;
+document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));
+if(id==='homePage'){document.getElementById('navHome').classList.add('active');renderHome()}
+if(id==='rosterPage'){document.getElementById('navRoster').classList.add('active');renderFilterPane('rosterFilterPane');renderRoster()}
+if(id==='listPage'){document.getElementById('navGirls').classList.add('active');renderFilterPane('girlsFilterPane');renderGrid()}
+if(id==='favoritesPage'){document.getElementById('navFavorites').classList.add('active');renderFilterPane('favoritesFilterPane');renderFavoritesGrid()}
+if(id==='valuePage'){document.getElementById('navValue').classList.add('active');renderValueTable()}
+if(id==='employmentPage'){document.getElementById('navEmployment').classList.add('active')}
+if(id==='calendarPage'){document.getElementById('navCalendar').classList.add('active');calPending={};renderFilterPane('calFilterPane');renderCalendar()}
+if(id==='analyticsPage'){document.getElementById('navAnalytics').classList.add('active');if(typeof renderAnalytics==='function')renderAnalytics()}
+if(id==='profileDbPage'){document.getElementById('navProfileDb').classList.add('active');if(typeof renderProfileDb==='function')renderProfileDb()}
+if(id==='bookingsPage'){document.getElementById('navBookings').classList.add('active');renderFilterPane('bookingsFilterPane');renderBookingsFilters();renderBookingsGrid()}
+if(id==='vacationPage'){document.getElementById('navVacation').classList.add('active');renderFilterPane('vacationFilterPane');renderVacationTable()}
+updateFilterToggle();
+if(_pagesWithFilters.includes(id))pushFiltersToURL();
+window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0))}
+
+document.getElementById('navHome').onclick=e=>{e.preventDefault();showPage('homePage')};
+document.getElementById('navRoster').onclick=e=>{e.preventDefault();showPage('rosterPage')};
+document.getElementById('navGirls').onclick=e=>{e.preventDefault();showPage('listPage')};
+document.getElementById('navFavorites').onclick=e=>{e.preventDefault();showPage('favoritesPage')};
+document.getElementById('navValue').onclick=e=>{e.preventDefault();showPage('valuePage')};
+document.getElementById('navEmployment').onclick=e=>{e.preventDefault();showPage('employmentPage')};
+document.getElementById('navCalendar').onclick=e=>{e.preventDefault();showPage('calendarPage')};
+document.getElementById('navAnalytics').onclick=e=>{e.preventDefault();showPage('analyticsPage')};
+document.getElementById('navProfileDb').onclick=e=>{e.preventDefault();showPage('profileDbPage')};
+document.getElementById('navBookings').onclick=e=>{e.preventDefault();showPage('bookingsPage')};
+document.getElementById('navVacation').onclick=e=>{e.preventDefault();showPage('vacationPage')};
+
+/* Nav Dropdown Menu Toggle */
+const navMenuBtn=document.getElementById('navMenuBtn');
+const navDropdown=document.getElementById('navDropdown');
+navMenuBtn.onclick=()=>{const o=navMenuBtn.classList.toggle('open');navDropdown.classList.toggle('open');navMenuBtn.setAttribute('aria-expanded',String(o))};
+function closeNavMenu(){navMenuBtn.classList.remove('open');navDropdown.classList.remove('open');navMenuBtn.setAttribute('aria-expanded','false')}
+navDropdown.querySelectorAll('a').forEach(a=>{const orig=a.onclick;a.addEventListener('click',()=>closeNavMenu())});
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-menu-wrap'))closeNavMenu()});
+
+/* Admin calendar stubs — real implementations loaded via admin.js */
+function findExistingTimes(){return null}
+function closeCopyTimeModal(){}
+function showCopyTimePrompt(n,d,s,e){return loadAdminModule().then(function(){return showCopyTimePrompt(n,d,s,e)})}
+function openCopyDayModal(){loadAdminModule().then(function(){openCopyDayModal()})}
+function openBulkTimeModal(name){loadAdminModule().then(function(){openBulkTimeModal(name)})}
+
+/* Home Page */
+function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
+
+function renderAvailNowWidget(){
+const container=document.getElementById('homeAvailNow');if(!container)return;
+const avail=girls.filter(g=>!g.hidden&&isAvailableNow(g.name));
+if(!avail.length){container.style.display='none';container.innerHTML='';return}
+container.style.display='';
+const countLabel=avail.length===1?t('home.girlSingular'):t('home.girlPlural').replace('{n}',avail.length);
+let html=`<div class="avail-now-header"><span class="avail-now-dot"></span><h2 class="logo" style="margin:0">${countLabel} Available Now</h2></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+avail.forEach(g=>{const ri=girls.indexOf(g);const photo=g.photos&&g.photos.length?g.photos[0]:'';const cd=getAvailCountdown(g.name);const cdText=cd&&cd.type==='until_end'?cd.display:'';
+html+=`<div class="avail-now-card" data-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${cdText?`<div class="anw-countdown">${cdText}</div>`:''}</div>`});
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
+let _anwDidDrag=false;
+let _anwHoverTimer;
+container.querySelectorAll('.avail-now-card').forEach(c=>{const idx=parseInt(c.dataset.idx);const _g=!isNaN(idx)?girls[idx]:null;c.onclick=()=>{if(_anwDidDrag)return;if(!isNaN(idx)){profileReturnPage='homePage';showProfile(idx)}};
+c.addEventListener('mouseenter',()=>{if(!_g)return;clearTimeout(_anwHoverTimer);_anwHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const ts=fmtDate(getAEDTDate());const _vacCd=_vacCountdownLabel(_g.name,ts);const _vacBdg=_isVacReturnDay(_g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBdg=_isNewGirl(_g)?'<span class="new-badge">New!</span>':'';const _liveNow=_g.name&&isAvailableNow(_g.name);const _entry=getCalEntry(_g.name,ts);const _timeStr=_entry&&_entry.start&&_entry.end?fmtTime12(_entry.start)+' - '+fmtTime12(_entry.end):'';const _availHtml=_liveNow&&_timeStr?t('avail.now')+' ('+_timeStr+')':(_timeStr?_timeStr:'');const _availCls=_liveNow?'chp-avail chp-avail-live':'chp-avail';prev.innerHTML=`<div class="chp-name">${_g.name||''}${_vacBdg}${_newBdg}</div><div class="chp-country">${Array.isArray(_g.country)?_g.country.join(', '):(_g.country||'')}</div>${_g.special?'<div class="chp-special">'+_g.special+'</div>':''}${cardRatingHtml(_g)?'<div class="chp-rating">'+cardRatingHtml(_g)+'</div>':''}${_availHtml?'<div class="'+_availCls+'">'+_availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${_g.age||'\u2014'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${_g.body||'\u2014'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${_g.height?_g.height+' cm':'\u2014'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${_g.cup||'\u2014'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${_g.val1||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${_g.val2||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${_g.val3||'\u2014'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${_g.exp||'\u2014'}</span></div></div>`;prev.classList.add('visible')},180)});
+c.addEventListener('mouseleave',()=>{clearTimeout(_anwHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
+c.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'})});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateAnwArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateAnwArrows);
+/* Mouse drag to scroll */
+let _anwMdX=0,_anwMdSL=0,_anwMdActive=false;
+strip.addEventListener('mousedown',e=>{_anwMdActive=true;_anwDidDrag=false;_anwMdX=e.pageX;_anwMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_anwMdActive)return;if(Math.abs(e.pageX-_anwMdX)>5)_anwDidDrag=true;strip.scrollLeft=_anwMdSL-(e.pageX-_anwMdX)});
+document.addEventListener('mouseup',()=>{if(!_anwMdActive)return;_anwMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_anwDidDrag=false},0)});
+strip.style.cursor='grab';_updateAnwArrows()}
+
+function renderHome(){safeRender('Home',()=>{
+const c=document.getElementById('homeImages');c.innerHTML='';
+const baseUrl='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_';
+for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
+document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
+ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();
+/* Scroll reveals for below-fold home sections */
+const _sr=[document.querySelector('#homePage .home-mid'),document.getElementById('homeWelcomeEn'),document.querySelector('[data-i18n="home.location"]'),document.getElementById('homeLocation'),document.getElementById('homeMap'),document.querySelector('[data-i18n="home.hours"]'),document.getElementById('homeHours')].filter(Boolean);_sr.forEach(el=>{el.classList.add('scroll-reveal');el.classList.remove('revealed')});if(window._homeRevealObs)window._homeRevealObs.disconnect();window._homeRevealObs=new IntersectionObserver((entries,obs)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('revealed');obs.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -60px 0px'});_sr.forEach(el=>window._homeRevealObs.observe(el));observeReveals(document.getElementById('homePage'))})}
+
+function renderRecentlyViewed(containerId='homeRecentlyViewed',returnPage='homePage'){
+const container=document.getElementById(containerId);if(!container)return;
+const rv=getRecentlyViewed();
+const valid=rv.map(r=>{const gi=girls.findIndex(g=>g.name===r.name);return gi>=0?{g:girls[gi],idx:gi}:null}).filter(v=>v&&(isAdmin()||!v.g.hidden));
+if(!valid.length){container.style.display='none';container.innerHTML='';return}
+container.style.display='';
+const clearId='rvClearBtn_'+containerId;
+let html=`<div class="rv-header"><div class="avail-now-title rv-title">${t('rv.title')}</div><button class="rv-clear-btn" id="${clearId}">${t('rv.clear')}</button></div><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+valid.forEach(({g,idx})=>{const liveNow=g.name&&isAvailableNow(g.name);const photo=g.photos&&g.photos.length?g.photos[0]:'';
+html+=`<div class="avail-now-card" data-rv-idx="${idx}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${liveNow?'<span class="avail-now-dot rv-dot"></span>':''}</div>`});
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';container.innerHTML=html;
+let _rvDidDrag=false;
+container.querySelectorAll('.avail-now-card').forEach(card=>{card.onclick=()=>{if(_rvDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage=returnPage;showProfile(parseInt(card.dataset.rvIdx))}});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateRvArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateRvArrows);
+/* Mouse drag to scroll */
+let _rvMdX=0,_rvMdSL=0,_rvMdActive=false;
+strip.addEventListener('mousedown',e=>{_rvMdActive=true;_rvDidDrag=false;_rvMdX=e.pageX;_rvMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_rvMdActive)return;if(Math.abs(e.pageX-_rvMdX)>5)_rvDidDrag=true;strip.scrollLeft=_rvMdSL-(e.pageX-_rvMdX)});
+document.addEventListener('mouseup',()=>{if(!_rvMdActive)return;_rvMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_rvDidDrag=false},0)});
+strip.style.cursor='grab';_updateRvArrows();
+const clearBtn=document.getElementById(clearId);if(clearBtn)clearBtn.onclick=()=>{clearRecentlyViewed();renderRecentlyViewed(containerId,returnPage)}}
+
+function renderNewGirls(){
+const container=document.getElementById('homeNewGirls');if(!container)return;
+if(!ngList.length){container.style.display='none';container.innerHTML='';return}
+container.style.display='';
+let html=`<h2 class="logo" style="margin-bottom:16px">${t('home.newGirls')}</h2><div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button><div class="avail-now-strip">`;
+ngList.forEach(g=>{const ri=girls.indexOf(g);const liveNow=g.name&&isAvailableNow(g.name);const photo=g.photos&&g.photos.length?g.photos[0]:'';
+html+=`<div class="avail-now-card" data-ng-idx="${ri}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${liveNow?'<span class="avail-now-dot rv-dot"></span>':''}</div>`});
+html+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button></div>';
+container.innerHTML=html;
+let _ngDidDrag=false;
+let _ngHoverTimer;
+container.querySelectorAll('.avail-now-card').forEach(card=>{const idx=parseInt(card.dataset.ngIdx);const _g=!isNaN(idx)?girls[idx]:null;card.onclick=()=>{if(_ngDidDrag)return;_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='homePage';showProfile(idx)};
+card.addEventListener('mouseenter',()=>{if(!_g)return;clearTimeout(_ngHoverTimer);_ngHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const ts=fmtDate(getAEDTDate());const _vacCd=_vacCountdownLabel(_g.name,ts);const _vacBdg=_isVacReturnDay(_g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBdg=_isNewGirl(_g)?'<span class="new-badge">New!</span>':'';const _liveNow=_g.name&&isAvailableNow(_g.name);const _entry=getCalEntry(_g.name,ts);const _timeStr=_entry&&_entry.start&&_entry.end?fmtTime12(_entry.start)+' - '+fmtTime12(_entry.end):'';const _availHtml=_liveNow&&_timeStr?t('avail.now')+' ('+_timeStr+')':(_timeStr?_timeStr:'');const _availCls=_liveNow?'chp-avail chp-avail-live':'chp-avail';prev.innerHTML=`<div class="chp-name">${_g.name||''}${_vacBdg}${_newBdg}</div><div class="chp-country">${Array.isArray(_g.country)?_g.country.join(', '):(_g.country||'')}</div>${_g.special?'<div class="chp-special">'+_g.special+'</div>':''}${cardRatingHtml(_g)?'<div class="chp-rating">'+cardRatingHtml(_g)+'</div>':''}${_availHtml?'<div class="'+_availCls+'">'+_availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${_g.age||'\u2014'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${_g.body||'\u2014'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${_g.height?_g.height+' cm':'\u2014'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${_g.cup||'\u2014'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${_g.val1||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${_g.val2||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${_g.val3||'\u2014'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${_g.exp||'\u2014'}</span></div></div>`;prev.classList.add('visible')},180)});
+card.addEventListener('mouseleave',()=>{clearTimeout(_ngHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
+card.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'})});
+const strip=container.querySelector('.avail-now-strip');const arwL=container.querySelector('.anw-arrow-left');const arwR=container.querySelector('.anw-arrow-right');
+function _updateNgArrows(){if(!strip)return;arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updateNgArrows);
+let _ngMdX=0,_ngMdSL=0,_ngMdActive=false;
+strip.addEventListener('mousedown',e=>{_ngMdActive=true;_ngDidDrag=false;_ngMdX=e.pageX;_ngMdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_ngMdActive)return;if(Math.abs(e.pageX-_ngMdX)>5)_ngDidDrag=true;strip.scrollLeft=_ngMdSL-(e.pageX-_ngMdX)});
+document.addEventListener('mouseup',()=>{if(!_ngMdActive)return;_ngMdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_ngDidDrag=false},0)});
+strip.style.cursor='grab';_updateNgArrows()}
+
+/* Home Search Bar */
+(function(){const inp=document.getElementById('homeSearchInput'),btn=document.getElementById('homeSearchBtn');if(!inp||!btn)return;function doHomeSearch(){const q=inp.value.trim();if(!q)return;sharedFilters.nameSearch=q;showPage('listPage');inp.value=''}inp.addEventListener('keydown',e=>{if(e.key==='Enter')doHomeSearch()});btn.onclick=doHomeSearch})();
+
+/* Lightbox */
+let lbPhotos=[],lbIdx=0,lbName='';
+const lightbox=document.getElementById('lightbox'),lbImg=document.getElementById('lbImg'),lbStrip=document.getElementById('lbStrip'),lbCounter=document.getElementById('lbCounter');
+
+function lbUpdateCounter(){lbCounter.innerHTML=`<span>${lbIdx+1}</span> / ${lbPhotos.length}`}
+
+function lbUpdateStrip(){lbStrip.querySelectorAll('.lb-strip-thumb').forEach((t,i)=>{t.classList.toggle('active',i===lbIdx)});
+const active=lbStrip.querySelector('.lb-strip-thumb.active');if(active)active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}
+
+function lbRenderStrip(){lbStrip.innerHTML='';
+lbPhotos.forEach((src,i)=>{const t=document.createElement('div');t.className='lb-strip-thumb'+(i===lbIdx?' active':'');t.innerHTML=`<img src="${src}" alt="${(lbName||'Photo '+(i+1)).replace(/"/g,'&quot;')}">`;t.onclick=()=>lbGoTo(i);lbStrip.appendChild(t)})}
+
+function lbGoTo(i){if(i===lbIdx)return;lbImg.classList.add('lb-fade');setTimeout(()=>{lbIdx=i;lbImg.src=lbPhotos[lbIdx];lbImg.alt=lbName||'';lbImg.onload=()=>{lbImg.classList.remove('lb-fade')};lbUpdateCounter();lbUpdateStrip()},150)}
+
+function closeLightbox(){lightbox.classList.remove('open');document.body.style.overflow=''}
+
+document.getElementById('lbClose').onclick=closeLightbox;
+lightbox.onclick=e=>{if(e.target===lightbox||e.target.classList.contains('lightbox-main'))closeLightbox()};
+document.getElementById('lbPrev').onclick=e=>{e.stopPropagation();lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)};
+document.getElementById('lbNext').onclick=e=>{e.stopPropagation();lbGoTo((lbIdx+1)%lbPhotos.length)};
+
+function openLightbox(p,i,name){lbPhotos=p;lbIdx=i;lbName=name||'';lbImg.src=p[i];lbImg.alt=lbName||'';lbImg.classList.remove('lb-fade');lbUpdateCounter();lbRenderStrip();lightbox.classList.add('open');document.body.style.overflow='hidden'}
+
+/* Keyboard nav for lightbox */
+document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length);if(e.key==='ArrowRight')lbGoTo((lbIdx+1)%lbPhotos.length)});
+
+/* Touch swipe for lightbox */
+(function(){let sx=0,sy=0;const el=document.getElementById('lightbox');
+el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+el.addEventListener('touchend',e=>{if(!el.classList.contains('open'))return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){if(dx<0)lbGoTo((lbIdx+1)%lbPhotos.length);else lbGoTo((lbIdx-1+lbPhotos.length)%lbPhotos.length)}},{passive:true})})();
+
+/* ── Compare Modal ── */
+function _compareBarHtml(val,min,max,rank){
+  if(isNaN(val)||min===null||max===null)return '';
+  const pct=max===min?50:((val-min)/(max-min))*100;
+  const cls=rank==='lo'?'compare-bar-lo':rank==='hi'?'compare-bar-hi':'compare-bar-mid';
+  return `<div class="compare-bar-track"><div class="compare-bar-fill ${cls}" style="width:${pct}%"></div></div>`;
+}
+function openCompareModal(){
+if(!loggedIn){showToast('Please log in to use compare','info');return}
+if(compareSelected.length<2)return;
+const overlay=document.getElementById('compareOverlay'),grid=document.getElementById('compareGrid');
+if(!overlay||!grid)return;
+const sel=compareSelected.map(name=>girls.find(g=>g.name===name)).filter(Boolean);
+if(sel.length<2)return;
+const stats=[
+{label:t('fp.country'),fn:g=>Array.isArray(g.country)?g.country.join(', '):(g.country||'\u2014')},
+{label:t('field.age'),fn:g=>g.age||'\u2014',raw:g=>parseFloat(g.age)},
+{label:t('fp.height'),fn:g=>g.height?(g.height+' cm'):'\u2014',raw:g=>parseFloat(g.height)},
+{label:t('field.body'),fn:g=>g.body||'\u2014',raw:g=>parseFloat(g.body)},
+{label:t('fp.cupSize'),fn:g=>g.cup||'\u2014',alpha:g=>g.cup?g.cup.trim().charAt(0).toUpperCase():null},
+{label:t('field.rates30'),fn:g=>g.val1?('$'+g.val1):'\u2014',raw:g=>parseFloat(g.val1)},
+{label:t('field.rates45'),fn:g=>g.val2?('$'+g.val2):'\u2014',raw:g=>parseFloat(g.val2)},
+{label:t('field.rates60'),fn:g=>g.val3?('$'+g.val3):'\u2014',raw:g=>parseFloat(g.val3)},
+{label:t('field.experience'),fn:g=>g.exp||'\u2014',fixedColor:g=>g.exp==='Experienced'?'#00c864':g.exp==='Inexperienced'?'#ff4d4d':null}
+];
+/* Desktop table */
+let html='<table class="compare-stat-table compare-desktop"><thead><tr><th></th>';
+sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" class="compare-col-photo" alt="${g.name.replace(/"/g,'&quot;')}">`:'<div class="compare-col-photo-placeholder"></div>';html+=`<th style="text-align:center;padding-bottom:16px;vertical-align:bottom">${photo}<div class="compare-col-name">${g.name}</div></th>`});
+html+='</tr></thead><tbody>';
+stats.forEach(s=>{html+='<tr>';html+=`<td>${s.label}</td>`;if(s.raw){const vals=sel.map(g=>s.raw(g));const valid=vals.filter(v=>!isNaN(v));const hi=valid.length?Math.max(...valid):null;const lo=valid.length?Math.min(...valid):null;sel.forEach((g,i)=>{const v=vals[i];const rank=!isNaN(v)&&hi!==null&&lo!==null&&hi!==lo?(v===lo?'lo':v===hi?'hi':'mid'):null;const clr=rank==='lo'?'color:#00c864;font-weight:600':rank==='hi'?'color:#ff4d4d;font-weight:600':'';html+=`<td><span${clr?` style="${clr}"`:''} >${s.fn(g)}</span>${_compareBarHtml(v,lo,hi,rank)}</td>`})}else if(s.alpha){const vals=sel.map(g=>s.alpha(g));const valid=[...new Set(vals.filter(Boolean))].sort();const hi=valid.length?valid[valid.length-1]:null;const lo=valid.length?valid[0]:null;sel.forEach((g,i)=>{const v=vals[i];let style='';if(v&&hi&&lo&&hi!==lo){if(v===hi)style=' style="color:#ff4d4d;font-weight:600"';else if(v===lo)style=' style="color:#00c864;font-weight:600"'}html+=`<td${style}>${s.fn(g)}</td>`})}else if(s.fixedColor){sel.forEach(g=>{const c=s.fixedColor(g);html+=`<td${c?` style="color:${c};font-weight:600"`:''}>${s.fn(g)}</td>`})}else{sel.forEach(g=>{html+=`<td>${s.fn(g)}</td>`})}html+='</tr>'});
+html+='</tbody></table>';
+/* Mobile cards */
+html+='<div class="compare-mobile-cards">';
+sel.forEach(g=>{const photo=g.photos&&g.photos.length?`<img src="${g.photos[0]}" alt="${g.name.replace(/"/g,'&quot;')}">`:'';
+html+=`<div class="compare-mobile-card"><div class="cmc-header">${photo}<div class="cmc-name">${g.name}</div></div><div class="cmc-stats">`;
+stats.forEach(s=>{html+=`<div class="cmc-row"><span class="cmc-label">${s.label}</span><span class="cmc-value">${s.fn(g)}</span></div>`});
+html+=`</div></div>`});
+html+='</div>';
+/* Labels comparison */
+const allLabels=new Set();sel.forEach(g=>{if(g.labels)g.labels.forEach(l=>allLabels.add(l))});
+if(allLabels.size){const shared=[...allLabels].filter(l=>sel.every(g=>g.labels&&g.labels.includes(l))).sort();const unique=[...allLabels].filter(l=>!sel.every(g=>g.labels&&g.labels.includes(l))).sort();
+html+=`<div class="compare-labels-section">`;
+if(shared.length)html+=`<div class="compare-labels-group"><div class="compare-labels-title">${t('compare.sharedLabels')}</div><div class="compare-labels-list">${shared.map(l=>`<span class="compare-label shared">${l}</span>`).join('')}</div></div>`;
+if(unique.length)html+=`<div class="compare-labels-group"><div class="compare-labels-title">${t('compare.uniqueLabels')}</div><div class="compare-labels-list">${unique.map(l=>`<span class="compare-label unique">${l}</span>`).join('')}</div></div>`;
+html+=`</div>`}
+/* Availability timeline */
+const today=fmtDate(getAEDTDate());const entries=sel.map(g=>({name:g.name,entry:getCalEntry(g.name,today)}));const hasAnySchedule=entries.some(e=>e.entry&&e.entry.start&&e.entry.end);
+if(hasAnySchedule){
+const nowDate=getAEDTDate();const nowHr=nowDate.getHours()+nowDate.getMinutes()/60;
+const tlStart=10,tlEnd=26;/* 10am to 2am next day (26h) */
+html+=`<div class="compare-timeline"><div class="compare-tl-title">${t('compare.todaySchedule')}</div><div class="compare-tl-hours">`;
+for(let h=tlStart;h<=tlEnd;h+=2)html+=`<span class="compare-tl-hour">${h>24?(h-24):h>12?h-12:h===0?12:h}${h>=12&&h<24?'p':'a'}</span>`;
+html+=`</div>`;
+entries.forEach(e=>{const ent=e.entry;html+=`<div class="compare-tl-row"><span class="compare-tl-name">${e.name}</span><div class="compare-tl-track">`;
+if(ent&&ent.start&&ent.end){const[sh,sm]=ent.start.split(':').map(Number);const[eh,em]=ent.end.split(':').map(Number);let s=sh+sm/60,en=eh+em/60;if(en<s)en+=24;
+const left=Math.max(0,(s-tlStart)/(tlEnd-tlStart)*100);const width=Math.min(100-left,(en-Math.max(s,tlStart))/(tlEnd-tlStart)*100);
+html+=`<div class="compare-tl-bar" style="left:${left}%;width:${width}%"></div>`}
+/* Now marker */
+let nowPos=(nowHr<tlStart?nowHr+24:nowHr);const nowPct=(nowPos-tlStart)/(tlEnd-tlStart)*100;
+if(nowPct>=0&&nowPct<=100)html+=`<div class="compare-tl-now" style="left:${nowPct}%"></div>`;
+html+=`</div></div>`});
+html+=`</div>`}
+grid.innerHTML=html;
+overlay.classList.add('open');document.body.style.overflow='hidden'}
+function closeCompareModal(){const overlay=document.getElementById('compareOverlay');if(overlay)overlay.classList.remove('open');document.body.style.overflow=''}
+(function(){const cl=document.getElementById('compareClear'),op=document.getElementById('compareOpen'),cs=document.getElementById('compareClose'),dn=document.getElementById('compareDone'),ov=document.getElementById('compareOverlay');
+if(cl)cl.onclick=clearCompare;if(op)op.onclick=openCompareModal;if(cs)cs.onclick=closeCompareModal;if(dn)dn.onclick=closeCompareModal;
+if(ov)ov.onclick=e=>{if(e.target===ov)closeCompareModal()};
+document.addEventListener('keydown',e=>{if(ov&&ov.classList.contains('open')&&e.key==='Escape')closeCompareModal()})})();
+
+/* Profile Nav Rail */
+function getNamedGirlIndices(){const named=girls.map((g,i)=>({g,i})).filter(x=>x.g.name&&String(x.g.name).trim().length>0&&(isAdmin()||!x.g.hidden));const filtered=applySharedFilters(named.map(x=>x.g));const result=named.filter(x=>filtered.includes(x.g));const sorted=applySortOrder(result.map(x=>x.g));return sorted.map(g=>result.find(x=>x.g===g).i)}
+/* Navigate via nav rail — replaceState to avoid history bloat */
+function showProfileReplace(idx){const origPush=Router.push;Router.push=Router.replace;try{showProfile(idx)}finally{Router.push=origPush}}
+function renderProfileNav(idx){const rail=document.getElementById('profileNavRail');rail.innerHTML='';
+const namedIndices=getNamedGirlIndices();const total=namedIndices.length;if(total===0)return;
+const posInList=namedIndices.indexOf(idx);const safePos=posInList>=0?posInList:0;
+const prevIdx=namedIndices[safePos<=0?total-1:safePos-1];
+const nextIdx=namedIndices[safePos>=total-1?0:safePos+1];
+[prevIdx,nextIdx].forEach(pi=>{const pg=girls[pi];if(!pg||!pg.photos||!pg.photos.length)return;const src=pg.photos[0];if(!src||src.startsWith('data:'))return;const eid='pfetch-'+pi;if(!document.getElementById(eid)){const lk=document.createElement('link');lk.rel='prefetch';lk.as='image';lk.href=src;lk.id=eid;document.head.appendChild(lk)}});
+const arwL=document.createElement('button');arwL.className='pnav-arrow pnav-arrow-left';arwL.innerHTML='<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';rail.appendChild(arwL);
+const strip=document.createElement('div');strip.className='pnav-strip';
+let _pnavDidDrag=false;
+for(let di=0;di<total;di++){const realIdx=namedIndices[di];const g=girls[realIdx];const card=document.createElement('div');card.className='pnav-card'+(realIdx===idx?' active':'')+(g.hidden?' pnav-card-hidden':'');const photo=g.photos&&g.photos.length?g.photos[0]:'';card.innerHTML=`<div class="pnav-card-photo">${photo?`<img src="${photo}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:`<div class="pnav-card-placeholder">${(g.name||'?').charAt(0)}</div>`}</div><div class="pnav-card-name">${g.name||'?'}</div>`;card.onclick=()=>{if(!_pnavDidDrag)showProfileReplace(realIdx)};strip.appendChild(card)}
+rail.appendChild(strip);
+const arwR=document.createElement('button');arwR.className='pnav-arrow pnav-arrow-right';arwR.innerHTML='<svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>';rail.appendChild(arwR);
+function _updatePnavArrows(){arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',_updatePnavArrows);
+/* Mouse drag to scroll */
+let _mdX=0,_mdSL=0,_mdActive=false;
+strip.addEventListener('mousedown',e=>{_mdActive=true;_pnavDidDrag=false;_mdX=e.pageX;_mdSL=strip.scrollLeft;strip.style.cursor='grabbing';strip.style.scrollSnapType='none';e.preventDefault()});
+document.addEventListener('mousemove',e=>{if(!_mdActive)return;if(Math.abs(e.pageX-_mdX)>5)_pnavDidDrag=true;strip.scrollLeft=_mdSL-(e.pageX-_mdX)});
+document.addEventListener('mouseup',()=>{if(!_mdActive)return;_mdActive=false;strip.style.cursor='';strip.style.scrollSnapType='';setTimeout(()=>{_pnavDidDrag=false},0)});
+strip.style.cursor='grab';
+const activeCard=strip.querySelector('.pnav-card.active');if(activeCard)setTimeout(()=>{activeCard.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});_updatePnavArrows()},50);else _updatePnavArrows()}
+
+/* OG / Twitter Meta Tag helpers */
+function updateOgMeta(g,idx){
+const set=(prop,val,attr)=>{attr=attr||'property';let el=document.querySelector('meta['+attr+'="'+prop+'"]');if(!el){el=document.createElement('meta');el.setAttribute(attr,prop);document.head.appendChild(el)}el.setAttribute('content',val)};
+const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
+const img=g.photos&&g.photos.length?g.photos[0]:'https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
+const country=Array.isArray(g.country)?g.country.join('/'):(g.country||'');
+const parts=[country,g.age?'Age '+g.age:'',g.body?'Body '+g.body:'',g.height?g.height+' cm':'',g.cup?g.cup+' cup':'',g.val3?'From '+g.val3+'/hr':'',g.exp||''].filter(Boolean);
+const desc=parts.length?parts.join(' \u00b7 ')+' \u2013 Ginza Empire, Sydney':'View profile at Ginza Empire, Sydney.';
+const title=(g.name||'Profile')+' \u2013 Ginza Empire';
+set('og:title',title);set('og:description',desc);set('og:url',url);set('og:image',img);
+set('twitter:title',title,'name');set('twitter:description',desc,'name');set('twitter:image',img,'name');
+set('description',desc,'name');
+let canon=document.querySelector('link[rel="canonical"]');if(!canon){canon=document.createElement('link');canon.rel='canonical';document.head.appendChild(canon)}canon.href=url}
+function updateProfileJsonLd(g,idx){
+let el=document.getElementById('profileLd');if(!el){el=document.createElement('script');el.type='application/ld+json';el.id='profileLd';document.head.appendChild(el)}
+const url='https://sydneyginza.github.io'+Router.pathForProfile(idx);
+const img=g.photos&&g.photos.length?g.photos[0]:'';
+const country=Array.isArray(g.country)?g.country[0]:(g.country||'');
+const person={"@type":"Person","name":g.name||'','worksFor':{"@id":"https://sydneyginza.github.io/#empire"}};
+if(img)person.image=g.photos.length>1?g.photos:img;
+if(country)person.nationality=country;
+if(g.desc)person.description=g.desc.replace(/<[^>]*>/g,'').substring(0,300);
+/* Offers from rates */
+const offers=[];
+if(g.val1)offers.push({"@type":"Offer","name":"30 min session","price":String(g.val1).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(g.val2)offers.push({"@type":"Offer","name":"45 min session","price":String(g.val2).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(g.val3)offers.push({"@type":"Offer","name":"60 min session","price":String(g.val3).replace(/[^0-9.]/g,''),"priceCurrency":"AUD"});
+if(offers.length)person.makesOffer=offers;
+/* Aggregate reviews */
+const rvs=g.reviews||[];
+const ld={"@context":"https://schema.org","@type":"ProfilePage","url":url,"mainEntity":person};
+if(rvs.length){const avg=rvs.reduce((s,r)=>s+r.rating,0)/rvs.length;ld.mainEntity.aggregateRating={"@type":"AggregateRating","ratingValue":avg.toFixed(1),"bestRating":"5","ratingCount":rvs.length}}
+el.textContent=JSON.stringify(ld);
+/* Update breadcrumb */
+if(typeof updateBreadcrumb==='function')updateBreadcrumb([{name:'Home',url:'https://sydneyginza.github.io/'},{name:'Girls',url:'https://sydneyginza.github.io/girls'},{name:g.name||'Profile',url:url}])}
+function resetOgMeta(){
+const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
+const t='Ginza Empire \u2013 Sydney\'s Premier Asian Bordello';
+const d='Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates. Open daily 10:30am\u20131am at 310 Cleveland St.';
+const i='https://raw.githubusercontent.com/sydneyginza/sydneyginza.github.io/main/Images/Homepage/Homepage_1.jpg';
+set('og:title',t);set('og:description',d);set('og:url','https://sydneyginza.github.io');set('og:image',i);
+set('twitter:title',t,'name');set('twitter:description',d,'name');set('twitter:image',i,'name');
+set('description',d,'name');
+const canon=document.querySelector('link[rel="canonical"]');if(canon)canon.href='https://sydneyginza.github.io';
+const pld=document.getElementById('profileLd');if(pld)pld.remove();
+if(typeof updateBreadcrumb==='function')updateBreadcrumb(null)}
+
+/* Profile Page */
+function renderAlsoAvailable(idx){
+const g=girls[idx];if(!g)return;
+const ts=fmtDate(getAEDTDate());
+const alsoList=girls.filter(o=>{if(!o.name||o.name===g.name)return false;if(!isAdmin()&&o.hidden)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8);
+if(!alsoList.length)return;
+const sec=document.createElement('div');sec.className='profile-also';
+const title=document.createElement('div');title.className='profile-desc-title';title.textContent=t('ui.alsoAvail');sec.appendChild(title);
+const strip=document.createElement('div');strip.className='also-avail-strip';
+alsoList.forEach(o=>{const ri=girls.indexOf(o);const liveNow=isAvailableNow(o.name);const card=document.createElement('div');card.className='also-avail-card';const thumb=o.photos&&o.photos.length?`<img src="${o.photos[0]}" alt="${o.name.replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';card.innerHTML=`${thumb}<div class="also-avail-name">${o.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}`;card.onclick=()=>showProfile(ri);strip.appendChild(card)});
+sec.appendChild(strip);
+document.getElementById('profileContent').appendChild(sec)}
+
+/* Similar Girls */
+function _avgRate(g){const vals=[parseFloat(g.val1),parseFloat(g.val2),parseFloat(g.val3)].filter(v=>!isNaN(v)&&v>0);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0}
+function computeSimilarity(a,b){
+let score=0;
+const ac=Array.isArray(a.country)?a.country:[a.country];
+const bc=Array.isArray(b.country)?b.country:[b.country];
+if(ac.some(c=>c&&bc.includes(c)))score+=1;
+const aa=parseFloat(a.age),ba=parseFloat(b.age);
+if(!isNaN(aa)&&!isNaN(ba)&&Math.abs(aa-ba)<=3)score+=1;
+const ab=parseFloat(a.body),bb=parseFloat(b.body);
+if(!isNaN(ab)&&!isNaN(bb)&&Math.abs(ab-bb)<=2)score+=1;
+if(a.cup&&b.cup&&a.cup.trim().charAt(0).toUpperCase()===b.cup.trim().charAt(0).toUpperCase())score+=1;
+const aAvg=_avgRate(a),bAvg=_avgRate(b);
+if(aAvg>0&&bAvg>0&&Math.abs(aAvg-bAvg)/Math.max(aAvg,bAvg)<=0.2)score+=1;
+const ah=parseFloat(a.height),bh=parseFloat(b.height);
+if(!isNaN(ah)&&!isNaN(bh)&&Math.abs(ah-bh)<=5)score+=1;
+if(a.exp&&b.exp&&a.exp===b.exp)score+=1;
+const al=Array.isArray(a.labels)?a.labels:[];const bl=Array.isArray(b.labels)?b.labels:[];
+if(al.length&&bl.length){const shared=al.filter(l=>bl.includes(l)).length;const union=new Set([...al,...bl]).size;if(shared/union>=0.8)score+=1}
+return score/8}
+
+function renderSimilarGirls(idx){
+const g=girls[idx];if(!g||!g.name)return;
+const ts=fmtDate(getAEDTDate());
+const alsoNames=new Set();
+girls.filter(o=>{if(!o.name||o.name===g.name)return false;if(!isAdmin()&&o.hidden)return false;const e=getCalEntry(o.name,ts);return e&&e.start&&e.end}).slice(0,8).forEach(o=>alsoNames.add(o.name));
+const candidates=girls.map((o,i)=>({g:o,idx:i})).filter(x=>x.g.name&&x.g.name!==g.name&&!alsoNames.has(x.g.name)&&(isAdmin()||!x.g.hidden)).map(x=>({...x,score:computeSimilarity(g,x.g)})).filter(x=>x.score>=0.4).sort((a,b)=>b.score-a.score).slice(0,6);
+if(!candidates.length)return;
+const sec=document.createElement('div');sec.className='profile-also';
+const title=document.createElement('div');title.className='profile-desc-title';title.textContent=t('sim.title');sec.appendChild(title);
+const strip=document.createElement('div');strip.className='also-avail-strip';
+candidates.forEach(c=>{const o=c.g;const liveNow=isAvailableNow(o.name);const card=document.createElement('div');card.className='also-avail-card';const thumb=o.photos&&o.photos.length?`<img src="${o.photos[0]}" alt="${o.name.replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';card.innerHTML=`${thumb}<div class="also-avail-name">${o.name}</div>${liveNow?'<span class="avail-now-dot"></span>':''}`;card.onclick=()=>showProfile(c.idx);strip.appendChild(card)});
+sec.appendChild(strip);document.getElementById('profileContent').appendChild(sec)}
+
+
+function updateFavBadge(){const b=document.getElementById('navFavBadge');const c=getFavCount();if(b)b.textContent=c>0?c:''}
+
+function favHeartSvg(filled){return filled?'<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>'}
+
+/* ── Reviews ── */
+const starSvgFull='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
+const starSvgEmpty='<svg viewBox="0 0 24 24" width="16" height="16"><path d="M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z"/></svg>';
+const verifiedSvg='<svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>';
+const helpfulThumbSvg='<svg viewBox="0 0 24 24" width="14" height="14"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>';
+let _reviewSort='newest';
+
+function renderStarsStatic(rating){let h='';for(let i=1;i<=5;i++)h+='<span class="review-star'+(i<=rating?' filled':'')+'">'+( i<=rating?starSvgFull:starSvgEmpty)+'</span>';return h}
+
+function renderReviews(idx){
+const container=document.getElementById('profileReviews');if(!container)return;
+const g=girls[idx];if(!g)return;
+const reviews=g.reviews||[];
+const avg=reviews.length?reviews.reduce((s,r)=>s+r.rating,0)/reviews.length:0;
+const hasReviewed=loggedIn&&reviews.some(r=>r.user===loggedInUser);
+let html='<div class="profile-reviews"><div class="profile-desc-title" style="margin-top:32px">'+t('review.title');
+if(reviews.length)html+=' <span class="review-count">('+reviews.length+')</span>';
+html+='</div>';
+/* Write / Sign-in prompt */
+if(loggedIn&&!hasReviewed){html+='<button class="review-write-btn" id="rvWriteBtn">'+t('review.write')+'</button>'}
+else if(!loggedIn){html+='<div class="review-signin">'+t('review.signin').replace('{link}','<a href="#" id="rvSignInLink">'+t('ui.signIn')+'</a>')+'</div>'}
+html+='<div id="rvFormArea"></div>';
+/* Sort bar */
+if(reviews.length>1){html+='<div class="review-sort-bar"><button class="review-sort-btn'+(_reviewSort==='newest'?' active':'')+'" data-sort="newest">'+t('review.sortNewest')+'</button><button class="review-sort-btn'+(_reviewSort==='helpful'?' active':'')+'" data-sort="helpful">'+t('review.sortHelpful')+'</button></div>'}
+/* Review list */
+if(!reviews.length){html+='<div class="review-empty">'+t('review.noReviews')+'</div>'}
+const sorted=reviews.slice().sort((a,b)=>{
+  if(_reviewSort==='helpful'){const ha=(a.helpful||[]).length,hb=(b.helpful||[]).length;if(hb!==ha)return hb-ha;return new Date(b.ts)-new Date(a.ts)}
+  return new Date(b.ts)-new Date(a.ts)});
+sorted.forEach(r=>{
+const isOwn=loggedIn&&r.user===loggedInUser;
+const canEdit=isOwn||isAdmin();
+const d=new Date(r.ts);const dateStr=d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+html+='<div class="review-card"><div class="review-header"><span class="review-user">'+r.user.toUpperCase()+'</span>';
+if(r.verified)html+='<span class="review-verified-badge" title="'+t('review.verifiedTip')+'">'+verifiedSvg+' '+t('review.verified')+'</span>';
+html+='<span class="review-stars">'+renderStarsStatic(r.rating)+'</span><span class="review-date">'+dateStr+'</span></div>';
+if(r.text)html+='<div class="review-text">'+r.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+/* Review photos */
+if(r.photos&&r.photos.length){html+='<div class="review-photos">';r.photos.forEach(src=>{html+='<div class="review-photo"><img src="'+src+'" loading="lazy" alt="Review photo"></div>'});html+='</div>'}
+/* Helpful voting */
+const helpfulCount=(r.helpful||[]).length;
+const hasVoted=loggedIn&&(r.helpful||[]).includes(loggedInUser);
+html+='<div class="review-helpful">';
+if(loggedIn&&!isOwn){html+='<button class="review-helpful-btn'+(hasVoted?' voted':'')+'" data-rv-user="'+r.user+'">'+helpfulThumbSvg+(hasVoted?t('review.helpfulVoted'):t('review.helpful'))+'</button>'}
+if(helpfulCount>0){html+='<span class="review-helpful-count">'+helpfulCount+' '+(helpfulCount===1?t('review.helpfulOne'):t('review.helpfulMany'))+'</span>'}
+html+='</div>';
+/* Edit/delete/verify actions */
+if(canEdit){html+='<div class="review-actions">';
+if(isOwn||isAdmin())html+='<button class="review-action-btn review-edit-btn" data-rv-user="'+r.user+'">'+t('review.edit')+'</button>';
+if(isAdmin()&&!r.verified)html+='<button class="review-action-btn review-verify-btn" data-rv-user="'+r.user+'">'+t('review.verify')+'</button>';
+html+='<button class="review-action-btn review-delete-btn" data-rv-user="'+r.user+'">'+t('review.delete')+'</button></div>'}
+html+='</div>'});
+html+='</div>';
+container.innerHTML=html;
+/* Bind events */
+const writeBtn=document.getElementById('rvWriteBtn');
+if(writeBtn)writeBtn.onclick=()=>openReviewForm(idx,null);
+const signInLink=document.getElementById('rvSignInLink');
+if(signInLink)signInLink.onclick=e=>{e.preventDefault();showAuthSignIn()};
+container.querySelectorAll('.review-sort-btn').forEach(btn=>{btn.onclick=()=>{_reviewSort=btn.dataset.sort;renderReviews(idx)}});
+container.querySelectorAll('.review-edit-btn').forEach(btn=>{btn.onclick=()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(rv)openReviewForm(idx,rv)}});
+container.querySelectorAll('.review-verify-btn').forEach(btn=>{btn.onclick=async()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(rv){rv.verified=true;if(await saveData()){showToast(t('review.verifiedDone'));renderReviews(idx)}}}});
+container.querySelectorAll('.review-helpful-btn').forEach(btn=>{btn.onclick=async()=>{const rv=(g.reviews||[]).find(r=>r.user===btn.dataset.rvUser);if(!rv)return;if(!rv.helpful)rv.helpful=[];const hi=rv.helpful.indexOf(loggedInUser);if(hi>=0)rv.helpful.splice(hi,1);else rv.helpful.push(loggedInUser);if(!rv.helpful.length)delete rv.helpful;if(await saveData())renderReviews(idx)}});
+container.querySelectorAll('.review-delete-btn').forEach(btn=>{btn.onclick=async()=>{if(!confirm(t('review.confirmDelete')))return;const u=btn.dataset.rvUser;g.reviews=(g.reviews||[]).filter(r=>r.user!==u);if(await saveData()){showToast(t('review.deleted'));renderReviews(idx)}}});
+container.querySelectorAll('.review-photo').forEach(ph=>{ph.onclick=()=>{const src=ph.querySelector('img').src;if(src){const lb=document.getElementById('galMain');const lbImg=document.getElementById('lbImg');if(lb&&lbImg){lbImg.src=src}}}})}
+
+function openReviewForm(idx,existing){
+const area=document.getElementById('rvFormArea');if(!area)return;
+const rating=existing?existing.rating:0;
+const text=existing?existing.text:'';
+let rvFormPhotos=existing&&existing.photos?[...existing.photos]:[];
+let rvNewPhotos=[];
+let html='<div class="review-form"><div class="review-stars-input" id="rvStarPicker">';
+for(let i=1;i<=5;i++)html+='<span class="review-star-pick'+(i<=rating?' active':'')+'" data-val="'+i+'">'+starSvgFull+'</span>';
+html+='</div><textarea class="review-textarea" id="rvText" placeholder="'+t('review.placeholder')+'" rows="3">'+text.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>';
+/* Photo upload area */
+html+='<div class="review-photos-area"><div class="review-photos-grid" id="rvPhotoGrid"></div>';
+html+='<button type="button" class="review-photo-add-btn" id="rvPhotoAdd">'+t('review.addPhoto')+'</button></div>';
+html+='<div class="review-form-actions"><button class="btn btn-primary review-submit-btn" id="rvSubmitBtn">'+(existing?t('review.edit'):t('review.write'))+'</button><button class="btn review-cancel-btn" id="rvCancelBtn">'+t('ui.cancel')+'</button></div>';
+html+='<div class="review-form-error" id="rvError"></div></div>';
+area.innerHTML=html;
+let picked=rating;
+function renderRvPhotos(){const grid=document.getElementById('rvPhotoGrid');if(!grid)return;grid.innerHTML='';
+rvFormPhotos.forEach((src,i)=>{const wrap=document.createElement('div');wrap.className='rv-photo-thumb';wrap.innerHTML='<img src="'+src+'"><button class="rv-photo-remove">&times;</button>';wrap.querySelector('.rv-photo-remove').onclick=()=>{rvFormPhotos.splice(i,1);rvNewPhotos=rvNewPhotos.filter(p=>p!==src);renderRvPhotos()};grid.appendChild(wrap)});
+const addBtn=document.getElementById('rvPhotoAdd');if(addBtn)addBtn.style.display=rvFormPhotos.length>=3?'none':''}
+renderRvPhotos();
+document.getElementById('rvPhotoAdd').onclick=()=>{
+  const remaining=3-rvFormPhotos.length;if(remaining<=0)return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.multiple=true;
+  inp.onchange=e=>{Array.from(e.target.files).slice(0,remaining).forEach(f=>{const reader=new FileReader();reader.onload=ev=>{
+    const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');const maxW=1200;let w=img.width,h=img.height;if(w>maxW){h=h*maxW/w;w=maxW}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);const resized=canvas.toDataURL('image/jpeg',0.85);rvFormPhotos.push(resized);rvNewPhotos.push(resized);renderRvPhotos()};img.src=ev.target.result};reader.readAsDataURL(f)})};inp.click()};
+document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(s=>{
+s.onmouseenter=()=>{const v=parseInt(s.dataset.val);document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach((ss,i)=>ss.classList.toggle('hover',i<v))};
+s.onmouseleave=()=>{document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach(ss=>ss.classList.remove('hover'))};
+s.onclick=()=>{picked=parseInt(s.dataset.val);document.getElementById('rvStarPicker').querySelectorAll('.review-star-pick').forEach((ss,i)=>ss.classList.toggle('active',i<picked))}});
+document.getElementById('rvCancelBtn').onclick=()=>{area.innerHTML='';if(!existing){const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display=''}};
+document.getElementById('rvSubmitBtn').onclick=async()=>{
+if(!picked){document.getElementById('rvError').textContent=t('review.ratingRequired');return}
+const g=girls[idx];if(!g.reviews)g.reviews=[];
+const txt=document.getElementById('rvText').value.trim();
+const submitBtn=document.getElementById('rvSubmitBtn');submitBtn.textContent=t('ui.saving');submitBtn.disabled=true;
+try{
+/* Upload new photos */
+const uploadedUrls=[];
+for(const b64 of rvNewPhotos){try{const url=await uploadReviewPhoto(b64);uploadedUrls.push(url)}catch(e){console.error('Review photo upload failed:',e)}}
+const finalPhotos=rvFormPhotos.filter(p=>!p.startsWith('data:')).concat(uploadedUrls);
+if(existing){const rv=g.reviews.find(r=>r.user===existing.user);if(rv){rv.rating=picked;rv.text=txt;rv.ts=new Date().toISOString();rv.photos=finalPhotos.length?finalPhotos:undefined}}
+else{const newRv={user:loggedInUser,rating:picked,text:txt,ts:new Date().toISOString()};if(finalPhotos.length)newRv.photos=finalPhotos;g.reviews.push(newRv)}
+if(await saveData()){showToast(existing?t('review.updated'):t('review.submitted'));renderReviews(idx)}
+}finally{submitBtn.textContent=existing?t('review.edit'):t('review.write');submitBtn.disabled=false}};
+const wb=document.getElementById('rvWriteBtn');if(wb)wb.style.display='none'}
+
+function showProfile(idx){safeRender('Profile',()=>{
+const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');return}currentProfileIdx=idx;if(!g.photos)g.photos=[];if(g.name)addRecentlyViewed(g.name);
+if(_countdownInterval){clearInterval(_countdownInterval);_countdownInterval=null}
+updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
+/* URL routing & dynamic title */
+const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
+document.title=profTitle;
+Router.push(Router.pathForProfile(idx),profTitle);
+const admin=isAdmin()?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">${t('ui.edit')}</button><button class="btn btn-danger" id="profDelete">${t('ui.delete')}</button></div>`:'';
+const now=getAEDTDate();const ts=fmtDate(now);const _profVac=g.name&&_isOnVacation(g.name,ts);const entry=_profVac?null:getCalEntry(g.name,ts);
+const liveNow=!_profVac&&g.name&&isAvailableNow(g.name);
+const _todayShiftEnded=entry&&entry.start&&entry.end&&!liveNow&&(()=>{const nm=now.getHours()*60+now.getMinutes();const[eh,em]=entry.end.split(':').map(Number);const[sh,sm]=entry.start.split(':').map(Number);return eh*60+em>sh*60+sm&&nm>=eh*60+em})();
+let availHtml='';if(liveNow)availHtml='<span class="dim">|</span><span class="profile-avail-live"><span class="avail-now-dot"></span>'+t('avail.now')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
+else if(entry&&entry.start&&entry.end&&!_todayShiftEnded)availHtml='<span class="dim">|</span><span style="color:#ffcc44;font-weight:600">'+t('avail.laterToday')+' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')</span>';
+else{const wdates=getWeekDates();const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);if(upcoming){const dn=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?' ('+fmtTime12(upEnt.start)+' - '+fmtTime12(upEnt.end)+')':'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?' · '+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';availHtml='<span class="dim">|</span><span class="profile-avail-coming">'+t('avail.coming')+' '+dn+timeStr+comingCd+'</span>'}else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';availHtml='<span class="dim">|</span><span class="profile-avail-last">'+t('avail.lastSeen')+' '+rel+'</span>'}}}
+const _cd=!_profVac&&g.name?getAvailCountdown(g.name):null;
+if(_cd){const _cdKey=_cd.type==='ends'?'avail.endsIn':'avail.startsIn';availHtml+='<span class="dim"> · </span><span id="profCountdown">'+t(_cdKey).replace('{t}',_cd.str)+'</span>'}
+const rvs=g.reviews||[];const rvAvg=rvs.length?rvs.reduce((s,r)=>s+r.rating,0)/rvs.length:0;
+const ratingHtml=rvs.length?'<span class="dim">|</span><span class="profile-rating-summary">'+renderStarsStatic(Math.round(rvAvg))+'<span class="profile-rating-num">'+rvAvg.toFixed(1)+' / 5</span><span class="profile-rating-count">('+rvs.length+')</span></span>':'';
+const stats=[{l:t('field.age'),v:g.age},{l:t('field.body'),v:g.body},{l:t('field.height'),v:g.height+' cm'},{l:t('field.cup'),v:g.cup},{l:t('field.rates30'),v:g.val1||'\u2014'},{l:t('field.rates45'),v:g.val2||'\u2014'},{l:t('field.rates60'),v:g.val3||'\u2014'},{l:t('field.experience'),v:g.exp||'\u2014'}];
+const mainImg=g.photos.length?`<img src="${g.photos[0]}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`:'<div class="silhouette"></div>';
+const hasMultiple=g.photos.length>1;
+const arrows=hasMultiple?`<button class="gallery-main-arrow prev" id="galPrev"><svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><button class="gallery-main-arrow next" id="galNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button>`:'';
+const counter=g.photos.length?`<div class="gallery-counter" id="galCounter"><span>1</span> / ${g.photos.length}</div>`:'';
+const zoomHint=g.photos.length?`<div class="gallery-zoom-hint">Click to expand</div>`:'';
+const isFav=g.name&&isFavorite(g.name);
+const favBtn=g.name&&loggedIn?`<button class="profile-fav-btn${isFav?' active':''}" id="profFavBtn">${favHeartSvg(isFav)}${isFav?t('ui.favorited'):t('ui.addFav')}</button>`:'';
+const shareBtn=g.name?`<button class="profile-share-btn" id="profShareBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>${t('ui.share')}</button>`:'';
+const _onVac=g.name&&_isOnVacation(g.name,ts);
+const bookBtn=g.name&&!_onVac?(loggedIn?`<button class="profile-book-btn" id="profBookBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"/></svg>${t('enquiry.bookBtn')}</button>`:`<div class="review-signin">${t('enquiry.signin').replace('{link}','<a href="#" id="profBookSignIn">'+t('ui.signIn')+'</a>')}</div>`):'';
+const _backLabel={listPage:t('page.girls'),rosterPage:t('page.roster'),homePage:t('nav.home'),favoritesPage:t('page.favorites')}[profileReturnPage]||t('ui.back');
+document.getElementById('profileContent').innerHTML=`<button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>${_backLabel}</button>
+<div class="profile-nav-rail" id="profileNavRail"></div>
+<div class="profile-layout"><div class="profile-image-area"><div class="gallery-main" id="galMain">${mainImg}${arrows}${counter}${zoomHint}</div><div class="gallery-thumbs" id="galThumbs"></div></div>
+<div class="profile-details"><div class="profile-name">${g.name}${(()=>{if(_isVacReturnDay(g.name,ts))return'<span class="vac-comeback">Come Back!</span>';const _vcd=_vacCountdownLabel(g.name,ts);return _vcd?`<span class="vac-lastdays">${_vcd}</span>`:'';})()}${_isNewGirl(g)?'<span class="new-badge">New!</span>':''}</div><div class="profile-meta"><span>${Array.isArray(g.country)?g.country.join(', '):g.country}</span>${g.special?'<span class="profile-special">'+g.special+'</span>':''}${availHtml}${ratingHtml}</div><div class="profile-action-row">${favBtn}${shareBtn}${bookBtn}</div><div class="profile-divider" style="margin-top:24px"></div>
+<div class="profile-stats">${stats.map(s=>`<div class="profile-stat"><div class="p-label">${s.l}</div><div class="p-val">${s.v}</div></div>`).join('')}</div>
+<div class="profile-desc-title">${t('field.special')}</div><div class="profile-desc" id="profSpecialText" style="margin-bottom:24px">${g.special||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.language')}</div><div class="profile-desc" id="profLangText" style="margin-bottom:24px">${g.lang||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.type')}</div><div class="profile-desc" id="profTypeText" style="margin-bottom:24px">${g.type||'\u2014'}</div>
+<div class="profile-desc-title">${t('field.description')}</div><div class="profile-desc" id="profDescText">${g.desc||''}</div>
+${(()=>{const lbls=g.labels||[];return lbls.length?`<div class="profile-desc-title" style="margin-top:24px">${t('field.labels')}</div><div class="profile-labels">${lbls.slice().sort().map(l=>`<span class="profile-label">${l}</span>`).join('')}</div>`:''})()}${admin}<div id="profileReviews"></div></div></div>`;
+document.getElementById('backBtn').onclick=()=>{showPage(profileReturnPage)};
+if(_cd){startCountdownTick()}
+if(isAdmin()){document.getElementById('profEdit').onclick=()=>openForm(idx);document.getElementById('profDelete').onclick=()=>openDelete(idx)}
+const profFav=document.getElementById('profFavBtn');
+if(profFav){profFav.onclick=()=>{const nowFav=toggleFavorite(g.name);profFav.classList.toggle('active',nowFav);profFav.innerHTML=favHeartSvg(nowFav)+(nowFav?t('ui.favorited'):t('ui.addFav'));updateFavBadge()}}
+const profShare=document.getElementById('profShareBtn');
+if(profShare){profShare.onclick=async()=>{const url=window.location.origin+Router.pathForProfile(idx);if(navigator.share){try{await navigator.share({title:g.name+' - Ginza',text:g.name+' at Ginza Sydney',url})}catch(e){}}else{try{await navigator.clipboard.writeText(url);showToast(t('ui.linkCopied'))}catch(e){const tmp=document.createElement('input');tmp.value=url;document.body.appendChild(tmp);tmp.select();document.execCommand('copy');document.body.removeChild(tmp);showToast(t('ui.linkCopied'))}}}}
+const profBook=document.getElementById('profBookBtn');
+if(profBook){profBook.onclick=()=>openEnquiryForm(g.name,idx)}
+const profBookSignIn=document.getElementById('profBookSignIn');
+if(profBookSignIn){profBookSignIn.onclick=e=>{e.preventDefault();showAuthSignIn()}}
+renderGallery(idx);renderReviews(idx);renderSimilarGirls(idx);renderProfileNav(idx);closeFilterPanel();_activeFilterPaneId='profileFilterPane';renderFilterPane('profileFilterPane');const _prevPg=document.querySelector('.page.active');const _profPg=document.getElementById('profilePage');const _pec=['page-enter','slide-enter-right','slide-enter-left'];_profPg.classList.remove(..._pec);if(_prevPg&&_prevPg!==_profPg){_prevPg.classList.remove('active',..._pec);_prevPg.classList.add('slide-exit-left');const _onEx=()=>{_prevPg.classList.remove('slide-exit-left');_prevPg.removeEventListener('animationend',_onEx)};_prevPg.addEventListener('animationend',_onEx);setTimeout(()=>_prevPg.classList.remove('slide-exit-left'),400);void _profPg.offsetWidth;_profPg.classList.add('active','slide-enter-right')}else{allPages.forEach(p=>p.classList.remove('active',..._pec));void _profPg.offsetWidth;_profPg.classList.add('active','page-enter')}document.querySelectorAll('.nav-dropdown a').forEach(a=>a.classList.remove('active'));updateFilterToggle();window.scrollTo(0,0);requestAnimationFrame(()=>window.scrollTo(0,0));setTimeout(()=>window.scrollTo(0,0),300)})}
+
+/* Profile Gallery */
+let galIdx=0,_galAutoPlay=null;
+function _clearGalAuto(){clearInterval(_galAutoPlay);_galAutoPlay=null}
+function galGoTo(idx,photos){
+const main=document.getElementById('galMain');if(!main)return;
+const img=main.querySelector('img');if(!img)return;
+img.classList.add('gallery-fade-out');
+setTimeout(()=>{galIdx=idx;img.src=photos[idx];img.onload=()=>img.classList.remove('gallery-fade-out');
+const counter=document.getElementById('galCounter');if(counter)counter.innerHTML=`<span>${idx+1}</span> / ${photos.length}`;
+const thumbs=document.getElementById('galThumbs');if(thumbs){thumbs.querySelectorAll('.gallery-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));const active=thumbs.querySelector('.gallery-thumb.active');if(active)active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}},180)}
+
+function renderGallery(idx){
+const g=girls[idx];if(!g||!g.photos)return;
+_clearGalAuto();galIdx=0;
+const main=document.getElementById('galMain');
+let _galSwipe=false;
+/* Touch swipe for photo gallery on mobile */
+if(main&&g.photos.length>1){
+let sx=0,sy=0;
+main.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;_galSwipe=false},{passive:true});
+main.addEventListener('touchmove',e=>{if(Math.abs(e.touches[0].clientX-sx)>8)_galSwipe=true},{passive:true});
+main.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){if(dx<0)galGoTo((galIdx+1)%g.photos.length,g.photos);else galGoTo((galIdx-1+g.photos.length)%g.photos.length,g.photos)}},{passive:true})}
+/* Main image click opens lightbox */
+if(main&&g.photos.length){main.onclick=e=>{if(e.target.closest('.gallery-main-arrow'))return;if(_galSwipe){_galSwipe=false;return}openLightbox(g.photos,galIdx,g.name)}}
+/* Prev/next arrows on main image */
+const prevBtn=document.getElementById('galPrev'),nextBtn=document.getElementById('galNext');
+if(prevBtn)prevBtn.onclick=e=>{e.stopPropagation();_clearGalAuto();galGoTo((galIdx-1+g.photos.length)%g.photos.length,g.photos)};
+if(nextBtn)nextBtn.onclick=e=>{e.stopPropagation();_clearGalAuto();galGoTo((galIdx+1)%g.photos.length,g.photos)};
+/* Auto-rotate every 3s while profile page is active */
+if(g.photos.length>1){_galAutoPlay=setInterval(()=>{if(!document.getElementById('profilePage')?.classList.contains('active')){_clearGalAuto();return}galGoTo((galIdx+1)%g.photos.length,g.photos)},3000)}
+/* Thumbnails */
+const c=document.getElementById('galThumbs');if(!c)return;c.innerHTML='';
+g.photos.forEach((src,i)=>{const t=document.createElement('div');t.className='gallery-thumb'+(i===0?' active':'');t.innerHTML=`<img src="${src}" alt="${(g.name||'').replace(/"/g,'&quot;')}">`;
+t.onclick=()=>{_clearGalAuto();galGoTo(i,g.photos)};
+if(isAdmin()){const rm=document.createElement('button');rm.className='gallery-thumb-remove';rm.innerHTML='&#x2715;';rm.onclick=async e=>{e.stopPropagation();if(src.includes('githubusercontent.com'))await deleteFromGithub(src);g.photos.splice(i,1);await saveData();showProfile(idx);renderGrid();renderRoster();renderHome();showToast('Photo removed')};t.appendChild(rm)}
+c.appendChild(t)})}
+
+/* My Profile Modal */
+function openMyProfile(){
+const overlay=document.getElementById('myProfileOverlay');
+const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
+const roleBadge=loggedInRole==='owner'?'<span class="mp-role-badge owner">OWNER</span>':loggedInRole==='admin'?'<span class="mp-role-badge admin">ADMIN</span>':'<span class="mp-role-badge member">MEMBER</span>';
+document.getElementById('mpUserDisplay').innerHTML=`<div class="mp-username">${loggedInUser.toUpperCase()}</div>${roleBadge}`;
+document.getElementById('mpEmail').value=entry.email||'';
+document.getElementById('mpMobile').value=entry.mobile||'';
+document.getElementById('mpNewPass').value='';
+document.getElementById('mpConfirmPass').value='';
+document.getElementById('mpError').textContent='';
+const bkSec=document.getElementById('mpBookingSection');
+const _mpNow=new Date(),_mpH=_mpNow.getHours(),_mpM=_mpNow.getMinutes(),_mpNowMin=_mpH<10?(_mpH+24)*60+_mpM:_mpH*60+_mpM,_mpToday=_mpNow.toISOString().slice(0,10);
+const myBk=(Array.isArray(calData._bookings)&&calData._bookings.filter(b=>b.user===loggedInUser&&(b.status==='pending'||b.status==='approved')&&(b.date>_mpToday||(b.date===_mpToday&&b.endMin>_mpNowMin))).sort((a,b)=>a.date!==b.date?a.date.localeCompare(b.date):a.startMin-b.startMin)[0])||null;
+if(myBk&&bkSec){
+  const f=dispDate(myBk.date);
+  const dur=myBk.endMin-myBk.startMin;
+  const durStr=dur>=60?(dur/60)+'hr'+(dur>60?'s':''):dur+' min';
+  document.getElementById('mpBookingCard').innerHTML=
+    '<div class="mp-bk-row"><span class="mp-bk-label">Girl</span><a class="mp-bk-girl-link" href="#">'+myBk.girlName+'</a></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Date</span><span>'+f.day+' '+f.date+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Time</span><span>'+fmtSlotTime(myBk.startMin)+' – '+fmtSlotTime(myBk.endMin)+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Duration</span><span>'+durStr+'</span></div>'+
+    '<div class="mp-bk-row"><span class="mp-bk-label">Status</span><span class="mp-bk-status">'+(myBk.status==='approved'?'Approved':'Pending Review')+'</span></div>';
+  const _gl=document.getElementById('mpBookingCard').querySelector('.mp-bk-girl-link');
+  if(_gl){_gl.onclick=e=>{e.preventDefault();const _gi=girls.findIndex(f=>f.name&&f.name.trim().toLowerCase()===myBk.girlName.trim().toLowerCase());if(_gi!==-1){document.getElementById('myProfileOverlay').classList.remove('open');showProfile(_gi)}}}
+  bkSec.style.display='';
+}else if(bkSec){bkSec.style.display='none'}
+overlay.classList.add('open')}
+
+document.getElementById('myProfileClose').onclick=()=>document.getElementById('myProfileOverlay').classList.remove('open');
+document.getElementById('myProfileCancel').onclick=()=>document.getElementById('myProfileOverlay').classList.remove('open');
+document.getElementById('myProfileOverlay').onclick=e=>{if(e.target.id==='myProfileOverlay')e.target.classList.remove('open')};
+
+document.getElementById('myProfileSave').onclick=async()=>{
+const entry=CRED.find(c=>c.user===loggedInUser);if(!entry)return;
+const newPass=document.getElementById('mpNewPass').value;
+const confirmPass=document.getElementById('mpConfirmPass').value;
+const errEl=document.getElementById('mpError');
+const emailVal=document.getElementById('mpEmail').value.trim();
+if(!emailVal){errEl.textContent=t('ui.emailRequired');return}
+if(newPass&&newPass!==confirmPass){errEl.textContent=t('ui.passwordMismatch');return}
+errEl.textContent='';
+const saveBtn=document.getElementById('myProfileSave');saveBtn.textContent='SAVING...';saveBtn.style.pointerEvents='none';
+try{
+entry.email=document.getElementById('mpEmail').value.trim()||undefined;
+entry.mobile=document.getElementById('mpMobile').value.trim()||undefined;
+if(newPass)entry.pass=newPass;
+loggedInEmail=entry.email||null;
+loggedInMobile=entry.mobile||null;
+if(await saveAuth()){document.getElementById('myProfileOverlay').classList.remove('open');showToast(t('ui.profileSaved'))}
+}catch(e){errEl.textContent='Error: '+e.message}finally{saveBtn.textContent=t('form.save');saveBtn.style.pointerEvents='auto'}};
+
+/* Auth / Login */
+const loginIconBtn=document.getElementById('loginIconBtn'),userDropdown=document.getElementById('userDropdown');
+const authOverlay=document.getElementById('authOverlay'),authContent=document.getElementById('authContent');
+document.getElementById('authClose').onclick=()=>authOverlay.classList.remove('open');
+authOverlay.onclick=e=>{if(e.target===authOverlay)authOverlay.classList.remove('open')};
+
+function renderDropdown(){
+if(loggedIn){loginIconBtn.classList.add('logged-in');userDropdown.innerHTML=`<div class="dropdown-header"><div class="label">Signed in as</div><div class="user">${(loggedInUser||'ADMIN').toUpperCase()}</div></div><button class="dropdown-item" id="myProfileBtn">${t('ui.myProfile')}</button><button class="dropdown-item danger" id="logoutBtn">Sign Out</button>`;
+document.getElementById('myProfileBtn').onclick=()=>{userDropdown.classList.remove('open');openMyProfile()};
+document.getElementById('logoutBtn').onclick=()=>{try{localStorage.removeItem('ginza_session')}catch(_){}loggedIn=false;loggedInUser=null;loggedInRole=null;loggedInEmail=null;loggedInMobile=null;loginIconBtn.classList.remove('logged-in');userDropdown.classList.remove('open');
+/* Hide theme + sound buttons, stop sound, reset theme */
+const _tbwL=document.getElementById('themeBtnWrap');if(_tbwL)_tbwL.style.display='none';
+const _abwL=document.getElementById('ambientBtnWrap');if(_abwL)_abwL.style.display='none';
+if(typeof window._ambientStop==='function')window._ambientStop();
+clearCompare();closeCompareModal();
+if(typeof setLanguage==='function')setLanguage('en');
+applySeasonalTheme();document.getElementById('navFavorites').style.display='none';const _bnf=document.getElementById('bnFavorites');if(_bnf)_bnf.style.display='none';document.getElementById('navCalendar').style.display='none';document.getElementById('navAnalytics').style.display='none';document.getElementById('navProfileDb').style.display='none';document.getElementById('navBookings').style.display='none';document.getElementById('navVacation').style.display='none';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='none');if(document.getElementById('favoritesPage').classList.contains('active')||document.getElementById('calendarPage').classList.contains('active')||document.getElementById('analyticsPage').classList.contains('active')||document.getElementById('profileDbPage').classList.contains('active')||document.getElementById('bookingsPage').classList.contains('active')||document.getElementById('vacationPage').classList.contains('active'))showPage('homePage');renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();document.body.classList.remove('vip-mode');_vipSparkles.forEach(s=>s.remove());_vipSparkles.length=0}}
+else{loginIconBtn.classList.remove('logged-in');userDropdown.innerHTML=''}}
+
+function showAuthSignIn(){
+authContent.innerHTML=`<div class="form-title">${t('ui.signIn')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username</label><input class="form-input" id="lfUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password</label><input class="form-input" id="lfPass" type="password" placeholder="Password"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="lfBtn" style="width:100%">${t('ui.signIn')}</button></div><div class="lf-remember"><label class="lf-remember-label"><input type="checkbox" id="lfRemember" checked> Stay logged in</label></div><div class="lf-error" id="lfError"></div><div class="lf-switch">${t('ui.noAccount')} <a href="#" id="lfSignUpLink">${t('ui.signUp')}</a></div>`;
+document.getElementById('lfBtn').onclick=doLogin;
+document.getElementById('lfPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('lfUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lfPass').focus()});
+document.getElementById('lfSignUpLink').onclick=e=>{e.preventDefault();showAuthSignUp()};
+authOverlay.classList.add('open')}
+
+function showAuthSignUp(){
+authContent.innerHTML=`<div class="form-title">${t('ui.signUp')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="suUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.email')} *</label><input class="form-input" id="suEmail" type="email" placeholder="email@example.com"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.mobile')}</label><input class="form-input" id="suMobile" type="tel" placeholder="04XX XXX XXX"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="suPass" type="password" placeholder="Password"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('ui.confirmPassword')} *</label><input class="form-input" id="suConfirm" type="password" placeholder="Confirm"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="suBtn" style="width:100%">${t('ui.createAccount')}</button></div><div class="lf-error" id="suError"></div><div class="lf-switch">${t('ui.haveAccount')} <a href="#" id="suSignInLink">${t('ui.signIn')}</a></div>`;
+document.getElementById('suBtn').onclick=doSignUp;
+document.getElementById('suConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doSignUp()});
+document.getElementById('suSignInLink').onclick=e=>{e.preventDefault();showAuthSignIn()};
+authOverlay.classList.add('open')}
+
+async function doSignUp(){
+const u=document.getElementById('suUser').value.trim();
+const email=document.getElementById('suEmail').value.trim();
+const mobile=document.getElementById('suMobile').value.trim();
+const pass=document.getElementById('suPass').value;
+const confirm=document.getElementById('suConfirm').value;
+const errEl=document.getElementById('suError');
+if(!u){errEl.textContent=t('ui.usernameRequired');return}
+if(CRED.some(c=>c.user.toLowerCase()===u.toLowerCase())){errEl.textContent=t('ui.usernameTaken');return}
+if(!email){errEl.textContent=t('ui.emailRequired');return}
+if(CRED.some(c=>c.email&&c.email.toLowerCase()===email.toLowerCase())){errEl.textContent=t('ui.emailTaken');return}
+if(mobile&&CRED.some(c=>c.mobile&&c.mobile===mobile)){errEl.textContent=t('ui.mobileTaken');return}
+if(!pass){errEl.textContent=t('ui.passwordRequired');return}
+if(pass!==confirm){errEl.textContent=t('ui.passwordMismatch');return}
+errEl.textContent='';
+const btn=document.getElementById('suBtn');btn.textContent='CREATING...';btn.style.pointerEvents='none';
+try{
+const entry={user:u,pass,role:'member',email,mobile:mobile||undefined,status:'pending'};
+CRED.push(entry);
+if(await saveAuth()){
+authOverlay.classList.remove('open');
+showToast(t('ui.signupPending'),null,6000)}
+else{CRED.pop()}
+}catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
+finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
+
+const _vipSparkles=[];
+function _applyLogin(match,_isRestore=false){loggedIn=true;loggedInUser=match.user;loggedInRole=match.role||'member';
+/* Show theme + sound buttons */
+const _tbw=document.getElementById('themeBtnWrap');if(_tbw)_tbw.style.display='';
+const _abw=document.getElementById('ambientBtnWrap');if(_abw)_abw.style.display='';
+/* Restore user language preference */
+const _savedLang=match.prefs&&match.prefs.lang;
+if(_savedLang&&typeof setLanguage==='function')setLanguage(_savedLang);
+/* Restore user theme preference */
+const _savedTheme=match.prefs&&match.prefs.theme;
+if(_savedTheme)applyColorTheme(_savedTheme);else applySeasonalTheme();
+/* Restore selected sound preset */
+const _ambSound=match.prefs&&match.prefs.ambSound;
+if(_ambSound&&typeof window._ambientSetSound==='function')window._ambientSetSound(_ambSound);
+/* Sound: auto-play on fresh login; on restore wait for first user gesture */
+const _soundOff=match.prefs&&match.prefs.soundOff;
+if(!_soundOff){if(!_isRestore){setTimeout(()=>{if(typeof window._ambientToggle==='function')window._ambientToggle(true)},400)}else if(typeof window._ambientStartOnGesture==='function')window._ambientStartOnGesture()}loggedInEmail=match.email||null;loggedInMobile=match.mobile||null;document.getElementById('navFavorites').style.display='';const _bnfShow=document.getElementById('bnFavorites');if(_bnfShow)_bnfShow.style.display='';if(isAdmin()){document.getElementById('navCalendar').style.display='';document.getElementById('navAnalytics').style.display='';document.getElementById('navBookings').style.display='';document.getElementById('navVacation').style.display='';document.getElementById('navProfileDb').style.display='';document.querySelectorAll('.page-edit-btn').forEach(b=>b.style.display='');loadAdminModule()}renderDropdown();renderFilters();renderGrid();renderRoster();renderHome();updateFavBadge();if(document.getElementById('profilePage').classList.contains('active'))showProfile(currentProfileIdx);try{const lv=localStorage.getItem('ginza_recently_viewed');if(lv){const local=JSON.parse(lv);if(Array.isArray(local)&&local.length){const remote=Array.isArray(match.viewHistory)?match.viewHistory:[];const merged=new Map();remote.forEach(h=>{if(h.name)merged.set(h.name,h)});local.forEach(h=>{if(h.name&&(!merged.has(h.name)||merged.get(h.name).ts<h.ts))merged.set(h.name,h)});match.viewHistory=[...merged.values()].sort((a,b)=>b.ts-a.ts).slice(0,10);syncViewHistory()}localStorage.removeItem('ginza_recently_viewed')}}catch(e){}
+/* VIP mode */
+document.body.classList.add('vip-mode');
+if(!IS_MOBILE_LITE&&!_vipSparkles.length){const _spDrifts=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];for(let i=0;i<8;i++){const s=document.createElement('div');s.className='vip-sparkle particle';const sz=3+Math.random()*2;s.style.width=s.style.height=sz+'px';s.style.left=Math.random()*100+'%';s.style.background='#ffffff';s.style.setProperty('--p-peak','0.8');s.style.animationName=_spDrifts[Math.floor(Math.random()*_spDrifts.length)];s.style.animationDuration=(8+Math.random()*12)+'s';s.style.animationDelay=Math.random()*15+'s';particlesEl.appendChild(s);_vipSparkles.push(s)}}}
+/* ── Welcome Back Popup ── */
+/* Respond to pings from other tabs so they know we're already open */
+const _welBc=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('ginza_wel'):null;
+if(_welBc)_welBc.onmessage=e=>{if(e.data==='ping')_welBc.postMessage('pong')};
+
+function _isStillAvailToday(name){
+  if(isAvailableNow(name))return true;
+  const now=getAEDTDate();const entry=getCalEntry(name,fmtDate(now));
+  if(!entry||!entry.start||!entry.end)return false;
+  const nowMins=now.getHours()*60+now.getMinutes();
+  const [sh,sm]=entry.start.split(':').map(Number);
+  return nowMins<sh*60+sm;
+}
+function _welCardStrip(list){
+  const arwSvgL='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
+  const arwSvgR='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>';
+  let h=`<div class="avail-now-wrap"><button class="anw-arrow anw-arrow-left" aria-label="Scroll left">${arwSvgL}</button><div class="avail-now-strip">`;
+  list.forEach(({g,idx})=>{
+    const photo=g.photos&&g.photos.length?g.photos[0]:'';
+    const live=isAvailableNow(g.name);
+    const entry=getCalEntry(g.name,fmtDate(getAEDTDate()));
+    const time=entry?fmtTime12(entry.start)+' - '+fmtTime12(entry.end):'';
+    h+=`<div class="avail-now-card wel-card" data-idx="${idx}"><div class="anw-photo">${photo?`<img src="${photo}" alt="${g.name}">`:'<div class="anw-placeholder"></div>'}</div><div class="anw-name">${g.name}</div>${time?`<div class="anw-time">${live?'<span class="avail-now-dot wel-dot"></span> ':''}<span>${time}</span></div>`:''}</div>`;
+  });
+  h+='</div><button class="anw-arrow anw-arrow-right" aria-label="Scroll right">'+arwSvgR+'</button></div>';
+  return h;
+}
+function _welBindStrip(container){
+  container.querySelectorAll('.wel-card').forEach(c=>{c.onclick=()=>{const i=parseInt(c.dataset.idx);if(!isNaN(i)){_closeWelcome();profileReturnPage='homePage';showProfile(i)}}});
+  container.querySelectorAll('.avail-now-wrap').forEach(wrap=>{
+    const strip=wrap.querySelector('.avail-now-strip');if(!strip)return;
+    const arwL=wrap.querySelector('.anw-arrow-left'),arwR=wrap.querySelector('.anw-arrow-right');
+    function upd(){arwL.classList.toggle('hidden',strip.scrollLeft<=0);arwR.classList.toggle('hidden',strip.scrollLeft+strip.clientWidth>=strip.scrollWidth-2)}
+    arwL.onclick=()=>{strip.scrollBy({left:-320,behavior:'smooth'})};arwR.onclick=()=>{strip.scrollBy({left:320,behavior:'smooth'})};strip.addEventListener('scroll',upd);
+    let mdX=0,mdSL=0,mdActive=false,didDrag=false;
+    strip.addEventListener('mousedown',e=>{mdActive=true;didDrag=false;mdX=e.pageX;mdSL=strip.scrollLeft;strip.style.cursor='grabbing';e.preventDefault()});
+    document.addEventListener('mousemove',e=>{if(!mdActive)return;if(Math.abs(e.pageX-mdX)>5)didDrag=true;strip.scrollLeft=mdSL-(e.pageX-mdX)});
+    document.addEventListener('mouseup',()=>{if(!mdActive)return;mdActive=false;strip.style.cursor='';setTimeout(()=>{didDrag=false},0)});
+    strip.style.cursor='grab';upd();
+  });
+}
+function showWelcomePopup(){
+  const overlay=document.getElementById('welcomeOverlay');if(!overlay)return;
+  const greeting=t('welcome.back').replace('{0}',loggedInUser.toUpperCase());
+  let html=`<div class="welcome-greeting">${greeting}</div>`;
+  /* Section 1: Favourites available today (not finished) */
+  const favNames=getFavorites();
+  const favAvail=favNames.map(n=>{const i=girls.findIndex(g=>g.name===n);return i>=0?{g:girls[i],idx:i}:null}).filter(Boolean).filter(x=>(isAdmin()||!x.g.hidden)&&_isStillAvailToday(x.g.name));
+  if(favAvail.length){
+    html+=`<div class="welcome-subtitle">${t('welcome.favTitle')}</div>`+_welCardStrip(favAvail);
+  }
+  /* Section 2: Recently viewed available today (not finished), exclude already in favs */
+  const rv=getRecentlyViewed();
+  const rvAvail=rv.map(r=>{const i=girls.findIndex(g=>g.name===r.name);return i>=0?{g:girls[i],idx:i}:null}).filter(Boolean).filter(x=>(isAdmin()||!x.g.hidden)&&_isStillAvailToday(x.g.name)&&!favNames.includes(x.g.name));
+  if(rvAvail.length){
+    html+=`<div class="welcome-subtitle">${t('welcome.rvTitle')}</div>`+_welCardStrip(rvAvail);
+  }
+  /* Empty state if nothing to show */
+  if(!favAvail.length&&!rvAvail.length){
+    html+=`<div class="welcome-empty"><div class="welcome-empty-text">${t('welcome.noAvail')}</div><button class="empty-state-cta welcome-browse-btn">${t('welcome.browse')}</button></div>`;
+  }
+  document.getElementById('welcomeContent').innerHTML=html;
+  overlay.classList.add('open');
+  _welBindStrip(overlay);
+  const browseBtn=overlay.querySelector('.welcome-browse-btn');
+  if(browseBtn)browseBtn.onclick=()=>{_closeWelcome();showPage('listPage')};
+  document.getElementById('welcomeClose').onclick=_closeWelcome;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)_closeWelcome()});
+}
+function _closeWelcome(){const o=document.getElementById('welcomeOverlay');if(o)o.classList.remove('open')}
+
+/* Check if another tab is already open; if not, show welcome popup */
+function _welcomeIfOnlyTab(){
+  if(typeof BroadcastChannel==='undefined'){showWelcomePopup();return}
+  const bc=new BroadcastChannel('ginza_wel');
+  let replied=false;
+  bc.onmessage=()=>{replied=true};
+  bc.postMessage('ping');
+  setTimeout(()=>{bc.close();if(!replied)showWelcomePopup()},150);
+}
+
+function tryRestoreSession(){try{const s=localStorage.getItem('ginza_session');if(!s)return;const{user,pass}=JSON.parse(s);const match=CRED.find(c=>c.user===user&&c.pass===pass);if(match){if(match.status==='pending'){localStorage.removeItem('ginza_session');return}_applyLogin(match,true);_welcomeIfOnlyTab()}}catch(e){try{localStorage.removeItem('ginza_session')}catch(_){}}}
+function doLogin(){const u=document.getElementById('lfUser').value.trim(),p=document.getElementById('lfPass').value;const match=CRED.find(c=>c.user===u&&c.pass===p);
+if(match){if(match.status==='pending'){document.getElementById('lfError').textContent=t('ui.pendingApproval');document.getElementById('lfPass').value='';return}const remember=document.getElementById('lfRemember');if(remember&&remember.checked){try{localStorage.setItem('ginza_session',JSON.stringify({user:match.user,pass:match.pass}))}catch(e){}}authOverlay.classList.remove('open');_applyLogin(match);showWelcomePopup()}
+else{document.getElementById('lfError').textContent='Invalid credentials.';document.getElementById('lfPass').value=''}}
+loginIconBtn.onclick=e=>{e.stopPropagation();if(loggedIn){const o=userDropdown.classList.toggle('open');loginIconBtn.setAttribute('aria-expanded',String(o))}else{showAuthSignIn()}};
+document.addEventListener('click',e=>{if(!e.target.closest('#userDropdown')&&!e.target.closest('#loginIconBtn')){userDropdown.classList.remove('open');loginIconBtn.setAttribute('aria-expanded','false')}});
+renderDropdown();
+
+
+/* ── Particle System: Bokeh Orbs + Fine Particles ── */
+const particlesEl=document.getElementById('particles');
+
+if(!IS_MOBILE_LITE){
+/* Layer 1: Bokeh Orbs */
+const ORB_COLORS=['#b44aff','#c9952c','#ff6f00','#f5e6a3'];
+const ORB_DRIFTS=['orbDrift1','orbDrift2','orbDrift3'];
+const _orbCount=8+Math.floor(Math.random()*5);
+for(let i=0;i<_orbCount;i++){
+  const o=document.createElement('div');
+  o.className='bokeh-orb';
+  const sz=50+Math.random()*150;
+  o.style.width=o.style.height=sz+'px';
+  o.style.left=Math.random()*100+'%';
+  o.style.top=Math.random()*100+'%';
+  o.style.background=ORB_COLORS[Math.floor(Math.random()*ORB_COLORS.length)];
+  o.style.opacity=(0.03+Math.random()*0.05).toFixed(3);
+  o.style.filter='blur('+(30+Math.random()*30)+'px)';
+  o.style.animationName=ORB_DRIFTS[Math.floor(Math.random()*ORB_DRIFTS.length)];
+  o.style.animationDuration=(30+Math.random()*30)+'s';
+  o.style.animationDelay=Math.random()*20+'s';
+  particlesEl.appendChild(o);
+}
+
+/* Layer 2: Fine Particles (3 depth layers) */
+const P_COLORS=['#b44aff','#c9952c','#ffffff'];
+const P_DRIFTS=['floatDrift1','floatDrift2','floatDrift3','floatDrift4'];
+const DEPTHS=[
+  {cls:'depth-far',  sMin:1,sMax:1.5,peak:0.3,r:0.35},
+  {cls:'depth-mid',  sMin:1.5,sMax:2.5,peak:0.5,r:0.40},
+  {cls:'depth-near', sMin:2.5,sMax:4,  peak:0.7,r:0.25}
+];
+const _pCount=35+Math.floor(Math.random()*6);
+for(let i=0;i<_pCount;i++){
+  const p=document.createElement('div');
+  const ratio=i/_pCount;
+  const d=ratio<DEPTHS[0].r?DEPTHS[0]:ratio<DEPTHS[0].r+DEPTHS[1].r?DEPTHS[1]:DEPTHS[2];
+  p.className='particle '+d.cls;
+  const sz=d.sMin+Math.random()*(d.sMax-d.sMin);
+  p.style.width=p.style.height=sz+'px';
+  p.style.left=Math.random()*100+'%';
+  p.style.background=P_COLORS[Math.floor(Math.random()*P_COLORS.length)];
+  p.style.setProperty('--p-peak',String(d.peak));
+  p.style.animationName=P_DRIFTS[Math.floor(Math.random()*P_DRIFTS.length)];
+  p.style.animationDuration=(8+Math.random()*12)+'s';
+  p.style.animationDelay=Math.random()*15+'s';
+  particlesEl.appendChild(p);
+}
+
+/* ── Scroll Parallax + Nav Glassmorphism ── */
+let _scrollTicking=false;
+const _navEl=document.querySelector('nav');
+window.addEventListener('scroll',()=>{
+  if(_scrollTicking)return;
+  _scrollTicking=true;
+  requestAnimationFrame(()=>{
+    const sy=scrollY;
+    particlesEl.style.transform='translateY('+sy*0.05+'px)';
+    if(_navEl){
+      const t=Math.min(sy/300,1);
+      const bg=0.85+t*0.12;
+      const bl=20+t*16;
+      const bw=t*1;
+      _navEl.style.background='rgba(10,10,15,'+bg.toFixed(2)+')';
+      _navEl.style.backdropFilter='blur('+bl.toFixed(1)+'px)';
+      _navEl.style.webkitBackdropFilter='blur('+bl.toFixed(1)+'px)';
+      _navEl.style.borderBottom=bw>0.05?bw.toFixed(2)+'px solid rgba(255,255,255,'+((t*0.06).toFixed(3))+')':'none';
+    }
+    _scrollTicking=false;
+  });
+},{passive:true});
+
+/* ── Cursor-Reactive Orbs ── */
+{
+  let _mouseX=innerWidth/2,_mouseY=innerHeight/2,_mouseTicking=false;
+  const _orbs=particlesEl.querySelectorAll('.bokeh-orb');
+  window.addEventListener('mousemove',e=>{
+    _mouseX=e.clientX;_mouseY=e.clientY;
+    if(_mouseTicking)return;
+    _mouseTicking=true;
+    requestAnimationFrame(()=>{
+      _orbs.forEach((orb,i)=>{
+        const rect=orb.getBoundingClientRect();
+        const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+        const dx=_mouseX-cx,dy=_mouseY-cy;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const maxDist=400;
+        if(dist<maxDist){
+          const strength=(1-dist/maxDist)*(15+i%3*5);
+          const ox=-dx/dist*strength,oy=-dy/dist*strength;
+          orb.style.translate=ox.toFixed(1)+'px '+oy.toFixed(1)+'px';
+        }else{
+          orb.style.translate='0px 0px';
+        }
+      });
+      _mouseTicking=false;
+    });
+  },{passive:true});
+}
+} /* end !IS_MOBILE_LITE */
+
+/* ── Section Reveals ── */
+const _revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('revealed');
+      _revealObserver.unobserve(entry.target);
+    }
+  });
+},{rootMargin:'50px 0px',threshold:0.1});
+function observeReveals(container){
+  if(!container)container=document;
+  container.querySelectorAll('.reveal:not(.revealed)').forEach(el=>_revealObserver.observe(el));
+}
+
+/* ── Custom Cursor ── */
+if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  const _curDot=document.getElementById('cursorDot');
+  const _curRing=document.getElementById('cursorRing');
+  if(_curDot&&_curRing){
+    document.body.classList.add('custom-cursor');
+    let _curX=0,_curY=0,_ringX=0,_ringY=0,_curRAF=false;
+    function _curLoop(){
+      _ringX+=(_curX-_ringX)*0.15;
+      _ringY+=(_curY-_ringY)*0.15;
+      _curRing.style.left=_ringX+'px';
+      _curRing.style.top=_ringY+'px';
+      if(Math.abs(_curX-_ringX)>0.1||Math.abs(_curY-_ringY)>0.1){
+        requestAnimationFrame(_curLoop);
+      }else{
+        _curRing.style.left=_curX+'px';
+        _curRing.style.top=_curY+'px';
+        _curRAF=false;
+      }
+    }
+    window.addEventListener('mousemove',e=>{
+      _curX=e.clientX;_curY=e.clientY;
+      _curDot.style.left=_curX+'px';
+      _curDot.style.top=_curY+'px';
+      if(!_curRAF){_curRAF=true;requestAnimationFrame(_curLoop)}
+    },{passive:true});
+    document.addEventListener('mouseover',e=>{
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option')){_curDot.classList.add('hover');_curRing.classList.add('hover')}
+    });
+    document.addEventListener('mouseout',e=>{
+      if(e.target.closest('a,button,.girl-card,.nav-menu-btn,.login-icon-btn,.theme-option,.lang-option')){_curDot.classList.remove('hover');_curRing.classList.remove('hover')}
+    });
+    document.addEventListener('mouseleave',()=>{_curDot.classList.add('hidden');_curRing.classList.add('hidden')});
+    document.addEventListener('mouseenter',()=>{_curDot.classList.remove('hidden');_curRing.classList.remove('hidden')});
+  }
+}
+
+/* ── Ambient Sound Toggle ── */
+(function(){
+  const btn=document.getElementById('ambientBtn');
+  const volWrap=document.getElementById('ambVolWrap');
+  const volSlider=document.getElementById('ambVolSlider');
+  const soundList=document.getElementById('ambSoundList');
+  if(!btn)return;
+  let _actx=null,_masterGain=null,_conv=null,_playing=false,_nodes=[],_schedTimer=null,_currentSound='romantic';
+  /* ── Sound presets: each factory(actx,master,conv,nodes) returns a sched fn ── */
+  const _SOUNDS={
+    romantic(actx,master,conv,nodes){
+      const chords=[[110,164.81,220,261.63],[87.31,130.81,174.61,220],[130.81,164.81,196,261.63],[98,146.83,196,246.94]];
+      const melody=[[659.25,587.33,523.25,440],[523.25,587.33,659.25,523.25],[440,523.25,659.25,587.33],[587.33,523.25,440,392]];
+      const CDUR=4.4,NDUR=CDUR/4;let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.15;
+        while(nt<actx.currentTime+CDUR*2){
+          const c=ci%chords.length,t=nt;
+          chords[c].forEach((f,ni)=>{
+            const o=actx.createOscillator();o.type='triangle';o.frequency.value=f;o.detune.value=[-2,3,-1,2][ni];
+            const g=actx.createGain();const v=ni===0?0.09:0.055;
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.55);
+            g.gain.setValueAtTime(v,t+CDUR-0.65);g.gain.linearRampToValueAtTime(0,t+CDUR+0.15);
+            o.connect(g);g.connect(master);g.connect(conv);o.start(t);o.stop(t+CDUR+0.25);nodes.push(o);
+          });
+          melody[c].forEach((f,ni)=>{
+            const mt=t+ni*NDUR+0.05;
+            const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+            const g=actx.createGain();
+            g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.038,mt+0.12);
+            g.gain.setValueAtTime(0.038,mt+NDUR-0.18);g.gain.linearRampToValueAtTime(0,mt+NDUR);
+            o.connect(g);g.connect(master);g.connect(conv);o.start(mt);o.stop(mt+NDUR+0.05);nodes.push(o);
+          });
+          ci++;nt+=CDUR;
+        }
+        _schedTimer=setTimeout(window._ambSched,1800);
+      };
+    },
+    jazz(actx,master,conv,nodes){
+      /* Dm7–G7–Cmaj7–Am7 jazz turnaround, sawtooth through LPF, walking bass */
+      const chords=[[146.83,174.61,220,261.63],[98,123.47,146.83,174.61],[130.81,164.81,196,246.94],[110,130.81,164.81,196]];
+      const bass=[73.42,98,65.41,55];
+      const melody=[[440,523.25,587.33,440],[392,440,523.25,392],[523.25,587.33,440,392],[440,523.25,392,329.63]];
+      const CDUR=3.2,NDUR=CDUR/4;let ci=0,nt=0;
+      const lpf=actx.createBiquadFilter();lpf.type='lowpass';lpf.frequency.value=1400;lpf.Q.value=1.0;
+      lpf.connect(master);lpf.connect(conv);
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.15;
+        while(nt<actx.currentTime+CDUR*2){
+          const c=ci%chords.length,t=nt;
+          chords[c].forEach((f,ni)=>{
+            const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=ni%2?5:-3;
+            const g=actx.createGain();const v=ni===0?0.065:0.04;
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.07);
+            g.gain.setValueAtTime(v,t+CDUR*0.5);g.gain.linearRampToValueAtTime(0,t+CDUR*0.65);
+            o.connect(g);g.connect(lpf);o.start(t);o.stop(t+CDUR);nodes.push(o);
+          });
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];
+          const bg=actx.createGain();
+          bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.14,t+0.06);
+          bg.gain.setValueAtTime(0.14,t+CDUR*0.45);bg.gain.linearRampToValueAtTime(0,t+CDUR*0.6);
+          bo.connect(bg);bg.connect(master);bo.start(t);bo.stop(t+CDUR);nodes.push(bo);
+          melody[c].forEach((f,ni)=>{
+            const mt=t+ni*NDUR;
+            const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+            const g=actx.createGain();
+            g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.042,mt+0.04);
+            g.gain.setValueAtTime(0.042,mt+NDUR*0.35);g.gain.linearRampToValueAtTime(0,mt+NDUR*0.6);
+            o.connect(g);g.connect(master);g.connect(conv);o.start(mt);o.stop(mt+NDUR+0.05);nodes.push(o);
+          });
+          ci++;nt+=CDUR;
+        }
+        _schedTimer=setTimeout(window._ambSched,1500);
+      };
+    },
+    lofi(actx,master,conv,nodes){
+      /* Em7–Cmaj7–Gmaj7–D7 muffled pads with vinyl crackle */
+      const chords=[[82.41,123.47,164.81,146.83],[130.81,164.81,196,246.94],[98,123.47,146.83,185],[73.42,92.5,110,130.81]];
+      const melody=[[329.63,392,440,392],[261.63,329.63,392,329.63],[392,329.63,293.66,329.63],[293.66,261.63,220,261.63]];
+      const CDUR=5.5,NDUR=CDUR/4;let ci=0,nt=0;
+      const lpf=actx.createBiquadFilter();lpf.type='lowpass';lpf.frequency.value=720;lpf.Q.value=0.7;
+      lpf.connect(master);lpf.connect(conv);
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.15;
+        while(nt<actx.currentTime+CDUR*2){
+          const c=ci%chords.length,t=nt;
+          chords[c].forEach((f,ni)=>{
+            const o=actx.createOscillator();o.type='triangle';o.frequency.value=f;
+            o.detune.value=(Math.random()-0.5)*10;
+            const g=actx.createGain();const v=ni===0?0.1:0.06;
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.9);
+            g.gain.setValueAtTime(v,t+CDUR-1.1);g.gain.linearRampToValueAtTime(0,t+CDUR+0.2);
+            o.connect(g);g.connect(lpf);o.start(t);o.stop(t+CDUR+0.4);nodes.push(o);
+          });
+          const cBuf=actx.createBuffer(1,Math.floor(actx.sampleRate*0.06),actx.sampleRate);
+          const cd=cBuf.getChannelData(0);for(let i=0;i<cd.length;i++)cd[i]=(Math.random()*2-1)*0.25;
+          const cs=actx.createBufferSource();cs.buffer=cBuf;
+          const cg=actx.createGain();cg.gain.setValueAtTime(0.018,t);cg.gain.linearRampToValueAtTime(0,t+0.06);
+          cs.connect(cg);cg.connect(master);cs.start(t);nodes.push(cs);
+          melody[c].forEach((f,ni)=>{
+            const mt=t+ni*NDUR+0.1;
+            const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+            const g=actx.createGain();
+            g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.028,mt+0.22);
+            g.gain.setValueAtTime(0.028,mt+NDUR-0.4);g.gain.linearRampToValueAtTime(0,mt+NDUR);
+            o.connect(g);g.connect(lpf);o.start(mt);o.stop(mt+NDUR+0.1);nodes.push(o);
+          });
+          ci++;nt+=CDUR;
+        }
+        _schedTimer=setTimeout(window._ambSched,2500);
+      };
+    },
+    midnight(actx,master,conv,nodes){
+      /* Dm–Bb–F–C deep atmospheric drones, very slow attack */
+      const pads=[[73.42,110,146.83,220],[58.27,87.31,174.61,233.08],[87.31,130.81,174.61,261.63],[65.41,130.81,196,261.63]];
+      const CDUR=7.0;let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.15;
+        while(nt<actx.currentTime+CDUR*2){
+          const c=ci%pads.length,t=nt;
+          pads[c].forEach((f,ni)=>{
+            const o=actx.createOscillator();o.type=ni<2?'sine':'triangle';o.frequency.value=f;o.detune.value=[-4,6,-3,5][ni];
+            const g=actx.createGain();const v=[0.12,0.08,0.055,0.04][ni];
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+2.5);
+            g.gain.setValueAtTime(v,t+CDUR-2.2);g.gain.linearRampToValueAtTime(0,t+CDUR+0.5);
+            o.connect(g);g.connect(master);g.connect(conv);o.start(t);o.stop(t+CDUR+0.7);nodes.push(o);
+          });
+          ci++;nt+=CDUR;
+        }
+        _schedTimer=setTimeout(window._ambSched,2500);
+      };
+    },
+    bossa(actx,master,conv,nodes){
+      /* Am–E7–Dm–G7 bossa nova, syncopated pluck feel */
+      const chords=[[110,164.81,220,261.63],[82.41,103.83,164.81,246.94],[73.42,110,146.83,220],[98,146.83,196,246.94]];
+      const bass=[110,82.41,73.42,98];
+      const melody=[[659.25,587.33,523.25,587.33],[622.25,554.37,493.88,554.37],[587.33,523.25,440,523.25],[523.25,493.88,440,493.88]];
+      const CDUR=3.6,NDUR=CDUR/4;let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.15;
+        while(nt<actx.currentTime+CDUR*2){
+          const c=ci%chords.length,t=nt;
+          [0,CDUR*0.375].forEach(off=>{
+            const pt=t+off;
+            chords[c].forEach((f,ni)=>{
+              const o=actx.createOscillator();o.type='triangle';o.frequency.value=f;
+              const g=actx.createGain();const v=ni===0?0.08:0.05;
+              g.gain.setValueAtTime(0,pt);g.gain.linearRampToValueAtTime(v,pt+0.04);
+              g.gain.exponentialRampToValueAtTime(0.001,pt+0.55);
+              o.connect(g);g.connect(master);g.connect(conv);o.start(pt);o.stop(pt+0.6);nodes.push(o);
+            });
+          });
+          [0,CDUR*0.5].forEach((off,oi)=>{
+            const bt=t+off;
+            const bf=oi===0?bass[c]:bass[(c+1)%bass.length]*1.5;
+            const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bf;
+            const bg=actx.createGain();
+            bg.gain.setValueAtTime(0,bt);bg.gain.linearRampToValueAtTime(0.13,bt+0.04);
+            bg.gain.exponentialRampToValueAtTime(0.001,bt+0.55);
+            bo.connect(bg);bg.connect(master);bo.start(bt);bo.stop(bt+0.6);nodes.push(bo);
+          });
+          melody[c].forEach((f,ni)=>{
+            const mt=t+ni*NDUR;
+            const o=actx.createOscillator();o.type='sine';o.frequency.value=f;
+            const g=actx.createGain();
+            g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.038,mt+0.06);
+            g.gain.setValueAtTime(0.038,mt+NDUR*0.5);g.gain.linearRampToValueAtTime(0,mt+NDUR*0.78);
+            o.connect(g);g.connect(master);g.connect(conv);o.start(mt);o.stop(mt+NDUR);nodes.push(o);
+          });
+          ci++;nt+=CDUR;
+        }
+        _schedTimer=setTimeout(window._ambSched,1800);
+      };
+    }
+  };
+  function _buildSched(soundId){
+    _nodes.forEach(n=>{try{n.stop(0)}catch(e){}});_nodes.length=0;
+    window._ambSched=_SOUNDS[soundId](_actx,_masterGain,_conv,_nodes);
+  }
+  function _initAudio(){
+    _actx=new(window.AudioContext||window.webkitAudioContext)();
+    _masterGain=_actx.createGain();
+    _masterGain.gain.value=parseFloat(volSlider?volSlider.value:0.3);
+    _masterGain.connect(_actx.destination);
+    const rLen=Math.floor(_actx.sampleRate*2.8);
+    const rBuf=_actx.createBuffer(2,rLen,_actx.sampleRate);
+    for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2.2)}
+    _conv=_actx.createConvolver();_conv.buffer=rBuf;
+    const wet=_actx.createGain();wet.gain.value=0.32;
+    _conv.connect(wet);wet.connect(_masterGain);
+    _buildSched(_currentSound);
+    /* Do NOT call _sched() here — called after resume() resolves in _toggle */
+  }
+  function _switchSound(soundId){
+    _currentSound=soundId;
+    clearTimeout(_schedTimer);
+    if(_actx)_buildSched(soundId);
+    if(_playing){_actx.resume().then(()=>{if(_playing){clearTimeout(_schedTimer);window._ambSched&&window._ambSched()}})}
+    if(loggedIn)setUserPref('ambSound',soundId);
+    if(soundList)soundList.querySelectorAll('.amb-sound-opt').forEach(b=>b.classList.toggle('active',b.dataset.sound===soundId));
+  }
+  function _toggle(silent){
+    if(!_actx)_initAudio();
+    if(_playing){_actx.suspend();btn.classList.remove('amb-playing');clearTimeout(_schedTimer);
+      if(!silent&&loggedIn)setUserPref('soundOff',true)}
+    else{_playing=true;_actx.resume().then(()=>{if(_playing){clearTimeout(_schedTimer);window._ambSched&&window._ambSched()}});
+      btn.classList.add('amb-playing');
+      if(!silent&&loggedIn){setUserPref('soundOff',false);setUserPref('ambSound',_currentSound)}return}
+    _playing=!_playing;
+  }
+  window._ambientToggle=_toggle;
+  window._ambientStop=()=>{
+    clearTimeout(_schedTimer);
+    _nodes.forEach(n=>{try{n.stop(0)}catch(e){}});_nodes.length=0;
+    if(_actx)_actx.suspend();
+    btn.classList.remove('amb-playing');
+    _playing=false;
+  };
+  window._ambientSetSound=(id)=>{_currentSound=id;if(_actx)_switchSound(id);if(soundList)soundList.querySelectorAll('.amb-sound-opt').forEach(b=>b.classList.toggle('active',b.dataset.sound===id))};
+  window._ambientStartOnGesture=()=>{
+    if(_playing)return;
+    const _start=()=>{if(!_playing&&loggedIn)_toggle(true)};
+    document.addEventListener('click',_start,{once:true,capture:true});
+    document.addEventListener('touchstart',_start,{once:true,capture:true});
+    document.addEventListener('keydown',_start,{once:true,capture:true});
+  };
+  btn.onclick=e=>{if(!e.target.closest('.amb-vol-wrap'))_toggle()};
+  btn.addEventListener('contextmenu',e=>{e.preventDefault();volWrap.classList.toggle('open')});
+  if(soundList){soundList.addEventListener('click',e=>{const opt=e.target.closest('.amb-sound-opt');if(!opt)return;e.stopPropagation();_switchSound(opt.dataset.sound)})}
+  if(volSlider){volSlider.oninput=()=>{if(_masterGain)_masterGain.gain.value=parseFloat(volSlider.value)}}
+  const _bwrap=document.getElementById('ambientBtnWrap');
+  document.addEventListener('click',e=>{if(_bwrap&&!_bwrap.contains(e.target)&&volWrap)volWrap.classList.remove('open')});
+})();
+
+/* ── Dynamic Accent Trail ── */
+if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  let _trailThrottle=0;
+  window.addEventListener('mousemove',e=>{
+    const now=Date.now();if(now-_trailThrottle<40)return;_trailThrottle=now;
+    const dot=document.createElement('div');dot.className='cursor-trail';
+    const size=3+Math.random()*3;
+    dot.style.cssText='width:'+size+'px;height:'+size+'px;left:'+e.clientX+'px;top:'+e.clientY+'px';
+    document.body.appendChild(dot);
+    setTimeout(()=>dot.remove(),500);
+  },{passive:true});
+}
+
+/* ── Card Hover Slideshow ── */
+function addCardSlideshow(el,g){
+  if(IS_MOBILE_LITE)return;
+  if(!g.photos||g.photos.length<2)return;
+  const imgWrap=el.querySelector('.card-img');if(!imgWrap)return;
+  const photos=g.photos;const len=photos.length;
+  let idx=0,timer=null;
+  const dots=document.createElement('div');dots.className='card-slide-dots';
+  for(let i=0;i<len;i++){const d=document.createElement('span');d.className='card-slide-dot'+(i===0?' active':'');dots.appendChild(d)}
+  imgWrap.appendChild(dots);
+  const thumb=imgWrap.querySelector('img.card-thumb');if(!thumb)return;
+  function show(i){
+    idx=i;thumb.src=photos[idx];thumb.classList.add('lazy-loaded');
+    dots.querySelectorAll('.card-slide-dot').forEach((d,di)=>d.classList.toggle('active',di===idx));
+  }
+  el.addEventListener('mouseenter',()=>{
+    if(el.classList.contains('card-flipped'))return;
+    idx=0;show(0);
+    timer=setInterval(()=>{show((idx+1)%len)},1500);
+  });
+  el.addEventListener('mouseleave',()=>{
+    clearInterval(timer);timer=null;
+    show(0);
+  });
+}
+
+/* ── Card Flip Preview ── */
+function addCardFlip(card,g){
+  const flipBtn=document.createElement('button');
+  flipBtn.className='card-flip-btn';flipBtn.innerHTML='&#x2139;';flipBtn.title='Quick info';
+  flipBtn.onclick=e=>{e.stopPropagation();card.classList.toggle('card-flipped')};
+  const imgWrap=card.querySelector('.card-img');
+  if(imgWrap)imgWrap.appendChild(flipBtn);
+  const back=document.createElement('div');back.className='card-back';
+  const entry=getCalEntry(g.name,fmtDate(getAEDTDate()));
+  const liveNow=g.name&&isAvailableNow(g.name);
+  const availText=liveNow?t('avail.now'):(entry&&entry.start?fmtTime12(entry.start)+' - '+fmtTime12(entry.end):'—');
+  back.innerHTML='<div class="card-back-name">'+(g.name||'')+'</div>'
+    +'<div class="card-back-row"><span>'+t('field.age')+'</span><span>'+(g.age||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.body')+'</span><span>'+(g.body||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.height')+'</span><span>'+(g.height?g.height+' cm':'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.cup')+'</span><span>'+(g.cup||'—')+'</span></div>'
+    +'<div class="card-back-divider"></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates30')+'</span><span>'+(g.val1||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates45')+'</span><span>'+(g.val2||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+t('field.rates60')+'</span><span>'+(g.val3||'—')+'</span></div>'
+    +'<div class="card-back-divider"></div>'
+    +'<div class="card-back-row"><span>'+t('field.experience')+'</span><span>'+(g.exp||'—')+'</span></div>'
+    +'<div class="card-back-row"><span>'+(liveNow?'🟢':'📅')+' '+t('avail.schedule')+'</span><span>'+availText+'</span></div>'
+    +'<div class="card-back-cta">'+t('ui.viewProfile')+' →</div>';
+  card.appendChild(back);
+}
+
+/* ── Seasonal / Event Themes ── */
+const SEASONAL_THEMES=[
+  {id:'valentine',cls:'theme-valentine',match:(m,d)=>m===1&&d>=1&&d<=14,accent:'#ff4488',accent2:'#ff6fa8',icon:'\u2764\uFE0F',greetingKey:'season.valentine'},
+  {id:'sakura',cls:'theme-sakura',match:(m,d)=>(m===1&&d>=15)||(m===2&&d<=15),accent:'#f4a0b5',accent2:'#d4738a',icon:'\uD83C\uDF38',greetingKey:'season.sakura'},
+  {id:'christmas',cls:'theme-christmas',match:(m,d)=>m===11&&d>=1&&d<=25,accent:'#cc1111',accent2:'#00aa44',icon:'\uD83C\uDF84',greetingKey:'season.christmas'},
+  {id:'newyear',cls:'theme-newyear',match:(m,d)=>(m===11&&d>=26)||(m===0&&d<=7),accent:'#ffd700',accent2:'#ff6f00',icon:'\uD83C\uDF86',greetingKey:'season.newyear'},
+  {id:'lunarnewyear',cls:'theme-lunarnewyear',match:(m,d)=>m===0&&d>=8&&d<=31,accent:'#cc0000',accent2:'#ffd700',icon:'\uD83E\uDDE7',greetingKey:'season.lunarnewyear'},
+  {id:'autumn',cls:'theme-autumn',match:(m,d)=>(m===2&&d>=16)||m===3||m===4,accent:'#ff8f00',accent2:'#880e4f',icon:'\uD83C\uDF42',greetingKey:'season.autumn'},
+  {id:'summer',cls:'theme-summer',match:(m,d)=>m===5||m===6||m===7,accent:'#00bcd4',accent2:'#ff6f61',icon:'\uD83C\uDFD6\uFE0F',greetingKey:'season.summer'},
+  {id:'halloween',cls:'theme-halloween',match:(m,d)=>m===9,accent:'#ff6f00',accent2:'#39ff14',icon:'\uD83C\uDF83',greetingKey:'season.halloween'}
+];
+let _activeSeason=null;
+function detectSeasonalTheme(){const d=getAEDTDate();const m=d.getMonth(),day=d.getDate();return SEASONAL_THEMES.find(th=>th.match(m,day))||null}
+function applySeasonalTheme(){
+  /* Remove all user color themes and seasonal themes first */
+  COLOR_THEMES.forEach(th=>{if(th.cls)document.body.classList.remove(th.cls)});
+  SEASONAL_THEMES.forEach(th=>document.body.classList.remove(th.cls));
+  document.documentElement.style.removeProperty('--accent');
+  document.documentElement.style.removeProperty('--accent2');
+  _updateThemeActive('default');
+  _activeSeason=detectSeasonalTheme();
+  if(!_activeSeason)return;
+  document.body.classList.add(_activeSeason.cls);
+  document.documentElement.style.setProperty('--accent',_activeSeason.accent);
+  document.documentElement.style.setProperty('--accent2',_activeSeason.accent2);
+  particlesEl.querySelectorAll('.particle').forEach(p=>{p.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
+  particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?_activeSeason.accent:_activeSeason.accent2});
+}
+function getSeasonalBanner(){if(!_activeSeason)return '';return `<div class="seasonal-banner"><span class="seasonal-icon">${_activeSeason.icon}</span> ${t(_activeSeason.greetingKey)}</div>`}
+
+/* ── Time-of-Day Adaptive ── */
+function applyTimeOfDay(){
+  const h=getAEDTDate().getHours();
+  document.body.classList.remove('tod-dusk','tod-latenight');
+  if(h>=18&&h<21)document.body.classList.add('tod-dusk');
+  else if(h>=2&&h<6)document.body.classList.add('tod-latenight');
+}
+applyTimeOfDay();
+setInterval(applyTimeOfDay,900000);
+
+/* ── User Color Themes ── */
+const COLOR_THEMES=[
+  {id:'default',cls:'',accent:null,accent2:null},
+  {id:'neonTokyo',cls:'theme-neonTokyo',accent:'#00d4ff',accent2:'#ff2d7b'},
+  {id:'midnightGold',cls:'theme-midnightGold',accent:'#b44aff',accent2:'#c9952c'},
+  {id:'emeraldNoir',cls:'theme-emeraldNoir',accent:'#00e676',accent2:'#c0c0c0'},
+  {id:'crimsonVelvet',cls:'theme-crimsonVelvet',accent:'#e63946',accent2:'#d4a373'}
+];
+const _themeBtn=document.getElementById('themeBtn');
+const _themeDropdown=document.getElementById('themeDropdown');
+
+function applyColorTheme(themeId){
+  COLOR_THEMES.forEach(th=>{if(th.cls)document.body.classList.remove(th.cls)});
+  SEASONAL_THEMES.forEach(th=>document.body.classList.remove(th.cls));
+  if(themeId==='default'){
+    if(loggedIn)setUserPref('theme',null);
+    applySeasonalTheme();
+    _updateThemeActive('default');
+    return;
+  }
+  const theme=COLOR_THEMES.find(t=>t.id===themeId);
+  if(!theme)return;
+  document.body.classList.add(theme.cls);
+  document.documentElement.style.setProperty('--accent',theme.accent);
+  document.documentElement.style.setProperty('--accent2',theme.accent2);
+  particlesEl.querySelectorAll('.particle').forEach(p=>{p.style.background=Math.random()>0.5?theme.accent:theme.accent2});
+  particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?theme.accent:theme.accent2});
+  if(loggedIn)setUserPref('theme',themeId);
+  _updateThemeActive(themeId);
+}
+function _updateThemeActive(id){
+  _themeDropdown.querySelectorAll('.theme-option').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.theme===id);
+  });
+}
+
+/* Theme dropdown wiring */
+_themeBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  const o=_themeDropdown.classList.toggle('open');
+  _themeBtn.setAttribute('aria-expanded',String(o));
+});
+_themeDropdown.querySelectorAll('.theme-option').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    applyColorTheme(btn.dataset.theme);
+    _themeDropdown.classList.remove('open');
+    _themeBtn.setAttribute('aria-expanded','false');
+  });
+});
+document.addEventListener('click',function(e){
+  if(!_themeDropdown.contains(e.target)&&e.target!==_themeBtn){
+    _themeDropdown.classList.remove('open');
+    _themeBtn.setAttribute('aria-expanded','false');
+  }
+});
+
+/* Apply seasonal theme by default; user theme restored on login */
+applySeasonalTheme();
+
+/* Filter Panel Toggle */
+let _activeFilterPaneId=null;
+const _filterToggle=document.getElementById('filterToggle');
+const _filterBackdrop=document.getElementById('filterBackdrop');
+const _pagesWithFilters=['rosterPage','listPage','calendarPage','profilePage','favoritesPage','bookingsPage','vacationPage'];
+
+function updateFilterToggle(){
+const hasPage=_pagesWithFilters.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});
+_filterToggle.classList.toggle('visible',hasPage);
+const cnt=countActiveFilters();
+_filterToggle.classList.toggle('has-filters',cnt>0);
+const ftText=_filterToggle.querySelector('.ft-text');
+if(ftText)ftText.textContent=cnt>0?t('ui.filtersActive').replace('{n}',cnt):t('ui.filters');
+}
+
+function openFilterPanel(){
+if(!_activeFilterPaneId)return;
+const pane=document.getElementById(_activeFilterPaneId);if(!pane)return;
+/* Hide all panes first */
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane','favoritesFilterPane','bookingsFilterPane','vacationFilterPane'].forEach(fp=>{
+const el=document.getElementById(fp);if(el)el.classList.remove('open')});
+/* Ensure content is rendered */
+renderFilterPane(_activeFilterPaneId);
+pane.classList.add('open');
+_filterToggle.classList.add('open');
+_filterBackdrop.classList.add('open');
+_filterToggle.setAttribute('aria-expanded','true');
+}
+
+function closeFilterPanel(){
+['rosterFilterPane','girlsFilterPane','calFilterPane','profileFilterPane','favoritesFilterPane','bookingsFilterPane','vacationFilterPane'].forEach(fp=>{
+const el=document.getElementById(fp);if(el)el.classList.remove('open')});
+_filterToggle.classList.remove('open');
+_filterBackdrop.classList.remove('open');
+_filterToggle.setAttribute('aria-expanded','false');
+}
+
+function toggleFilterPanel(){
+const isOpen=_filterToggle.classList.contains('open');
+if(isOpen)closeFilterPanel();else openFilterPanel();
+}
+
+_filterToggle.onclick=toggleFilterPanel;
+_filterBackdrop.onclick=closeFilterPanel;
+
+/* Back to Top */
+(function(){const btn=document.getElementById('backToTop');if(!btn)return;const targetPages=['rosterPage','listPage','favoritesPage','calendarPage'];
+window.addEventListener('scroll',()=>{const active=targetPages.some(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')});if(active&&window.scrollY>300)btn.classList.add('visible');else btn.classList.remove('visible')});
+btn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'})})();
+
+/* ── FAB (Floating Contact Buttons) ── */
+(function(){const toggle=document.getElementById('fabToggle'),menu=document.getElementById('fabMenu');if(!toggle||!menu)return;toggle.onclick=()=>{const o=toggle.classList.toggle('open');menu.classList.toggle('open');toggle.setAttribute('aria-expanded',String(o))};document.addEventListener('click',e=>{if(!e.target.closest('.fab-container')){toggle.classList.remove('open');menu.classList.remove('open');toggle.setAttribute('aria-expanded','false')}})})();
+
+/* ── Focus Trap for Modal Overlays ── */
+document.addEventListener('keydown',function(e){
+if(e.key!=='Tab')return;
+var openModal=document.querySelector('.modal-overlay.open,.lightbox-overlay.open');
+if(!openModal)return;
+var focusable=openModal.querySelectorAll('button:not([disabled]):not([style*="display:none"]):not([style*="display: none"]),[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+if(!focusable.length)return;
+var first=focusable[0],last=focusable[focusable.length-1];
+if(e.shiftKey){if(document.activeElement===first||!openModal.contains(document.activeElement)){e.preventDefault();last.focus()}}
+else{if(document.activeElement===last||!openModal.contains(document.activeElement)){e.preventDefault();first.focus()}}
+});
+
+/* ── Keyboard Shortcuts ── */
+let _kbFocusedCardIdx=-1;
+function _kbIsTyping(){const el=document.activeElement;if(!el)return false;const tag=el.tagName;return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||el.isContentEditable}
+function _kbIsModalOpen(){return!!document.querySelector('.modal-overlay.open,.lightbox-overlay.open,.copy-time-modal.open,.copy-day-modal.open,.bulk-time-modal.open')}
+function _kbGetActivePage(){return['homePage','rosterPage','listPage','favoritesPage','valuePage','employmentPage','profilePage'].find(id=>{const el=document.getElementById(id);return el&&el.classList.contains('active')})||null}
+function _kbGetVisibleCards(){const page=_kbGetActivePage();const gridMap={listPage:'girlsGrid',rosterPage:'rosterGrid',favoritesPage:'favoritesGrid'};const gridId=gridMap[page];if(!gridId)return[];return Array.from(document.getElementById(gridId)?.querySelectorAll('.girl-card')||[])}
+function _kbFocusCard(idx){const cards=_kbGetVisibleCards();if(!cards.length)return;_kbFocusedCardIdx=Math.max(0,Math.min(idx,cards.length-1));cards.forEach((c,i)=>c.classList.toggle('kb-focused',i===_kbFocusedCardIdx));cards[_kbFocusedCardIdx].scrollIntoView({block:'nearest',behavior:'smooth'})}
+function _kbOpenHelp(){let ov=document.getElementById('kbHelpOverlay');if(!ov){ov=document.createElement('div');ov.id='kbHelpOverlay';ov.className='modal-overlay kb-help-overlay';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','kbHelpTitle');document.body.appendChild(ov)}
+ov.innerHTML=`<div class="form-modal" style="max-width:480px"><button class="modal-close" id="kbHelpClose" aria-label="Close">&times;</button><div class="form-title" id="kbHelpTitle">${t('kb.title')}</div><div class="kb-help-grid"><div class="kb-row"><kbd>j</kbd> <kbd>k</kbd><span>${t('kb.navCards')}</span></div><div class="kb-row"><kbd>Enter</kbd><span>${t('kb.openProfile')}</span></div><div class="kb-row"><kbd>f</kbd><span>${t('kb.favorite')}</span></div><div class="kb-row"><kbd>c</kbd><span>${t('kb.compare')}</span></div><div class="kb-row"><kbd>/</kbd><span>${t('kb.search')}</span></div><div class="kb-row"><kbd>Esc</kbd><span>${t('kb.back')}</span></div><div class="kb-row"><kbd>?</kbd><span>${t('kb.help')}</span></div></div></div>`;
+ov.classList.add('open');ov.querySelector('#kbHelpClose').onclick=()=>ov.classList.remove('open');ov.onclick=e=>{if(e.target===ov)ov.classList.remove('open')}}
+
+document.addEventListener('keydown',function(e){
+if(_kbIsTyping())return;
+const helpOv=document.getElementById('kbHelpOverlay');
+if(helpOv&&helpOv.classList.contains('open')){if(e.key==='Escape'||e.key==='?'){helpOv.classList.remove('open');e.preventDefault()}return}
+if(_kbIsModalOpen())return;
+const page=_kbGetActivePage();
+switch(e.key){
+case '?':e.preventDefault();_kbOpenHelp();break;
+case '/':e.preventDefault();{const inp=document.querySelector('#filterBar .inline-search-input,#rosterFilterBar .inline-search-input,#homeSearchInput');if(inp)inp.focus()}break;
+case 'Escape':if(page==='profilePage'){const btn=document.getElementById('backBtn');if(btn)btn.click()}break;
+case 'j':if(['listPage','rosterPage','favoritesPage'].includes(page)){e.preventDefault();_kbFocusCard(_kbFocusedCardIdx+1)}break;
+case 'k':if(['listPage','rosterPage','favoritesPage'].includes(page)){e.preventDefault();_kbFocusCard(_kbFocusedCardIdx-1)}break;
+case 'Enter':if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();if(cards[_kbFocusedCardIdx])cards[_kbFocusedCardIdx].click()}break;
+case 'f':if(page==='profilePage'){const btn=document.getElementById('profFavBtn');if(btn)btn.click()}else if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();const btn=cards[_kbFocusedCardIdx]?.querySelector('.card-fav');if(btn)btn.click()}break;
+case 'c':if(_kbFocusedCardIdx>=0){const cards=_kbGetVisibleCards();const btn=cards[_kbFocusedCardIdx]?.querySelector('.card-compare');if(btn)btn.click()}break;
+}});
+
