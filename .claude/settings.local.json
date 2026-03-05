@@ -5,7 +5,8 @@
       "Bash(openssl base64 -A)",
       "Bash(openssl dgst -sha384 -binary js/app.min.js)",
       "Bash(openssl dgst -sha384 -binary js/analytics.min.js)",
-      "Bash(gh run list --limit 3)"
+      "Bash(gh run list --limit 3)",
+      "WebFetch(domain:sydneyginza.github.io)"
     ]
   }
 }
