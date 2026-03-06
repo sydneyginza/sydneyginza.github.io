@@ -68,7 +68,7 @@ function createTestContext(files, overrides = {}) {
     querySelectorAll: () => [],
     createElement,
     body: { classList: { _cls: new Set(), add() {}, remove() {}, toggle() {}, contains() { return false; } }, style: {}, appendChild() {} },
-    documentElement: { classList: { add() {}, remove() {} }, style: { setProperty() {} } },
+    documentElement: { classList: { add() {}, remove() {} }, style: { setProperty() {}, removeProperty() {} } },
     head: { appendChild() {} },
     addEventListener() {},
     activeElement: null,
