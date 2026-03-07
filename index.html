@@ -36,7 +36,7 @@
   })();
 </script>
 <style>@font-face{font-family:'Orbitron';font-style:normal;font-weight:400 900;font-display:swap;src:url('/fonts/orbitron-var-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/rajdhani-400-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/rajdhani-600-latin.woff2') format('woff2')}*{margin:0;padding:0;box-sizing:border-box}:root{--accent:#b44aff;--accent2:#ff6f00;--gold:#c9952c;--gold-light:#f5e6a3;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.06);--bg-card-hover:rgba(255,255,255,0.09);--text:#e0e0e0;--text-dim:#888;--border-subtle:rgba(255,255,255,0.1)}body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:none}.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}.page{display:none;opacity:0;position:relative;z-index:1}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}@keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}.skeleton-shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0.03) 80%);background-size:800px 100%;animation:skeletonShimmer 1.8s ease-in-out infinite}@keyframes skeletonShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.skeleton-card{background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}.skeleton-card .skel-img{width:100%;aspect-ratio:3/4}.skeleton-card .skel-info{padding:16px;display:flex;flex-direction:column;gap:8px}.skeleton-card .skel-line{height:12px;border-radius:2px}.skeleton-card .skel-line.w60{width:60%}.skeleton-card .skel-line.w40{width:40%}.skeleton-card .skel-line.w80{width:80%}.skeleton-fade{transition:opacity .4s ease;opacity:1}</style>
-<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-23odcjcnKoDtr/gKcnm8IE0Vp3B8xcI0ZstSqHNoSrohzz5emvYKpakOmnOOKeyz" crossorigin="anonymous">
+<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-m2paktHkyN5p0MzgFFCHIxtPuPoQ0Wgx2azYI9INouWpx/oKQNjmgvwuJLnzFv+V" crossorigin="anonymous">
 <noscript><link rel="stylesheet" href="/styles.min.css" media="all"></noscript>
 <script type="application/ld+json">
 {
@@ -146,10 +146,20 @@
 <button class="login-icon-btn" id="themeBtn" aria-label="Theme" aria-expanded="false" aria-controls="themeDropdown"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-1 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg></button>
 <div class="theme-dropdown" id="themeDropdown">
 <button class="theme-option active" data-theme="default"><span class="theme-swatch" style="background:linear-gradient(135deg,#b44aff,#c9952c)"></span><span data-i18n="theme.default"></span></button>
-<button class="theme-option" data-theme="neon"><span class="theme-swatch" style="background:linear-gradient(135deg,#00d4ff,#ff2d7b)"></span><span data-i18n="theme.neon"></span></button>
-<button class="theme-option" data-theme="midnight"><span class="theme-swatch" style="background:linear-gradient(135deg,#b44aff,#c9952c)"></span><span data-i18n="theme.midnight"></span></button>
-<button class="theme-option" data-theme="emerald"><span class="theme-swatch" style="background:linear-gradient(135deg,#00e676,#c0c0c0)"></span><span data-i18n="theme.emerald"></span></button>
+<button class="theme-option" data-theme="amber"><span class="theme-swatch" style="background:linear-gradient(135deg,#ff8f00,#d4a373)"></span><span data-i18n="theme.amber"></span></button>
+<button class="theme-option" data-theme="arctic"><span class="theme-swatch" style="background:linear-gradient(135deg,#80deea,#e0f7fa)"></span><span data-i18n="theme.arctic"></span></button>
+<button class="theme-option" data-theme="bronze"><span class="theme-swatch" style="background:linear-gradient(135deg,#cd7f32,#5d4037)"></span><span data-i18n="theme.bronze"></span></button>
+<button class="theme-option" data-theme="cobalt"><span class="theme-swatch" style="background:linear-gradient(135deg,#1e90ff,#5bc0be)"></span><span data-i18n="theme.cobalt"></span></button>
 <button class="theme-option" data-theme="crimson"><span class="theme-swatch" style="background:linear-gradient(135deg,#e63946,#d4a373)"></span><span data-i18n="theme.crimson"></span></button>
+<button class="theme-option" data-theme="emerald"><span class="theme-swatch" style="background:linear-gradient(135deg,#00e676,#c0c0c0)"></span><span data-i18n="theme.emerald"></span></button>
+<button class="theme-option" data-theme="ivory"><span class="theme-swatch" style="background:linear-gradient(135deg,#d4af37,#f5f0e1)"></span><span data-i18n="theme.ivory"></span></button>
+<button class="theme-option" data-theme="midnight"><span class="theme-swatch" style="background:linear-gradient(135deg,#b44aff,#c9952c)"></span><span data-i18n="theme.midnight"></span></button>
+<button class="theme-option" data-theme="neon"><span class="theme-swatch" style="background:linear-gradient(135deg,#00d4ff,#ff2d7b)"></span><span data-i18n="theme.neon"></span></button>
+<button class="theme-option" data-theme="onyx"><span class="theme-swatch" style="background:linear-gradient(135deg,#e0e0e0,#757575)"></span><span data-i18n="theme.onyx"></span></button>
+<button class="theme-option" data-theme="phantom"><span class="theme-swatch" style="background:linear-gradient(135deg,#78909c,#4db6ac)"></span><span data-i18n="theme.phantom"></span></button>
+<button class="theme-option" data-theme="rust"><span class="theme-swatch" style="background:linear-gradient(135deg,#bf360c,#8d6e63)"></span><span data-i18n="theme.rust"></span></button>
+<button class="theme-option" data-theme="sakura2"><span class="theme-swatch" style="background:linear-gradient(135deg,#f48fb1,#fce4ec)"></span><span data-i18n="theme.sakura2"></span></button>
+<button class="theme-option" data-theme="violet"><span class="theme-swatch" style="background:linear-gradient(135deg,#9c27b0,#e040fb)"></span><span data-i18n="theme.violet"></span></button>
 </div>
 </div>
 <div style="position:relative;display:none" id="ambientBtnWrap">
@@ -513,7 +523,7 @@
 
 <footer><p data-i18n="footer.rights"></p><p class="footer-privacy" data-i18n="footer.privacy"></p></footer>
 
-<script src="/js/app.min.js" defer integrity="sha384-XQg0Fm57y8clPomqgTHPMdg4b/KA31Vrmnd6YmfkBuYUYk50x49PzuYURdXYS6DI"></script>
+<script src="/js/app.min.js" defer integrity="sha384-aSlFNsycYoTJsjvxw7Z1JaQiiecCJhKweJFWADa7fl4fkf/52E5JSeR/FQkQgz0c"></script>
 <script src="/js/analytics.min.js" defer integrity="sha384-QvrTB8Qf7IHvfA/zyT8OEDIyY6tOEJ3okv0BJR0+phRq3l+BMmT/FjtM5uJ/68/d"></script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
 <div class="cursor-dot" id="cursorDot"></div>

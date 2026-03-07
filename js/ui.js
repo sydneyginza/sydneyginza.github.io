@@ -1245,69 +1245,57 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
   let _actx=null,_masterGain=null,_conv=null,_playing=false,_nodes=[],_schedTimer=null,_currentSound='japanese',_currentThemeSounds=null;
 
   /* ── Theme → Sound mapping ── */
-  const _THEME_SOUNDS={
-    default:[
-      {id:'romantic',label:'Soft Hours'},
-      {id:'japanese',label:'Still Water, Moving Mind'},
-      {id:'tiggerific',label:'Bounce & Believe'},
-      {id:'perthmilks',label:'Golden Coast Hustle'},
-      {id:'brightside',label:'Bright Side'},
-      {id:'loopworld',label:'Loop World'},
-      {id:'mazeltov',label:'L\'Chaim (To Life)'}
-    ],
-    neon:[
-      {id:'neonfocus',label:'Neon Focus'},
-      {id:'cybershogun',label:'Neon Sovereignty'},
-      {id:'haven',label:'Haven'},
-      {id:'twominutes',label:'Two Minutes'},
-      {id:'headlights',label:'High Beams'},
-      {id:'subzero',label:'Sub Zero'},
-      {id:'engage',label:'Engage'},
-      {id:'wired',label:'Wired'}
-    ],
-    midnight:[
-      {id:'whoisbach',label:'Borrowed From the Canon'},
-      {id:'alice',label:'Down the Rabbit Hole'},
-      {id:'whiteexpanse',label:'White Expanse'},
-      {id:'drift',label:'Drift'},
-      {id:'timecurrent',label:'Time Current'},
-      {id:'gilt',label:'Gilt'},
-      {id:'koishii',label:'Yearning'},
-      {id:'porcelain',label:'Porcelain'}
-    ],
-    emerald:[
-      {id:'jadedragon',label:'Emerald Thunder'},
-      {id:'cobblestone',label:'Old Quarter Walk'},
-      {id:'boyandbear',label:'Into the Wild Together'},
-      {id:'barestrings',label:'Bare Strings'},
-      {id:'goyourway',label:'Solo Run'},
-      {id:'getout',label:'Bolt'},
-      {id:'firstlight',label:'First Light'}
-    ],
-    crimson:[
-      {id:'warrior',label:'Stand Your Ground'},
-      {id:'epicbattle',label:'The Last Line'},
-      {id:'samuraisake',label:'Blade & Rice Wine'},
-      {id:'steelsilk',label:'Steel & Silk'},
-      {id:'packlaw',label:'Pack Law'},
-      {id:'empower',label:'Empower'},
-      {id:'peakrush',label:'Peak Rush'},
-      {id:'feelalive',label:'Raw Rush'}
-    ]
-  };
-  function _populateSoundList(themeId){
-    if(!soundList)return;
-    const list=_THEME_SOUNDS[themeId]||_THEME_SOUNDS['default'];
-    if(list===_currentThemeSounds)return;
-    _currentThemeSounds=list;
+  const _ALL_SOUNDS_LIST=[
+    {id:'romantic',label:'Default'},
+    {id:'barestrings',label:'Bare Strings'},
+    {id:'samuraisake',label:'Blade & Rice Wine'},
+    {id:'getout',label:'Bolt'},
+    {id:'whoisbach',label:'Borrowed From the Canon'},
+    {id:'tiggerific',label:'Bounce & Believe'},
+    {id:'brightside',label:'Bright Side'},
+    {id:'brickdrop',label:'Brick Drop'},
+    {id:'alice',label:'Down the Rabbit Hole'},
+    {id:'drift',label:'Drift'},
+    {id:'jadedragon',label:'Emerald Thunder'},
+    {id:'empower',label:'Empower'},
+    {id:'engage',label:'Engage'},
+    {id:'firstlight',label:'First Light'},
+    {id:'gilt',label:'Gilt'},
+    {id:'perthmilks',label:'Golden Coast Hustle'},
+    {id:'haven',label:'Haven'},
+    {id:'headlights',label:'High Beams'},
+    {id:'boyandbear',label:'Into the Wild Together'},
+    {id:'mazeltov',label:'L\'Chaim (To Life)'},
+    {id:'loopworld',label:'Loop World'},
+    {id:'neonfocus',label:'Neon Focus'},
+    {id:'cybershogun',label:'Neon Sovereignty'},
+    {id:'cobblestone',label:'Old Quarter Walk'},
+    {id:'packlaw',label:'Pack Law'},
+    {id:'peakrush',label:'Peak Rush'},
+    {id:'porcelain',label:'Porcelain'},
+    {id:'feelalive',label:'Raw Rush'},
+    {id:'goyourway',label:'Solo Run'},
+    {id:'warrior',label:'Stand Your Ground'},
+    {id:'steelsilk',label:'Steel & Silk'},
+    {id:'japanese',label:'Still Water, Moving Mind'},
+    {id:'subzero',label:'Sub Zero'},
+    {id:'epicbattle',label:'The Last Line'},
+    {id:'timecurrent',label:'Time Current'},
+    {id:'twominutes',label:'Two Minutes'},
+    {id:'whiteexpanse',label:'White Expanse'},
+    {id:'wired',label:'Wired'},
+    {id:'koishii',label:'Yearning'}
+  ];
+  function _populateSoundList(){
+    if(!soundList||_currentThemeSounds)return;
+    _currentThemeSounds=_ALL_SOUNDS_LIST;
     soundList.innerHTML='';
-    list.forEach((s,i)=>{
+    _ALL_SOUNDS_LIST.forEach((s,i)=>{
       const b=document.createElement('button');b.className='amb-sound-opt'+(i===0?' active':'');
       b.dataset.sound=s.id;b.dataset.i18n='sound.'+s.id;b.textContent=typeof t==='function'?t('sound.'+s.id):s.label;soundList.appendChild(b);
     });
-    if(_playing||_actx){_switchSound(list[0].id)}else{_currentSound=list[0].id}
+    _currentSound=_ALL_SOUNDS_LIST[0].id;
   }
-  window._ambientSetTheme=_populateSoundList;
 
   /* ── Sound presets: each factory(actx,master,conv,nodes) returns a sched fn ── */
   const _SOUNDS={
@@ -3244,6 +3232,25 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
           ci++;nt+=BAR;
         }_schedTimer=setTimeout(window._ambSched,2000);
       };
+    },
+    brickdrop(actx,master,conv,nodes){
+      /* Brick Drop — Bb major, 128 BPM, bouncy bass-heavy Chinese DJ track */
+      const BPM=128,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[233.08,293.66,349.23],[207.65,261.63,311.13],[220,277.18,329.63],[233.08,293.66,349.23]];
+      const bass=[116.54,103.83,110,116.54];
+      const bounce=[[466.16,349.23,466.16,349.23,466.16,587.33,466.16,349.23],[415.3,311.13,415.3,311.13,415.3,523.25,415.3,311.13],[440,329.63,440,329.63,440,554.37,440,329.63],[466.16,349.23,466.16,349.23,466.16,587.33,349.23,466.16]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-6,6,-4][ni];const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*1.004;const g=actx.createGain();const v=0.014-ni*0.003;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.08);g.gain.setValueAtTime(v,t+BAR-0.1);g.gain.linearRampToValueAtTime(0,t+BAR+0.03);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1500;lp.Q.value=1;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+0.1);o2.stop(t+BAR+0.1);nodes.push(o,o2)});
+          bounce[c].forEach((f,ni)=>{const bt=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='square';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,bt);g.gain.linearRampToValueAtTime(0.025,bt+0.004);g.gain.exponentialRampToValueAtTime(0.002,bt+BEAT*0.28);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;lp.Q.value=1.5;o.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(bt);o.stop(bt+BEAT*0.5);nodes.push(o)});
+          [0,1,2,3].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(b%2===0?130:90,dt);o.frequency.exponentialRampToValueAtTime(42,dt+0.04);const g=actx.createGain();g.gain.setValueAtTime(b%2===0?0.12:0.06,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.15);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.18);nodes.push(o)});
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const lfo=actx.createOscillator();lfo.type='sine';lfo.frequency.value=4;const lfoG=actx.createGain();lfoG.gain.value=8;lfo.connect(lfoG);lfoG.connect(bo.frequency);const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.12,t+0.04);bg.gain.setValueAtTime(0.12,t+BAR-0.08);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);lfo.start(t);bo.stop(t+BAR+0.1);lfo.stop(t+BAR+0.1);nodes.push(bo,lfo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
     }
   };
   function _buildSched(soundId){
@@ -3304,7 +3311,7 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
   const _bwrap=document.getElementById('ambientBtnWrap');
   document.addEventListener('click',e=>{if(_bwrap&&!_bwrap.contains(e.target)&&volWrap)volWrap.classList.remove('open')});
   /* Initialize sound list for default theme */
-  _populateSoundList('default');
+  _populateSoundList();
 })();
 
 /* ── Dynamic Accent Trail ── */
@@ -3416,10 +3423,20 @@ setInterval(applyTimeOfDay,900000);
 /* ── User Color Themes ── */
 const COLOR_THEMES=[
   {id:'default',cls:'',accent:null,accent2:null},
-  {id:'neon',cls:'theme-neon',accent:'#00d4ff',accent2:'#ff2d7b'},
-  {id:'midnight',cls:'theme-midnight',accent:'#b44aff',accent2:'#c9952c'},
+  {id:'amber',cls:'theme-amber',accent:'#ff8f00',accent2:'#d4a373'},
+  {id:'arctic',cls:'theme-arctic',accent:'#80deea',accent2:'#e0f7fa'},
+  {id:'bronze',cls:'theme-bronze',accent:'#cd7f32',accent2:'#5d4037'},
+  {id:'cobalt',cls:'theme-cobalt',accent:'#1e90ff',accent2:'#5bc0be'},
+  {id:'crimson',cls:'theme-crimson',accent:'#e63946',accent2:'#d4a373'},
   {id:'emerald',cls:'theme-emerald',accent:'#00e676',accent2:'#c0c0c0'},
-  {id:'crimson',cls:'theme-crimson',accent:'#e63946',accent2:'#d4a373'}
+  {id:'ivory',cls:'theme-ivory',accent:'#d4af37',accent2:'#f5f0e1'},
+  {id:'midnight',cls:'theme-midnight',accent:'#b44aff',accent2:'#c9952c'},
+  {id:'neon',cls:'theme-neon',accent:'#00d4ff',accent2:'#ff2d7b'},
+  {id:'onyx',cls:'theme-onyx',accent:'#e0e0e0',accent2:'#757575'},
+  {id:'phantom',cls:'theme-phantom',accent:'#78909c',accent2:'#4db6ac'},
+  {id:'rust',cls:'theme-rust',accent:'#bf360c',accent2:'#8d6e63'},
+  {id:'sakura2',cls:'theme-sakura2',accent:'#f48fb1',accent2:'#fce4ec'},
+  {id:'violet',cls:'theme-violet',accent:'#9c27b0',accent2:'#e040fb'}
 ];
 const _themeBtn=document.getElementById('themeBtn');
 const _themeDropdown=document.getElementById('themeDropdown');
@@ -3431,7 +3448,6 @@ function applyColorTheme(themeId){
     if(loggedIn)setUserPref('theme',null);
     applySeasonalTheme();
     _updateThemeActive('default');
-    if(window._ambientSetTheme)window._ambientSetTheme('default');
     return;
   }
   const theme=COLOR_THEMES.find(t=>t.id===themeId);
@@ -3443,7 +3459,6 @@ function applyColorTheme(themeId){
   particlesEl.querySelectorAll('.bokeh-orb').forEach(o=>{o.style.background=Math.random()>0.5?theme.accent:theme.accent2});
   if(loggedIn)setUserPref('theme',themeId);
   _updateThemeActive(themeId);
-  if(window._ambientSetTheme)window._ambientSetTheme(themeId);
 }
 function _updateThemeActive(id){
   _themeDropdown.querySelectorAll('.theme-option').forEach(btn=>{
