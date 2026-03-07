@@ -1252,8 +1252,10 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
     {id:'getout',label:'Bolt'},
     {id:'whoisbach',label:'Borrowed From the Canon'},
     {id:'tiggerific',label:'Bounce & Believe'},
+    {id:'brassempire',label:'Brass Empire'},
     {id:'brightside',label:'Bright Side'},
     {id:'brickdrop',label:'Brick Drop'},
+    {id:'deadsignal',label:'Dead Signal'},
     {id:'alice',label:'Down the Rabbit Hole'},
     {id:'drift',label:'Drift'},
     {id:'jadedragon',label:'Emerald Thunder'},
@@ -1267,6 +1269,9 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
     {id:'boyandbear',label:'Into the Wild Together'},
     {id:'mazeltov',label:'L\'Chaim (To Life)'},
     {id:'loopworld',label:'Loop World'},
+    {id:'luciddescent',label:'Lucid Descent'},
+    {id:'midnightprotocol',label:'Midnight Protocol'},
+    {id:'neondevot',label:'Neon Devotion'},
     {id:'neonfocus',label:'Neon Focus'},
     {id:'cybershogun',label:'Neon Sovereignty'},
     {id:'cobblestone',label:'Old Quarter Walk'},
@@ -1278,6 +1283,7 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
     {id:'warrior',label:'Stand Your Ground'},
     {id:'steelsilk',label:'Steel & Silk'},
     {id:'japanese',label:'Still Water, Moving Mind'},
+    {id:'strobecity',label:'Strobe City'},
     {id:'subzero',label:'Sub Zero'},
     {id:'epicbattle',label:'The Last Line'},
     {id:'timecurrent',label:'Time Current'},
@@ -3248,6 +3254,121 @@ if(!IS_MOBILE_LITE&&!matchMedia('(prefers-reduced-motion:reduce)').matches){
           bounce[c].forEach((f,ni)=>{const bt=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='square';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,bt);g.gain.linearRampToValueAtTime(0.025,bt+0.004);g.gain.exponentialRampToValueAtTime(0.002,bt+BEAT*0.28);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;lp.Q.value=1.5;o.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(bt);o.stop(bt+BEAT*0.5);nodes.push(o)});
           [0,1,2,3].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(b%2===0?130:90,dt);o.frequency.exponentialRampToValueAtTime(42,dt+0.04);const g=actx.createGain();g.gain.setValueAtTime(b%2===0?0.12:0.06,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.15);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.18);nodes.push(o)});
           const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const lfo=actx.createOscillator();lfo.type='sine';lfo.frequency.value=4;const lfoG=actx.createGain();lfoG.gain.value=8;lfo.connect(lfoG);lfoG.connect(bo.frequency);const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.12,t+0.04);bg.gain.setValueAtTime(0.12,t+BAR-0.08);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);lfo.start(t);bo.stop(t+BAR+0.1);lfo.stop(t+BAR+0.1);nodes.push(bo,lfo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
+    },
+    brassempire(actx,master,conv,nodes){
+      /* Brass Empire — Bb major, 150 BPM, triumphant brass-like synths, bold hook */
+      const BPM=150,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[233.08,293.66,349.23],[196,246.94,293.66],[207.65,261.63,311.13],[220,277.18,329.63]];
+      const bass=[116.54,98,103.83,110];
+      const brass=[[466.16,466.16,587.33,466.16,349.23,466.16,587.33,698.46],[392,392,493.88,392,293.66,392,493.88,587.33],[415.3,415.3,523.25,415.3,311.13,415.3,523.25,622.25],[440,440,554.37,440,329.63,440,554.37,659.25]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-6,7,-4][ni];const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*1.006;const g=actx.createGain();const v=0.015-ni*0.003;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.12);g.gain.setValueAtTime(v,t+BAR-0.1);g.gain.linearRampToValueAtTime(0,t+BAR+0.04);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1600;lp.Q.value=0.9;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+0.1);o2.stop(t+BAR+0.1);nodes.push(o,o2)});
+          brass[c].forEach((f,ni)=>{const bt=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='square';o.frequency.value=f;const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*1.003;const g=actx.createGain();g.gain.setValueAtTime(0,bt);g.gain.linearRampToValueAtTime(0.03,bt+0.008);g.gain.setValueAtTime(0.03,bt+BEAT*0.18);g.gain.exponentialRampToValueAtTime(0.002,bt+BEAT*0.38);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2600;lp.Q.value=1.5;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(bt);o2.start(bt);o.stop(bt+BEAT*0.5);o2.stop(bt+BEAT*0.5);nodes.push(o,o2)});
+          [0,1,2,3].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(140,dt);o.frequency.exponentialRampToValueAtTime(42,dt+0.04);const g=actx.createGain();g.gain.setValueAtTime(0.13,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.16);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.2);nodes.push(o)});
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.11,t+0.04);bg.gain.setValueAtTime(0.11,t+BAR-0.08);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
+    },
+    deadsignal(actx,master,conv,nodes){
+      /* Dead Signal — A minor, 130 BPM, phonk, heavy 808 bass, cowbell, dark */
+      const BPM=130,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[220,261.63,329.63],[174.61,220,261.63],[196,246.94,293.66],[164.81,196,246.94]];
+      const bass=[55,43.65,49,41.2];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-15,12,-9][ni];const g=actx.createGain();const v=0.012-ni*0.003;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.3);g.gain.setValueAtTime(v,t+BAR-0.2);g.gain.linearRampToValueAtTime(0,t+BAR+0.1);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=800;lp.Q.value=1.8;o.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o.stop(t+BAR+0.15);nodes.push(o)});
+          [0,1,2,3,4,5,6,7].forEach(b=>{const dt=t+b*BEAT*0.5;const o=actx.createOscillator();o.type='sine';o.frequency.value=1200;const g=actx.createGain();g.gain.setValueAtTime(b%2===0?0.04:0.025,dt);g.gain.exponentialRampToValueAtTime(0.001,dt+0.02);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.03);nodes.push(o)});
+          [0,2].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(160,dt);o.frequency.exponentialRampToValueAtTime(35,dt+0.06);const g=actx.createGain();g.gain.setValueAtTime(0.14,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.3);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.35);nodes.push(o)});
+          [1,3].forEach(b=>{const dt=t+b*BEAT;const nb=actx.createBufferSource();const nBuf=actx.createBuffer(1,Math.floor(actx.sampleRate*0.03),actx.sampleRate);const nd=nBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;nb.buffer=nBuf;const ng=actx.createGain();ng.gain.setValueAtTime(0.04,dt);ng.gain.exponentialRampToValueAtTime(0.001,dt+0.03);const hp=actx.createBiquadFilter();hp.type='highpass';hp.frequency.value=3000;nb.connect(ng);ng.connect(hp);hp.connect(master);nb.start(dt);nodes.push(nb)});
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const bDist=actx.createWaveShaper();const curve=new Float32Array(256);for(let i=0;i<256;i++){const x=i*2/255-1;curve[i]=Math.tanh(x*3)}bDist.curve=curve;const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.18,t+0.03);bg.gain.exponentialRampToValueAtTime(0.04,t+BAR*0.8);bg.gain.linearRampToValueAtTime(0,t+BAR);const blp=actx.createBiquadFilter();blp.type='lowpass';blp.frequency.value=120;bo.connect(bDist);bDist.connect(bg);bg.connect(blp);blp.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
+    },
+    luciddescent(actx,master,conv,nodes){
+      /* Lucid Descent — C minor, 70 BPM, dreamy ambient, ethereal pads, lo-fi */
+      const BPM=70,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[261.63,311.13,392],[207.65,261.63,311.13],[155.56,196,233.08],[233.08,277.18,349.23]];
+      const bass=[65.41,51.91,77.78,58.27];
+      const mel=[[523.25,0,466.16,0,392,0,311.13,0],[415.3,0,392,0,311.13,0,261.63,0],[311.13,0,349.23,0,392,0,466.16,0],[466.16,0,440,0,349.23,0,311.13,0]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sine';o.frequency.value=f;const o2=actx.createOscillator();o2.type='triangle';o2.frequency.value=f*1.002;o2.detune.value=[-4,5,-2][ni];const g=actx.createGain();const v=0.028-ni*0.006;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+2);g.gain.setValueAtTime(v,t+BAR-1.5);g.gain.linearRampToValueAtTime(0,t+BAR+0.8);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=600;lp.Q.value=0.4;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+1);o2.stop(t+BAR+1);nodes.push(o,o2)});
+          mel[c].forEach((f,ni)=>{if(!f)return;const mt=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='sine';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.02,mt+0.4);g.gain.exponentialRampToValueAtTime(0.002,mt+BEAT*0.9);o.connect(g);g.connect(master);g.connect(conv);o.start(mt);o.stop(mt+BEAT);nodes.push(o)});
+          if(ci%2===0){const dt=t+BEAT*2;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(65,dt);o.frequency.exponentialRampToValueAtTime(30,dt+0.08);const g=actx.createGain();g.gain.setValueAtTime(0.05,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.5);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.55);nodes.push(o)}
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.06,t+0.8);bg.gain.setValueAtTime(0.06,t+BAR-1);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2500);
+      };
+    },
+    midnightprotocol(actx,master,conv,nodes){
+      /* Midnight Protocol — Eb minor, 108 BPM, dark synth-pop, descending bass, 80s darkwave */
+      const BPM=108,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[311.13,369.99,466.16],[246.94,311.13,369.99],[207.65,261.63,311.13],[233.08,277.18,349.23]];
+      const bass=[155.56,123.47,103.83,116.54];
+      const arp=[[622.25,466.16,622.25,739.99,622.25,466.16,622.25,739.99],[493.88,369.99,493.88,622.25,493.88,369.99,493.88,622.25],[415.3,311.13,415.3,523.25,415.3,311.13,415.3,523.25],[466.16,349.23,466.16,587.33,466.16,349.23,466.16,587.33]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-10,8,-5][ni];const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*0.996;const g=actx.createGain();const v=0.016-ni*0.004;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.6);g.gain.setValueAtTime(v,t+BAR-0.4);g.gain.linearRampToValueAtTime(0,t+BAR+0.2);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.Q.value=1;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+0.3);o2.stop(t+BAR+0.3);nodes.push(o,o2)});
+          arp[c].forEach((f,ni)=>{const at=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='square';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.02,at+0.005);g.gain.exponentialRampToValueAtTime(0.002,at+BEAT*0.35);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(1800,at);lp.frequency.exponentialRampToValueAtTime(800,at+BEAT*0.4);lp.Q.value=2;o.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(at);o.stop(at+BEAT*0.5);nodes.push(o)});
+          [0,2].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(120,dt);o.frequency.exponentialRampToValueAtTime(38,dt+0.05);const g=actx.createGain();g.gain.setValueAtTime(0.1,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.25);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.3);nodes.push(o)});
+          [1,3].forEach(b=>{const dt=t+b*BEAT;const nb=actx.createBufferSource();const nBuf=actx.createBuffer(1,Math.floor(actx.sampleRate*0.025),actx.sampleRate);const nd=nBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;nb.buffer=nBuf;const ng=actx.createGain();ng.gain.setValueAtTime(0.03,dt);ng.gain.exponentialRampToValueAtTime(0.001,dt+0.025);const hp=actx.createBiquadFilter();hp.type='highpass';hp.frequency.value=2800;nb.connect(ng);ng.connect(hp);hp.connect(master);nb.start(dt);nodes.push(nb)});
+          const bo=actx.createOscillator();bo.type='sawtooth';bo.frequency.value=bass[c];const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.09,t+0.05);bg.gain.setValueAtTime(0.09,t+BAR-0.1);bg.gain.linearRampToValueAtTime(0,t+BAR);const blp=actx.createBiquadFilter();blp.type='lowpass';blp.frequency.value=280;bo.connect(bg);bg.connect(blp);blp.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
+    },
+    neondevot(actx,master,conv,nodes){
+      /* Neon Devotion — F# minor, 100 BPM, 80s synth-pop, lush pads, soaring melody */
+      const BPM=100,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[369.99,440,554.37],[293.66,369.99,440],[220,277.18,329.63],[329.63,415.3,493.88]];
+      const bass=[92.5,73.42,110,82.41];
+      const mel=[[739.99,880,1046.5,880,739.99,659.25,739.99,880],[587.33,739.99,880,739.99,587.33,493.88,587.33,739.99],[440,554.37,659.25,554.37,440,369.99,440,554.37],[659.25,783.99,987.77,783.99,659.25,554.37,659.25,783.99]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-7,7,-4][ni];const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*1.004;const g=actx.createGain();const v=0.018-ni*0.004;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.8);g.gain.setValueAtTime(v,t+BAR-0.5);g.gain.linearRampToValueAtTime(0,t+BAR+0.3);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1400;lp.Q.value=0.7;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+0.4);o2.stop(t+BAR+0.4);nodes.push(o,o2)});
+          mel[c].forEach((f,ni)=>{const mt=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='triangle';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,mt);g.gain.linearRampToValueAtTime(0.022,mt+0.02);g.gain.setValueAtTime(0.022,mt+BEAT*0.25);g.gain.exponentialRampToValueAtTime(0.002,mt+BEAT*0.45);o.connect(g);g.connect(master);g.connect(conv);o.start(mt);o.stop(mt+BEAT*0.5);nodes.push(o)});
+          [0,1,2,3].forEach(b=>{const dt=t+b*BEAT;if(b%2===0){const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(110,dt);o.frequency.exponentialRampToValueAtTime(38,dt+0.05);const g=actx.createGain();g.gain.setValueAtTime(0.09,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.2);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.25);nodes.push(o)}else{const nb=actx.createBufferSource();const nBuf=actx.createBuffer(1,Math.floor(actx.sampleRate*0.02),actx.sampleRate);const nd=nBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;nb.buffer=nBuf;const ng=actx.createGain();ng.gain.setValueAtTime(0.025,dt);ng.gain.exponentialRampToValueAtTime(0.001,dt+0.02);const hp=actx.createBiquadFilter();hp.type='highpass';hp.frequency.value=2500;nb.connect(ng);ng.connect(hp);hp.connect(master);nb.start(dt);nodes.push(nb)}});
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.08,t+0.15);bg.gain.setValueAtTime(0.08,t+BAR-0.2);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
+          ci++;nt+=BAR;
+        }_schedTimer=setTimeout(window._ambSched,2000);
+      };
+    },
+    strobecity(actx,master,conv,nodes){
+      /* Strobe City — E minor, 128 BPM, dance/EDM, uplifting, bright synths, side-chain feel */
+      const BPM=128,BEAT=60/BPM,BAR=BEAT*4;
+      const chords=[[329.63,392,493.88],[261.63,329.63,392],[196,246.94,293.66],[293.66,349.23,440]];
+      const bass=[82.41,65.41,98,73.42];
+      const arp=[[659.25,493.88,659.25,783.99,987.77,783.99,659.25,987.77],[523.25,392,523.25,659.25,783.99,659.25,523.25,783.99],[392,293.66,392,493.88,587.33,493.88,392,587.33],[587.33,440,587.33,698.46,880,698.46,587.33,880]];
+      let ci=0,nt=0;
+      return function _s(){
+        if(!nt||nt<actx.currentTime)nt=actx.currentTime+0.1;
+        while(nt<actx.currentTime+BAR*2){
+          const c=ci%4,t=nt;
+          chords[c].forEach((f,ni)=>{const o=actx.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=[-8,9,-5][ni];const o2=actx.createOscillator();o2.type='sawtooth';o2.frequency.value=f*1.005;const g=actx.createGain();[0,1,2,3].forEach(b=>{const bt=t+b*BEAT;const v=0.015-ni*0.003;g.gain.setValueAtTime(0.001,bt);g.gain.linearRampToValueAtTime(v,bt+BEAT*0.3);g.gain.setValueAtTime(v,bt+BEAT*0.8);g.gain.linearRampToValueAtTime(0.001,bt+BEAT)});const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1800;lp.Q.value=0.8;o.connect(g);o2.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(t);o2.start(t);o.stop(t+BAR+0.1);o2.stop(t+BAR+0.1);nodes.push(o,o2)});
+          arp[c].forEach((f,ni)=>{const at=t+ni*BEAT*0.5;const o=actx.createOscillator();o.type='square';o.frequency.value=f;const g=actx.createGain();g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(0.022,at+0.004);g.gain.exponentialRampToValueAtTime(0.002,at+BEAT*0.3);const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3500;lp.Q.value=1.2;o.connect(g);g.connect(lp);lp.connect(master);lp.connect(conv);o.start(at);o.stop(at+BEAT*0.5);nodes.push(o)});
+          [0,1,2,3].forEach(b=>{const dt=t+b*BEAT;const o=actx.createOscillator();o.type='sine';o.frequency.setValueAtTime(135,dt);o.frequency.exponentialRampToValueAtTime(40,dt+0.04);const g=actx.createGain();g.gain.setValueAtTime(0.12,dt);g.gain.exponentialRampToValueAtTime(0.002,dt+0.16);o.connect(g);g.connect(master);o.start(dt);o.stop(dt+0.2);nodes.push(o)});
+          const bo=actx.createOscillator();bo.type='sine';bo.frequency.value=bass[c];const bg=actx.createGain();bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(0.1,t+0.04);bg.gain.setValueAtTime(0.1,t+BAR-0.08);bg.gain.linearRampToValueAtTime(0,t+BAR);bo.connect(bg);bg.connect(master);bo.start(t);bo.stop(t+BAR+0.1);nodes.push(bo);
           ci++;nt+=BAR;
         }_schedTimer=setTimeout(window._ambSched,2000);
       };
