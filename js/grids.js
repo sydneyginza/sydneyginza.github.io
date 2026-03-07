@@ -75,10 +75,10 @@ if(!avail&&g.name){
   const wdates=getWeekDates();
   const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);
   if(upcoming){const dayName=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?` (${fmtTime12(upEnt.start)} - ${fmtTime12(upEnt.end)})`:'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?` <span style="opacity:.65;font-size:.85em">·</span> `+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}${timeStr}${comingCd}</div>`}
-  else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
+  else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?t('time.today'):diff===1?t('time.yesterday'):t('time.daysAgo').replace('{n}',diff);schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
 }
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
-const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
+const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">'+t('badge.comeBack')+'</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">'+t('badge.new')+'</span>':'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}${act}</div><div class="card-info"><div class="card-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}${isAdmin()&&g.lastModified?`<div style="font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:1px;margin-top:2px">${daysAgo(g.lastModified)}</div>`:''}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
@@ -128,7 +128,7 @@ const _todayShiftEnded=isToday&&entry&&entry.start&&entry.end&&!liveNow&&(()=>{c
 const timeStr=entry&&entry.start&&entry.end?' ('+fmtTime12(entry.start)+' - '+fmtTime12(entry.end)+')':'';
 const avail=liveNow?`<div class="card-avail card-avail-live"><span class="avail-now-dot"></span><span>${t('avail.now')}${timeStr}</span></div>`:(_todayShiftEnded?`<div class="card-avail card-avail-finished">${t('avail.finished')}</div>`:(isToday?`<div class="card-avail">${t('avail.laterToday')}${timeStr}</div>`:`<div class="card-avail" style="color:var(--accent)">${timeStr.trim()}</div>`));
 const fav=g.name?cardFavBtn(g.name):'';const cmp=g.name?cardCompareBtn(g.name):'';
-const _rVacCd=_vacCountdownLabel(g.name,ts);const _rVacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_rVacCd?`<span class="vac-lastdays">${_rVacCd}</span>`:'');const _rNewBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
+const _rVacCd=_vacCountdownLabel(g.name,ts);const _rVacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">'+t('badge.comeBack')+'</span>':(_rVacCd?`<span class="vac-lastdays">${_rVacCd}</span>`:'');const _rNewBadge=_isNewGirl(g)?'<span class="new-badge">'+t('badge.new')+'</span>':'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}${_rVacBadge}${_rNewBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
@@ -157,10 +157,10 @@ if(!avail&&g.name){
   const wdates=getWeekDates();
   const upcoming=wdates.find(dt=>dt>ts&&!_isOnVacation(g.name,dt)&&(getCalEntry(g.name,dt)||{}).start);
   if(upcoming){const dayName=dispDate(upcoming).day;const upEnt=getCalEntry(g.name,upcoming);const timeStr=upEnt&&upEnt.start&&upEnt.end?` (${fmtTime12(upEnt.start)} - ${fmtTime12(upEnt.end)})`:'';const _fmtD=m=>{const d=Math.floor(m/1440),h=Math.floor((m%1440)/60),mm=m%60;return d>0?`${d}d ${h}h`:h>0?`${h}h ${mm}m`:`${mm}m`};const daysUntil=Math.round((new Date(upcoming+' 00:00')-new Date(ts+' 00:00'))/86400000);const nowMins=now.getHours()*60+now.getMinutes();const[ush,usm]=(upEnt&&upEnt.start||'00:00').split(':').map(Number);const totalMins=daysUntil*1440+ush*60+usm-nowMins;const comingCd=totalMins>0?` <span style="opacity:.65;font-size:.85em">·</span> `+t('avail.startsIn').replace('{t}',_fmtD(totalMins)):'';schedLabel=`<div class="card-coming">${t('avail.coming')} ${dayName}${timeStr}${comingCd}</div>`}
-  else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?'today':diff===1?'yesterday':diff+' days ago';schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
+  else{const lr=getLastRostered(g.name);if(lr){const diff=Math.round((new Date(ts+' 00:00')-new Date(lr+' 00:00'))/86400000);const rel=diff===0?t('time.today'):diff===1?t('time.yesterday'):t('time.daysAgo').replace('{n}',diff);schedLabel=`<div class="card-last-seen">${t('avail.lastSeen')} ${rel}</div>`}}
 }
 const fav=cardFavBtn(g.name);const cmp=cardCompareBtn(g.name);
-const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">Come Back!</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">New!</span>':'';
+const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">'+t('badge.comeBack')+'</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">'+t('badge.new')+'</span>':'';
 el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgba(180,74,255,0.06),rgba(255,111,0,0.03))">${img}${fav}${cmp}</div><div class="card-info"><div class="card-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="card-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="card-special">'+g.special+'</div>':''}${cardRatingHtml(g)}${avail||schedLabel}${viewedBadgeHtml(g.name)}<div class="card-hover-line"></div></div>`;
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
@@ -544,9 +544,9 @@ function _vacCountdownLabel(name,dateStr){
   const s=new Date(v.start);
   const t=new Date(dateStr);
   const diff=Math.round((s-t)/864e5);
-  if(diff===1)return 'Last Day!';
-  if(diff===2)return 'Last 2 Days!';
-  if(diff===3)return 'Last 3 Days!';
+  if(diff===1)return t('badge.lastDay');
+  if(diff===2)return t('badge.lastNDays').replace('{n}','2');
+  if(diff===3)return t('badge.lastNDays').replace('{n}','3');
   return '';
 }
 

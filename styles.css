@@ -1044,9 +1044,9 @@ body.theme-summer .logo,body.theme-summer .home-title{background:linear-gradient
 body.theme-halloween .seasonal-banner{border-color:#ff6f00;background:rgba(255,111,0,0.08)}
 body.theme-halloween .logo,body.theme-halloween .home-title{background:linear-gradient(135deg,#ff6f00,#39ff14,#ff6f00);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(255,111,0,0.4))}
 /* ── User Color Themes ── */
-body.theme-neonTokyo .logo,body.theme-neonTokyo .home-title{background:linear-gradient(135deg,#00d4ff,#ff2d7b,#00d4ff);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,212,255,0.4))}
-body.theme-emeraldNoir .logo,body.theme-emeraldNoir .home-title{background:linear-gradient(135deg,#00e676,#c0c0c0,#00e676);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,230,118,0.4))}
-body.theme-crimsonVelvet .logo,body.theme-crimsonVelvet .home-title{background:linear-gradient(135deg,#e63946,#d4a373,#e63946);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(230,57,70,0.4))}
+body.theme-neon .logo,body.theme-neon .home-title{background:linear-gradient(135deg,#00d4ff,#ff2d7b,#00d4ff);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,212,255,0.4))}
+body.theme-emerald .logo,body.theme-emerald .home-title{background:linear-gradient(135deg,#00e676,#c0c0c0,#00e676);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(0,230,118,0.4))}
+body.theme-crimson .logo,body.theme-crimson .home-title{background:linear-gradient(135deg,#e63946,#d4a373,#e63946);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 4s ease infinite;filter:drop-shadow(0 0 8px rgba(230,57,70,0.4))}
 
 /* ── Time-of-Day Adaptive ── */
 body.tod-dusk::before{background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(255,143,0,0.07),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(255,111,0,0.06),transparent),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(201,149,44,0.05),transparent)}
