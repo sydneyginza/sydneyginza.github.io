@@ -76,6 +76,8 @@ const LANG_DICT = {
     'roster.refresh':'Refresh',
     'roster.dataUpdated':'Availability updated',
     'roster.upToDate':'Already up to date',
+    'roster.weeklyView':'Weekly view',
+    'roster.cardView':'Card view',
     /* Enquiry form */
     'enquiry.title':'Booking Enquiry',
     'enquiry.bookBtn':'Book Now',
@@ -558,6 +560,8 @@ const LANG_DICT = {
     'roster.refresh':'更新',
     'roster.dataUpdated':'空き状況が更新されました',
     'roster.upToDate':'最新の状態です',
+    'roster.weeklyView':'週間ビュー',
+    'roster.cardView':'カードビュー',
     /* Enquiry form */
     'enquiry.title':'予約のお問い合わせ',
     'enquiry.bookBtn':'予約する',
@@ -1040,6 +1044,8 @@ const LANG_DICT = {
     'roster.refresh':'새로고침',
     'roster.dataUpdated':'가용성이 업데이트되었습니다',
     'roster.upToDate':'이미 최신 상태입니다',
+    'roster.weeklyView':'주간 보기',
+    'roster.cardView':'카드 보기',
     /* Enquiry form */
     'enquiry.title':'예약 문의',
     'enquiry.bookBtn':'예약하기',
@@ -1522,6 +1528,8 @@ const LANG_DICT = {
     'roster.refresh':'刷新',
     'roster.dataUpdated':'可用状态已更新',
     'roster.upToDate':'已是最新',
+    'roster.weeklyView':'周视图',
+    'roster.cardView':'卡片视图',
     /* Enquiry form */
     'enquiry.title':'预约咨询',
     'enquiry.bookBtn':'立即预约',

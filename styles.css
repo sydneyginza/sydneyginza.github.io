@@ -852,6 +852,54 @@ tr:hover .cal-bulk-actions,.cal-bulk-actions:focus-within{opacity:1;pointer-even
 .roster-advance-btn:hover{border-color:var(--accent);color:var(--accent)}
 .roster-advance-btn.active{background:rgba(180,74,255,0.15);border-color:var(--accent);color:var(--accent)}
 
+/* ── Roster View Toggle ── */
+.roster-view-toggle{width:32px;height:32px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;flex-shrink:0;margin-left:8px}
+.roster-view-toggle:hover{border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,0.08)}
+
+/* ── Weekly Schedule View ── */
+.weekly-top-bar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px}
+.weekly-nav{display:flex;gap:8px}
+.weekly-nav-btn{width:36px;height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.weekly-nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(180,74,255,0.08)}
+
+.weekly-grid{width:100%}
+.weekly-day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:2px}
+.weekly-day-header{text-align:center;padding:12px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
+.weekly-day-header.weekly-today{background:rgba(180,74,255,0.08);border-color:rgba(180,74,255,0.2)}
+.weekly-day-name{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text)}
+.weekly-day-date{font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--text-dim);letter-spacing:1px;margin-top:2px}
+
+.weekly-shift-cols{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+.weekly-col{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);padding:8px 6px;min-height:80px;display:flex;flex-direction:column;gap:6px}
+.weekly-col.weekly-today{background:rgba(180,74,255,0.04);border-color:rgba(180,74,255,0.12)}
+.weekly-empty{color:rgba(255,255,255,0.15);text-align:center;padding:20px 0;font-size:14px}
+
+.weekly-col{position:relative}
+.weekly-girl{display:flex;align-items:center;gap:6px;padding:4px 4px;border-radius:6px;cursor:pointer;transition:background .2s;position:relative;overflow:hidden}
+.weekly-girl:hover{background:rgba(255,255,255,0.08)}
+.weekly-girl-bar{position:absolute;top:0;bottom:0;background:rgba(180,74,255,0.10);border-radius:6px;pointer-events:none;transition:opacity .3s}
+.weekly-girl-live .weekly-girl-bar{background:rgba(0,200,100,0.15)}
+.weekly-girl-live{border-left:2px solid #00c864}
+.weekly-girl-done{opacity:.4}
+.weekly-girl-done .weekly-girl-bar{background:rgba(255,255,255,0.04)}
+/* Current time indicator */
+.weekly-now-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,60,60,0.5);z-index:2;pointer-events:none}
+.weekly-now-line::before{content:'';position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:rgba(255,60,60,0.8)}
+.weekly-now-label{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:600;color:rgba(255,60,60,0.8);letter-spacing:.5px;white-space:nowrap}
+.weekly-girl-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.06)}
+.weekly-avatar{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.weekly-letter{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:11px;color:var(--text-dim);background:rgba(255,255,255,0.06);border-radius:50%}
+.weekly-girl-name{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:500;color:var(--text);letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.weekly-girl-name .new-badge{font-size:9px;margin-left:4px;vertical-align:middle}
+.weekly-girl-time{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);letter-spacing:.5px;white-space:nowrap;margin-left:auto;flex-shrink:0}
+
+/* Weekly mobile nav */
+.weekly-mobile-nav{display:none}
+.weekly-mob-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px}
+.weekly-mob-btn{width:36px;height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .3s}
+.weekly-mob-btn:hover{border-color:var(--accent);color:var(--accent)}
+.weekly-mob-label{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;letter-spacing:2px;color:var(--text);text-transform:uppercase}
+
 .bottom-nav{display:none}
 
 /* ── Analytics: profile bar with thumbnail ── */
@@ -1312,6 +1360,15 @@ body.mobile-lite.vip-mode .girl-card{backdrop-filter:none;-webkit-backdrop-filte
   .home-img-card{width:calc(50% - 6px);height:auto;aspect-ratio:3/4}
   .an-two-col{grid-template-columns:1fr}
   .an-top5{grid-template-columns:repeat(3,1fr)}
+  /* Weekly view mobile */
+  .weekly-mobile-nav{display:block}
+  .weekly-day-headers{display:none}
+  .weekly-shift-cols{grid-template-columns:1fr}
+  .weekly-shift-cols>[data-wcol]{display:none}
+  .weekly-shift-cols>[data-wcol].wcol-active{display:flex}
+  .weekly-day-header{display:none}
+  .weekly-day-header.wcol-active{display:block}
+  .weekly-month-name{font-size:22px}
 }
 
 /* ===================================================================

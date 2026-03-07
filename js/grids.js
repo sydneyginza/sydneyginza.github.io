@@ -2,6 +2,10 @@
 
 /* Roster-only availability filter (local, not shared) */
 let rosterAvailFilter=null; /* null | 'now' | 'later' | 'finished' */
+let rosterViewMode='cards'; /* 'cards' | 'weekly' */
+let weeklyOffset=0; /* 0 = current week, -1 = prev, +1 = next */
+let weeklyMobileDay=0; /* 0-6 for mobile column */
+try{const _rv=localStorage.getItem('ginza_roster_view');if(_rv)rosterViewMode=_rv}catch(e){}
 
 /* Girls Grid */
 function renderFilters(){const fb=document.getElementById('filterBar');fb.innerHTML='';
@@ -97,19 +101,178 @@ function isSlotBooked(girlName,date,slotMin){if(!Array.isArray(calData._bookings
 function getSlotBooking(girlName,date,slotMin){if(!Array.isArray(calData._bookings))return null;return calData._bookings.find(b=>b.girlName===girlName&&b.date===date&&slotMin>=b.startMin&&slotMin<b.endMin)||null}
 async function togglePublishDate(ds){if(!Array.isArray(calData._published))calData._published=[];const idx=calData._published.indexOf(ds);if(idx>=0)calData._published.splice(idx,1);else calData._published.push(ds);renderCalendar();renderRosterFilters();renderRosterGrid();saveCalData()}
 
+function switchRosterView(mode){
+rosterViewMode=mode;
+try{localStorage.setItem('ginza_roster_view',mode)}catch(e){}
+const cardView=document.getElementById('rosterCardView');
+const weeklyView=document.getElementById('rosterWeeklyView');
+const availBar=document.getElementById('rosterAvailBar');
+if(mode==='weekly'){
+  if(cardView)cardView.style.display='none';
+  if(weeklyView)weeklyView.style.display='';
+  if(availBar)availBar.style.display='none';
+  weeklyOffset=0;weeklyMobileDay=0;
+  renderWeeklySchedule();
+}else{
+  if(cardView)cardView.style.display='';
+  if(weeklyView)weeklyView.style.display='none';
+  if(availBar)availBar.style.display='';
+  renderRosterGrid();
+}
+renderRosterFilters();
+}
+
+function getWeekDatesOffset(offset){
+const t=getAEDTDate();
+t.setDate(t.getDate()+offset*7);
+const a=[];for(let i=0;i<7;i++){const d=new Date(t);d.setDate(t.getDate()+i);a.push(fmtDate(d))}return a;
+}
+
+function renderWeeklySchedule(){
+const dates=getWeekDatesOffset(weeklyOffset);
+const grid=document.getElementById('weeklyGrid');
+if(!grid)return;
+
+/* Nav buttons */
+const prevBtn=document.getElementById('weeklyPrev');
+const nextBtn=document.getElementById('weeklyNext');
+if(prevBtn){prevBtn.onclick=()=>{if(weeklyOffset>0){weeklyOffset--;weeklyMobileDay=0;renderWeeklySchedule()}};prevBtn.disabled=weeklyOffset<=0}
+if(nextBtn)nextBtn.onclick=()=>{weeklyOffset++;weeklyMobileDay=0;renderWeeklySchedule()};
+
+const today=fmtDate(getAEDTDate());
+
+/* Build filtered+sorted base list */
+let _wFiltered=[...girls];
+if(!isAdmin())_wFiltered=_wFiltered.filter(g=>!g.hidden);
+_wFiltered=applySharedFilters(_wFiltered);
+if(!loggedIn)_wFiltered=_wFiltered.filter(g=>g.name&&String(g.name).trim().length>0);
+applySortOrder(_wFiltered);
+const _wSet=new Set(_wFiltered);
+
+/* Collect all girls per date */
+const perDate=dates.map(ds=>{
+  const pub=isDatePublished(ds);
+  let allGirls=[];
+  if(pub){
+    _wFiltered.forEach(g=>{
+      if(!g.name||_isOnVacation(g.name,ds))return;
+      const e=getCalEntry(g.name,ds);
+      if(!e||!e.start||!e.end)return;
+      allGirls.push({g,entry:e});
+    });
+  }
+  return{ds,pub,allGirls};
+});
+
+/* Build HTML */
+let html='<div class="weekly-day-headers">';
+dates.forEach((ds,i)=>{
+  const f=dispDate(ds);
+  const isToday=ds===today;
+  html+=`<div class="weekly-day-header${isToday?' weekly-today':''}" data-wcol="${i}"><div class="weekly-day-name">${f.day}</div><div class="weekly-day-date">${f.date}</div></div>`;
+});
+html+='</div>';
+
+/* Venue operating window: 10:30am (630min) to 4:00am next day (1680min = 28*60) */
+const VENUE_OPEN=10*60+30, VENUE_CLOSE=28*60; /* 10:30 to 28:00 (4am next day) */
+const VENUE_SPAN=VENUE_CLOSE-VENUE_OPEN;
+function _shiftPct(startStr,endStr){
+  const[sh,sm]=startStr.split(':').map(Number);const[eh,em]=endStr.split(':').map(Number);
+  let s=sh*60+sm, e=eh*60+em;
+  if(e<=s)e+=24*60; /* overnight */
+  if(s<VENUE_OPEN)s+=24*60;
+  const left=Math.max(0,(s-VENUE_OPEN)/VENUE_SPAN*100);
+  const right=Math.min(100,(e-VENUE_OPEN)/VENUE_SPAN*100);
+  return{left,width:Math.max(0,right-left)};
+}
+
+/* Current time position for today marker */
+const _now=getAEDTDate();
+let _nowPct=null;
+{const nm=_now.getHours()*60+_now.getMinutes();
+let normNow=nm;if(nm<VENUE_OPEN)normNow=nm+24*60;
+if(normNow>=VENUE_OPEN&&normNow<=VENUE_CLOSE)_nowPct=(normNow-VENUE_OPEN)/VENUE_SPAN*100;}
+
+/* Single combined columns */
+html+=`<div class="weekly-shift-cols">`;
+perDate.forEach((pd,i)=>{
+  const isToday=pd.ds===today;
+  html+=`<div class="weekly-col${isToday?' weekly-today':''}" data-wcol="${i}">`;
+  if(isToday&&_nowPct!==null){
+    html+=`<div class="weekly-now-line" style="left:${_nowPct}%"><span class="weekly-now-label">${fmtTime12(String(_now.getHours()).padStart(2,'0')+':'+String(_now.getMinutes()).padStart(2,'0'))}</span></div>`;
+  }
+  if(!pd.pub||!pd.allGirls.length){html+=`<div class="weekly-empty">&mdash;</div>`;
+  }else{
+    pd.allGirls.forEach(({g,entry})=>{
+      const av=g.photos&&g.photos.length?`<img class="weekly-avatar" src="${g.photos[0]}" alt="${g.name}" loading="lazy">`:`<span class="weekly-letter">${(g.name||'?').charAt(0)}</span>`;
+      const isNew=_isNewGirl(g);
+      const liveNow=pd.ds===today&&isAvailableNow(g.name);
+      const pct=_shiftPct(entry.start,entry.end);
+      const barStyle=`left:${pct.left}%;width:${pct.width}%`;
+      const finishedCls=(isToday&&!liveNow&&_nowPct!==null&&_nowPct>pct.left+pct.width)?' weekly-girl-done':'';
+      html+=`<div class="weekly-girl${liveNow?' weekly-girl-live':''}${finishedCls}" data-girl-name="${g.name}"><div class="weekly-girl-bar" style="${barStyle}"></div><div class="weekly-girl-avatar">${av}</div><div class="weekly-girl-name">${g.name}${isNew?'<span class="new-badge">'+t('badge.new')+'</span>':''}</div><div class="weekly-girl-time">${fmtTime12(entry.start)}-${fmtTime12(entry.end)}</div></div>`;
+    });
+  }
+  html+=`</div>`;
+});
+html+='</div>';
+
+grid.innerHTML=html;
+
+/* Click + hover handlers for girl entries */
+let _weeklyHoverTimer;
+grid.querySelectorAll('.weekly-girl').forEach(el=>{
+  const name=el.dataset.girlName;
+  const g=girls.find(x=>x.name===name);
+  if(!g)return;
+  const idx=girls.indexOf(g);
+  el.onclick=e=>{
+    if(idx>=0){_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='rosterPage';showProfile(idx)}
+  };
+  el.addEventListener('mouseenter',()=>{clearTimeout(_weeklyHoverTimer);_weeklyHoverTimer=setTimeout(()=>{
+    const prev=document.getElementById('cardHoverPreview');if(!prev)return;
+    const ts=fmtDate(getAEDTDate());
+    const _vacCd=_vacCountdownLabel(g.name,ts);const _vacBadge=_isVacReturnDay(g.name,ts)?'<span class="vac-comeback">'+t('badge.comeBack')+'</span>':(_vacCd?`<span class="vac-lastdays">${_vacCd}</span>`:'');const _newBadge=_isNewGirl(g)?'<span class="new-badge">'+t('badge.new')+'</span>':'';
+    const availEl=el.querySelector('.weekly-girl-time');const timeText=availEl?availEl.textContent:'';
+    prev.innerHTML=`<div class="chp-name">${g.name||''}${_vacBadge}${_newBadge}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${timeText?'<div class="chp-avail">'+timeText+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'\u2014'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'\u2014'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'\u2014'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'\u2014'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'\u2014'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'\u2014'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'\u2014'}</span></div></div>`;
+    prev.classList.add('visible');
+  },180)});
+  el.addEventListener('mouseleave',()=>{clearTimeout(_weeklyHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});
+  el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});
+});
+
+/* Mobile day navigation */
+const mobileNav=document.getElementById('weeklyMobileNav');
+if(mobileNav&&window.innerWidth<=768){
+  mobileNav.innerHTML='<div class="weekly-mob-nav"><button class="weekly-mob-btn" id="weeklyMobPrev">&#8249;</button><div class="weekly-mob-label" id="weeklyMobLabel"></div><button class="weekly-mob-btn" id="weeklyMobNext">&#8250;</button></div>';
+  updateWeeklyMobileView(dates);
+  document.getElementById('weeklyMobPrev').onclick=()=>{if(weeklyMobileDay>0){weeklyMobileDay--;updateWeeklyMobileView(dates)}};
+  document.getElementById('weeklyMobNext').onclick=()=>{if(weeklyMobileDay<6){weeklyMobileDay++;updateWeeklyMobileView(dates)}};
+}else if(mobileNav){mobileNav.innerHTML=''}
+}
+
+function updateWeeklyMobileView(dates){
+const activeCol=String(weeklyMobileDay);
+document.querySelectorAll('#weeklyGrid [data-wcol]').forEach(el=>{
+  el.classList.toggle('wcol-active',el.dataset.wcol===activeCol);
+});
+const lbl=document.getElementById('weeklyMobLabel');
+if(lbl){const f=dispDate(dates[weeklyMobileDay]);const today=fmtDate(getAEDTDate());lbl.textContent=(dates[weeklyMobileDay]===today?t('ui.today')+' \u00b7 ':'')+f.day+' '+f.date}
+}
+
 function renderRosterFilters(){const fb=document.getElementById('rosterFilterBar');fb.innerHTML='';const dates=getWeekDates();const ts=dates[0];if(!rosterDateFilter)rosterDateFilter=ts;
 const availDates=dates.filter(ds=>hasGirlsOnDate(ds)&&isDatePublished(ds));
 if(availDates.length&&!availDates.includes(rosterDateFilter))rosterDateFilter=availDates[0];
 if(!availDates.length)rosterDateFilter=null;
-availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)});
-/* Last Updated indicator + manual refresh */
-const uw=document.createElement('div');uw.className='roster-updated-wrap';uw.id='rosterLastUpdated';
-uw.innerHTML='<span class="roster-updated-label">'+t('roster.lastUpdated')+'</span><span class="roster-updated-time" id="rosterLastUpdatedTime">'+(_lastCalFetchDisplay||'--:--')+'</span><button class="roster-refresh-btn" id="rosterRefreshBtn" title="'+t('roster.refresh')+'"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>';
-fb.appendChild(uw);
-setTimeout(()=>{const rb=document.getElementById('rosterRefreshBtn');if(rb)rb.onclick=async()=>{rb.classList.add('spinning');rb.disabled=true;const changed=await refreshCalendar();if(changed){renderRoster()}updateLastUpdatedDisplay();rb.classList.remove('spinning');rb.disabled=false;showToast(changed?t('roster.dataUpdated'):t('roster.upToDate'))}},0);
+if(rosterViewMode!=='weekly'){availDates.forEach(ds=>{const f=dispDate(ds);const b=document.createElement('button');b.className='filter-btn'+(ds===rosterDateFilter?' date-active':'');b.textContent=ds===ts?t('ui.today'):f.day+' '+f.date;b.onclick=()=>{rosterDateFilter=ds;rosterAvailFilter=null;renderRosterFilters();renderRosterGrid()};fb.appendChild(b)})}
+/* View toggle */
+const vt=document.createElement('button');vt.className='roster-view-toggle';vt.title=rosterViewMode==='cards'?t('roster.weeklyView'):t('roster.cardView');
+vt.innerHTML=rosterViewMode==='cards'?'<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 5v14h18V5H3zm16 6h-4V7h4v4zm-4 2h4v4h-4v-4zm-2-2H7V7h6v4zm-6 2h6v4H7v-4zM5 7h0v4H5V7zm0 6h0v4H5v-4z"/></svg>':'<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zM16 4v4h4V4h-4zm-6-0h4V0h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>';
+vt.onclick=()=>switchRosterView(rosterViewMode==='cards'?'weekly':'cards');
+fb.appendChild(vt);
 
 /* Available Now / Today quick-filters */
-renderAvailNowBar()}
+if(rosterViewMode==='weekly'){const bar=document.getElementById('rosterAvailBar');if(bar){bar.innerHTML='';bar.style.display='none'}}else{renderAvailNowBar()}}
 function renderRosterGrid(){safeRender('Roster Grid',()=>{const rg=document.getElementById('rosterGrid');rg.innerHTML='';
 if(!rosterDateFilter){rg.innerHTML=`<div class="empty-msg">${t('ui.noGirlsWeek')}</div>`;return}
 const ts=fmtDate(getAEDTDate());const ds=rosterDateFilter;
@@ -133,7 +296,22 @@ el.innerHTML=`<div class="card-img" style="background:linear-gradient(135deg,rgb
 if(typeof addCardFlip==='function')addCardFlip(el,g);
 if(typeof addCardSlideshow==='function')addCardSlideshow(el,g);
 el.onclick=e=>{if(e.target.closest('.card-fav')||e.target.closest('.card-compare')||e.target.closest('.card-flip-btn'))return;if(el.classList.contains('card-flipped')){el.classList.remove('card-flipped');return}_savedScrollY=window.scrollY;sessionStorage.setItem('ginza_scroll',window.scrollY);profileReturnPage='rosterPage';showProfile(ri)};el.addEventListener('mouseenter',()=>{clearTimeout(_rosterHoverTimer);_rosterHoverTimer=setTimeout(()=>{const prev=document.getElementById('cardHoverPreview');if(!prev)return;const availEl=el.querySelector('.card-avail,.card-coming,.card-last-seen');const availHtml=availEl?availEl.innerHTML:'';const chpCls=availEl?(availEl.classList.contains('card-avail-live')?'chp-avail chp-avail-live':availEl.classList.contains('card-coming')?'chp-avail chp-avail-coming':availEl.classList.contains('card-last-seen')?'chp-avail chp-avail-last':'chp-avail'):'chp-avail';prev.innerHTML=`<div class="chp-name">${g.name||''}${_rVacBadge}${_rNewBadge}</div><div class="chp-country">${Array.isArray(g.country)?g.country.join(', '):(g.country||'')}</div>${g.special?'<div class="chp-special">'+g.special+'</div>':''}${cardRatingHtml(g)?'<div class="chp-rating">'+cardRatingHtml(g)+'</div>':''}${availHtml?'<div class="'+chpCls+'">'+availHtml+'</div>':''}<div class="chp-stats"><div class="chp-row"><span>${t('field.age')}</span><span>${g.age||'—'}</span></div><div class="chp-row"><span>${t('field.body')}</span><span>${g.body||'—'}</span></div><div class="chp-row"><span>${t('field.height')}</span><span>${g.height?g.height+' cm':'—'}</span></div><div class="chp-row"><span>${t('field.cup')}</span><span>${g.cup||'—'}</span></div><div class="chp-divider"></div><div class="chp-row"><span>${t('field.rates30')}</span><span>${g.val1||'—'}</span></div><div class="chp-row"><span>${t('field.rates45')}</span><span>${g.val2||'—'}</span></div><div class="chp-row"><span>${t('field.rates60')}</span><span>${g.val3||'—'}</span></div><div class="chp-row"><span>${t('field.experience')}</span><span>${g.exp||'—'}</span></div></div>`;prev.classList.add('visible')},180)});el.addEventListener('mouseleave',()=>{clearTimeout(_rosterHoverTimer);document.getElementById('cardHoverPreview')?.classList.remove('visible')});el.addEventListener('mousemove',e=>{const prev=document.getElementById('cardHoverPreview');if(!prev||!prev.classList.contains('visible'))return;const vw=window.innerWidth,vh=window.innerHeight,pw=prev.offsetWidth||220,ph=prev.offsetHeight||280;let x=e.clientX+16,y=e.clientY+16;if(x+pw>vw-8)x=e.clientX-pw-12;if(y+ph>vh-8)y=e.clientY-ph-12;prev.style.left=x+'px';prev.style.top=y+'px'});return el});if(card)rg.appendChild(card)});bindCardFavs(rg);bindCardCompare(rg);observeLazy(rg);observeEntrance(rg);renderAvailNowBar()})}
-function renderRoster(){renderRosterFilters();renderRosterGrid()}
+function renderRoster(){
+renderRosterFilters();
+const cardView=document.getElementById('rosterCardView');
+const weeklyView=document.getElementById('rosterWeeklyView');
+const availBar=document.getElementById('rosterAvailBar');
+if(rosterViewMode==='weekly'){
+  if(cardView)cardView.style.display='none';
+  if(weeklyView)weeklyView.style.display='';
+  if(availBar)availBar.style.display='none';
+  renderWeeklySchedule();
+}else{
+  if(cardView)cardView.style.display='';
+  if(weeklyView)weeklyView.style.display='none';
+  if(availBar)availBar.style.display='';
+  renderRosterGrid();
+}}
 
 /* Favorites Grid */
 function renderFavoritesGrid(){safeRender('Favorites Grid',()=>{const fg=document.getElementById('favoritesGrid');fg.innerHTML='';

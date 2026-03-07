@@ -36,7 +36,7 @@
   })();
 </script>
 <style>@font-face{font-family:'Orbitron';font-style:normal;font-weight:400 900;font-display:swap;src:url('/fonts/orbitron-var-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:400;font-display:swap;src:url('/fonts/rajdhani-400-latin.woff2') format('woff2')}@font-face{font-family:'Rajdhani';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/rajdhani-600-latin.woff2') format('woff2')}*{margin:0;padding:0;box-sizing:border-box}:root{--accent:#b44aff;--accent2:#ff6f00;--gold:#c9952c;--gold-light:#f5e6a3;--bg-dark:#0a0a0f;--bg-card:rgba(255,255,255,0.06);--bg-card-hover:rgba(255,255,255,0.09);--text:#e0e0e0;--text-dim:#888;--border-subtle:rgba(255,255,255,0.1)}body{background:var(--bg-dark);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh}nav{position:fixed;top:0;left:0;width:100%;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:70px;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:none}.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:26px;letter-spacing:5px;text-transform:uppercase;background:linear-gradient(135deg,#c9952c,#f5e6a3,#c9952c,#e1b97e,#f5e6a3,#c9952c);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 8px rgba(201,149,44,0.4))}.page{display:none;opacity:0;position:relative;z-index:1}.page.active{display:block;opacity:1}.page.page-enter{animation:pageFadeIn .3s ease}@keyframes pageFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.section{padding:100px 40px;padding-top:120px;max-width:1400px;margin:0 auto}.girls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}.skeleton-shimmer{background:linear-gradient(90deg,rgba(255,255,255,0.03) 0%,rgba(255,255,255,0.07) 40%,rgba(255,255,255,0.03) 80%);background-size:800px 100%;animation:skeletonShimmer 1.8s ease-in-out infinite}@keyframes skeletonShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.skeleton-card{background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);overflow:hidden;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}.skeleton-card .skel-img{width:100%;aspect-ratio:3/4}.skeleton-card .skel-info{padding:16px;display:flex;flex-direction:column;gap:8px}.skeleton-card .skel-line{height:12px;border-radius:2px}.skeleton-card .skel-line.w60{width:60%}.skeleton-card .skel-line.w40{width:40%}.skeleton-card .skel-line.w80{width:80%}.skeleton-fade{transition:opacity .4s ease;opacity:1}</style>
-<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-IzT9K3kuksDezSmgIjLimLm/NUMOJ+2by/lu2el70G5oU1b2ZETFk9f+tA8Etaa9" crossorigin="anonymous">
+<link rel="stylesheet" href="/styles.min.css" media="print" integrity="sha384-fwMraDWqrex4eqgB6GOKQ1UEUdDmHZW2hNn1O6Vfh5J6J0nm7FIlX63kjdLwgF8e" crossorigin="anonymous">
 <noscript><link rel="stylesheet" href="/styles.min.css" media="all"></noscript>
 <script type="application/ld+json">
 {
@@ -214,10 +214,17 @@
 <div class="page" id="rosterPage"><section class="section">
 <div class="section-header"><div class="section-line"></div><div><div class="section-tag" data-i18n="page.titlelower"></div><div class="section-title" data-i18n="page.roster"></div></div><div class="filter-bar" id="rosterFilterBar"><div class="skeleton-fade" id="rosterFilterSkeleton" style="display:contents"><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div><div class="skeleton-filter-btn skeleton-shimmer"></div></div></div></div>
 <div id="rosterAvailBar"></div>
+<div id="rosterCardView">
 <div class="page-with-sidebar">
 <div class="page-main-content">
 <div class="girls-grid" id="rosterGrid"><div class="skeleton-fade" id="rosterSkeleton" style="display:contents"><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w60 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div><div class="skeleton-card"><div class="skel-img skeleton-shimmer"></div><div class="skel-info"><div class="skel-line w80 skeleton-shimmer"></div><div class="skel-line w40 skeleton-shimmer"></div></div></div></div></div>
 </div>
+</div>
+</div>
+<div id="rosterWeeklyView" style="display:none">
+<div class="weekly-top-bar"><div class="weekly-nav"><button class="weekly-nav-btn" id="weeklyPrev"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg></button><button class="weekly-nav-btn" id="weeklyNext"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></button></div></div>
+<div class="weekly-mobile-nav" id="weeklyMobileNav"></div>
+<div class="weekly-grid" id="weeklyGrid"></div>
 </div>
 </section></div>
 
@@ -523,7 +530,7 @@
 
 <footer><p data-i18n="footer.rights"></p><p class="footer-privacy" data-i18n="footer.privacy"></p></footer>
 
-<script src="/js/app.min.js" defer integrity="sha384-cPNgKZ1nXHTeIrUJCjfVXJKc+5DOo4liWsuiz6piu/uq1jeYrDyA2WoxJC2UIfON"></script>
+<script src="/js/app.min.js" defer integrity="sha384-cUEa4VopXaTDFKzVDQvMBbRzo2RCcFyUOx3q3A+0JlV3T6wHForIvrD7GQe591xb"></script>
 <script src="/js/analytics.min.js" defer integrity="sha384-QvrTB8Qf7IHvfA/zyT8OEDIyY6tOEJ3okv0BJR0+phRq3l+BMmT/FjtM5uJ/68/d"></script>
 <div id="cardHoverPreview" class="card-hover-preview"></div>
 <div class="cursor-dot" id="cursorDot"></div>

@@ -418,8 +418,8 @@ async function loadCalData() {
 
 async function saveCalData(retryOnConflict = true) {
   try {
-    const vd = getWeekDates(), cl = {};
-    for (const n in calData) { if(n==='_published'){cl._published=Array.isArray(calData._published)?[...calData._published]:[];continue} if(n==='_bookings'){cl._bookings=Array.isArray(calData._bookings)?calData._bookings.filter(b=>vd.includes(b.date)).map(b=>({...b})):[];continue} cl[n] = {}; for (const dt of vd) { if (calData[n] && calData[n][dt]) cl[n][dt] = calData[n][dt] } }
+    const vd = getWeekDates(); const _yd=new Date(getAEDTDate());_yd.setDate(_yd.getDate()-1);const yesterday=fmtDate(_yd);if(!vd.includes(yesterday))vd.unshift(yesterday); const cl = {};
+    for (const n in calData) { if(n==='_published'){cl._published=Array.isArray(calData._published)?calData._published.filter(d=>d>=yesterday):[];continue} if(n==='_bookings'){cl._bookings=Array.isArray(calData._bookings)?calData._bookings.filter(b=>vd.includes(b.date)).map(b=>({...b})):[];continue} cl[n] = {}; for (const dt of vd) { if (calData[n] && calData[n][dt]) cl[n][dt] = calData[n][dt] } }
     calData = cl;
     const body = { message: 'Update calendar', content: enc(calData) };
     if (calSha) body.sha = calSha;
