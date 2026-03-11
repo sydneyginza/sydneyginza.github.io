@@ -1938,5 +1938,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T11:30:34.729Z",
     "profile": "Yume"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:30:40.194Z",
+    "page": "bookings"
   }
 ]
