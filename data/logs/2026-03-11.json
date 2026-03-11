@@ -1908,5 +1908,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T11:30:02.181Z",
     "page": "bookings"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:30:07.693Z",
+    "profile": "Susu"
   }
 ]
