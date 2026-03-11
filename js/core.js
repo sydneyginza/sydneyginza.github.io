@@ -917,6 +917,28 @@ const Router = (function() {
   return { PAGE_ROUTES, push, replace, resolve, pathForPage, pathForProfile, nameToSlug, slugToName, findGirlByName };
 })();
 
+/* === Booking Price Calculation === */
+function calcBookingPrice(girlName,startMin,endMin){
+  const g=girls.find(x=>x.name===girlName);
+  if(!g)return null;
+  /* Build sorted tiers: [{mins, price}] from longest to shortest */
+  const tiers=[];
+  if(g.val3){const p=parseFloat(g.val3);if(!isNaN(p))tiers.push({mins:60,price:p})}
+  if(g.val2){const p=parseFloat(g.val2);if(!isNaN(p))tiers.push({mins:45,price:p})}
+  if(g.val1){const p=parseFloat(g.val1);if(!isNaN(p))tiers.push({mins:30,price:p})}
+  if(!tiers.length)return null;
+  /* Greedy: use largest tier first, then fill remainder */
+  let remaining=endMin-startMin;
+  if(remaining<=0)return null;
+  let total=0;
+  while(remaining>0){
+    const tier=tiers.find(t=>t.mins<=remaining);
+    if(tier){total+=tier.price;remaining-=tier.mins}
+    else{/* Remaining is less than smallest tier — charge smallest tier */total+=tiers[tiers.length-1].price;break}
+  }
+  return String(total);
+}
+
 /* === Booking Log === */
 async function saveBookingLog(entry){
   const _d=new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}));

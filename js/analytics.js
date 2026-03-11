@@ -1014,9 +1014,9 @@ async function _loadBookingCounts(){
     const bookings={};/* bookingId -> {user, status} */
     allEntries.forEach(e=>{
       const id=e.bookingId;
-      if(!bookings[id])bookings[id]={user:e.user,status:'pending'};
-      if(e.type==='booking_approved')bookings[id].status='approved';
-      else if(e.type==='booking_rejected')bookings[id].status='rejected';
+      if(!bookings[id])bookings[id]={user:e.user,status:e.status||'pending'};
+      if(e.type==='booking_approved'||(e.type==='booking_admin_created'&&e.status==='approved'))bookings[id].status='approved';
+      else if(e.type==='booking_rejected'||e.type==='booking_auto_rejected')bookings[id].status='rejected';
     });
     /* Tally per user */
     Object.values(bookings).forEach(b=>{

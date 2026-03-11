@@ -513,7 +513,7 @@ async function approveBooking(){
   if(!_adminBkCurrent)return;
   const bk=calData._bookings.find(b=>b.id===_adminBkCurrent.id);if(!bk)return;
   bk.status='approved';
-  if(await saveCalData()){saveBookingLog({type:'booking_approved',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:'approved',by:loggedInUser});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking approved');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_approved',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:'approved',by:loggedInUser,totalValue:calcBookingPrice(bk.girlName,bk.startMin,bk.endMin)});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking approved');renderBookingsGrid()}
   else{bk.status='pending';showToast('Failed to save','error')}
 }
 
@@ -521,7 +521,7 @@ async function rejectBooking(){
   if(!_adminBkCurrent)return;
   const idx=calData._bookings.findIndex(b=>b.id===_adminBkCurrent.id);if(idx===-1)return;
   const removed=calData._bookings.splice(idx,1)[0];
-  if(await saveCalData()){saveBookingLog({type:'booking_rejected',bookingId:removed.id,user:removed.user,girlName:removed.girlName,date:removed.date,startMin:removed.startMin,endMin:removed.endMin,status:'rejected',by:loggedInUser});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking rejected');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_rejected',bookingId:removed.id,user:removed.user,girlName:removed.girlName,date:removed.date,startMin:removed.startMin,endMin:removed.endMin,status:'rejected',by:loggedInUser,totalValue:calcBookingPrice(removed.girlName,removed.startMin,removed.endMin)});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking rejected');renderBookingsGrid()}
   else{calData._bookings.splice(idx,0,removed);showToast('Failed to save','error')}
 }
 
@@ -552,7 +552,7 @@ async function autoRejectExpiredBookings(){
     });
     if(await saveCalData()){
       expired.forEach(b=>{
-        saveBookingLog({type:'booking_auto_rejected',bookingId:b.id,user:b.user,girlName:b.girlName,date:b.date,startMin:b.startMin,endMin:b.endMin,status:'rejected',by:'system'});
+        saveBookingLog({type:'booking_auto_rejected',bookingId:b.id,user:b.user,girlName:b.girlName,date:b.date,startMin:b.startMin,endMin:b.endMin,status:'rejected',by:'system',totalValue:calcBookingPrice(b.girlName,b.startMin,b.endMin)});
       });
       console.log('[AutoReject] Rejected',expired.length,'expired pending booking(s)');
     }else{
@@ -569,7 +569,7 @@ async function editBooking(){
   const dur=parseInt(document.getElementById('adminBkEditDur').value);
   const prev={date:bk.date,startMin:bk.startMin,endMin:bk.endMin};
   bk.startMin=s;bk.endMin=s+dur;
-  if(await saveCalData()){saveBookingLog({type:'booking_edited',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:bk.status,by:loggedInUser,prev:{startMin:prev.startMin,endMin:prev.endMin}});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
+  if(await saveCalData()){saveBookingLog({type:'booking_edited',bookingId:bk.id,user:bk.user,girlName:bk.girlName,date:bk.date,startMin:bk.startMin,endMin:bk.endMin,status:bk.status,by:loggedInUser,prev:{startMin:prev.startMin,endMin:prev.endMin},totalValue:calcBookingPrice(bk.girlName,bk.startMin,bk.endMin)});document.getElementById('adminBkPopup').classList.remove('open');showToast('Booking updated');renderBookingsGrid()}
   else{bk.startMin=prev.startMin;bk.endMin=prev.endMin;showToast('Failed to save','error')}
 }
 
@@ -629,7 +629,7 @@ async function createAdminBooking(user){
   const booking={id:Date.now().toString(36)+Math.random().toString(36).slice(2),girlName:_adminNewBkGirl,date:_adminNewBkDate,startMin:_adminNewBkSel.startMin,endMin:_adminNewBkSel.endMin,user,status:'approved',ts:new Date().toISOString()};
   calData._bookings.push(booking);
   if(await saveCalData()){
-    saveBookingLog({type:'booking_admin_created',bookingId:booking.id,user:booking.user,girlName:booking.girlName,date:booking.date,startMin:booking.startMin,endMin:booking.endMin,status:'approved',by:loggedInUser});
+    saveBookingLog({type:'booking_admin_created',bookingId:booking.id,user:booking.user,girlName:booking.girlName,date:booking.date,startMin:booking.startMin,endMin:booking.endMin,status:'approved',by:loggedInUser,totalValue:calcBookingPrice(booking.girlName,booking.startMin,booking.endMin)});
     document.getElementById('adminUserSelectPopup').classList.remove('open');
     document.getElementById('adminNewBkPopup').classList.remove('open');
     showToast('Booking created');renderBookingsGrid();
