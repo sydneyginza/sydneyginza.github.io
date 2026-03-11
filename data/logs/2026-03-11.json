@@ -463,5 +463,138 @@
     "uuid": "v_mmlhl8yu_trfw2ana",
     "timestamp": "2026-03-11T06:14:12.446Z",
     "page": "value"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:40:45.401Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:40:55.088Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:40:57.501Z",
+    "page": "list"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:00.253Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/girls",
+    "referrer": "https://sydneyginza.github.io/girls",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:04.763Z",
+    "page": "list"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:06.779Z",
+    "page": "roster"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:11.430Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/roster/card",
+    "referrer": "https://sydneyginza.github.io/roster/card",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:15.834Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:21.920Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:23.660Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "https://sydneyginza.github.io/roster/card",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:32.336Z",
+    "page": "list"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:41:42.679Z",
+    "page": "roster"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlhlm3t_ufamhoau",
+    "timestamp": "2026-03-11T07:49:37.827Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/roster/card",
+    "referrer": "https://sydneyginza.github.io/roster/card",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
   }
 ]
