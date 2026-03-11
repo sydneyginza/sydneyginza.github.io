@@ -838,5 +838,476 @@
     "uuid": "v_mmlqrxyr_17pss3h5",
     "timestamp": "2026-03-11T09:59:46.199Z",
     "page": "calendar"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:03:46.489Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/calendar",
+    "referrer": "https://sydneyginza.github.io/calendar",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:03:47.228Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:04:17.992Z",
+    "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:04:28.887Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:04:34.240Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:13:51.920Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:03.134Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:06.821Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:24.501Z",
+    "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:27.269Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:32.247Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:15:42.444Z",
+    "page": "favorites"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:16:07.730Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:16:53.376Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:17:15.729Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:17:43.370Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:18:41.131Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T08:11:39.341Z",
+    "page": "list"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:20:06.397Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/index.html",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:20:06.850Z",
+    "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:22:47.213Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:22:51.283Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:22:52.051Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:24:37.301Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:24:38.301Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:21.824Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "https://sydneyginza.github.io/profile-database",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:22.734Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:30.681Z",
+    "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:37.425Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:42.244Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:27:45.086Z",
+    "page": "bookings"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:32:25.485Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:32:26.317Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:33:57.802Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:33:59.010Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:34:23.230Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:34:23.863Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:35:49.171Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:35:50.104Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:38:53.550Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:38:54.740Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:39:08.294Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:39:09.039Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:44:59.449Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:45:00.025Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:47:06.824Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/bookings",
+    "referrer": "https://sydneyginza.github.io/bookings",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:47:07.975Z",
+    "page": "bookings"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:47:12.970Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:47:14.571Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:47:17.880Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:47:18.851Z",
+    "page": "profileDb"
   }
 ]
