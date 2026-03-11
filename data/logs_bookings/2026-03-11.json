@@ -1,26 +1,65 @@
 [
   {
-    "ts": "2026-03-11T11:07:47.679Z",
+    "ts": "2026-03-11T11:11:27.929Z",
     "type": "booking_created",
-    "bookingId": "mmlxqbhto9hpfiv1ezk",
+    "bookingId": "mmlxv1fd83s0rkzh92d",
     "user": "member",
     "girlName": "Vanilla",
     "date": "2026-03-11",
-    "startMin": 1560,
-    "endMin": 1650,
+    "startMin": 1500,
+    "endMin": 1605,
     "status": "pending"
   },
   {
-    "ts": "2026-03-11T11:08:09.106Z",
+    "ts": "2026-03-11T11:12:00.261Z",
     "type": "booking_admin_created",
-    "bookingId": "mmlxqrxqh5goxpxqv6w",
+    "bookingId": "mmlxvpzz88ximnzt9oo",
     "user": "member",
     "girlName": "Vanilla",
     "date": "2026-03-11",
-    "startMin": 1320,
-    "endMin": 1410,
+    "startMin": 1260,
+    "endMin": 1350,
     "status": "approved",
     "by": "Ginza Empire",
     "totalValue": "490"
+  },
+  {
+    "ts": "2026-03-11T11:18:49.055Z",
+    "type": "booking_approved",
+    "bookingId": "mmlxv1fd83s0rkzh92d",
+    "user": "member",
+    "girlName": "Vanilla",
+    "date": "2026-03-11",
+    "startMin": 1500,
+    "endMin": 1605,
+    "status": "approved",
+    "by": "Ginza Empire",
+    "totalValue": "550"
+  },
+  {
+    "ts": "2026-03-11T11:21:54.922Z",
+    "type": "booking_rejected",
+    "bookingId": "mmlxvpzz88ximnzt9oo",
+    "user": "member",
+    "girlName": "Vanilla",
+    "date": "2026-03-11",
+    "startMin": 1260,
+    "endMin": 1350,
+    "status": "rejected",
+    "by": "Ginza Empire",
+    "totalValue": "490"
+  },
+  {
+    "ts": "2026-03-11T11:30:52.233Z",
+    "type": "booking_admin_created",
+    "bookingId": "mmlyjzuzzkvjgpska4",
+    "user": "member",
+    "girlName": "Yume",
+    "date": "2026-03-11",
+    "startMin": 1380,
+    "endMin": 1500,
+    "status": "approved",
+    "by": "Ginza Empire",
+    "totalValue": "600"
   }
 ]
