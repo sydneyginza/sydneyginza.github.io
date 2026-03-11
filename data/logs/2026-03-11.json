@@ -733,5 +733,28 @@
     "screen": "2560x1440",
     "viewport": "1731x1305",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T08:08:31.491Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/roster/card",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "1731x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T08:08:32.739Z",
+    "page": "roster"
   }
 ]
