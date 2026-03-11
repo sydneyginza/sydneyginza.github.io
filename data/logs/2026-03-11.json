@@ -1985,5 +1985,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T11:37:12.272Z",
     "page": "analytics"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:37:17.377Z",
+    "page": "vacation"
   }
 ]
