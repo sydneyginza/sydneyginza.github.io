@@ -903,5 +903,11 @@
     "uuid": "v_mmlqrxyr_17pss3h5",
     "timestamp": "2026-03-11T10:14:24.501Z",
     "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:14:27.269Z",
+    "page": "bookings"
   }
 ]
