@@ -2459,5 +2459,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T12:02:12.106Z",
     "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T12:02:37.001Z",
+    "page": "myProfile"
   }
 ]
