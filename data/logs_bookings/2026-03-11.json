@@ -35,5 +35,18 @@
     "status": "rejected",
     "by": "Ginza Empire",
     "totalValue": "490"
+  },
+  {
+    "ts": "2026-03-11T11:10:58.564Z",
+    "type": "booking_rejected",
+    "bookingId": "mmlxqbhto9hpfiv1ezk",
+    "user": "member",
+    "girlName": "Vanilla",
+    "date": "2026-03-11",
+    "startMin": 1560,
+    "endMin": 1650,
+    "status": "rejected",
+    "by": "Ginza Empire",
+    "totalValue": "490"
   }
 ]
