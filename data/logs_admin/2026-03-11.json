@@ -130,5 +130,11 @@
     "admin": "Ginza Empire",
     "action": "profile_add",
     "target": "Koi"
+  },
+  {
+    "ts": "2026-03-11T09:55:19.778Z",
+    "admin": "Ginza Empire",
+    "action": "profile_add",
+    "target": "Amu"
   }
 ]
