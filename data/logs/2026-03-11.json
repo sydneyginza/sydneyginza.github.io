@@ -451,5 +451,11 @@
     "uuid": "v_mmlhlm3t_ufamhoau",
     "timestamp": "2026-03-11T06:12:29.322Z",
     "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlhl8yu_trfw2ana",
+    "timestamp": "2026-03-11T06:14:00.689Z",
+    "page": "list"
   }
 ]
