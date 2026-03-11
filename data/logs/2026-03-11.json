@@ -2161,5 +2161,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T11:49:33.821Z",
     "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:49:56.724Z",
+    "page": "bookings"
   }
 ]
