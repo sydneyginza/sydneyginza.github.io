@@ -1011,18 +1011,27 @@ async function _loadBookingCounts(){
       results.forEach(entries=>{entries.forEach(e=>{if(e.bookingId&&e.user)allEntries.push(e)})});
     }
     /* Deduplicate by bookingId — keep last status per booking */
-    const bookings={};/* bookingId -> {user, status} */
+    const bookings={};/* bookingId -> {user, status, startMin, endMin, totalValue} */
     allEntries.forEach(e=>{
       const id=e.bookingId;
-      if(!bookings[id])bookings[id]={user:e.user,status:e.status||'pending'};
+      if(!bookings[id])bookings[id]={user:e.user,status:e.status||'pending',girlName:e.girlName,startMin:e.startMin,endMin:e.endMin,totalValue:e.totalValue||null};
       if(e.type==='booking_approved'||(e.type==='booking_admin_created'&&e.status==='approved'))bookings[id].status='approved';
       else if(e.type==='booking_rejected'||e.type==='booking_auto_rejected')bookings[id].status='rejected';
+      /* Update duration/value from latest entry that has them */
+      if(e.startMin!=null)bookings[id].startMin=e.startMin;
+      if(e.endMin!=null)bookings[id].endMin=e.endMin;
+      if(e.totalValue!=null)bookings[id].totalValue=e.totalValue;
     });
     /* Tally per user */
     Object.values(bookings).forEach(b=>{
-      if(!counts[b.user])counts[b.user]={total:0,approved:0,rejected:0,pending:0};
+      if(!counts[b.user])counts[b.user]={total:0,approved:0,rejected:0,pending:0,totalHours:0,totalValue:0,girls:new Set()};
       counts[b.user].total++;
-      if(b.status==='approved')counts[b.user].approved++;
+      if(b.status==='approved'){
+        counts[b.user].approved++;
+        if(b.girlName)counts[b.user].girls.add(b.girlName);
+        if(b.startMin!=null&&b.endMin!=null)counts[b.user].totalHours+=(b.endMin-b.startMin)/60;
+        if(b.totalValue!=null)counts[b.user].totalValue+=parseFloat(b.totalValue)||0;
+      }
       else if(b.status==='rejected')counts[b.user].rejected++;
       else counts[b.user].pending++;
     });
@@ -1049,13 +1058,14 @@ if(_pdbRoleFilter&&c.role!==_pdbRoleFilter)return false;
 if(q){const u=(c.user||'').toLowerCase(),e=(c.email||'').toLowerCase(),m=(c.mobile||'').toLowerCase();if(!u.includes(q)&&!e.includes(q)&&!m.includes(q))return false}
 return true});
 /* Table */
-html+='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>'+t('pdb.bookings')+'</th><th>'+t('pdb.role')+'</th><th>'+t('pdb.status')+'</th><th></th></tr></thead><tbody>';
-if(!filtered.length){html+='<tr><td colspan="7" style="text-align:center;color:var(--text-dim);padding:24px">'+t('pdb.noResults')+'</td></tr>'}
+html+='<table class="pdb-table"><thead><tr><th>'+t('pdb.username')+'</th><th>'+t('field.email')+'</th><th>'+t('field.mobile')+'</th><th>Girls</th><th>'+t('pdb.bookings')+'</th><th>Time</th><th>Value</th><th>'+t('pdb.role')+'</th><th>'+t('pdb.status')+'</th><th></th></tr></thead><tbody>';
+if(!filtered.length){html+='<tr><td colspan="10" style="text-align:center;color:var(--text-dim);padding:24px">'+t('pdb.noResults')+'</td></tr>'}
 filtered.forEach(({c,i})=>{
 const isSelf=c.user===loggedInUser;const st=c.status||'approved';
 const isApproved=st==='approved';
-const bk=bkCounts[c.user]||{total:0,approved:0,rejected:0,pending:0};
-html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td class="pdb-bookings">'+bk.total+' <span class="pdb-bk-approved" title="'+t('pdb.bkApproved')+'">'+bk.approved+'</span> <span class="pdb-bk-pending" title="'+t('pdb.bkPending')+'">'+bk.pending+'</span> <span class="pdb-bk-rejected" title="'+t('pdb.bkRejected')+'">'+bk.rejected+'</span></td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td><td><label class="pdb-status-check'+(isApproved?' pdb-status-approved':'')+'"><input type="checkbox" class="pdb-status-cb" data-cred-idx="'+i+'"'+(isApproved?' checked disabled':'')+'/><span class="pdb-status-label">'+(isApproved?t('pdb.statusApproved'):t('pdb.statusPending'))+'</span></label></td><td>'+(isSelf?'':'<button class="pdb-delete-btn" data-cred-idx="'+i+'" title="'+t('pdb.deleteUser')+'">&#x2715;</button>')+'</td></tr>'});
+const bk=bkCounts[c.user]||{total:0,approved:0,rejected:0,pending:0,totalHours:0,totalValue:0,girls:new Set()};
+const _bkH=Math.floor(bk.totalHours),_bkM=Math.round((bk.totalHours-_bkH)*60);const bkHrs=_bkM?_bkH+'h '+_bkM+'m':_bkH+'h';
+html+='<tr><td class="pdb-user">'+((c.user||'').toUpperCase())+'</td><td>'+(c.email||'—')+'</td><td>'+(c.mobile||'—')+'</td><td class="pdb-bk-girls-col">'+(bk.girls.size||'—')+'</td><td class="pdb-bookings">'+bk.total+' <span class="pdb-bk-approved" title="'+t('pdb.bkApproved')+'">'+bk.approved+'</span> <span class="pdb-bk-pending" title="'+t('pdb.bkPending')+'">'+bk.pending+'</span> <span class="pdb-bk-rejected" title="'+t('pdb.bkRejected')+'">'+bk.rejected+'</span></td><td class="pdb-bk-hours-col">'+(bk.approved?bkHrs:'—')+'</td><td class="pdb-bk-value-col">'+(bk.approved?'$'+bk.totalValue:'—')+'</td><td><select class="pdb-role-select" data-cred-idx="'+i+'"><option value="admin"'+(c.role==='admin'?' selected':'')+'>Admin</option><option value="member"'+(c.role==='member'?' selected':'')+'>Member</option></select></td><td><label class="pdb-status-check'+(isApproved?' pdb-status-approved':'')+'"><input type="checkbox" class="pdb-status-cb" data-cred-idx="'+i+'"'+(isApproved?' checked disabled':'')+'/><span class="pdb-status-label">'+(isApproved?t('pdb.statusApproved'):t('pdb.statusPending'))+'</span></label></td><td>'+(isSelf?'':'<button class="pdb-delete-btn" data-cred-idx="'+i+'" title="'+t('pdb.deleteUser')+'">&#x2715;</button>')+'</td></tr>'});
 html+='</tbody></table>';
 container.innerHTML=html;
 /* Bind search */
