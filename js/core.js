@@ -7,7 +7,7 @@ const SITE_REPO = REPO;
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
-const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', RHP = 'data/roster_history.json', VP = 'data/vacation.json', ALP = 'data/admin_log.json', BKLP = 'data/logs_bookings';
+const DP = 'data/girls.json', AP = 'data/auth.json', KP = 'data/calendar.json', RHP = 'data/roster_history.json', VP = 'data/vacation.json', ALP = 'data/logs_admin', BKLP = 'data/logs_bookings';
 var loggedIn = false, dataSha = null, calSha = null, calData = {}, loggedInUser = null, loggedInRole = null, loggedInEmail = null, loggedInMobile = null, authSha = null, MAX_PHOTOS = 10, profileReturnPage = 'homePage';
 function isAdmin(){ return loggedIn && (loggedInRole === 'admin' || loggedInRole === 'owner') }
 var rosterHistory = {}, rosterHistorySha = null;
@@ -915,13 +915,16 @@ async function saveBookingLog(entry){
 /* === Activity Log === */
 async function logAdminAction(action,target,meta={}){
   if(!loggedInUser)return;
+  const _d=new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}));
+  const dateStr=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
+  const path=`${ALP}/${dateStr}.json`;
   let existing=[],sha=null;
-  try{const r=await fetch(`${DATA_API}/${ALP}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;existing=dec(d.content)}}catch(_){}
-  if(existing.length>=500)existing=existing.slice(existing.length-499);
+  try{const r=await fetch(`${DATA_API}/${path}`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();sha=d.sha;try{const parsed=dec(d.content);if(Array.isArray(parsed))existing=parsed;}catch(_){}}}catch(_){}
+  if(existing.length>=1000)existing=existing.slice(existing.length-999);
   existing.push({ts:new Date().toISOString(),admin:loggedInUser,action,target,...meta});
   const body={message:`Log ${action}`,content:enc(existing)};
   if(sha)body.sha=sha;
-  try{await fetch(`${DATA_API}/${ALP}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)})}catch(_){}
+  try{await fetch(`${DATA_API}/${path}`,{method:'PUT',headers:proxyHeaders(),body:JSON.stringify(body)})}catch(_){}
 }
 
 /* === Privacy Banner (moved from inline for CSP compliance) === */

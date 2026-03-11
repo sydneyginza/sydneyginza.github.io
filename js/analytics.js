@@ -916,11 +916,15 @@ async function renderAdminLog(){
   if(!container)return;
   container.innerHTML='<div class="an-section"><div class="an-section-title">Activity Log <span class="an-hint">Last 50 admin actions</span></div><div class="an-loading"><div class="an-loading-spinner"></div><div class="an-loading-text">Loading…</div></div></div>';
   try{
-    const r=await fetch(`${DATA_API}/${ALP}`,{headers:proxyHeaders()});
-    if(!r.ok){container.innerHTML='<div class="an-section"><div class="an-section-title">Activity Log</div><div class="an-empty">No activity recorded yet</div></div>';return}
-    const d=await r.json();
-    const entries=dec(d.content);
-    const recent=[...entries].reverse().slice(0,50);
+    const _d=new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'}));
+    const days=[];
+    for(let i=0;i<7;i++){const d=new Date(_d);d.setDate(d.getDate()-i);days.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));}
+    const entries=[];
+    await Promise.all(days.map(async day=>{
+      try{const r=await fetch(`${DATA_API}/${ALP}/${day}.json`,{headers:proxyHeaders()});if(r.ok){const d=await r.json();const parsed=dec(d.content);if(Array.isArray(parsed))entries.push(...parsed);}}catch(_){}
+    }));
+    if(!entries.length){container.innerHTML='<div class="an-section"><div class="an-section-title">Activity Log</div><div class="an-empty">No activity recorded yet</div></div>';return}
+    const recent=entries.sort((a,b)=>(b.ts||'').localeCompare(a.ts||'')).slice(0,50);
     const ACTION_LABELS={profile_add:'Added profile',profile_edit:'Edited profile',profile_delete:'Deleted profile',user_role_change:'Changed role',user_delete:'Deleted user',csv_import:'CSV import'};
     let html='<div class="an-section"><div class="an-section-title">Activity Log <span class="an-hint">Last 50 admin actions</span></div>';
     if(!recent.length){html+='<div class="an-empty">No activity recorded yet</div></div>';container.innerHTML=html;return}
