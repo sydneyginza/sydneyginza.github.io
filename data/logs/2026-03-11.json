@@ -318,5 +318,22 @@
     "uuid": "v_mmljf8ug_rpztz6nx",
     "timestamp": "2026-03-11T04:27:19.603Z",
     "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlk0rnv_x7vm98nu",
+    "timestamp": "2026-03-11T04:43:59.371Z",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Linux",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Europe/Moscow",
+    "tzOffset": -180,
+    "page": "/ginzaempire",
+    "referrer": "https://sydneyginza.github.io/ginzaempire",
+    "screen": "800x600",
+    "viewport": "1905x1096",
+    "siteLang": "en"
   }
 ]
