@@ -756,5 +756,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T08:08:32.739Z",
     "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T08:08:43.450Z",
+    "page": "roster"
   }
 ]
