@@ -9,5 +9,18 @@
     "startMin": 1500,
     "endMin": 1605,
     "status": "pending"
+  },
+  {
+    "ts": "2026-03-11T11:12:00.261Z",
+    "type": "booking_admin_created",
+    "bookingId": "mmlxvpzz88ximnzt9oo",
+    "user": "member",
+    "girlName": "Vanilla",
+    "date": "2026-03-11",
+    "startMin": 1260,
+    "endMin": 1350,
+    "status": "approved",
+    "by": "Ginza Empire",
+    "totalValue": "490"
   }
 ]
