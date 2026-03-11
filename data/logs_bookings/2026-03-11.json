@@ -1,1 +1,13 @@
-
+[
+  {
+    "ts": "2026-03-11T11:11:27.929Z",
+    "type": "booking_created",
+    "bookingId": "mmlxv1fd83s0rkzh92d",
+    "user": "member",
+    "girlName": "Vanilla",
+    "date": "2026-03-11",
+    "startMin": 1500,
+    "endMin": 1605,
+    "status": "pending"
+  }
+]
