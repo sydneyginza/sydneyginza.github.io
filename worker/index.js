@@ -5,7 +5,18 @@
  *   GITHUB_TOKEN — GitHub personal access token (contents read/write scope)
  */
 
-const ALLOWED_ORIGIN = 'https://sydneyginza.github.io';
+const ALLOWED_ORIGINS = [
+  'https://sydneyginza.github.io',
+  'http://localhost:3000',
+  'http://127.0.0.1:5500',
+];
+
+let _reqOrigin = ALLOWED_ORIGINS[0];
+
+function getAllowedOrigin(request) {
+  const origin = request.headers.get('Origin') || '';
+  return ALLOWED_ORIGINS.includes(origin) ? origin : null;
+}
 const REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_REPO = REPO;
 const GH_API = 'https://api.github.com';
@@ -14,7 +25,7 @@ const GH_API = 'https://api.github.com';
 
 function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+    'Access-Control-Allow-Origin': _reqOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
     'Access-Control-Max-Age': '86400',
@@ -266,10 +277,12 @@ export default {
     }
 
     // Origin check — only allow requests from the site (skip for scheduled triggers)
-    const origin = request.headers.get('Origin');
-    if (origin && origin !== ALLOWED_ORIGIN) {
+    const origin = getAllowedOrigin(request);
+    const rawOrigin = request.headers.get('Origin');
+    if (rawOrigin && !origin) {
       return jsonResp({ error: 'forbidden origin' }, 403);
     }
+    _reqOrigin = origin || ALLOWED_ORIGINS[0];
 
     // Rate limiting
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
