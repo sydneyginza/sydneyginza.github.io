@@ -785,5 +785,11 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T08:11:47.518Z",
     "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T08:16:19.182Z",
+    "page": "list"
   }
 ]
