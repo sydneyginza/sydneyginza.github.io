@@ -11,31 +11,30 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:5500',
 ];
 
-let _reqOrigin = ALLOWED_ORIGINS[0];
-
-function getAllowedOrigin(request) {
-  const origin = request.headers.get('Origin') || '';
-  return ALLOWED_ORIGINS.includes(origin) ? origin : null;
-}
 const REPO = 'sydneyginza/sydneyginza.github.io';
 const DATA_REPO = REPO;
 const GH_API = 'https://api.github.com';
 
 /* ── Helpers ── */
 
-function corsHeaders() {
+function getAllowedOrigin(request) {
+  const origin = request.headers.get('Origin') || '';
+  return ALLOWED_ORIGINS.includes(origin) ? origin : null;
+}
+
+function corsHeaders(origin) {
   return {
-    'Access-Control-Allow-Origin': _reqOrigin,
+    'Access-Control-Allow-Origin': origin || ALLOWED_ORIGINS[0],
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
-    'Access-Control-Max-Age': '86400',
+    'Access-Control-Max-Age': '300',
   };
 }
 
-function jsonResp(obj, status = 200) {
+function jsonResp(obj, status = 200, origin) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders() },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
   });
 }
 
@@ -180,7 +179,7 @@ function isRateLimited(ip, isWrite) {
 
 /* ── GitHub API Proxy (existing logic) ── */
 
-async function handleProxy(request, env, pathname) {
+async function handleProxy(request, env, pathname, origin) {
   const ghUrl = `${GH_API}${pathname}`;
   const headers = {
     Authorization: `token ${env.GITHUB_TOKEN}`,
@@ -197,7 +196,7 @@ async function handleProxy(request, env, pathname) {
   }
 
   const ghResp = await fetch(ghUrl, init);
-  const respHeaders = { ...corsHeaders(), 'Content-Type': ghResp.headers.get('Content-Type') || 'application/json' };
+  const respHeaders = { ...corsHeaders(origin), 'Content-Type': ghResp.headers.get('Content-Type') || 'application/json' };
   return new Response(ghResp.body, { status: ghResp.status, headers: respHeaders });
 }
 
@@ -207,31 +206,31 @@ const ENQUIRY_PATH = 'data/enquiries.json';
 const ENQUIRY_RATE = new Map();
 const ENQUIRY_MAX_PER_HOUR = 5;
 
-async function handleSubmitEnquiry(request, env) {
-  if (request.method !== 'POST') return jsonResp({ error: 'method not allowed' }, 405);
+async function handleSubmitEnquiry(request, env, origin) {
+  if (request.method !== 'POST') return jsonResp({ error: 'method not allowed' }, 405, origin);
 
   const xrw = request.headers.get('X-Requested-With');
-  if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403);
+  if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403, origin);
 
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   const now = Date.now();
   if (!ENQUIRY_RATE.has(ip)) ENQUIRY_RATE.set(ip, []);
   const timestamps = ENQUIRY_RATE.get(ip).filter(t => now - t < 3600000);
   if (timestamps.length >= ENQUIRY_MAX_PER_HOUR) {
-    return jsonResp({ error: 'Too many enquiries. Please try again later.' }, 429);
+    return jsonResp({ error: 'Too many enquiries. Please try again later.' }, 429, origin);
   }
   timestamps.push(now);
   ENQUIRY_RATE.set(ip, timestamps);
   if (ENQUIRY_RATE.size > 5000) { ENQUIRY_RATE.delete(ENQUIRY_RATE.keys().next().value); }
 
   let data;
-  try { data = await request.json(); } catch { return jsonResp({ error: 'invalid body' }, 400); }
+  try { data = await request.json(); } catch { return jsonResp({ error: 'invalid body' }, 400, origin); }
 
   if (!data.girlName || !data.customerName) {
-    return jsonResp({ error: 'missing required fields' }, 400);
+    return jsonResp({ error: 'missing required fields' }, 400, origin);
   }
   if (!data.phone && !data.email) {
-    return jsonResp({ error: 'phone or email required' }, 400);
+    return jsonResp({ error: 'phone or email required' }, 400, origin);
   }
 
   try {
@@ -259,10 +258,10 @@ async function handleSubmitEnquiry(request, env) {
     });
 
     await ghPut(env, ENQUIRY_PATH, existing, sha, 'New enquiry');
-    return jsonResp({ success: true });
+    return jsonResp({ success: true }, 200, origin);
   } catch (e) {
     console.error('Enquiry error:', e);
-    return jsonResp({ error: 'internal error' }, 500);
+    return jsonResp({ error: 'internal error' }, 500, origin);
   }
 }
 
@@ -272,20 +271,19 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Resolve origin for all requests (including preflight)
+    // Resolve origin for all requests
     const origin = getAllowedOrigin(request);
     const rawOrigin = request.headers.get('Origin');
-    _reqOrigin = origin || ALLOWED_ORIGINS[0];
 
     // CORS preflight
     if (request.method === 'OPTIONS') {
       if (!origin && rawOrigin) return new Response('Forbidden', { status: 403 });
-      return new Response(null, { headers: corsHeaders() });
+      return new Response(null, { headers: corsHeaders(origin) });
     }
 
     // Origin check — only allow requests from the site (skip for scheduled triggers)
     if (rawOrigin && !origin) {
-      return jsonResp({ error: 'forbidden origin' }, 403);
+      return jsonResp({ error: 'forbidden origin' }, 403, origin);
     }
 
     // Rate limiting
@@ -298,7 +296,7 @@ export default {
         headers: {
           'Content-Type': 'application/json',
           'Retry-After': String(retryAfter),
-          ...corsHeaders(),
+          ...corsHeaders(origin),
         },
       });
     }
@@ -307,40 +305,40 @@ export default {
     if (url.pathname === '/update-view-history' && request.method === 'POST') {
       try {
         const xrw = request.headers.get('X-Requested-With');
-        if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403);
+        if (xrw !== 'XMLHttpRequest') return jsonResp({ error: 'forbidden' }, 403, origin);
         const { username, history } = await request.json();
-        if (!username || !Array.isArray(history)) return jsonResp({ error: 'invalid' }, 400);
+        if (!username || !Array.isArray(history)) return jsonResp({ error: 'invalid' }, 400, origin);
         const authResult = await ghGet(env, 'data/auth.json');
         const users = authResult.content;
         const user = users.find(u => u.user === username);
-        if (!user) return jsonResp({ error: 'user not found' }, 404);
+        if (!user) return jsonResp({ error: 'user not found' }, 404, origin);
         user.viewHistory = history.slice(0, 10).map(h => ({ name: h.name, ts: h.ts }));
         await ghPut(env, 'data/auth.json', users, authResult.sha, 'Update view history');
-        return jsonResp({ success: true });
-      } catch (e) { return jsonResp({ error: e.message }, 500); }
+        return jsonResp({ success: true }, 200, origin);
+      } catch (e) { return jsonResp({ error: e.message }, 500, origin); }
     }
 
     // Enquiry submission
     if (url.pathname === '/submit-enquiry' && request.method === 'POST') {
-      return handleSubmitEnquiry(request, env);
+      return handleSubmitEnquiry(request, env, origin);
     }
 
     // Sitemap regeneration (admin trigger)
     if (url.pathname === '/generate-sitemap' && request.method === 'POST') {
       try {
         const ok = await commitSitemap(env);
-        return jsonResp({ success: ok });
+        return jsonResp({ success: ok }, 200, origin);
       } catch (e) {
-        return jsonResp({ error: e.message }, 500);
+        return jsonResp({ error: e.message }, 500, origin);
       }
     }
 
     // GitHub API proxy (/repos/...)
     if (url.pathname.startsWith('/repos/')) {
-      return handleProxy(request, env, url.pathname);
+      return handleProxy(request, env, url.pathname, origin);
     }
 
-    return new Response('Not found', { status: 404, headers: corsHeaders() });
+    return new Response('Not found', { status: 404, headers: corsHeaders(origin) });
   },
 
   async scheduled(event, env, ctx) {
