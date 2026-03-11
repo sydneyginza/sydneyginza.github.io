@@ -1309,5 +1309,256 @@
     "uuid": "v_mmlqtplr_6mdfy2au",
     "timestamp": "2026-03-11T10:47:18.851Z",
     "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:48:24.980Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:50:11.908Z",
+    "page": "home"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:50:26.332Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:50:45.997Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:50:52.676Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:51:02.684Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:51:37.685Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:51:41.943Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:51:46.133Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/profile-database",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:51:46.865Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:52:18.819Z",
+    "page": "bookings"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:55:44.617Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/bookings",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:55:45.764Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T10:55:48.652Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:56:42.028Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/bookings",
+    "referrer": "https://sydneyginza.github.io/bookings",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:56:42.539Z",
+    "page": "bookings"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T10:58:55.371Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:05:50.423Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/girls/Vanilla",
+    "referrer": "https://sydneyginza.github.io/girls/Vanilla",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:05:51.164Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:14.842Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:22.317Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/girls/Vanilla",
+    "referrer": "https://sydneyginza.github.io/girls/Vanilla",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:23.389Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:06:37.206Z",
+    "page": "bookings"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:52.184Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:52.730Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/girls/Vanilla",
+    "referrer": "https://sydneyginza.github.io/girls/Vanilla",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:06:53.402Z",
+    "profile": "Vanilla"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:07:52.535Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/bookings",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmlqtplr_6mdfy2au",
+    "timestamp": "2026-03-11T11:07:53.108Z",
+    "page": "bookings"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmlqrxyr_17pss3h5",
+    "timestamp": "2026-03-11T11:08:20.283Z",
+    "profile": "Vanilla"
   }
 ]
