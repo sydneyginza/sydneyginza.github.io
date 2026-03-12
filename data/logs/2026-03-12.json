@@ -918,5 +918,11 @@
     "uuid": "v_mmn8tmjr_nph0o8ss",
     "timestamp": "2026-03-12T09:10:39.046Z",
     "page": "employment"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn8tmjr_nph0o8ss",
+    "timestamp": "2026-03-12T09:10:41.599Z",
+    "page": "home"
   }
 ]
