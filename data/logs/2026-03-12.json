@@ -1317,5 +1317,17 @@
     "screen": "2560x1440",
     "viewport": "2560x1305",
     "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn8tmjr_nph0o8ss",
+    "timestamp": "2026-03-12T10:39:31.544Z",
+    "page": "list"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn8tmjr_nph0o8ss",
+    "timestamp": "2026-03-12T10:39:33.089Z",
+    "page": "home"
   }
 ]
