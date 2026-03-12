@@ -1242,5 +1242,11 @@
     "uuid": "v_mmn5wfky_v83p406o",
     "timestamp": "2026-03-12T10:25:07.999Z",
     "page": "home"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmn8tmjr_nph0o8ss",
+    "timestamp": "2026-03-12T10:25:26.560Z",
+    "profile": "Umi"
   }
 ]
