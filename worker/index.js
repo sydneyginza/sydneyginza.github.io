@@ -235,12 +235,353 @@ async function syncRosterToCalendar(env) {
   return true;
 }
 
+/* ── Girls Sync (auto-detect new profiles from 479ginza.com.au) ── */
+
+const GIRLS_URL = 'https://479ginza.com.au/Girls';
+const GIRLS_PATH = 'data/girls.json';
+
+const COUNTRY_PREFIX = {
+  J: 'Japanese', K: 'Korean', T: 'Thai', C: 'Chinese',
+  V: 'Vietnamese', M: 'Malaysian', S: 'Singaporean',
+};
+
+const LANG_FROM_COUNTRY = {
+  Japanese: 'Japanese, Limited English',
+  Korean: 'Korean, Limited English',
+  Thai: 'Thai, Limited English',
+  Chinese: 'Mandarin, Limited English',
+  Vietnamese: 'Vietnamese, Limited English',
+  Malaysian: 'English',
+  Singaporean: 'English',
+};
+
+const LABEL_PATTERNS = [
+  ['Double Lesbian', /\blesbian\s*double\b/i],
+  ['Shower Together', /\bshower\s*together\b/i],
+  ['Pussy Slide', /\bpussy\s*slide\b/i],
+  ['DFK', /\bDFK\b/],
+  ['BBBJ', /\bBBBJ\b/],
+  ['DATY', /\bDATY\b/],
+  ['69', /\b69\b/],
+  ['CIM', /\bCIM\b/],
+  ['COB', /\bCOB\b/],
+  ['COF', /\bCOF\b/],
+  ['Rimming', /\brimming\b/i],
+  ['Anal', /\ban[- ]?al\b/i],
+  ['Double', /\bdouble\b/i],
+  ['Swallow', /\bswallow\b/i],
+  ['Filming', /\bfilming\b/i],
+  ['GFE', /\bGFE\b/],
+  ['PSE', /\bPSE\b/],
+  ['Massage', /\bmassage\b/i],
+  ['Toys', /\btoys?\b/i],
+  ['Costume', /\bcostume\b/i],
+];
+
+function extractLabels(desc) {
+  if (!desc) return [];
+  return LABEL_PATTERNS.filter(([, re]) => re.test(desc)).map(([label]) => label);
+}
+
+/**
+ * Parse titles like "New J Amu(No Indian)" into { name, country, special }
+ *
+ * Examples:
+ *   "New J Amu(No Indian)"              → { name:"Amu", country:["Japanese"], special:"No Indian" }
+ *   "K IU(1HR MINIMUM)"                 → { name:"IU", country:["Korean"],   special:"1HR MINIMUM" }
+ *   "New Brazil mix J Jenny(45mins min)" → { name:"Jenny", country:["Japanese"], special:"45mins min" }
+ *   "J Umi"                              → { name:"Umi", country:["Japanese"], special:"" }
+ */
+function parseGirlTitle(raw) {
+  let special = '';
+  let clean = raw;
+
+  // 1. Extract ALL parenthetical restrictions: "(No Indian)", "(1hr minimum)", etc.
+  const parens = [];
+  clean = clean.replace(/\(([^)]+)\)/g, (_, inner) => { parens.push(inner.trim()); return ''; }).trim();
+  if (parens.length) special = parens.join(', ');
+
+  // 2. Separate restriction text stuck to the name: "Jenny45MINS MINIMUM" → "Jenny 45MINS MINIMUM"
+  clean = clean.replace(/([a-zA-Z])(\d+\s*(?:MINS?|HRS?|HOURS?))/gi, '$1 $2');
+
+  // 3. Extract non-parenthesized restrictions: "45MINS MINIMUM", "1HR MINIMUM", etc.
+  const minRe = /\b(\d+\s*(?:MINS?|MINUTES?|HRS?|HOURS?)\s*(?:MINIMUM|MIN)?)\b/gi;
+  let minM;
+  while ((minM = minRe.exec(clean)) !== null) {
+    special = special ? special + ', ' + minM[1].trim() : minM[1].trim();
+  }
+  clean = clean.replace(minRe, '').trim();
+
+  // Restriction phrases without parens: "No Indian", "Asian only"
+  const restrictRe = /\b(No\s+\w+|Asian\s+only|Japanese\s+only)\b/gi;
+  let rm;
+  while ((rm = restrictRe.exec(clean)) !== null) {
+    special = special ? special + ', ' + rm[1].trim() : rm[1].trim();
+  }
+  clean = clean.replace(restrictRe, '').trim();
+
+  // 4. Strip "New" prefix(es)
+  clean = clean.replace(/^(New\s+)+/i, '').trim();
+
+  // 5. Split into words — name is the last word, earlier words are prefixes
+  const words = clean.split(/\s+/).filter(Boolean);
+  let country = [];
+
+  // Check for single-letter country codes in prefix words
+  for (const w of words.slice(0, -1)) {
+    if (COUNTRY_PREFIX[w]) {
+      country = [COUNTRY_PREFIX[w]];
+    }
+  }
+
+  // If no country code found, check for country keywords in prefix
+  if (!country.length && words.length > 1) {
+    const prefix = words.slice(0, -1).join(' ').toLowerCase();
+    if (prefix.includes('japan')) country = ['Japanese'];
+    else if (prefix.includes('korea')) country = ['Korean'];
+    else if (prefix.includes('thai')) country = ['Thai'];
+    else if (prefix.includes('chin')) country = ['Chinese'];
+    else if (prefix.includes('vietnam')) country = ['Vietnamese'];
+    else if (prefix.includes('brazil')) country = ['Brazilian'];
+    else if (prefix.includes('malay')) country = ['Malaysian'];
+  }
+
+  // Name is the last word, clean up dots (e.g. "I.U" → "IU")
+  let name = (words[words.length - 1] || '').replace(/\./g, '');
+
+  return { name, country, special };
+}
+
+/**
+ * Scrape the /Girls listing page → array of card objects
+ */
+async function scrapeGirlsListing() {
+  const resp = await fetch(GIRLS_URL, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GinzaBot/1.0)' },
+  });
+  if (!resp.ok) throw new Error(`Girls listing fetch failed: ${resp.status}`);
+  const html = await resp.text();
+
+  const cards = [];
+  // Each card: <a href="/Girls/5569" ...> ... <h3>New J Amu(No Indian)</h3> ... </a>
+  const cardRe = /<a\s+href="\/Girls\/(\d+)"[^>]*>([\s\S]*?)<\/a>/g;
+  let m;
+  while ((m = cardRe.exec(html)) !== null) {
+    const id = m[1];
+    const cardHtml = m[2];
+
+    const h3 = cardHtml.match(/<h3>(.*?)<\/h3>/);
+    if (!h3) continue;
+    const rawTitle = h3[1].replace(/<[^>]*>/g, '').trim();
+    const parsed = parseGirlTitle(rawTitle);
+    if (!parsed.name) continue;
+
+    const age    = (cardHtml.match(/Age:(\d+)/)        || [])[1] || '';
+    const body   = (cardHtml.match(/Body Size:(\d+)/)   || [])[1] || '';
+    const cup    = (cardHtml.match(/Cup Size:([\w\-]+)/) || [])[1] || '';
+    const height = (cardHtml.match(/Height:(\d+)/)       || [])[1] || '';
+
+    cards.push({ id, ...parsed, age, body, cup, height });
+  }
+  return cards;
+}
+
+/**
+ * Scrape an individual profile page for booking prices, images, description
+ */
+async function scrapeGirlProfile(id) {
+  const resp = await fetch(`${GIRLS_URL}/${id}`, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GinzaBot/1.0)' },
+  });
+  if (!resp.ok) throw new Error(`Profile fetch ${resp.status} for /Girls/${id}`);
+  const html = await resp.text();
+
+  // Booking: "180.250.290" or "180/250/290"
+  const bk = html.match(/Booking:<\/label>\s*([\d.\/]+)/);
+  let val1 = '', val2 = '', val3 = '';
+  if (bk) {
+    const p = bk[1].split(/[.\/]/);
+    val1 = p[0] || ''; val2 = p[1] || ''; val3 = p[2] || '';
+  }
+
+  // Full-size images: <a href="/data/upload/...jpeg"> (skip thumbnails ending in 's.jpeg')
+  const imgRe = /<a[^>]+href="(\/data\/upload\/[^"]+\.\w+)"[^>]*>/gi;
+  const images = [];
+  let im;
+  while ((im = imgRe.exec(html)) !== null) {
+    const src = im[1];
+    if (/s\.\w+$/i.test(src)) continue; // skip thumbnail variants
+    if (/\.(jpe?g|png|webp)$/i.test(src)) {
+      images.push('https://479ginza.com.au' + src);
+    }
+  }
+
+  // Description: try several common container patterns
+  let desc = '';
+  const descPatterns = [
+    /<div class="(?:about|description|text|info-text|detail)"[^>]*>([\s\S]*?)<\/div>/i,
+    /<div class="row"><label>(?:Description|About|Info):<\/label>\s*([\s\S]*?)<\/div>/i,
+  ];
+  for (const re of descPatterns) {
+    const dm = html.match(re);
+    if (dm) {
+      desc = dm[1].replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      if (desc) break;
+    }
+  }
+
+  // Fallback: grab any long text block that looks like a description
+  if (!desc) {
+    const textBlocks = html.match(/<(?:p|div)[^>]*>([^<]{80,})<\/(?:p|div)>/gi);
+    if (textBlocks && textBlocks.length) {
+      const longest = textBlocks.sort((a, b) => b.length - a.length)[0];
+      desc = longest.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+  }
+
+  return { val1, val2, val3, images, desc };
+}
+
+/**
+ * Convert ArrayBuffer to base64 (chunk-safe for large images)
+ */
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunks = [];
+  for (let i = 0; i < bytes.length; i += 32768) {
+    chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 32768)));
+  }
+  return btoa(chunks.join(''));
+}
+
+/**
+ * Download an image from a URL and upload it to GitHub repo
+ */
+async function uploadImage(env, imageUrl, repoPath) {
+  const resp = await fetch(imageUrl, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GinzaBot/1.0)' },
+  });
+  if (!resp.ok) throw new Error(`Image fetch ${resp.status}`);
+
+  const buffer = await resp.arrayBuffer();
+  const base64 = arrayBufferToBase64(buffer);
+
+  // Check if file already exists (to get sha for update)
+  let sha = null;
+  try {
+    const r = await fetch(`${GH_API}/repos/${REPO}/contents/${repoPath}`, { headers: ghHeaders(env) });
+    if (r.ok) sha = (await r.json()).sha;
+  } catch {}
+
+  const body = { message: `Add ${repoPath}`, content: base64 };
+  if (sha) body.sha = sha;
+
+  const r = await fetch(`${GH_API}/repos/${REPO}/contents/${repoPath}`, {
+    method: 'PUT',
+    headers: ghHeaders(env),
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`Image upload ${r.status} for ${repoPath}`);
+
+  return `https://raw.githubusercontent.com/${REPO}/main/${repoPath}`;
+}
+
+/**
+ * Main sync: detect new girls, scrape profiles, upload images, update girls.json
+ */
+async function syncNewGirls(env) {
+  const { content: existing, sha } = await ghGet(env, GIRLS_PATH);
+  const knownNames = new Set(existing.map(g => g.name));
+  const knownUrls = new Set(existing.map(g => g.oldUrl).filter(Boolean));
+
+  const cards = await scrapeGirlsListing();
+  const newCards = cards.filter(c => {
+    const url = `https://479ginza.com.au/Girls/${c.id}`;
+    return !knownNames.has(c.name) && !knownUrls.has(url);
+  });
+
+  if (newCards.length === 0) {
+    console.log('Girls sync: no new profiles');
+    return { added: 0, names: [] };
+  }
+
+  console.log(`Girls sync: ${newCards.length} new profile(s) found`);
+  const now = new Date().toISOString();
+  const todayStr = now.split('T')[0];
+  const addedNames = [];
+
+  for (const card of newCards) {
+    try {
+      await new Promise(r => setTimeout(r, 1000)); // polite delay
+      const profile = await scrapeGirlProfile(card.id);
+
+      // Download & upload images, renaming to Name_1.jpeg, Name_2.jpeg, ...
+      const photos = [];
+      for (let i = 0; i < profile.images.length; i++) {
+        try {
+          const ext = (profile.images[i].match(/\.(jpe?g|png|webp)$/i) || [])[1] || 'jpeg';
+          const path = `Images/${card.name}/${card.name}_${i + 1}.${ext}`;
+          const ghUrl = await uploadImage(env, profile.images[i], path);
+          photos.push(ghUrl);
+          await new Promise(r => setTimeout(r, 500)); // delay between uploads
+        } catch (e) {
+          console.error(`Image error ${card.name} #${i + 1}: ${e.message}`);
+        }
+      }
+
+      // Build the entry matching the girls.json schema
+      const entry = {
+        name: card.name,
+        country: card.country.length ? card.country : undefined,
+        age: card.age || undefined,
+        body: card.body || undefined,
+        height: card.height || undefined,
+        cup: card.cup || undefined,
+        val1: profile.val1 || undefined,
+        val2: profile.val2 || undefined,
+        val3: profile.val3 || undefined,
+      };
+      if (card.special) entry.special = card.special;
+      entry.exp = 'Inexperienced';
+      entry.startDate = todayStr;
+      if (card.country.length) {
+        entry.lang = LANG_FROM_COUNTRY[card.country[0]] || '';
+      }
+      entry.oldUrl = `https://479ginza.com.au/Girls/${card.id}`;
+      entry.type = '';
+      entry.desc = profile.desc || '';
+      entry.photos = photos;
+      entry.labels = extractLabels(profile.desc);
+      entry.lastModified = now;
+
+      // Clean undefined values but keep empty arrays/strings for required fields
+      for (const k of Object.keys(entry)) {
+        if (entry[k] === undefined) delete entry[k];
+      }
+
+      existing.push(entry);
+      addedNames.push(card.name);
+      console.log(`Girls sync: added ${card.name} (${photos.length} photos)`);
+    } catch (e) {
+      console.error(`Failed to process ${card.name}: ${e.message}`);
+    }
+  }
+
+  if (addedNames.length > 0) {
+    await ghPut(env, GIRLS_PATH, existing, sha,
+      `Auto-sync new girls: ${addedNames.join(', ')}`);
+    console.log(`Girls sync: girls.json updated with ${addedNames.length} new profile(s)`);
+  }
+
+  return { added: addedNames.length, names: addedNames };
+}
+
 /* ── Sitemap Generation ── */
 
 async function generateSitemap(env) {
   const { content: girlsData } = await ghGet(env, 'data/girls.json');
   const today = fmtDate(getAEDTDate());
-  const base = 'https://travanixlabs.github.io/ginzaempire';
+  const base = 'https://ginzaempire.com';
   const pages = [
     { loc: '/',           freq: 'daily',   pri: '1.0' },
     { loc: '/roster/card',   freq: 'daily',   pri: '0.9' },
@@ -475,6 +816,16 @@ export default {
       }
     }
 
+    // Girls sync (admin trigger)
+    if (url.pathname === '/sync-girls' && request.method === 'POST') {
+      try {
+        const result = await syncNewGirls(env);
+        return jsonResp(result, 200, origin);
+      } catch (e) {
+        return jsonResp({ error: e.message }, 500, origin);
+      }
+    }
+
     // Roster sync (admin trigger)
     if (url.pathname === '/sync-roster' && request.method === 'POST') {
       try {
@@ -495,6 +846,13 @@ export default {
 
   async scheduled(event, env, ctx) {
     const hour = new Date(event.scheduledTime).getUTCHours();
+
+    // 9:00 UTC = 7pm AEST — girls sync (new profiles)
+    if (hour === 9) {
+      ctx.waitUntil(
+        syncNewGirls(env).catch(e => console.error('Girls sync error:', e))
+      );
+    }
 
     // 10:00 UTC = 8pm AEST (or 9pm AEDT) — roster sync
     if (hour === 10) {
