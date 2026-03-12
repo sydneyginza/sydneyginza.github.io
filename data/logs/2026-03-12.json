@@ -1190,5 +1190,11 @@
     "uuid": "v_mmn5wfky_v83p406o",
     "timestamp": "2026-03-12T09:46:36.913Z",
     "page": "list"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T09:50:10.908Z",
+    "page": "home"
   }
 ]
