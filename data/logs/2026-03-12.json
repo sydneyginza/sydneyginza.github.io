@@ -1120,5 +1120,11 @@
     "uuid": "v_mmn8tmjr_nph0o8ss",
     "timestamp": "2026-03-12T10:01:33.908Z",
     "profile": "Umi"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn8tmjr_nph0o8ss",
+    "timestamp": "2026-03-12T10:01:40.511Z",
+    "page": "home"
   }
 ]
