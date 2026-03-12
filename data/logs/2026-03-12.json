@@ -358,5 +358,173 @@
     "uuid": "v_mmn3msvu_usmzsa9z",
     "timestamp": "2026-03-12T07:41:28.467Z",
     "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T07:44:06.101Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/ginzaempire/",
+    "referrer": "https://github.com/",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T07:44:14.818Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn61ytz_8gbmprxa",
+    "timestamp": "2026-03-12T07:48:33.047Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63090a13) UnifiedPCWindowsWechat(0xf254162e) XWEB/18163 Flue",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/ginzaempire/",
+    "referrer": "https://security.wechat.com/",
+    "screen": "2560x1440",
+    "viewport": "2560x1351",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn61ytz_8gbmprxa",
+    "timestamp": "2026-03-12T07:48:33.713Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn62d1d_t3t01nia",
+    "timestamp": "2026-03-12T07:48:51.457Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.66(0x18004237) NetType/WIFI Language/zh_CN",
+    "browser": "Unknown",
+    "os": "macOS",
+    "device": "Desktop",
+    "language": "zh-CN",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/ginzaempire/",
+    "referrer": "direct",
+    "screen": "430x932",
+    "viewport": "430x834",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn62d1d_t3t01nia",
+    "timestamp": "2026-03-12T07:48:52.204Z",
+    "page": "home"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmn62d1d_t3t01nia",
+    "timestamp": "2026-03-12T07:49:06.739Z",
+    "profile": "Darin"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn6gfvn_kmyyypwk",
+    "timestamp": "2026-03-12T07:59:48.323Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
+    "browser": "Safari",
+    "os": "macOS",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/ginzaempire/",
+    "referrer": "direct",
+    "screen": "390x844",
+    "viewport": "390x844",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn6gfvn_kmyyypwk",
+    "timestamp": "2026-03-12T07:59:50.140Z",
+    "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:27:32.489Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T07:44:06.618Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:31:05.727Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/ginzaempire/calendar",
+    "referrer": "https://travanixlabs.github.io/ginzaempire/calendar",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:31:07.313Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:31:31.173Z",
+    "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:31:59.562Z",
+    "page": "favorites"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:32:05.207Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T08:32:15.847Z",
+    "page": "home"
   }
 ]
