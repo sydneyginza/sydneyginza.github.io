@@ -6,12 +6,12 @@
  */
 
 const ALLOWED_ORIGINS = [
-  'https://sydneyginza.github.io',
+  'https://travanixlabs.github.io',
   'http://localhost:3000',
   'http://127.0.0.1:5500',
 ];
 
-const REPO = 'sydneyginza/sydneyginza.github.io';
+const REPO = 'travanixlabs/ginzaempire';
 const DATA_REPO = REPO;
 const GH_API = 'https://api.github.com';
 
@@ -67,7 +67,7 @@ function ghHeaders(env) {
   return {
     Authorization: `token ${env.GITHUB_TOKEN}`,
     Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'sydneyginza-worker',
+    'User-Agent': 'travanixlabs-worker',
     'Content-Type': 'application/json',
   };
 }
@@ -98,7 +98,7 @@ async function ghPut(env, path, content, sha, message) {
 async function generateSitemap(env) {
   const { content: girlsData } = await ghGet(env, 'data/girls.json');
   const today = fmtDate(getAEDTDate());
-  const base = 'https://sydneyginza.github.io';
+  const base = 'https://travanixlabs.github.io/ginzaempire';
   const pages = [
     { loc: '/',           freq: 'daily',   pri: '1.0' },
     { loc: '/roster/card',   freq: 'daily',   pri: '0.9' },
@@ -184,7 +184,7 @@ async function handleProxy(request, env, pathname, origin) {
   const headers = {
     Authorization: `token ${env.GITHUB_TOKEN}`,
     Accept: request.headers.get('Accept') || 'application/vnd.github.v3+json',
-    'User-Agent': 'sydneyginza-worker',
+    'User-Agent': 'travanixlabs-worker',
   };
   if (request.method === 'PUT' || request.method === 'POST' || request.method === 'DELETE') {
     headers['Content-Type'] = 'application/json';

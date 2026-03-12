@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sydneyginza.github.io/sitemap.xml
+Sitemap: https://travanixlabs.github.io/ginzaempire/sitemap.xml

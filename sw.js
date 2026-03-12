@@ -1,11 +1,12 @@
-const CACHE = 'ginza-v5';
-const SHELL = ['/', '/index.html', '/404.html', '/styles.css',
-  '/js/core.js', '/js/ui.js', '/js/grids.js', '/js/forms.js',
-  '/js/i18n.js', '/js/analytics.js', '/js/controls.js', '/fav-icon.png',
-  '/fonts/orbitron-var-latin.woff2',
-  '/fonts/rajdhani-400-latin.woff2',
-  '/fonts/rajdhani-500-latin.woff2',
-  '/fonts/rajdhani-600-latin.woff2'];
+const CACHE = 'ginza-v6';
+const BP = '/ginzaempire';
+const SHELL = [BP + '/', BP + '/index.html', BP + '/404.html', BP + '/styles.css',
+  BP + '/js/core.js', BP + '/js/ui.js', BP + '/js/grids.js', BP + '/js/forms.js',
+  BP + '/js/i18n.js', BP + '/js/analytics.js', BP + '/js/controls.js', BP + '/fav-icon.png',
+  BP + '/fonts/orbitron-var-latin.woff2',
+  BP + '/fonts/rajdhani-400-latin.woff2',
+  BP + '/fonts/rajdhani-500-latin.woff2',
+  BP + '/fonts/rajdhani-600-latin.woff2'];
 
 /* Image cache has a separate size limit to avoid unbounded growth */
 const IMG_CACHE = 'ginza-images-v1';
@@ -41,7 +42,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
   /* Font files → cache-first (immutable content-hashed files) */
-  if (url.pathname.startsWith('/fonts/')) {
+  if (url.pathname.startsWith(BP + '/fonts/')) {
     e.respondWith(
       caches.open(CACHE).then(async c => {
         const cached = await c.match(e.request);
@@ -89,7 +90,7 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.match(e.request).then(cached => {
         /* If no cached response and it's a navigation, serve the cached index */
         if (!cached && e.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          return caches.match(BP + '/index.html');
         }
         return cached;
       }))

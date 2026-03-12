@@ -110,7 +110,7 @@ function createTestContext(files, overrides = {}) {
     MutationObserver: class { observe() {} disconnect() {} },
     ResizeObserver: class { observe() {} unobserve() {} disconnect() {} },
     history: { scrollRestoration: 'auto', pushState() {}, replaceState() {}, back() {}, go() {} },
-    location: { href: 'https://sydneyginza.github.io/', pathname: '/', search: '', hash: '', origin: 'https://sydneyginza.github.io', replace() {}, assign() {} },
+    location: { href: 'https://travanixlabs.github.io/ginzaempire/', pathname: '/ginzaempire/', search: '', hash: '', origin: 'https://travanixlabs.github.io', replace() {}, assign() {} },
     Notification: { permission: 'default', requestPermission: async () => 'default' },
     PushManager: class {},
     alert() {},

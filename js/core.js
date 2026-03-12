@@ -1,9 +1,10 @@
 /* === CORE UTILITIES & API === */
 
 const PROXY = 'https://github-proxy.sydneyginza-api-2.workers.dev';
-const REPO = 'sydneyginza/sydneyginza.github.io';
+const REPO = 'travanixlabs/ginzaempire';
 const DATA_REPO = REPO;
 const SITE_REPO = REPO;
+const BASE_PATH = '/ginzaempire';
 const DATA_API = `${PROXY}/repos/${DATA_REPO}/contents`;
 const SITE_API = `${PROXY}/repos/${SITE_REPO}/contents`;
 
@@ -749,25 +750,29 @@ function observeCalEntrance(table) {
 
 /* === URL Router (pushState / popstate) === */
 /* Handle SPA redirect from 404.html — must run before anything reads location */
-(function(){const sp=new URLSearchParams(window.location.search).get('_sp');if(sp)history.replaceState(null,'',sp)})();
+(function(){const sp=new URLSearchParams(window.location.search).get('_sp');if(sp)history.replaceState(null,'',BASE_PATH+sp)})();
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const Router = (function() {
+  const B = BASE_PATH; // '/ginzaempire'
   const PAGE_ROUTES = {
-    homePage:       '/',
-    rosterPage:     '/roster',
-    listPage:       '/girls',
-    favoritesPage:  '/favorites',
-    valuePage:      '/rates',
-    employmentPage: '/employment',
-    calendarPage:   '/calendar',
-    analyticsPage:  '/analytics',
-    profileDbPage:  '/profile-database',
-    bookingsPage:   '/bookings',
-    vacationPage:   '/vacation',
-    myProfilePage:  '/my-profile'
+    homePage:       B + '/',
+    rosterPage:     B + '/roster',
+    listPage:       B + '/girls',
+    favoritesPage:  B + '/favorites',
+    valuePage:      B + '/rates',
+    employmentPage: B + '/employment',
+    calendarPage:   B + '/calendar',
+    analyticsPage:  B + '/analytics',
+    profileDbPage:  B + '/profile-database',
+    bookingsPage:   B + '/bookings',
+    vacationPage:   B + '/vacation',
+    myProfilePage:  B + '/my-profile'
   };
   const PATH_TO_PAGE = {};
-  for (const id in PAGE_ROUTES) PATH_TO_PAGE[PAGE_ROUTES[id]] = id;
+  for (const id in PAGE_ROUTES) {
+    const rel = PAGE_ROUTES[id].slice(B.length) || '/';
+    PATH_TO_PAGE[rel] = id;
+  }
 
   function nameToSlug(name) {
     return encodeURIComponent((name || '').trim().replace(/\s+/g, '-'));
@@ -784,8 +789,8 @@ const Router = (function() {
   }
   function pathForProfile(idx) {
     const g = girls[idx];
-    if (!g || !g.name) return '/girls';
-    return '/girls/' + nameToSlug(g.name);
+    if (!g || !g.name) return B + '/girls';
+    return B + '/girls/' + nameToSlug(g.name);
   }
 
   let _suppressPush = false;
@@ -811,7 +816,8 @@ const Router = (function() {
   /* Parse current URL and navigate to the right view */
   function resolve() {
     if(typeof queryToFilters==='function')queryToFilters();
-    const path = window.location.pathname;
+    const rawPath = window.location.pathname;
+    const path = rawPath.startsWith(B) ? rawPath.slice(B.length) || '/' : rawPath;
 
     /* Profile deep link: /girls/Some-Name */
     const profileMatch = path.match(/^\/girls\/(.+)$/);
@@ -829,7 +835,7 @@ const Router = (function() {
       _suppressPush = true;
       showPage('listPage');
       _suppressPush = false;
-      replace('/girls', 'Ginza – Girls');
+      replace(B + '/girls', 'Ginza – Girls');
       return true;
     }
 
@@ -850,7 +856,7 @@ const Router = (function() {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       _suppressPush = true;
@@ -867,7 +873,7 @@ const Router = (function() {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       _suppressPush = true;
@@ -884,49 +890,49 @@ const Router = (function() {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'favoritesPage' && !loggedIn) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'calendarPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'analyticsPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'profileDbPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'bookingsPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'vacationPage' && !isAdmin()) {
         _suppressPush = true;
         showPage('homePage');
         _suppressPush = false;
-        replace('/', 'Ginza Empire');
+        replace(B + '/', 'Ginza Empire');
         return true;
       }
       if (pageId === 'rosterPage') {
@@ -934,7 +940,7 @@ const Router = (function() {
         _suppressPush = true;
         showPage('rosterPage');
         _suppressPush = false;
-        replace('/roster/card', 'Ginza Empire – Roster');
+        replace(B + '/roster/card', 'Ginza Empire – Roster');
         return true;
       }
       _suppressPush = true;
@@ -948,14 +954,14 @@ const Router = (function() {
       _suppressPush = true;
       showPage('homePage');
       _suppressPush = false;
-      replace('/', 'Ginza Empire');
+      replace(B + '/', 'Ginza Empire');
     }
     return true;
   }
 
   window.addEventListener('popstate', function() { resolve(); });
 
-  return { PAGE_ROUTES, push, replace, resolve, pathForPage, pathForProfile, nameToSlug, slugToName, findGirlByName };
+  return { PAGE_ROUTES, push, replace, resolve, pathForPage, pathForProfile, nameToSlug, slugToName, findGirlByName, BASE: B };
 })();
 
 /* === Booking Price Calculation === */
@@ -1013,7 +1019,7 @@ async function logAdminAction(action,target,meta={}){
 (function(){try{const K='ginza_privacy_seen';if(localStorage.getItem(K))return;const b=document.getElementById('privacyBanner');if(!b)return;b.style.display='flex';const dismiss=()=>{b.style.display='none';try{localStorage.setItem(K,'1')}catch(e){}};document.getElementById('privacyDismissBtn').onclick=dismiss;}catch(e){}})();
 
 /* === Service Worker Registration === */
-if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');
+if('serviceWorker' in navigator)navigator.serviceWorker.register(BASE_PATH+'/sw.js');
 
 /* === Error Boundary: timeout for skeleton loaders === */
 setTimeout(function(){
@@ -1030,7 +1036,7 @@ function loadAdminModule(){
   if(window._adminLoaded)return Promise.resolve();
   if(_adminModulePromise)return _adminModulePromise;
   _adminModulePromise=new Promise(function(resolve,reject){
-    var s=document.createElement('script');s.src='/js/admin.js';
+    var s=document.createElement('script');s.src=BASE_PATH+'/js/admin.js';
     s.onload=resolve;
     s.onerror=function(){_adminModulePromise=null;reject(new Error('Failed to load admin module'))};
     document.head.appendChild(s);
