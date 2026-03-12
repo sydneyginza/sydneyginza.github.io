@@ -1,0 +1,19 @@
+[
+  {
+    "type": "session",
+    "uuid": "v_mmnldboi_dubwgv06",
+    "timestamp": "2026-03-12T14:57:17.154Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "America/New_York",
+    "tzOffset": 240,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1920x1080",
+    "viewport": "1280x653",
+    "siteLang": "en"
+  }
+]
