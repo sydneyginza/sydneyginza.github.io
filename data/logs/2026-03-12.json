@@ -277,5 +277,11 @@
     "uuid": "v_mmn3msvu_usmzsa9z",
     "timestamp": "2026-03-12T07:03:58.885Z",
     "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn3msvu_usmzsa9z",
+    "timestamp": "2026-03-12T07:04:05.687Z",
+    "page": "roster"
   }
 ]
