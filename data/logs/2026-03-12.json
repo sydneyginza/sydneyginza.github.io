@@ -409,5 +409,11 @@
     "screen": "2560x1440",
     "viewport": "2560x1351",
     "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn61ytz_8gbmprxa",
+    "timestamp": "2026-03-12T07:48:33.713Z",
+    "page": "home"
   }
 ]
