@@ -1080,5 +1080,22 @@
     "uuid": "v_mmn5wfky_v83p406o",
     "timestamp": "2026-03-12T09:38:54.479Z",
     "page": "roster"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmna22uv_sbdzvqlj",
+    "timestamp": "2026-03-12T09:40:36.728Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+    "browser": "Firefox",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "800x600",
+    "viewport": "1920x1080",
+    "siteLang": "en"
   }
 ]
