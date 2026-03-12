@@ -1254,5 +1254,22 @@
     "uuid": "v_mmn8tmjr_nph0o8ss",
     "timestamp": "2026-03-12T10:28:17.433Z",
     "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmnbtu11_pkgnpfsn",
+    "timestamp": "2026-03-12T10:30:11.269Z",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Linux",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Europe/Rome",
+    "tzOffset": -60,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1920x1080",
+    "viewport": "1920x1080",
+    "siteLang": "en"
   }
 ]
