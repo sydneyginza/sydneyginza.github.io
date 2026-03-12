@@ -267,7 +267,7 @@ const focusPaneId=focusPane?focusPane.id:null;
 const _oldGrid=_captureGridPositions(document.getElementById('girlsGrid'));
 const _oldRoster=_captureGridPositions(document.getElementById('rosterGrid'));
 renderFilterPane('sharedFilterPane');
-renderFilters();renderGrid();renderRoster();
+renderFilters();renderGrid();renderRoster();renderAvailNowWidget();
 _animateFlip(document.getElementById('girlsGrid'),_oldGrid);
 _animateFlip(document.getElementById('rosterGrid'),_oldRoster);
 updateFilterToggle();pushFiltersToURL();
@@ -343,6 +343,7 @@ function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff
 function renderAvailNowWidget(){
 const container=document.getElementById('homeAvailNow');if(!container)return;
 const avail=girls.filter(g=>!g.hidden&&isAvailableNow(g.name));
+applySortOrder(avail);
 if(!avail.length){container.style.display='none';container.innerHTML='';return}
 container.style.display='';
 const countLabel=avail.length===1?t('home.girlSingular'):t('home.girlPlural').replace('{n}',avail.length);
