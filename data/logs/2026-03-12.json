@@ -415,5 +415,22 @@
     "uuid": "v_mmn61ytz_8gbmprxa",
     "timestamp": "2026-03-12T07:48:33.713Z",
     "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn62d1d_t3t01nia",
+    "timestamp": "2026-03-12T07:48:51.457Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.66(0x18004237) NetType/WIFI Language/zh_CN",
+    "browser": "Unknown",
+    "os": "macOS",
+    "device": "Desktop",
+    "language": "zh-CN",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/ginzaempire/",
+    "referrer": "direct",
+    "screen": "430x932",
+    "viewport": "430x834",
+    "siteLang": "en"
   }
 ]
