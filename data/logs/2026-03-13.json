@@ -1,0 +1,146 @@
+[
+  {
+    "type": "session",
+    "uuid": "v_mmnldboi_dubwgv06",
+    "timestamp": "2026-03-12T14:57:17.154Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "America/New_York",
+    "tzOffset": 240,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1920x1080",
+    "viewport": "1280x653",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmnxfg6q_oa35149f",
+    "timestamp": "2026-03-12T20:34:51.698Z",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
+    "browser": "Safari",
+    "os": "macOS",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "428x926",
+    "viewport": "428x926",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmnz5rij_em3ch81t",
+    "timestamp": "2026-03-12T21:23:19.051Z",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Linux",
+    "device": "Desktop",
+    "language": "en-US@posix",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1280x720",
+    "viewport": "1280x720",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:12:09.786Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1253",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:12:18.565Z",
+    "page": "roster"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:12:48.474Z",
+    "profile": "Mirei"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:12:53.401Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:12:56.429Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:19:39.922Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:20:34.499Z",
+    "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:20:42.016Z",
+    "page": "list"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:20:49.494Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmn5wfky_v83p406o",
+    "timestamp": "2026-03-12T22:35:24.887Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  }
+]
