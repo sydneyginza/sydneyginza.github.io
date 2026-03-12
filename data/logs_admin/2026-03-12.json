@@ -16,5 +16,12 @@
     "admin": "Owner",
     "action": "user_delete",
     "target": "MEMBER"
+  },
+  {
+    "ts": "2026-03-12T11:07:38.595Z",
+    "admin": "Owner",
+    "action": "user_status_change",
+    "target": "member",
+    "newStatus": "approved"
   }
 ]
