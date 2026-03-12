@@ -10,5 +10,11 @@
     "admin": "Owner",
     "action": "profile_delete",
     "target": "Umi"
+  },
+  {
+    "ts": "2026-03-12T11:04:44.606Z",
+    "admin": "Owner",
+    "action": "user_delete",
+    "target": "MEMBER"
   }
 ]
