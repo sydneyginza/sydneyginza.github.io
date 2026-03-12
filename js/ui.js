@@ -284,10 +284,12 @@ resetOgMeta();if(document.getElementById('calendarPage').classList.contains('act
 const prev=document.querySelector('.page.active');const next=document.getElementById(id);const _ec=['page-enter','slide-enter-right','slide-enter-left'];next.classList.remove(..._ec);if(prev&&prev!==next){const fromProfile=prev.id==='profilePage';const exitCls=fromProfile?'slide-exit-right':'page-exit';const enterCls=fromProfile?'slide-enter-left':'page-enter';prev.classList.remove('active',..._ec);prev.classList.add(exitCls);const onDone=()=>{prev.classList.remove(exitCls);prev.removeEventListener('animationend',onDone)};prev.addEventListener('animationend',onDone);setTimeout(()=>{prev.classList.remove(exitCls)},400);void next.offsetWidth;next.classList.add(enterCls)}else{allPages.forEach(p=>p.classList.remove('active',..._ec));next.classList.add('page-enter')}next.classList.add('active');
 closeFilterPanel();
 _kbFocusedCardIdx=-1;document.querySelectorAll('.girl-card.kb-focused').forEach(c=>c.classList.remove('kb-focused'));
-/* URL routing & dynamic title */
-const titleMap={homePage:'Ginza Empire',rosterPage:'Ginza Empire – Roster',listPage:'Ginza Empire – Girls',favoritesPage:'Ginza Empire – Favorites',valuePage:'Ginza Empire – Rates',employmentPage:'Ginza Empire – Employment',calendarPage:'Ginza Empire – Calendar',analyticsPage:'Ginza Empire – Analytics',profileDbPage:'Ginza Empire – Profile Database',bookingsPage:'Ginza Empire – Bookings',vacationPage:'Ginza Empire – Vacation',myProfilePage:'Ginza Empire – My Profile'};
+/* URL routing & dynamic title + meta description */
+const titleMap={homePage:'Ginza Empire – Sydney\'s Premier Asian Bordello',rosterPage:'Today\'s Roster – Ginza Empire Sydney',listPage:'Our Girls – Ginza Empire Sydney',favoritesPage:'Favorites – Ginza Empire',valuePage:'Rates & Pricing – Ginza Empire Sydney',employmentPage:'Employment – Ginza Empire Sydney',calendarPage:'Calendar – Ginza Empire',analyticsPage:'Analytics – Ginza Empire',profileDbPage:'Profile Database – Ginza Empire',bookingsPage:'Bookings – Ginza Empire',vacationPage:'Vacation – Ginza Empire',myProfilePage:'My Profile – Ginza Empire'};
+const descMap={homePage:'Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates. Open daily 10:30am–1am at 310 Cleveland St.',rosterPage:'View today\'s available girls at Ginza Empire Sydney. Live roster with real-time availability and scheduling. 310 Cleveland St, Surry Hills.',listPage:'Browse all girls at Ginza Empire Sydney. Filter by nationality, age, body type and more. Japanese, Korean, Thai & Chinese companions.',valuePage:'Session rates and pricing at Ginza Empire Sydney. 30, 45 and 60 minute bookings available. 310 Cleveland St, Surry Hills.',employmentPage:'Join the team at Ginza Empire Sydney. Employment opportunities for ladies at Sydney\'s premier Asian bordello.'};
 const pageTitle=titleMap[id]||'Ginza Empire';
 document.title=pageTitle;
+const _metaDesc=document.querySelector('meta[name="description"]');if(_metaDesc&&descMap[id])_metaDesc.setAttribute('content',descMap[id]);
 announce(pageTitle.replace('Ginza Empire – ','').replace('Ginza Empire','Home'));
 if(id==='rosterPage'){const rvm=typeof rosterViewMode!=='undefined'?rosterViewMode:'grid';Router.push('/roster/'+(rvm==='weekly'?'weekly':'card'),pageTitle)}else{Router.push(Router.pathForPage(id),pageTitle)}
 /* Shared filter pane is active for all pages */
@@ -369,8 +371,8 @@ strip.style.cursor='grab';_updateAnwArrows()}
 
 function renderHome(){safeRender('Home',()=>{
 const c=document.getElementById('homeImages');c.innerHTML='';
-const baseUrl='https://raw.githubusercontent.com/travanixlabs/ginzaempire/main/Images/Homepage/Homepage_';
-for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}
+if(isAdmin()){const baseUrl='https://raw.githubusercontent.com/travanixlabs/ginzaempire/main/Images/Homepage/Homepage_';
+for(let i=1;i<=4;i++){const card=document.createElement('div');card.className='home-img-card reveal';card.style.cursor='default';card.style.setProperty('--reveal-delay',(i*0.1)+'s');card.innerHTML=`<img src="${baseUrl}${i}.jpg" alt="Ginza venue photo ${i}">`;c.appendChild(card)}}
 document.getElementById('homeAnnounce').innerHTML=getSeasonalBanner()+'<p></p>';
 ngList=getNewGirls();ngIdx=0;renderNewGirls();renderAvailNowWidget();
 /* Scroll reveals for below-fold home sections */
@@ -591,7 +593,7 @@ el.textContent=JSON.stringify(ld);
 if(typeof updateBreadcrumb==='function')updateBreadcrumb([{name:'Home',url:'https://ginzaempire.com/'},{name:'Girls',url:'https://ginzaempire.com/girls'},{name:g.name||'Profile',url:url}])}
 function resetOgMeta(){
 const set=(prop,val,attr)=>{attr=attr||'property';const el=document.querySelector('meta['+attr+'="'+prop+'"]');if(el)el.setAttribute('content',val)};
-const t='Ginza Empire \u2013 Sydney\'s Premier Asian Bordello';
+const t='Ginza Empire \u2013 Sydney\'s Premier Asian Bordello | Surry Hills';
 const d='Sydney\'s premier Asian bordello in Surry Hills. Browse our roster of stunning girls, check live availability, and view rates. Open daily 10:30am\u20131am at 310 Cleveland St.';
 const i='https://raw.githubusercontent.com/travanixlabs/ginzaempire/main/Images/Homepage/Homepage_1.jpg';
 set('og:title',t);set('og:description',d);set('og:url','https://ginzaempire.com');set('og:image',i);
@@ -770,7 +772,8 @@ const g=girls[idx];if(!g)return;if(g.hidden&&!isAdmin()){showPage('homePage');re
 if(_countdownInterval){clearInterval(_countdownInterval);_countdownInterval=null}
 updateOgMeta(g,idx);updateProfileJsonLd(g,idx);
 /* URL routing & dynamic title */
-const profTitle=g.name?'Ginza Empire – '+g.name:'Ginza Empire – Profile';
+const _country=Array.isArray(g.country)?g.country[0]:(g.country||'');
+const profTitle=g.name?(g.name+(_country?' – '+_country:'')+' – Ginza Empire Sydney'):'Ginza Empire – Profile';
 document.title=profTitle;
 Router.push(Router.pathForProfile(idx),profTitle);
 const admin=isAdmin()?`<div class="profile-actions"><button class="btn btn-primary" id="profEdit">${t('ui.edit')}</button><button class="btn btn-danger" id="profDelete">${t('ui.delete')}</button></div>`:'';
