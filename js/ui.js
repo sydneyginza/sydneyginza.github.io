@@ -338,7 +338,7 @@ function openCopyDayModal(){loadAdminModule().then(function(){openCopyDayModal()
 function openBulkTimeModal(name){loadAdminModule().then(function(){openBulkTimeModal(name)})}
 
 /* Home Page */
-function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now})}
+function getNewGirls(){const now=getAEDTDate();const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-28);return girls.filter(g=>{if(!isAdmin()&&g.hidden)return false;if(!g.startDate)return false;const sd=new Date(g.startDate+'T00:00:00');return sd>=cutoff&&sd<=now}).sort((a,b)=>new Date(b.startDate)-new Date(a.startDate))}
 
 function renderAvailNowWidget(){
 const container=document.getElementById('homeAvailNow');if(!container)return;
