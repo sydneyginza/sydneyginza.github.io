@@ -94,6 +94,143 @@ async function ghPut(env, path, content, sha, message) {
   return r.json();
 }
 
+/* ── Roster Scraper ── */
+
+const ROSTER_URL = 'https://479ginza.com.au/Roster';
+const CALENDAR_PATH = 'data/calendar.json';
+
+const MONTH_MAP = {
+  january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+  july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+};
+
+function parseTime12to24(timeStr) {
+  const m = timeStr.match(/^(\d{1,2})(?::(\d{2}))?([ap]m)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const min = m[2] ? parseInt(m[2], 10) : 0;
+  const pm = m[3].toLowerCase() === 'pm';
+  if (pm && h !== 12) h += 12;
+  if (!pm && h === 12) h = 0;
+  return String(h).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+}
+
+function resolveDate(day, monthName) {
+  const now = getAEDTDate();
+  const month = MONTH_MAP[monthName.toLowerCase()];
+  if (month === undefined) return null;
+  let year = now.getFullYear();
+  // If the month is far in the past, it's probably next year
+  if (month < now.getMonth() - 2) year++;
+  const d = new Date(year, month, day);
+  return fmtDate(d);
+}
+
+async function scrapeRoster() {
+  const resp = await fetch(ROSTER_URL, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; GinzaBot/1.0)' },
+  });
+  if (!resp.ok) throw new Error(`Roster fetch failed: ${resp.status}`);
+  const html = await resp.text();
+
+  // Strip HTML tags, decode entities
+  const text = html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&#\d+;/g, '')
+    .replace(/&[a-z]+;/g, '');
+
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Parse day headers: "Happy Thursday 12th of March"
+  const dayHeaderRe = /Happy\s+\w+\s+(\d+)\w*\s+of\s+(\w+)/i;
+  // Parse girl entries: "... Name 10:30am-7pm ..."
+  const entryRe = /(\w[\w .]*?)\s+(\d{1,2}(?::\d{2})?[ap]m)-(\d{1,2}(?::\d{2})?[ap]m)/i;
+
+  const result = {}; // { dateStr: [ { name, start, end } ] }
+  let currentDate = null;
+
+  for (const line of lines) {
+    const dayMatch = line.match(dayHeaderRe);
+    if (dayMatch) {
+      currentDate = resolveDate(parseInt(dayMatch[1], 10), dayMatch[2]);
+      continue;
+    }
+    if (!currentDate) continue;
+
+    const entryMatch = line.match(entryRe);
+    if (entryMatch) {
+      // Extract just the last word as the name (handles prefixes like "New New J")
+      const rawName = entryMatch[1].trim();
+      // The name is the last word in the prefix, e.g. "New New J Sonata" → "Sonata"
+      const nameParts = rawName.split(/\s+/);
+      const name = nameParts[nameParts.length - 1].replace(/\./g, ''); // "I.U" → "IU"
+      if (name.toLowerCase() === 'open') continue; // skip "OPEN 10:20am-4am"
+
+      const start = parseTime12to24(entryMatch[2]);
+      const end = parseTime12to24(entryMatch[3]);
+      if (!start || !end) continue;
+
+      if (!result[currentDate]) result[currentDate] = [];
+      result[currentDate].push({ name, start, end });
+    }
+  }
+
+  return result;
+}
+
+async function syncRosterToCalendar(env) {
+  const scraped = await scrapeRoster();
+  if (Object.keys(scraped).length === 0) {
+    console.log('Roster scrape: no data found');
+    return false;
+  }
+
+  // Load existing calendar
+  const { content: calendar, sha } = await ghGet(env, CALENDAR_PATH);
+
+  // Load girls.json to get valid names
+  const { content: girls } = await ghGet(env, 'data/girls.json');
+  const validNames = new Set(girls.map(g => g.name));
+
+  let changed = false;
+
+  for (const [dateStr, entries] of Object.entries(scraped)) {
+    for (const { name, start, end } of entries) {
+      // Only update if name exists in girls.json
+      if (!validNames.has(name)) continue;
+
+      if (!calendar[name]) calendar[name] = {};
+
+      const existing = calendar[name][dateStr];
+      if (!existing || existing.start !== start || existing.end !== end) {
+        calendar[name][dateStr] = { start, end };
+        changed = true;
+      }
+    }
+  }
+
+  // Auto-publish scraped dates
+  if (!Array.isArray(calendar._published)) calendar._published = [];
+  for (const dateStr of Object.keys(scraped)) {
+    if (!calendar._published.includes(dateStr)) {
+      calendar._published.push(dateStr);
+      changed = true;
+    }
+  }
+  calendar._published.sort();
+
+  if (!changed) {
+    console.log('Roster sync: no changes needed');
+    return true;
+  }
+
+  await ghPut(env, CALENDAR_PATH, calendar, sha, 'Auto-sync roster from 479ginza.com.au');
+  console.log('Roster sync: calendar.json updated');
+  return true;
+}
+
 /* ── Sitemap Generation ── */
 
 async function generateSitemap(env) {
@@ -334,6 +471,16 @@ export default {
       }
     }
 
+    // Roster sync (admin trigger)
+    if (url.pathname === '/sync-roster' && request.method === 'POST') {
+      try {
+        const ok = await syncRosterToCalendar(env);
+        return jsonResp({ success: ok }, 200, origin);
+      } catch (e) {
+        return jsonResp({ error: e.message }, 500, origin);
+      }
+    }
+
     // GitHub API proxy (/repos/...)
     if (url.pathname.startsWith('/repos/')) {
       return handleProxy(request, env, url.pathname, origin);
@@ -343,8 +490,20 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(
-      commitSitemap(env).catch(e => console.error('Sitemap error:', e))
-    );
+    const hour = new Date(event.scheduledTime).getUTCHours();
+
+    // 10:00 UTC = 8pm AEST (or 9pm AEDT) — roster sync
+    if (hour === 10) {
+      ctx.waitUntil(
+        syncRosterToCalendar(env).catch(e => console.error('Roster sync error:', e))
+      );
+    }
+
+    // 21:00 UTC = 8am AEDT — sitemap update
+    if (hour === 21) {
+      ctx.waitUntil(
+        commitSitemap(env).catch(e => console.error('Sitemap error:', e))
+      );
+    }
   },
 };

@@ -3,7 +3,7 @@ main = "index.js"
 compatibility_date = "2024-01-01"
 
 [triggers]
-crons = ["0 21 * * *"]  # 21:00 UTC = 8:00 AM AEDT
+crons = ["0 21 * * *", "0 10 * * *"]  # 21:00 UTC = 8am AEDT (sitemap), 10:00 UTC = 8pm AEST (roster sync)
 
 # Secrets (set via dashboard or `wrangler secret put`):
 #   GITHUB_TOKEN        - GitHub personal access token
