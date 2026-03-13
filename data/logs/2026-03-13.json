@@ -949,5 +949,11 @@
     "uuid": "v_mmo99t9t_mkpgl2gb",
     "timestamp": "2026-03-13T02:17:29.313Z",
     "profile": "Amu"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:19:59.571Z",
+    "page": "myProfile"
   }
 ]
