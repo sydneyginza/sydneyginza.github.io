@@ -1,9 +1,9 @@
-const CACHE = 'ginza-v7';
+const CACHE = 'ginza-v8';
 /* Derive base path from where sw.js is served — works for both localhost and GitHub Pages */
 const BP = new URL('./', self.location).pathname.replace(/\/$/, '');
 const SHELL = [BP + '/', BP + '/index.html', BP + '/404.html', BP + '/styles.css',
   BP + '/js/core.js', BP + '/js/ui.js', BP + '/js/grids.js', BP + '/js/forms.js',
-  BP + '/js/i18n.js', BP + '/js/analytics.js', BP + '/js/controls.js', BP + '/fav-icon.png',
+  BP + '/js/i18n.js', BP + '/js/analytics.js', BP + '/fav-icon.png',
   BP + '/fonts/orbitron-var-latin.woff2',
   BP + '/fonts/rajdhani-400-latin.woff2',
   BP + '/fonts/rajdhani-500-latin.woff2',
