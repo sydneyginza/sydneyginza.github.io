@@ -180,5 +180,22 @@
     "uuid": "v_mmpic4ak_j07qb1zm",
     "timestamp": "2026-03-13T23:07:55.570Z",
     "profile": "Tomo"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmpic7q7_ee4k1zip",
+    "timestamp": "2026-03-13T23:07:58.879Z",
+    "userAgent": "\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36\"",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US@posix",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/girls/Erika",
+    "referrer": "https://ginzaempire.com/girls/Erika",
+    "screen": "1280x720",
+    "viewport": "1280x720",
+    "siteLang": "en"
   }
 ]
