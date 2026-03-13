@@ -935,20 +935,6 @@ const Router = (function() {
         replace(B + '/', 'Ginza Empire');
         return true;
       }
-      if (pageId === 'valuePage' && !isAdmin()) {
-        _suppressPush = true;
-        showPage('homePage');
-        _suppressPush = false;
-        replace(B + '/', 'Ginza Empire');
-        return true;
-      }
-      if (pageId === 'employmentPage' && !isAdmin()) {
-        _suppressPush = true;
-        showPage('homePage');
-        _suppressPush = false;
-        replace(B + '/', 'Ginza Empire');
-        return true;
-      }
       if (pageId === 'rosterPage') {
         rosterViewMode = 'grid';
         _suppressPush = true;
