@@ -174,5 +174,11 @@
     "screen": "1280x720",
     "viewport": "1280x720",
     "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmpic4ak_j07qb1zm",
+    "timestamp": "2026-03-13T23:07:55.570Z",
+    "profile": "Tomo"
   }
 ]
