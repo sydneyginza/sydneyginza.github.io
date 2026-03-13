@@ -1,0 +1,19 @@
+[
+  {
+    "type": "session",
+    "uuid": "v_mmp3siii_50wh6not",
+    "timestamp": "2026-03-13T16:20:45.115Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.5938.132 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "https://bing.com/",
+    "screen": "800x600",
+    "viewport": "1600x1200",
+    "siteLang": "en"
+  }
+]
