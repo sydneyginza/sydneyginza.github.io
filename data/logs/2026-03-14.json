@@ -214,5 +214,11 @@
     "screen": "1280x720",
     "viewport": "1280x720",
     "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmpic9bf_aamqwqna",
+    "timestamp": "2026-03-13T23:08:01.944Z",
+    "profile": "Jane"
   }
 ]
