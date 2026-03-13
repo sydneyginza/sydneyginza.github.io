@@ -844,5 +844,168 @@
     "screen": "2560x1440",
     "viewport": "2560x1305",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:07:55.433Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:08:01.684Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo9a5v9_uzl4h94c",
+    "timestamp": "2026-03-13T02:08:26.132Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9a5v9_uzl4h94c",
+    "timestamp": "2026-03-13T02:08:42.934Z",
+    "profile": "Umi"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:13:07.236Z",
+    "page": "employment"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:13:11.304Z",
+    "page": "calendar"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:13:30.258Z",
+    "page": "bookings"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:13:34.289Z",
+    "page": "vacation"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:13:38.368Z",
+    "page": "analytics"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:14:38.722Z",
+    "page": "profileDb"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:17:27.650Z",
+    "page": "roster"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:17:29.313Z",
+    "profile": "Amu"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:19:59.571Z",
+    "page": "myProfile"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:11.500Z",
+    "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:13.378Z",
+    "page": "roster"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:15.301Z",
+    "profile": "Amu"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:24.858Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:26.285Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
   }
 ]
