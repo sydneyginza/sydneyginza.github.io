@@ -955,5 +955,23 @@
     "uuid": "v_mmo99t9t_mkpgl2gb",
     "timestamp": "2026-03-13T02:19:59.571Z",
     "page": "myProfile"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:11.500Z",
+    "page": "home"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:13.378Z",
+    "page": "roster"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo99t9t_mkpgl2gb",
+    "timestamp": "2026-03-13T02:20:15.301Z",
+    "profile": "Amu"
   }
 ]
