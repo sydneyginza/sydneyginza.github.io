@@ -1650,5 +1650,139 @@
     "uuid": "v_mmo9usvl_tjs1s5q3",
     "timestamp": "2026-03-13T02:58:40.624Z",
     "profile": "Umi"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:03:40.635Z",
+    "profile": "Umi"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:08:40.600Z",
+    "profile": "Umi"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:10:32.016Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:10:34.606Z",
+    "profile": "Umi"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:12:10.642Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:12:12.585Z",
+    "profile": "Umi"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:12:39.807Z",
+    "page": "myProfile"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:13:00.770Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:15:38.858Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:16:10.591Z",
+    "page": "favorites"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:16:14.308Z",
+    "profile": "Amu"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:16:23.682Z",
+    "profile": "Akemi"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmo9usvl_tjs1s5q3",
+    "timestamp": "2026-03-13T03:16:26.606Z",
+    "page": "home"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmoa0gvd_0yej80pt",
+    "timestamp": "2026-03-13T03:16:45.604Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/bookings",
+    "referrer": "https://ginzaempire.com/bookings",
+    "screen": "2560x1440",
+    "viewport": "2560x1305",
+    "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmoa0gvd_0yej80pt",
+    "timestamp": "2026-03-13T03:16:46.510Z",
+    "page": "bookings"
   }
 ]
