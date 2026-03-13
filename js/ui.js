@@ -1032,7 +1032,7 @@ document.getElementById('lfSignUpLink').onclick=e=>{e.preventDefault();showAuthS
 authOverlay.classList.add('open')}
 
 function showAuthSignUp(){
-authContent.innerHTML=`<div class="form-title">${t('ui.signUp')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="suUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.email')} *</label><input class="form-input" id="suEmail" type="email" placeholder="email@example.com"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.mobile')}</label><input class="form-input" id="suMobile" type="tel" placeholder="04XX XXX XXX"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="suPass" type="password" placeholder="Password"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('ui.confirmPassword')} *</label><input class="form-input" id="suConfirm" type="password" placeholder="Confirm"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="suBtn" style="width:100%">${t('ui.createAccount')}</button></div><div class="lf-error" id="suError"></div><div class="lf-switch">${t('ui.haveAccount')} <a href="#" id="suSignInLink">${t('ui.signIn')}</a></div>`;
+authContent.innerHTML=`<div class="form-title">${t('ui.signUp')}</div><div class="form-row full"><div class="form-group"><label class="form-label">Username *</label><input class="form-input" id="suUser" placeholder="Username" autocomplete="off"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.email')}</label><input class="form-input" id="suEmail" type="email" placeholder="email@example.com"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('field.mobile')}</label><input class="form-input" id="suMobile" type="tel" placeholder="04XX XXX XXX"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="suPass" type="password" placeholder="Password"></div></div><div class="form-row full"><div class="form-group"><label class="form-label">${t('ui.confirmPassword')} *</label><input class="form-input" id="suConfirm" type="password" placeholder="Confirm"></div></div><div class="form-actions" style="justify-content:center"><button class="btn btn-primary" id="suBtn" style="width:100%">${t('ui.createAccount')}</button></div><div class="lf-error" id="suError"></div><div class="lf-switch">${t('ui.haveAccount')} <a href="#" id="suSignInLink">${t('ui.signIn')}</a></div>`;
 document.getElementById('suBtn').onclick=doSignUp;
 document.getElementById('suConfirm').addEventListener('keydown',e=>{if(e.key==='Enter')doSignUp()});
 document.getElementById('suSignInLink').onclick=e=>{e.preventDefault();showAuthSignIn()};
@@ -1047,19 +1047,20 @@ const confirm=document.getElementById('suConfirm').value;
 const errEl=document.getElementById('suError');
 if(!u){errEl.textContent=t('ui.usernameRequired');return}
 if(CRED.some(c=>c.user.toLowerCase()===u.toLowerCase())){errEl.textContent=t('ui.usernameTaken');return}
-if(!email){errEl.textContent=t('ui.emailRequired');return}
-if(CRED.some(c=>c.email&&c.email.toLowerCase()===email.toLowerCase())){errEl.textContent=t('ui.emailTaken');return}
+if(email&&CRED.some(c=>c.email&&c.email.toLowerCase()===email.toLowerCase())){errEl.textContent=t('ui.emailTaken');return}
 if(mobile&&CRED.some(c=>c.mobile&&c.mobile===mobile)){errEl.textContent=t('ui.mobileTaken');return}
 if(!pass){errEl.textContent=t('ui.passwordRequired');return}
 if(pass!==confirm){errEl.textContent=t('ui.passwordMismatch');return}
 errEl.textContent='';
 const btn=document.getElementById('suBtn');btn.textContent='CREATING...';btn.style.pointerEvents='none';
 try{
-const entry={user:u,pass,role:'member',email,mobile:mobile||undefined,status:'pending'};
+const entry={user:u,pass,role:'member',email:email||undefined,mobile:mobile||undefined,status:'approved'};
 CRED.push(entry);
 if(await saveAuth()){
+try{localStorage.setItem('ginza_session',JSON.stringify({user:entry.user,pass:entry.pass}))}catch(e){}
 authOverlay.classList.remove('open');
-showToast(t('ui.signupPending'),null,6000)}
+_applyLogin(entry);showWelcomePopup();
+showToast(t('ui.accountCreated')||'Account created!','success')}
 else{CRED.pop()}
 }catch(e){CRED.pop();errEl.textContent='Error: '+e.message}
 finally{btn.textContent=t('ui.createAccount');btn.style.pointerEvents='auto'}}
