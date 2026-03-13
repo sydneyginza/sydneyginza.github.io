@@ -1569,5 +1569,11 @@
     "uuid": "v_mmoa0gvd_0yej80pt",
     "timestamp": "2026-03-13T02:51:06.529Z",
     "profile": "Umi"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmoa0gvd_0yej80pt",
+    "timestamp": "2026-03-13T02:51:10.254Z",
+    "page": "bookings"
   }
 ]
