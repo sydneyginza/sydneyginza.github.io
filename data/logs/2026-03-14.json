@@ -260,5 +260,22 @@
     "screen": "1280x720",
     "viewport": "1280x720",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmpk9pro_6thtk38x",
+    "timestamp": "2026-03-14T00:02:01.525Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.3",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1280x1696",
+    "viewport": "1280x1696",
+    "siteLang": "en"
   }
 ]
