@@ -328,5 +328,22 @@
     "screen": "1280x720",
     "viewport": "1440x2000",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmplttm6_lqe1mhtr",
+    "timestamp": "2026-03-14T00:45:39.246Z",
+    "userAgent": "Mozilla/5.0 (compatible; Dataprovider.com)",
+    "browser": "Unknown",
+    "os": "Unknown",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1920x1080",
+    "viewport": "1920x1080",
+    "siteLang": "en"
   }
 ]
