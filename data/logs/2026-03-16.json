@@ -189,5 +189,11 @@
     "screen": "412x924",
     "viewport": "411x765",
     "siteLang": "en"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mms3fnq4_lgj27m0l",
+    "timestamp": "2026-03-15T18:38:18.726Z",
+    "profile": "Himari"
   }
 ]
