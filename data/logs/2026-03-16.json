@@ -49,5 +49,22 @@
     "screen": "1920x1080",
     "viewport": "1920x1080",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmrvpvzr_lvaqmhh0",
+    "timestamp": "2026-03-15T14:58:04.215Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/cmd_sco",
+    "referrer": "https://ginzaempire.com/cmd_sco",
+    "screen": "1920x1080",
+    "viewport": "1920x1080",
+    "siteLang": "en"
   }
 ]
