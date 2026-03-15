@@ -202,5 +202,22 @@
     "screen": "800x600",
     "viewport": "1440x2000",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmr3cau0_hv79fc8c",
+    "timestamp": "2026-03-15T01:43:41.017Z",
+    "userAgent": "Mozilla/5.0 (compatible; Dataprovider.com)",
+    "browser": "Unknown",
+    "os": "Unknown",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/?embed",
+    "referrer": "http://travanixlabs.com/",
+    "screen": "1920x1080",
+    "viewport": "1440x2000",
+    "siteLang": "en"
   }
 ]
