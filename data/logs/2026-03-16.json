@@ -195,5 +195,22 @@
     "uuid": "v_mms3fnq4_lgj27m0l",
     "timestamp": "2026-03-15T18:38:18.726Z",
     "profile": "Himari"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmscobz1_1b0oz79h",
+    "timestamp": "2026-03-15T22:52:45.086Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-GB",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "https://www.google.com/",
+    "screen": "1920x1080",
+    "viewport": "1920x919",
+    "siteLang": "en"
   }
 ]
