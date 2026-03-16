@@ -358,5 +358,11 @@
     "uuid": "v_mmsx2e5c_dg8i16m1",
     "timestamp": "2026-03-16T08:25:16.601Z",
     "profile": "Momo"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmsx2e5c_dg8i16m1",
+    "timestamp": "2026-03-16T08:25:19.020Z",
+    "page": "list"
   }
 ]
