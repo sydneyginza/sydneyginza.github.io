@@ -418,5 +418,22 @@
     "uuid": "v_mmsx2e5c_dg8i16m1",
     "timestamp": "2026-03-16T08:26:22.209Z",
     "profile": "IU"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmsxkpkk_o44jfwi1",
+    "timestamp": "2026-03-16T08:37:48.024Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "browser": "Chrome",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "America/Los_Angeles",
+    "tzOffset": 420,
+    "page": "/?embed",
+    "referrer": "https://travanixlabs.com/",
+    "screen": "1366x768",
+    "viewport": "1440x2000",
+    "siteLang": "en"
   }
 ]
