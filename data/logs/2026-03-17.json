@@ -264,5 +264,22 @@
     "uuid": "v_mmu1bowr_yhr736me",
     "timestamp": "2026-03-17T03:59:01.758Z",
     "page": "list"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmu7dxgk_sewpn1p3",
+    "timestamp": "2026-03-17T06:00:13.988Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 OPR/127.0.0.0",
+    "browser": "Opera",
+    "os": "Windows",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "https://www.google.com/",
+    "screen": "2560x1440",
+    "viewport": "2559x1285",
+    "siteLang": "en"
   }
 ]
