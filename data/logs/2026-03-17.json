@@ -328,5 +328,11 @@
     "screen": "412x924",
     "viewport": "411x765",
     "siteLang": "en"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmu95uhk_78avf50v",
+    "timestamp": "2026-03-17T06:51:18.320Z",
+    "page": "list"
   }
 ]
