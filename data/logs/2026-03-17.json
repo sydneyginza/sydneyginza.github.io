@@ -352,5 +352,11 @@
     "uuid": "v_mmu95uhk_78avf50v",
     "timestamp": "2026-03-17T06:51:55.568Z",
     "profile": "Jade"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmu95uhk_78avf50v",
+    "timestamp": "2026-03-17T06:52:09.784Z",
+    "page": "roster"
   }
 ]
