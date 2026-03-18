@@ -229,5 +229,22 @@
     "uuid": "v_mmoa0gvd_0yej80pt",
     "timestamp": "2026-03-18T10:03:27.317Z",
     "page": "value"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmvzn9t4_edmarqvs",
+    "timestamp": "2026-03-18T11:59:05.320Z",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15 (Applebot/0.1; +http://www.apple.com/go/applebot)",
+    "browser": "Safari",
+    "os": "macOS",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "1920x1080",
+    "viewport": "1920x1080",
+    "siteLang": "en"
   }
 ]
