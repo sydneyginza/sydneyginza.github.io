@@ -205,5 +205,17 @@
     "uuid": "v_mmoa0gvd_0yej80pt",
     "timestamp": "2026-03-18T10:01:04.798Z",
     "page": "home"
+  },
+  {
+    "type": "profileView",
+    "uuid": "v_mmoa0gvd_0yej80pt",
+    "timestamp": "2026-03-18T10:01:08.813Z",
+    "profile": "Sooyeon"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmoa0gvd_0yej80pt",
+    "timestamp": "2026-03-18T10:01:09.973Z",
+    "page": "home"
   }
 ]
