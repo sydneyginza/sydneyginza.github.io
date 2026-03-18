@@ -79,5 +79,22 @@
     "uuid": "v_mmvg7mjn_8pf5yhr3",
     "timestamp": "2026-03-18T02:56:20.886Z",
     "page": "roster"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmvpfpw6_yxwj08py",
+    "timestamp": "2026-03-18T07:13:16.759Z",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.3",
+    "browser": "Chrome",
+    "os": "Linux",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "800x600",
+    "viewport": "1920x993",
+    "siteLang": "en"
   }
 ]
