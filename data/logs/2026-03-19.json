@@ -279,5 +279,22 @@
     "screen": "800x600",
     "viewport": "1440x2000",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmwz1l24_b4dktukg",
+    "timestamp": "2026-03-19T04:29:59.644Z",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36",
+    "browser": "Chrome",
+    "os": "Android",
+    "device": "Mobile",
+    "language": "en-AU",
+    "timezone": "Australia/Sydney",
+    "tzOffset": -660,
+    "page": "/",
+    "referrer": "https://www.google.com/",
+    "screen": "412x924",
+    "viewport": "411x765",
+    "siteLang": "en"
   }
 ]
