@@ -221,5 +221,11 @@
     "uuid": "v_mmwwy1u9_b1qofwqv",
     "timestamp": "2026-03-19T03:31:38.826Z",
     "page": "roster"
+  },
+  {
+    "type": "pageView",
+    "uuid": "v_mmwwy1u9_b1qofwqv",
+    "timestamp": "2026-03-19T03:31:51.381Z",
+    "page": "list"
   }
 ]
