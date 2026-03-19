@@ -56,5 +56,22 @@
     "screen": "800x600",
     "viewport": "800x600",
     "siteLang": "en"
+  },
+  {
+    "type": "session",
+    "uuid": "v_mmxtpetq_75trrid9",
+    "timestamp": "2026-03-19T18:48:19.790Z",
+    "userAgent": "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
+    "browser": "Unknown",
+    "os": "Unknown",
+    "device": "Desktop",
+    "language": "en-US",
+    "timezone": "UTC",
+    "tzOffset": 0,
+    "page": "/",
+    "referrer": "direct",
+    "screen": "800x600",
+    "viewport": "1024x12140",
+    "siteLang": "en"
   }
 ]
